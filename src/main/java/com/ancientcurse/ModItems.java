@@ -95,7 +95,7 @@ public class ModItems {
     //SCARAB TALISMAN
     public static final Item SCARAB_TALISMAN  = new Item(new FabricItemSettings());
 
-    // VESSELE OF DUAT
+    // VESSEL OF DUAT
     public static final Item VESSEL_OF_THE_DUAT  = new Item(new FabricItemSettings());
 
     // Bronze materials
@@ -168,7 +168,7 @@ public class ModItems {
         // Register the
         Registry.register(
                 Registries.ITEM,
-                new Identifier(AncientCurse.MOD_ID, "scarab_talis"),
+                new Identifier(AncientCurse.MOD_ID, "scarab_tali"),
                 SCARAB_TALISMAN
         );
 
