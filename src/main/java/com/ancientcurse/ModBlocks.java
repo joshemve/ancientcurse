@@ -1,37 +1,6 @@
 package com.ancientcurse;
 
-import com.ancientcurse.block.DateBlock;
-import com.ancientcurse.block.DatePalmLeafBlock;
-import com.ancientcurse.block.DatePalmLogBlock;
-import com.ancientcurse.block.DeadPapyrusReedBlock;
-import com.ancientcurse.block.DryNileSiltBlock;
-import com.ancientcurse.block.FertileNileSiltBlock;
-import com.ancientcurse.block.SycamoreFigLogBlock;
-import com.ancientcurse.block.SycamoreLeafBlock;
-import com.ancientcurse.block.TilledNileSiltBlock;
-import com.ancientcurse.block.PapyrusReedBlock;
-import com.ancientcurse.block.FlaxCropBlock;
-import com.ancientcurse.block.BarleyCropBlock;
-import com.ancientcurse.block.AlgaeBlock;
-import com.ancientcurse.block.ClayCrucibleBlock;
-import com.ancientcurse.block.LotusFlowerPadBlock;
-import com.ancientcurse.block.SmallRockBlock;
-import com.ancientcurse.block.MediumRockBlock;
-import com.ancientcurse.block.LargeRockBlock;
-import com.ancientcurse.block.NileMudBlock;
-import com.ancientcurse.block.HeavyMarshBlock;
-import com.ancientcurse.block.DwarfPapyrusBlock;
-import com.ancientcurse.block.EgyptianSpinachBlock;
-import com.ancientcurse.block.EuphorbiaHelioscopiaBlock;
-import com.ancientcurse.block.LightDeadFernBlock;
-import com.ancientcurse.block.MiniCactusBlock;
-import com.ancientcurse.block.PistiaStratiotesBlock;
-import com.ancientcurse.block.OfferingPotBlock;
-import com.ancientcurse.block.VesselOfWhisperingWindsBlock;
-import com.ancientcurse.block.CanopicUrnOfBastetBlock;
-import com.ancientcurse.block.ScarabSealedUrnBlock;
-import com.ancientcurse.block.PharaohsIncenseJarBlock;
-import com.ancientcurse.block.NileRiverTallGrassBlock;
+import com.ancientcurse.block.*;
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
 import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
 import net.minecraft.block.AbstractBlock;
@@ -41,6 +10,7 @@ import net.minecraft.block.MapColor;
 import net.minecraft.block.SandBlock;
 import net.minecraft.block.PlantBlock;
 import net.minecraft.item.BlockItem;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
@@ -673,6 +643,15 @@ public class ModBlocks {
             .nonOpaque()
     );
 
+    // Declare the Anubus Glyph block
+    public static final Block ANUBUS_GLYPH_BLOCK = new AnubusGlyphBlock(
+            FabricBlockSettings.create()
+                    .mapColor(MapColor.GRAY) // You can change this to any color you'd like
+                    .strength(3.0f, 6.0f) // Adjust strength as needed
+                    .requiresTool()
+                    .sounds(BlockSoundGroup.STONE) // Adjust sound group if needed
+    );
+
     /**
      * Registers all mod blocks
      */
@@ -685,12 +664,27 @@ public class ModBlocks {
             new Identifier(AncientCurse.MOD_ID, "sycamore_fig_log"),
             SYCAMORE_FIG_LOG
         );
-        
+
+
         // Register the sycamore leaves block
         Registry.register(
             Registries.BLOCK,
             new Identifier(AncientCurse.MOD_ID, "sycamore_leaves"),
             SYCAMORE_LEAVES
+        );
+
+        // Register the Anubus Glyph block
+        Registry.register(
+                Registries.BLOCK,
+                new Identifier(AncientCurse.MOD_ID, "anubus__glyph"),
+                ANUBUS_GLYPH_BLOCK
+        );
+
+        // Register the Anubus Glyph block item
+        Registry.register(
+                Registries.ITEM,
+                new Identifier(AncientCurse.MOD_ID, "anubus__glyph"),
+                new BlockItem(ANUBUS_GLYPH_BLOCK, new Item.Settings())
         );
         
         // Register the date palm log block

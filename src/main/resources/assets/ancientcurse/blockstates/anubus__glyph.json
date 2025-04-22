@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "half=lower": {
+      "model": "ancientcurse:block/anubus_glyph_lower"
+    },
+    "half=upper": {
+      "model": "ancientcurse:block/anubus_glyph_upper"
+    }
+  }
+}
