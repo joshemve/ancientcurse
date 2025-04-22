@@ -5,16 +5,11 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.bernie.geckolib.GeckoLib;
-import com.ancientcurse.world.AncientWorldGeneration;
-import com.ancientcurse.world.ModWorldPresets;
-import com.ancientcurse.world.biome.BiomeModifier;
-import com.ancientcurse.world.biome.ModBiomes;
-import com.ancientcurse.world.gen.ModSurfaceRuleRegistration;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.util.Identifier;
 import net.minecraft.world.gen.WorldPreset;
-import com.ancientcurse.world.dimension.ModDimensions;
+
 
 /**
  * Main mod class for Ancient Curse.
