@@ -84,19 +84,19 @@ public class ModItems {
     public static final Item ROPE = new Item(new FabricItemSettings());
 
     // EYE_OF_APOPHIS
-    public  static  final Item EYE_OF_APOPHIS = new Item(new FabricItemSettings());
+    public static final Item EYE_OF_APOPHIS = new Item(new FabricItemSettings());
 
     // CANOPIC HEART JAR
-    public  static  final Item CANOPIC_HEART_JAR  = new Item(new FabricItemSettings());
+    public static final Item CANOPIC_HEART_JAR  = new Item(new FabricItemSettings());
 
     // THE BROKEN CROOK
-    public  static  final Item THE_BROKEN_CROOK  = new Item(new FabricItemSettings());
+    public static final Item THE_BROKEN_CROOK  = new Item(new FabricItemSettings());
 
     //SCARAB TALISMAN
-    public  static  final Item SCARAB_TALISMAN  = new Item(new FabricItemSettings());
+    public static final Item SCARAB_TALISMAN  = new Item(new FabricItemSettings());
 
     // VESSELE OF DUAT
-    public  static  final Item VESSEL_OF_THE_DUAT  = new Item(new FabricItemSettings());
+    public static final Item VESSEL_OF_THE_DUAT  = new Item(new FabricItemSettings());
 
     // Bronze materials
     public static final Item BRONZE_BLEND = new Item(new FabricItemSettings());
