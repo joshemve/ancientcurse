@@ -140,6 +140,8 @@ public class ModItemGroup {
                 safeAdd(entries, ModBlocks.BLACKSTONE_BRICK);
                 safeAdd(entries, ModBlocks.HARDENED_BLACK_STONE);
                 safeAdd(entries, ModBlocks.WIND_SWEPT_BLACKSTONE);
+
+
                 safeAdd(entries, ModItems.CANOPIC_HEART_JAR);
                 safeAdd(entries, ModItems.EYE_OF_APOPHIS);
                 safeAdd(entries, ModItems.SCARAB_TALISMAN);
