@@ -91,7 +91,7 @@ public class ModBlocks {
             .breakInstantly()
     );
     
-    // Smooth Sand - With identical properties to vanilla sand
+    // Smooth Sand - With Identical properties to vanilla sand
     public static final Block SMOOTH_SAND = new SandBlock(
         14406560, // Same color value as vanilla sand
         FabricBlockSettings.copyOf(Blocks.SAND)
