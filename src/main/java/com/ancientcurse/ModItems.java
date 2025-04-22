@@ -18,7 +18,8 @@ import net.minecraft.util.Identifier;
 public class ModItems {
     // Define items
     public static final CustomAnimatedItem STAFF_OF_RA = new CustomAnimatedItem(new FabricItemSettings(), "staff_of_ra");
-    
+
+
     // Define the Sycamore Fig food item
     public static final Item SYCAMORE_FIG = new Item(
         new FabricItemSettings()
@@ -81,7 +82,22 @@ public class ModItems {
     
     // Define Rope item - crafting material
     public static final Item ROPE = new Item(new FabricItemSettings());
-    
+
+    // EYE_OF_APOPHIS
+    public  static  final Item EYE_OF_APOPHIS = new Item(new FabricItemSettings());
+
+    // CANOPIC HEART JAR
+    public  static  final Item CANOPIC_HEART_JAR  = new Item(new FabricItemSettings());
+
+    // THE BROKEN CROOK
+    public  static  final Item THE_BROKEN_CROCK  = new Item(new FabricItemSettings());
+
+    //SCARAB TALISMAN
+    public  static  final Item SCARAB_TALISMAN  = new Item(new FabricItemSettings());
+
+    // VESSELE OF DUAT
+    public  static  final Item VESSEL_OF_THE_DUAT  = new Item(new FabricItemSettings());
+
     // Bronze materials
     public static final Item BRONZE_BLEND = new Item(new FabricItemSettings());
     public static final Item RAW_BRONZE_NUGGET = new Item(new FabricItemSettings());
@@ -127,7 +143,42 @@ public class ModItems {
             new Identifier(AncientCurse.MOD_ID, "golden_sycamore_fig"),
             GOLDEN_SYCAMORE_FIG
         );
-        
+
+        // Register the
+        Registry.register(
+                Registries.ITEM,
+                new Identifier(AncientCurse.MOD_ID, "eye_of_apophis"),
+                EYE_OF_APOPHIS
+        );
+
+        // Register the
+        Registry.register(
+                Registries.ITEM,
+                new Identifier(AncientCurse.MOD_ID, "canopic_heart_jar"),
+                CANOPIC_HEART_JAR
+        );
+
+         // Register the
+        Registry.register(
+                Registries.ITEM,
+                new Identifier(AncientCurse.MOD_ID, "the_broken_crook"),
+                THE_BROKEN_CROCK
+        );
+
+        // Register the
+        Registry.register(
+                Registries.ITEM,
+                new Identifier(AncientCurse.MOD_ID, "scarab_talis"),
+                SCARAB_TALISMAN
+        );
+
+        // Register the
+        Registry.register(
+                Registries.ITEM,
+                new Identifier(AncientCurse.MOD_ID, "vessel_of_the_duat"),
+                VESSEL_OF_THE_DUAT
+        );
+
         // Register the Sekhem Date
         Registry.register(
             Registries.ITEM,
