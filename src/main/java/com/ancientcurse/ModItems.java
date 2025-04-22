@@ -90,7 +90,7 @@ public class ModItems {
     public  static  final Item CANOPIC_HEART_JAR  = new Item(new FabricItemSettings());
 
     // THE BROKEN CROOK
-    public  static  final Item THE_BROKEN_CROCK  = new Item(new FabricItemSettings());
+    public  static  final Item THE_BROKEN_CROOK  = new Item(new FabricItemSettings());
 
     //SCARAB TALISMAN
     public  static  final Item SCARAB_TALISMAN  = new Item(new FabricItemSettings());
@@ -162,7 +162,7 @@ public class ModItems {
         Registry.register(
                 Registries.ITEM,
                 new Identifier(AncientCurse.MOD_ID, "the_broken_crook"),
-                THE_BROKEN_CROCK
+                THE_BROKEN_CROOK
         );
 
         // Register the
