@@ -46,6 +46,7 @@ public class ModItemGroup {
                 
                 // Terrain blocks
                 safeAdd(entries, ModBlocks.SMOOTH_SAND);
+                safeAdd(entries, ModBlocks.ANUBUS_GLYPH_BLOCK);
                 safeAdd(entries, ModBlocks.NILE_RIVER_SAND);
                 safeAdd(entries, ModBlocks.FERTILE_NILE_SILT);
                 safeAdd(entries, ModBlocks.DRY_NILE_SILT);

@@ -1,0 +1,12 @@
+{
+  "parent": "block/cube",
+  "textures": {
+    "particle": "ancientcurse:block/upper",
+    "down": "ancientcurse:block/updown",
+    "up": "ancientcurse:block/updown",
+    "north": "ancientcurse:block/upper",
+    "east": "ancientcurse:block/upper",
+    "south": "ancientcurse:block/upper",
+    "west": "ancientcurse:block/upper"
+  }
+}
