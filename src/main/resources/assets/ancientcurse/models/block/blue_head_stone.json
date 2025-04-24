@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/cube_all",
+  "textures": {
+    "all": "ancientcurse:block/headstone/blue_head_stone"
+  }
+}

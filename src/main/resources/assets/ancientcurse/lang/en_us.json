@@ -27,12 +27,13 @@
   "item.ancientcurse.bronze_helmet": "Bronze Helmet",
   "item.ancientcurse.bronze_chestplate": "Bronze Chestplate",
   "item.ancientcurse.bronze_leggings": "Bronze Leggings",
-  "item.ancientcurse.bronze_boots": "Bronze Sandals",
+  "item.ancientcurse.bronze_boots": "Bronze Boots",
+
   "item.ancientcurse.the_broken_crook": "The Broken Crook",
   "item.ancientcurse.canopic_heart_jar": "Canopic Heart Jar",
-  "item.ancientcurse.eye_of_apophis": "Eye OF Apophis",
+  "item.ancientcurse.eye_of_apophis": "Eye Of Apophis",
   "item.ancientcurse.scarab_tali": "Scarab Talismen",
-  "item.ancientcurse.vessel_of_the_duat": "Vessel OF Duat",
+  "item.ancientcurse.vessel_of_the_duat": "Vessel Of Duat",
   "item.ancientcurse.anubus__glyph": "Anubus Glyph",
 
 
@@ -88,8 +89,6 @@
   
   "block.ancientcurse.bronze_block": "Bronze Block",
   "block.ancientcurse.bronze_plate": "Bronze Plate",
-  "block.ancientcurse.chiseled_bronze": "Chiseled Bronze",
-  "block.ancientcurse.bronze_grate": "Bronze Grate",
   
   "block.ancientcurse.small_rock": "Small Rock",
   "block.ancientcurse.medium_rock": "Medium Rock",
@@ -104,6 +103,31 @@
   "block.ancientcurse.blackstone_brick": "Blackstone Brick",
   "block.ancientcurse.hardened_black_stone": "Hardened Black Stone",
   "block.ancientcurse.wind_swept_blackstone": "Wind-Swept Blackstone",
+
+  "block.ancientcurse.necrostone_brick": "Necrostone Brick",
+  "block.ancientcurse.necrostone_cracked": "Cracked Necrostone",
+  "block.ancientcurse.necrostone_rough": "Rough Necrostone",
+  "block.ancientcurse.necrostone_wall": "Necrostone Wall",
+  "block.ancientcurse.necrostone_pillar": "Necrostone Pillar",
+  "block.ancientcurse.necrostone_chain": "Necrostone Chain",
+  "block.ancientcurse.necrostone_eye": "Necrostone Eye",
+  "block.ancientcurse.necrostone_ankh": "Necrostone Ankh",
+  "block.ancientcurse.necrostone_fork": "Necrostone Fork",
+  "block.ancientcurse.decorative_necrostone": "Decorative Necrostone",
+  
+  "block.ancientcurse.deshret_scale": "Deshret Scale",
+  "block.ancientcurse.deshret_pillar": "Deshret Pillar",
+  "block.ancientcurse.egyptian_gold_pillar": "Egyptian Gold Pillar",
+  "block.ancientcurse.mudstone_pillar": "Mudstone Pillar",
+  
+  "block.ancientcurse.blue_head_stone": "Blue Headstone",
+  "block.ancientcurse.gold_headstone": "Gold Headstone",
+  "block.ancientcurse.green_head_stone": "Green Headstone",
+  
+  "block.ancientcurse.scroll_shelf": "Scroll Shelf",
+  "block.ancientcurse.wooden_crate": "Wooden Crate",
+  "block.ancientcurse.ancient_wood": "Ancient Wood",
+  "block.ancientcurse.ancient_udjat": "Ancient Udjat",
 
   "itemgroup.ancientcurse": "Ancient Curse",
   

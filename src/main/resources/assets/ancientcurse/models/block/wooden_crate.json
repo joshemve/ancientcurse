@@ -1,0 +1,12 @@
+{
+  "parent": "minecraft:block/cube",
+  "textures": {
+    "particle": "ancientcurse:block/wooden_crate/wooden_crate_top",
+    "north": "ancientcurse:block/wooden_crate/wooden_crate_top",
+    "south": "ancientcurse:block/wooden_crate/wooden_crate_top",
+    "east": "ancientcurse:block/wooden_crate/wooden_crate_top",
+    "west": "ancientcurse:block/wooden_crate/wooden_crate_top",
+    "up": "ancientcurse:block/wooden_crate/wooden_crate_top",
+    "down": "ancientcurse:block/wooden_crate/wooden_crate_bottom"
+  }
+}

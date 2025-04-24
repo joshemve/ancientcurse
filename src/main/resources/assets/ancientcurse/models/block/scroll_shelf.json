@@ -1,0 +1,12 @@
+{
+  "parent": "minecraft:block/cube",
+  "textures": {
+    "particle": "ancientcurse:block/scroll_shelf/scroll_shelf_face",
+    "north": "ancientcurse:block/scroll_shelf/scroll_shelf_face",
+    "south": "ancientcurse:block/scroll_shelf/scroll_shelf_face",
+    "east": "ancientcurse:block/scroll_shelf/scroll_shelf_sides",
+    "west": "ancientcurse:block/scroll_shelf/scroll_shelf_sides",
+    "up": "ancientcurse:block/scroll_shelf/scroll_shelf_top",
+    "down": "ancientcurse:block/scroll_shelf/scroll_shelf_bottom"
+  }
+}

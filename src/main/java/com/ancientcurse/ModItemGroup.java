@@ -1,7 +1,6 @@
 package com.ancientcurse;
 
 import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemConvertible;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
@@ -46,7 +45,7 @@ public class ModItemGroup {
                 
                 // Terrain blocks
                 safeAdd(entries, ModBlocks.SMOOTH_SAND);
-                safeAdd(entries, ModBlocks.ANUBUS_GLYPH_BLOCK);
+                // REMOVED: Anubus Glyph block was causing registration conflicts
                 safeAdd(entries, ModBlocks.NILE_RIVER_SAND);
                 safeAdd(entries, ModBlocks.FERTILE_NILE_SILT);
                 safeAdd(entries, ModBlocks.DRY_NILE_SILT);
@@ -73,7 +72,6 @@ public class ModItemGroup {
                 safeAdd(entries, ModBlocks.LIGHT_NILE_MARSH);
                 safeAdd(entries, ModBlocks.HEAVY_MARSH);
                 safeAdd(entries, ModBlocks.RIVERBED_MOSS);
-                safeAdd(entries, ModBlocks.ALGAE);
                 safeAdd(entries, ModBlocks.REED_MAT);
                 safeAdd(entries, ModBlocks.SPOTTED_MARSH);
                 safeAdd(entries, ModBlocks.DEAD_PAPYRUS_REED);
@@ -94,9 +92,7 @@ public class ModItemGroup {
                 
                 // Bronze Blocks
                 safeAdd(entries, ModBlocks.BRONZE_BLOCK);
-                safeAdd(entries, ModBlocks.BRONZE_PLATE);
-                safeAdd(entries, ModBlocks.CHISELED_BRONZE);
-                safeAdd(entries, ModBlocks.BRONZE_GRATE);
+                safeAdd(entries, ModItems.BRONZE_PLATE);
                 
                 // Bronze Tools
                 safeAdd(entries, ModItems.BRONZE_SWORD);
@@ -142,7 +138,37 @@ public class ModItemGroup {
                 safeAdd(entries, ModBlocks.HARDENED_BLACK_STONE);
                 safeAdd(entries, ModBlocks.WIND_SWEPT_BLACKSTONE);
 
+                // Necrostone blocks
+                safeAdd(entries, com.ancientcurse.block.registry.NecrostoneBlocks.NECROSTONE_BRICK);
+                safeAdd(entries, com.ancientcurse.block.registry.NecrostoneBlocks.NECROSTONE_CRACKED);
+                safeAdd(entries, com.ancientcurse.block.registry.NecrostoneBlocks.NECROSTONE_ROUGH);
+                safeAdd(entries, com.ancientcurse.block.registry.NecrostoneBlocks.NECROSTONE_WALL);
+                safeAdd(entries, com.ancientcurse.block.registry.NecrostoneBlocks.NECROSTONE_CHAIN);
+                safeAdd(entries, com.ancientcurse.block.registry.NecrostoneBlocks.NECROSTONE_EYE);
+                safeAdd(entries, com.ancientcurse.block.registry.NecrostoneBlocks.NECROSTONE_ANKH);
+                safeAdd(entries, com.ancientcurse.block.registry.NecrostoneBlocks.NECROSTONE_FORK);
+                safeAdd(entries, com.ancientcurse.block.registry.NecrostoneBlocks.DECORATIVE_NECROSTONE);
+                
+                // Pillar blocks
+                safeAdd(entries, com.ancientcurse.block.registry.PillarBlocks.DESHRET_PILLAR);
+                safeAdd(entries, com.ancientcurse.block.registry.PillarBlocks.EGYPTIAN_GOLD_PILLAR);
+                safeAdd(entries, com.ancientcurse.block.registry.PillarBlocks.MUDSTONE_PILLAR);
+                
+                // Headstone blocks
+                safeAdd(entries, com.ancientcurse.block.registry.HeadstoneBlocks.BLUE_HEAD_STONE);
+                safeAdd(entries, com.ancientcurse.block.registry.HeadstoneBlocks.GREEN_HEAD_STONE);
+                safeAdd(entries, com.ancientcurse.block.registry.HeadstoneBlocks.GOLD_HEADSTONE);
+                
+                // Furniture blocks
+                safeAdd(entries, com.ancientcurse.block.registry.FurnitureBlocks.SCROLL_SHELF);
+                safeAdd(entries, com.ancientcurse.block.registry.FurnitureBlocks.WOODEN_CRATE);
+                safeAdd(entries, com.ancientcurse.block.registry.FurnitureBlocks.ANCIENT_WOOD);
+                safeAdd(entries, com.ancientcurse.block.registry.FurnitureBlocks.ANCIENT_UDJAT);
+                
+                // Deshret blocks
+                safeAdd(entries, com.ancientcurse.block.registry.DeshretBlocks.DESHRET_SCALE);
 
+                // Artifact items
                 safeAdd(entries, ModItems.CANOPIC_HEART_JAR);
                 safeAdd(entries, ModItems.EYE_OF_APOPHIS);
                 safeAdd(entries, ModItems.SCARAB_TALISMAN);

@@ -3,14 +3,11 @@ package com.ancientcurse;
 import com.ancientcurse.block.*;
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
 import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
-import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.MapColor;
 import net.minecraft.block.SandBlock;
-import net.minecraft.block.PlantBlock;
 import net.minecraft.item.BlockItem;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
@@ -617,40 +614,8 @@ public class ModBlocks {
             .sounds(BlockSoundGroup.METAL)
     );
     
-    public static final Block BRONZE_PLATE = new Block(
-        FabricBlockSettings.create()
-            .mapColor(MapColor.TERRACOTTA_ORANGE)
-            .strength(2.5f, 6.0f)
-            .requiresTool()
-            .sounds(BlockSoundGroup.METAL)
-            .nonOpaque()
-    );
-    
-    public static final Block CHISELED_BRONZE = new Block(
-        FabricBlockSettings.create()
-            .mapColor(MapColor.TERRACOTTA_ORANGE)
-            .strength(3.0f, 6.0f)
-            .requiresTool()
-            .sounds(BlockSoundGroup.METAL)
-    );
-    
-    public static final Block BRONZE_GRATE = new Block(
-        FabricBlockSettings.create()
-            .mapColor(MapColor.TERRACOTTA_ORANGE)
-            .strength(2.5f, 6.0f)
-            .requiresTool()
-            .sounds(BlockSoundGroup.METAL)
-            .nonOpaque()
-    );
-
-    // Declare the Anubus Glyph block
-    public static final Block ANUBUS_GLYPH_BLOCK = new AnubusGlyphBlock(
-            FabricBlockSettings.create()
-                    .mapColor(MapColor.GRAY) // You can change this to any color you'd like
-                    .strength(3.0f, 6.0f) // Adjust strength as needed
-                    .requiresTool()
-                    .sounds(BlockSoundGroup.STONE) // Adjust sound group if needed
-    );
+    // REMOVED: Anubus Glyph block was causing registration conflicts
+    // public static final Block ANUBUS_GLYPH_BLOCK = new AnubusGlyphBlock(...);
 
     /**
      * Registers all mod blocks
@@ -673,19 +638,10 @@ public class ModBlocks {
             SYCAMORE_LEAVES
         );
 
-        // Register the Anubus Glyph block
-        Registry.register(
-                Registries.BLOCK,
-                new Identifier(AncientCurse.MOD_ID, "anubus__glyph"),
-                ANUBUS_GLYPH_BLOCK
-        );
-
-        // Register the Anubus Glyph block item
-        Registry.register(
-                Registries.ITEM,
-                new Identifier(AncientCurse.MOD_ID, "anubus__glyph"),
-                new BlockItem(ANUBUS_GLYPH_BLOCK, new Item.Settings())
-        );
+        // REMOVED: Anubus Glyph block was causing registration conflicts
+        // Registry.register(Registries.BLOCK, new Identifier(AncientCurse.MOD_ID, "anubus_glyph"), ANUBUS_GLYPH_BLOCK);
+        // Registry.register(Registries.ITEM, new Identifier(AncientCurse.MOD_ID, "anubus_glyph"), new BlockItem(...));
+        
         
         // Register the date palm log block
         Registry.register(
@@ -1128,23 +1084,6 @@ public class ModBlocks {
             BRONZE_BLOCK
         );
         
-        Registry.register(
-            Registries.BLOCK,
-            new Identifier(AncientCurse.MOD_ID, "bronze_plate"),
-            BRONZE_PLATE
-        );
-        
-        Registry.register(
-            Registries.BLOCK,
-            new Identifier(AncientCurse.MOD_ID, "chiseled_bronze"),
-            CHISELED_BRONZE
-        );
-        
-        Registry.register(
-            Registries.BLOCK,
-            new Identifier(AncientCurse.MOD_ID, "bronze_grate"),
-            BRONZE_GRATE
-        );
         
         // Register block items
         registerBlockItems();
@@ -1221,11 +1160,9 @@ public class ModBlocks {
         
         // Register Bronze Blocks
         registerBlockItem(BRONZE_BLOCK, ModItemGroup.ANCIENT_CURSE);
-        registerBlockItem(BRONZE_PLATE, ModItemGroup.ANCIENT_CURSE);
-        registerBlockItem(CHISELED_BRONZE, ModItemGroup.ANCIENT_CURSE);
-        registerBlockItem(BRONZE_GRATE, ModItemGroup.ANCIENT_CURSE);
         
         // We don't register a BlockItem for DATE_BLOCK since it should only drop the Sekhem Date item
+        // We don't register Anubus Glyph here because it's registered directly in registerBlocks to avoid ID conflicts
     }
 
     private static void registerBlockItem(Block block, ItemGroup group) {

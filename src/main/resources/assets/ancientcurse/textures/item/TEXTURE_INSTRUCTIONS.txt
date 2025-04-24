@@ -1,5 +1,0 @@
-Please add the following texture file to this directory:
-
-1. sycamore_fig.png - Texture for the harvested sycamore fig item
-
-This texture will be used for the Sycamore Fig food item that players can harvest from the Sycamore Fig Log.

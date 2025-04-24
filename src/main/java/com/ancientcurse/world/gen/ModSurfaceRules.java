@@ -17,17 +17,26 @@ public class ModSurfaceRules {
      * This is a placeholder that can be expanded later.
      */
     public static MaterialRule createSurfaceRules() {
-        // Return vanilla surface rules as fallback
+        // TEMPORARILY DISABLED TO PREVENT INTRUSIVE HOLDERS ERRORS
+        // This method was accessing vanilla block states too early in the initialization process
+        // Return an empty sequence that doesn't access any vanilla blocks
+        return MaterialRules.sequence();
+        
+        /* Original implementation - commented out to fix intrusive holders error
         return MaterialRules.sequence(
             MaterialRules.condition(
                 MaterialRules.surface(),
                 block(Blocks.GRASS_BLOCK)
             )
         );
+        */
     }
     
-    // Helper method to create block rules
+    // Helper method to create block rules - commented out to prevent intrusive holders errors
     private static MaterialRule block(Block block) {
-        return MaterialRules.block(block.getDefaultState());
+        // This method accesses block.getDefaultState() which causes intrusive holders errors
+        // when called too early in the initialization process
+        return MaterialRules.sequence(); // Empty rule as placeholder
+        // return MaterialRules.block(block.getDefaultState());
     }
 } 

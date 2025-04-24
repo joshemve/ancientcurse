@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_column",
+  "textures": {
+    "end": "ancientcurse:block/ancient_wood_top",
+    "side": "ancientcurse:block/ancient_wood"
+  }
+}

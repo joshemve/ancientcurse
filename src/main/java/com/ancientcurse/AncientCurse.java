@@ -49,6 +49,10 @@ public class AncientCurse implements ModInitializer {
         // Register mod blocks
         ModBlocks.registerBlocks();
         
+        // Register specialized block registries
+        com.ancientcurse.block.registry.BlockRegistry.registerAll();
+        com.ancientcurse.block.registry.BlockRegistry.registerBlockItems();
+        
         // Register mod items
         ModItems.registerItems();
         

@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=north": { "model": "ancientcurse:block/wooden_crate" },
+    "facing=east": { "model": "ancientcurse:block/wooden_crate", "y": 90 },
+    "facing=south": { "model": "ancientcurse:block/wooden_crate", "y": 180 },
+    "facing=west": { "model": "ancientcurse:block/wooden_crate", "y": 270 }
+  }
+}

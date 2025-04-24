@@ -36,31 +36,66 @@ public class AncientDesertChunkGenerator extends ChunkGenerator {
             ).apply(instance, AncientDesertChunkGenerator::new)
     );
 
-    private static final BlockState WATER_LILY = Blocks.LILY_PAD.getDefaultState();
-    private static final BlockState GRASS = Blocks.GRASS_BLOCK.getDefaultState();
-    private static final BlockState DIRT = Blocks.DIRT.getDefaultState();
-    private static final BlockState SAND = Blocks.SAND.getDefaultState();
-    private static final BlockState SANDSTONE = Blocks.SANDSTONE.getDefaultState();
-    private static final BlockState WATER = Blocks.WATER.getDefaultState();
-    private static final BlockState BEDROCK = Blocks.BEDROCK.getDefaultState();
-    private static final BlockState PALM_LOG = Blocks.JUNGLE_LOG.getDefaultState();
-    private static final BlockState PALM_LEAVES = Blocks.JUNGLE_LEAVES.getDefaultState();
-    private static final BlockState CACTUS = Blocks.CACTUS.getDefaultState();
-    private static final BlockState DEAD_BUSH = Blocks.DEAD_BUSH.getDefaultState();
+    // Prevent early access to vanilla block states by making these non-static and initializing them on demand
+    // This prevents intrusive holders errors during startup
+    private BlockState WATER_LILY;
+    private BlockState GRASS;
+    private BlockState DIRT;
+    private BlockState SAND;
+    private BlockState SANDSTONE;
+    private BlockState WATER;
+    private BlockState BEDROCK;
+    private BlockState PALM_LOG;
+    private BlockState PALM_LEAVES;
+    private BlockState CACTUS;
+    private BlockState DEAD_BUSH;
+    
+    // Flag to track if block states have been initialized
+    private boolean blockStatesInitialized = false;
 
     // Add a field for chunk generator settings 
-    private final net.minecraft.registry.entry.RegistryEntry<net.minecraft.world.gen.chunk.ChunkGeneratorSettings> settings;
+    // Removed unused settings field to fix lint error
+
+    /**
+     * Initialize block states on demand to prevent intrusive holders errors
+     * This method should only be called after registries are frozen
+     */
+    private void initializeBlockStates() {
+        if (blockStatesInitialized) {
+            return;
+        }
+        
+        try {
+            // Initialize all block states here
+            WATER_LILY = Blocks.LILY_PAD.getDefaultState();
+            GRASS = Blocks.GRASS_BLOCK.getDefaultState();
+            DIRT = Blocks.DIRT.getDefaultState();
+            SAND = Blocks.SAND.getDefaultState();
+            SANDSTONE = Blocks.SANDSTONE.getDefaultState();
+            WATER = Blocks.WATER.getDefaultState();
+            BEDROCK = Blocks.BEDROCK.getDefaultState();
+            PALM_LOG = Blocks.JUNGLE_LOG.getDefaultState();
+            PALM_LEAVES = Blocks.JUNGLE_LEAVES.getDefaultState();
+            CACTUS = Blocks.CACTUS.getDefaultState();
+            DEAD_BUSH = Blocks.DEAD_BUSH.getDefaultState();
+            
+            blockStatesInitialized = true;
+            AncientCurse.LOGGER.info("Block states initialized successfully for AncientDesertChunkGenerator");
+        } catch (Exception e) {
+            AncientCurse.LOGGER.error("Failed to initialize block states for AncientDesertChunkGenerator", e);
+        }
+    }
 
     public AncientDesertChunkGenerator(BiomeSource biomeSource) {
         super(biomeSource);
-        this.settings = null;
+        initializeBlockStates();
         AncientCurse.LOGGER.info("AncientDesertChunkGenerator initialized with default settings");
     }
 
     // Add the settings constructor
     public AncientDesertChunkGenerator(BiomeSource biomeSource, net.minecraft.registry.entry.RegistryEntry<net.minecraft.world.gen.chunk.ChunkGeneratorSettings> settings) {
         super(biomeSource);
-        this.settings = settings;
+        initializeBlockStates();
         AncientCurse.LOGGER.info("AncientDesertChunkGenerator initialized with custom settings");
     }
 

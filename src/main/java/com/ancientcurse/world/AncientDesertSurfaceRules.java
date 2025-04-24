@@ -32,6 +32,15 @@ public class AncientDesertSurfaceRules {
     
     // Create surface rules for the ancient desert biome
     public static MaterialRules.MaterialRule createAncientDesertSurfaceRules() {
+        // TEMPORARILY DISABLED TO PREVENT INTRUSIVE HOLDERS ERRORS
+        // This method was accessing vanilla block states too early in the initialization process
+        // We'll return an empty rule for now to allow the mod to load
+        AncientCurse.LOGGER.warn("Ancient Desert surface rules are temporarily disabled to prevent intrusive holders errors");
+        
+        // Return an empty sequence that doesn't access any vanilla blocks
+        return MaterialRules.sequence();
+        
+        /* Original implementation - commented out to fix intrusive holders error
         // Create a biome condition for our ancient desert
         @SuppressWarnings("unchecked")
         MaterialRules.MaterialCondition isAncientDesert = MaterialRules.biome(
@@ -56,5 +65,6 @@ public class AncientDesertSurfaceRules {
         return MaterialRules.sequence(
             MaterialRules.condition(isAncientDesert, sandSurface)
         );
+        */
     }
 }

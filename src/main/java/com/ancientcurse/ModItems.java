@@ -103,6 +103,7 @@ public class ModItems {
     public static final Item RAW_BRONZE_NUGGET = new Item(new FabricItemSettings());
     public static final Item BRONZE_INGOT = new Item(new FabricItemSettings());
     public static final Item BRONZE_NUGGET = new Item(new FabricItemSettings());
+    public static final Item BRONZE_PLATE = new Item(new FabricItemSettings());
     
     // Bronze tools
     public static final Item BRONZE_SWORD = new Item(new FabricItemSettings());
@@ -265,6 +266,12 @@ public class ModItems {
             Registries.ITEM,
             new Identifier(AncientCurse.MOD_ID, "bronze_nugget"),
             BRONZE_NUGGET
+        );
+        
+        Registry.register(
+            Registries.ITEM,
+            new Identifier(AncientCurse.MOD_ID, "bronze_plate"),
+            BRONZE_PLATE
         );
         
         // Register Bronze tools

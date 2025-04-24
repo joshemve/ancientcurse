@@ -1,0 +1,1 @@
+The goal for this folder, is for me to put in new minecraft mod textures and files for you to create a plan for what effects tailored to the mod theme and how to implement them fully and functional.

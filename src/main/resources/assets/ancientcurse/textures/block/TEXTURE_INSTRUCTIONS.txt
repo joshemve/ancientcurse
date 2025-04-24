@@ -1,9 +1,0 @@
-Please add the following texture files to this directory:
-
-1. date_palm_log.png - Texture for the side of the Date Palm Log block
-2. sycamore_leaves.png - Texture for the Sycamore Leaves block
-3. date_palm_leaves.png - Texture for the Date Palm Leaves block
-
-These textures will be used for the new tree blocks that have been implemented in the mod.
-
-Note: The date_palm_log_top.png texture is already present, but the side texture for the Date Palm Log is missing, which is causing the block to appear with a missing texture in-game.

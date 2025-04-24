@@ -1,44 +1,31 @@
 package com.ancientcurse.util;
 
 import com.ancientcurse.AncientCurse;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
-import net.minecraft.block.Blocks;
 
 /**
  * Helper class to ensure proper registration of block states
  * to prevent "Some intrusive holders were not registered" errors.
+ * 
+ * DISABLED: This class has been disabled to prevent intrusive holders errors.
+ * Accessing vanilla block states before registries are frozen causes intrusive holders errors.
  */
 public class BlockStateRegistrationHelper {
 
     /**
      * Register this helper to be called at the appropriate lifecycle events
+     * DISABLED: This method has been disabled to prevent intrusive holders errors.
      */
     public static void register() {
-        // Register server starting event handler
-        ServerLifecycleEvents.SERVER_STARTING.register(server -> {
-            preRegisterBlockStates();
-        });
+        AncientCurse.LOGGER.info("BlockStateRegistrationHelper has been disabled to prevent intrusive holders errors");
+        // All functionality has been disabled to prevent intrusive holders errors
     }
     
     /**
      * Pre-registers commonly used block states to ensure they are properly
      * registered before world generation starts.
+     * DISABLED: This method has been disabled to prevent intrusive holders errors.
      */
     private static void preRegisterBlockStates() {
-        AncientCurse.LOGGER.info("Pre-registering vanilla block states to prevent registry errors");
-        try {
-            // Force air block registration
-            Blocks.AIR.getDefaultState();
-            // Force other commonly used blocks
-            Blocks.WATER.getDefaultState();
-            Blocks.STONE.getDefaultState();
-            Blocks.SAND.getDefaultState();
-            Blocks.DIRT.getDefaultState();
-            Blocks.GRASS_BLOCK.getDefaultState();
-            
-            AncientCurse.LOGGER.info("Successfully pre-registered vanilla block states");
-        } catch (Exception e) {
-            AncientCurse.LOGGER.error("Error during block state pre-registration", e);
-        }
+        // All functionality has been disabled to prevent intrusive holders errors
     }
 }

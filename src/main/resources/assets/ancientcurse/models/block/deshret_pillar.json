@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_column",
+  "textures": {
+    "end": "ancientcurse:block/pillar/deshret_pillar_top",
+    "side": "ancientcurse:block/pillar/deshret_pillar"
+  }
+}

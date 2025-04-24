@@ -1,9 +1,0 @@
-Please add the following texture file to this directory:
-
-1. sekhem_date.png - Texture for the Sekhem Date food item
-
-This texture will be used for the Sekhem Date food item that players can harvest from the Date Block when it's fully grown.
-
-The Sekhem Date should look like a dried date fruit with a rich brown/reddish color, typical of dates that were a staple food in ancient Egypt.
-
-In-game, the Sekhem Date provides 5 hunger points and gives the player Fire Resistance for 10 seconds, making it a valuable food item for desert exploration.

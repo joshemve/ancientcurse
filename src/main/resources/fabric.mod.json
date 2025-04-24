@@ -42,6 +42,9 @@
     "java": ">=17",
     "geckolib": ">=4.2.0"
   },
+  "custom": {
+    "fabric-registry-sync:registry-sync-phase": "AFTER"
+  },
   "suggests": {
     "another-mod": "*"
   }
