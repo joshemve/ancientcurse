@@ -1,14 +1,5 @@
 package com.ancientcurse;
 
-import com.ancientcurse.entity.SunGolemEntity;
-import net.fabricmc.fabric.api.object.builder.v1.entity.FabricEntityTypeBuilder;
-import net.minecraft.entity.EntityDimensions;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.SpawnGroup;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
-import net.minecraft.util.Identifier;
-
 /**
  * Centralizes entity registration for the mod
  */
@@ -25,24 +16,29 @@ public class ModEntities {
     );
     */
     
+        // Tentacle entity registrations removed
+    
     /**
      * Registers all mod entities
      */
     public static void registerEntities() {
         AncientCurse.LOGGER.info("Registering entities for " + AncientCurse.MOD_ID);
         
-        // When you're ready to implement the entity, uncomment the code above
+        // Tentacle entity registrations removed
+        
+        // When you're ready to implement the SunGolem entity, uncomment the code above
         // and then uncomment the following code for client-side rendering:
         
         /*
         EntityRendererRegistry.register(SUN_GOLEM, SunGolemRenderer::new);
-        
-        // Register spawn egg item
-        Registry.register(
-            Registries.ITEM, 
-            new Identifier(AncientCurse.MOD_ID, "sun_golem_spawn_egg"),
-            new SpawnEggItem(SUN_GOLEM, 0xF7C649, 0xFFAE19, new Item.Settings())
-        );
         */
     }
-} 
+    
+    /**
+     * Registers client-side entity renderers
+     * This should be called from the client initializer
+     */
+    public static void registerEntityRenderers() {
+        // Tentacle entity renderers removed
+    }
+}

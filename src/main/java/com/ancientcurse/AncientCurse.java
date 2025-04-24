@@ -13,6 +13,28 @@ import net.minecraft.world.gen.WorldPreset;
 
 /**
  * Main mod class for Ancient Curse.
+ * 
+ * IMPORTANT MOD ARCHITECTURE GUIDELINES:
+ * 
+ * 1. REGISTRY SYSTEM:
+ *    - All blocks are organized into specialized registry classes in com.ancientcurse.block.registry
+ *    - Each registry class handles a specific type of block (e.g., CursedPlantBlocks, EgyptianPlantBlocks)
+ *    - New blocks should be added to the appropriate registry class, NOT directly in ModBlocks
+ *    - The BlockRegistry class coordinates all block registrations
+ * 
+ * 2. BLOCK REGISTRATION PROCESS:
+ *    - Blocks are defined as public static final fields in their registry class
+ *    - Blocks are registered to the game in the registerBlocks() method of their registry class
+ *    - Block items are registered in the registerBlockItems() method of their registry class
+ *    - All registry classes are called from BlockRegistry.registerAll() and BlockRegistry.registerBlockItems()
+ * 
+ * 3. CREATIVE MENU:
+ *    - All blocks must be added to the creative menu in ModItemGroup
+ *    - Blocks from registry classes should be referenced using their full path
+ *    - Related blocks should be grouped together with appropriate comments
+ * 
+ * Following these guidelines prevents registration conflicts and makes the codebase more maintainable.
+ * See previous fixes for registration conflicts in the mod's history.
  */
 public class AncientCurse implements ModInitializer {
     public static final String MOD_ID = "ancientcurse";

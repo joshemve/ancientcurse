@@ -588,6 +588,15 @@ public class ModBlocks {
             .sounds(BlockSoundGroup.STONE)
     );
     
+    public static final Block CURSED_EARTH = new CursedEarthBlock(
+        FabricBlockSettings.create()
+            .mapColor(MapColor.TERRACOTTA_PURPLE)
+            .strength(0.5f)
+            .sounds(BlockSoundGroup.GRAVEL)
+            .ticksRandomly() // Enable random ticks for effects
+            .luminance(state -> 2) // Slight glow effect
+    );
+    
     public static final Block HARDENED_BLACK_STONE = new Block(
         FabricBlockSettings.create()
             .mapColor(MapColor.BLACK)
@@ -614,6 +623,128 @@ public class ModBlocks {
             .sounds(BlockSoundGroup.METAL)
     );
     
+    // New cursed plant blocks
+    public static final Block BLOODSHADE_THICKET = new BloodshadeThicketBlock(
+        FabricBlockSettings.create()
+            .mapColor(MapColor.DARK_RED)
+            .strength(0.4f)
+            .sounds(BlockSoundGroup.GRASS)
+            .nonOpaque()
+            .noCollision()
+            .luminance(state -> 2) // Slight glow
+    );
+    
+    public static final Block CURSED_SPRIG = new CursedSprigBlock(
+        FabricBlockSettings.create()
+            .mapColor(MapColor.TERRACOTTA_PURPLE)
+            .strength(0.2f)
+            .sounds(BlockSoundGroup.GRASS)
+            .nonOpaque()
+            .noCollision()
+    );
+    
+    public static final Block CURSED_SPROUT = new CursedSproutBlock(
+        FabricBlockSettings.create()
+            .mapColor(MapColor.TERRACOTTA_PURPLE)
+            .strength(0.2f)
+            .sounds(BlockSoundGroup.GRASS)
+            .nonOpaque()
+            .noCollision()
+    );
+    
+    public static final Block DUAT_FERN = new DuatFernBlock(
+        FabricBlockSettings.create()
+            .mapColor(MapColor.TERRACOTTA_BLUE)
+            .strength(0.3f)
+            .sounds(BlockSoundGroup.GRASS)
+            .nonOpaque()
+            .noCollision()
+            .luminance(state -> 3) // Mystical glow
+    );
+    
+    public static final Block VINE_OF_APEP = new VineOfApepBlock(
+        FabricBlockSettings.create()
+            .mapColor(MapColor.DARK_GREEN)
+            .strength(0.4f)
+            .sounds(BlockSoundGroup.GRASS)
+            .nonOpaque()
+            .noCollision()
+    );
+    
+    // New Egyptian-themed plant blocks
+    public static final Block DUAMUTEF_CAP = new DuamutefCapBlock(
+        FabricBlockSettings.create()
+            .mapColor(MapColor.TERRACOTTA_ORANGE)
+            .strength(0.3f)
+            .sounds(BlockSoundGroup.GRASS)
+            .nonOpaque()
+            .noCollision()
+    );
+    
+    public static final Block ISFET_FROND = new IsfetFrondBlock(
+        FabricBlockSettings.create()
+            .mapColor(MapColor.PALE_GREEN)
+            .strength(0.3f)
+            .sounds(BlockSoundGroup.GRASS)
+            .nonOpaque()
+            .noCollision()
+    );
+    
+    public static final Block ISFET_SHRUB = new IsfetShrubBlock(
+        FabricBlockSettings.create()
+            .mapColor(MapColor.PALE_GREEN)
+            .strength(0.4f)
+            .sounds(BlockSoundGroup.GRASS)
+            .nonOpaque()
+            .noCollision()
+    );
+    
+    public static final Block KHEMNU_POD = new KhemnuPodBlock(
+        FabricBlockSettings.create()
+            .mapColor(MapColor.TERRACOTTA_YELLOW)
+            .strength(0.3f)
+            .sounds(BlockSoundGroup.GRASS)
+            .nonOpaque()
+            .noCollision()
+            .luminance(state -> 7) // Glowing pod
+    );
+    
+    public static final Block KHERU_MOSS = new KheruMossBlock(
+        FabricBlockSettings.create()
+            .mapColor(MapColor.DARK_GREEN)
+            .strength(0.2f)
+            .sounds(BlockSoundGroup.GRASS)
+            .nonOpaque()
+            .noCollision()
+    );
+    
+    public static final Block MENFET_SPRIG = new MenfetSprigBlock(
+        FabricBlockSettings.create()
+            .mapColor(MapColor.TERRACOTTA_BLUE)
+            .strength(0.2f)
+            .sounds(BlockSoundGroup.GRASS)
+            .nonOpaque()
+            .noCollision()
+    );
+    
+    public static final Block REED_OF_SEKHEM = new ReedOfSekhemBlock(
+        FabricBlockSettings.create()
+            .mapColor(MapColor.PALE_YELLOW)
+            .strength(0.4f)
+            .sounds(BlockSoundGroup.GRASS)
+            .nonOpaque()
+            .noCollision()
+    );
+    
+    public static final Block SUTEKH_COIL = new SutekhCoilBlock(
+        FabricBlockSettings.create()
+            .mapColor(MapColor.TERRACOTTA_RED)
+            .strength(0.4f)
+            .sounds(BlockSoundGroup.GRASS)
+            .nonOpaque()
+            .noCollision()
+    );
+    
     // REMOVED: Anubus Glyph block was causing registration conflicts
     // public static final Block ANUBUS_GLYPH_BLOCK = new AnubusGlyphBlock(...);
 
@@ -622,6 +753,9 @@ public class ModBlocks {
      */
     public static void registerBlocks() {
         AncientCurse.LOGGER.info("Registering blocks for " + AncientCurse.MOD_ID);
+        
+        // Clear any existing registrations to prevent conflicts
+        AncientCurse.LOGGER.info("Registering all blocks for " + AncientCurse.MOD_ID);
         
         // Register the sycamore fig log block
         Registry.register(
@@ -1077,6 +1211,13 @@ public class ModBlocks {
             WIND_SWEPT_BLACKSTONE
         );
         
+        // Register Cursed Earth
+        Registry.register(
+            Registries.BLOCK,
+            new Identifier(AncientCurse.MOD_ID, "cursed_earth"),
+            CURSED_EARTH
+        );
+        
         // Register Bronze Blocks
         Registry.register(
             Registries.BLOCK,
@@ -1084,9 +1225,60 @@ public class ModBlocks {
             BRONZE_BLOCK
         );
         
+        // Egyptian-themed plant blocks are now registered in EgyptianPlantBlocks registry class
         
-        // Register block items
+        // Register all block items
         registerBlockItems();
+        
+        // Ensure all blocks are properly registered
+        AncientCurse.LOGGER.info("Validating block registrations...");
+        
+        // This will help identify any blocks that might be causing issues
+        // Validate all blocks to ensure they're properly registered
+        validateAndFixBlockRegistrations();
+    }
+    
+    /**
+     * Validates all block registrations and fixes any issues
+     */
+    private static void validateAndFixBlockRegistrations() {
+        // Check Egyptian plant blocks
+        Block[] egyptianPlantBlocks = new Block[] {
+            DUAMUTEF_CAP, ISFET_FROND, ISFET_SHRUB, KHEMNU_POD, 
+            KHERU_MOSS, MENFET_SPRIG, REED_OF_SEKHEM, SUTEKH_COIL
+        };
+        
+        for (Block block : egyptianPlantBlocks) {
+            validateBlockRegistration(block);
+        }
+        
+        // Check cursed plant blocks
+        Block[] cursedPlantBlocks = new Block[] {
+            CURSED_SPRIG, CURSED_SPROUT, BLOODSHADE_THICKET, DUAT_FERN, VINE_OF_APEP
+        };
+        
+        for (Block block : cursedPlantBlocks) {
+            validateBlockRegistration(block);
+        }
+    }
+    
+    /**
+     * Validates a block registration and fixes it if needed
+     */
+    private static void validateBlockRegistration(Block block) {
+        if (block == null || block == Blocks.AIR) {
+            return;
+        }
+        
+        Identifier id = Registries.BLOCK.getId(block);
+        if (id == null || id.equals(new Identifier("minecraft:air"))) {
+            // Block not properly registered, register it now
+            String path = block.getClass().getSimpleName().toLowerCase().replace("block", "");
+            Registry.register(Registries.BLOCK, new Identifier(AncientCurse.MOD_ID, path), block);
+            AncientCurse.LOGGER.info("Fixed registration for block: " + path);
+        } else {
+            AncientCurse.LOGGER.info("Block registration check: " + id);
+        }
     }
     
     /**
@@ -1157,18 +1349,45 @@ public class ModBlocks {
         registerBlockItem(BLACKSTONE_BRICK, ModItemGroup.ANCIENT_CURSE);
         registerBlockItem(HARDENED_BLACK_STONE, ModItemGroup.ANCIENT_CURSE);
         registerBlockItem(WIND_SWEPT_BLACKSTONE, ModItemGroup.ANCIENT_CURSE);
+        registerBlockItem(CURSED_EARTH, ModItemGroup.ANCIENT_CURSE);
         
         // Register Bronze Blocks
         registerBlockItem(BRONZE_BLOCK, ModItemGroup.ANCIENT_CURSE);
+        
+        // Egyptian-themed plant blocks and cursed plant blocks are now registered in their respective registry classes
         
         // We don't register a BlockItem for DATE_BLOCK since it should only drop the Sekhem Date item
         // We don't register Anubus Glyph here because it's registered directly in registerBlocks to avoid ID conflicts
     }
 
     private static void registerBlockItem(Block block, ItemGroup group) {
-        // Use Registry.register instead of Item.register to prevent duplicate registration
-        Registry.register(Registries.ITEM, 
-            new Identifier(AncientCurse.MOD_ID, Registries.BLOCK.getId(block).getPath()),
-            new BlockItem(block, new FabricItemSettings()));
+        // Skip registration for null blocks or air blocks
+        if (block == null || block == Blocks.AIR) {
+            return;
+        }
+        
+        // First, ensure the block itself is properly registered
+        validateBlockRegistration(block);
+        
+        // Now get the block ID (which should be valid after validation)
+        Identifier blockId = Registries.BLOCK.getId(block);
+        if (blockId == null || blockId.equals(new Identifier("minecraft:air"))) {
+            AncientCurse.LOGGER.error("Failed to register item for block: " + block.getClass().getSimpleName());
+            return;
+        }
+        
+        // Create the item ID based on the block ID
+        Identifier itemId = new Identifier(AncientCurse.MOD_ID, blockId.getPath());
+        
+        // Check if the item is already registered to prevent conflicts
+        if (Registries.ITEM.containsId(itemId)) {
+            // Skip registration if item already exists
+            System.out.println("Skipping duplicate item registration for: " + itemId);
+            return;
+        }
+        
+        // Register the item
+        Registry.register(Registries.ITEM, itemId, new BlockItem(block, new FabricItemSettings()));
+        AncientCurse.LOGGER.info("Registered item for block: " + blockId);
     }
 }

@@ -9,6 +9,23 @@ import net.minecraft.registry.Registry;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
+/**
+ * Manages the creative menu tab for the Ancient Curse mod
+ * 
+ * IMPORTANT CREATIVE MENU GUIDELINES:
+ * 1. All blocks and items must be added to the creative menu using the safeAdd() method
+ * 2. Blocks from specialized registry classes should be referenced using their full path:
+ *    - com.ancientcurse.block.registry.CursedPlantBlocks.BLOCK_NAME
+ *    - com.ancientcurse.block.registry.EgyptianPlantBlocks.BLOCK_NAME
+ *    - com.ancientcurse.block.registry.NecrostoneBlocks.BLOCK_NAME
+ *    - etc.
+ * 3. Group related blocks together with appropriate comments
+ * 4. When adding a new block type, add all blocks of that type in a single section
+ * 5. DO NOT reference blocks directly from ModBlocks if they have been moved to a registry class
+ * 
+ * Following these guidelines prevents missing blocks in the creative menu and makes
+ * the codebase more maintainable.
+ */
 public class ModItemGroup {
     public static final ItemGroup ANCIENT_CURSE = Registry.register(
         Registries.ITEM_GROUP,
@@ -84,6 +101,23 @@ public class ModItemGroup {
                 safeAdd(entries, ModBlocks.PISTIA_STRATIOTES);
                 safeAdd(entries, ModBlocks.LOTUS_FLOWER_PAD);
                 
+                // All cursed plant blocks
+                safeAdd(entries, com.ancientcurse.block.registry.CursedPlantBlocks.CURSED_SPRIG);
+                safeAdd(entries, com.ancientcurse.block.registry.CursedPlantBlocks.CURSED_SPROUT);
+                safeAdd(entries, com.ancientcurse.block.registry.CursedPlantBlocks.DUAT_FERN);
+                safeAdd(entries, com.ancientcurse.block.registry.CursedPlantBlocks.VINE_OF_APEP);
+                safeAdd(entries, com.ancientcurse.block.registry.CursedPlantBlocks.BLOODSHADE_THICKET);
+                
+                // Additional cursed plant blocks (moved from EgyptianPlantBlocks)
+                safeAdd(entries, com.ancientcurse.block.registry.CursedPlantBlocks.DUAMUTEF_CAP);
+                safeAdd(entries, com.ancientcurse.block.registry.CursedPlantBlocks.ISFET_FROND);
+                safeAdd(entries, com.ancientcurse.block.registry.CursedPlantBlocks.ISFET_SHRUB);
+                safeAdd(entries, com.ancientcurse.block.registry.CursedPlantBlocks.KHEMNU_POD);
+                safeAdd(entries, com.ancientcurse.block.registry.CursedPlantBlocks.KHERU_MOSS);
+                safeAdd(entries, com.ancientcurse.block.registry.CursedPlantBlocks.MENFET_SPRIG);
+                safeAdd(entries, com.ancientcurse.block.registry.CursedPlantBlocks.REED_OF_SEKHEM);
+                safeAdd(entries, com.ancientcurse.block.registry.CursedPlantBlocks.SUTEKH_COIL);
+                
                 // Bronze Materials
                 safeAdd(entries, ModItems.BRONZE_BLEND);
                 safeAdd(entries, ModItems.RAW_BRONZE_NUGGET);
@@ -137,6 +171,7 @@ public class ModItemGroup {
                 safeAdd(entries, ModBlocks.BLACKSTONE_BRICK);
                 safeAdd(entries, ModBlocks.HARDENED_BLACK_STONE);
                 safeAdd(entries, ModBlocks.WIND_SWEPT_BLACKSTONE);
+                safeAdd(entries, ModBlocks.CURSED_EARTH);
 
                 // Necrostone blocks
                 safeAdd(entries, com.ancientcurse.block.registry.NecrostoneBlocks.NECROSTONE_BRICK);

@@ -2,14 +2,13 @@ package com.ancientcurse.client;
 
 import com.ancientcurse.AncientCurse;
 import com.ancientcurse.ModBlocks;
-import com.ancientcurse.block.RockBlock;
+import com.ancientcurse.block.registry.CursedPlantBlocks;
 import com.ancientcurse.client.color.RockColorProvider;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
 import net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry;
-import net.minecraft.block.Block;
 import net.minecraft.client.render.RenderLayer;
 
 /**
@@ -51,6 +50,23 @@ public class AncientCurseClient implements ClientModInitializer {
         BlockRenderLayerMap.INSTANCE.putBlock(ModBlocks.LOTUS_FLOWER_PAD, RenderLayer.getCutout());
         
         // Note: NILE_RIVER_TALL_GRASS removed to fix compilation issues
+        
+        // Register all cursed plant blocks with cutout render layer
+        BlockRenderLayerMap.INSTANCE.putBlock(CursedPlantBlocks.CURSED_SPRIG, RenderLayer.getCutout());
+        BlockRenderLayerMap.INSTANCE.putBlock(CursedPlantBlocks.CURSED_SPROUT, RenderLayer.getCutout());
+        BlockRenderLayerMap.INSTANCE.putBlock(CursedPlantBlocks.DUAT_FERN, RenderLayer.getCutout());
+        BlockRenderLayerMap.INSTANCE.putBlock(CursedPlantBlocks.VINE_OF_APEP, RenderLayer.getCutout());
+        BlockRenderLayerMap.INSTANCE.putBlock(CursedPlantBlocks.BLOODSHADE_THICKET, RenderLayer.getCutout());
+        
+        // Register additional cursed plant blocks with cutout render layer
+        BlockRenderLayerMap.INSTANCE.putBlock(CursedPlantBlocks.DUAMUTEF_CAP, RenderLayer.getCutout());
+        BlockRenderLayerMap.INSTANCE.putBlock(CursedPlantBlocks.ISFET_FROND, RenderLayer.getCutout());
+        BlockRenderLayerMap.INSTANCE.putBlock(CursedPlantBlocks.ISFET_SHRUB, RenderLayer.getCutout());
+        BlockRenderLayerMap.INSTANCE.putBlock(CursedPlantBlocks.KHEMNU_POD, RenderLayer.getCutout());
+        BlockRenderLayerMap.INSTANCE.putBlock(CursedPlantBlocks.KHERU_MOSS, RenderLayer.getCutout());
+        BlockRenderLayerMap.INSTANCE.putBlock(CursedPlantBlocks.MENFET_SPRIG, RenderLayer.getCutout());
+        BlockRenderLayerMap.INSTANCE.putBlock(CursedPlantBlocks.REED_OF_SEKHEM, RenderLayer.getCutout());
+        BlockRenderLayerMap.INSTANCE.putBlock(CursedPlantBlocks.SUTEKH_COIL, RenderLayer.getCutout());
     }
     
     /**

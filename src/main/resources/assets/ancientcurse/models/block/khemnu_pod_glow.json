@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/cross",
+  "textures": {
+    "cross": "ancientcurse:block/khemnu_pod_glow"
+  }
+}
