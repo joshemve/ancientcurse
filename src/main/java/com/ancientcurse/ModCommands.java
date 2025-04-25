@@ -1,5 +1,6 @@
 package com.ancientcurse;
 
+import com.ancientcurse.command.KhamsinCurseCommand;
 import com.mojang.brigadier.CommandDispatcher;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.minecraft.command.CommandRegistryAccess;
@@ -37,5 +38,8 @@ public class ModCommands {
                 return 1;
             })
         );
+        
+        // Register the Khamsin Curse command
+        KhamsinCurseCommand.register(dispatcher, registryAccess, environment);
     }
 } 

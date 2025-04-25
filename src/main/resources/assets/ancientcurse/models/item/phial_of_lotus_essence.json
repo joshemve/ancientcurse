@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "ancientcurse:item/phial_of_lotus_essence"
+  }
+}

@@ -1,7 +1,12 @@
 package com.ancientcurse;
 
+import com.ancientcurse.item.AncientPickItem;
 import com.ancientcurse.item.CustomAnimatedItem;
+import com.ancientcurse.item.ElixirOfRasSparkItem;
+import com.ancientcurse.item.PhialOfLotusEssenceItem;
+import com.ancientcurse.item.ScarabTalismanItem;
 import com.ancientcurse.item.SekhemDateItem;
+import com.ancientcurse.item.SnakeStaffItem;
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
@@ -92,11 +97,17 @@ public class ModItems {
     // THE BROKEN CROOK
     public static final Item THE_BROKEN_CROOK  = new Item(new FabricItemSettings());
 
-    //SCARAB TALISMAN
-    public static final Item SCARAB_TALISMAN  = new Item(new FabricItemSettings());
+    // Scarab Talisman - A magical amulet with protective properties
+    public static final ScarabTalismanItem SCARAB_TALISMAN = new ScarabTalismanItem(new FabricItemSettings());
 
     // VESSEL OF DUAT
-    public static final Item VESSEL_OF_THE_DUAT  = new Item(new FabricItemSettings());
+    public static final Item VESSEL_OF_THE_DUAT = new Item(new FabricItemSettings());
+    
+    // New magical items
+    public static final PhialOfLotusEssenceItem PHIAL_OF_LOTUS_ESSENCE = new PhialOfLotusEssenceItem(new FabricItemSettings());
+    public static final ElixirOfRasSparkItem ELIXIR_OF_RAS_SPARK = new ElixirOfRasSparkItem(new FabricItemSettings());
+    public static final AncientPickItem ANCIENT_PICK = new AncientPickItem(new FabricItemSettings());
+    public static final SnakeStaffItem SNAKE_STAFF = new SnakeStaffItem(new FabricItemSettings());
 
     // Bronze materials
     public static final Item BRONZE_BLEND = new Item(new FabricItemSettings());
@@ -164,13 +175,6 @@ public class ModItems {
                 Registries.ITEM,
                 new Identifier(AncientCurse.MOD_ID, "the_broken_crook"),
                 THE_BROKEN_CROOK
-        );
-
-        // Register the
-        Registry.register(
-                Registries.ITEM,
-                new Identifier(AncientCurse.MOD_ID, "scarab_tali"),
-                SCARAB_TALISMAN
         );
 
         // Register the
@@ -321,6 +325,35 @@ public class ModItems {
             Registries.ITEM,
             new Identifier(AncientCurse.MOD_ID, "bronze_boots"),
             BRONZE_BOOTS
+        );
+        
+        // Register Scarab Talisman
+        Registry.register(
+            Registries.ITEM,
+            new Identifier(AncientCurse.MOD_ID, "scarab_talisman"),
+            SCARAB_TALISMAN
+        );
+        
+        // Register new magical items
+        Registry.register(
+            Registries.ITEM,
+            new Identifier(AncientCurse.MOD_ID, "phial_of_lotus_essence"),
+            PHIAL_OF_LOTUS_ESSENCE
+        );
+        Registry.register(
+            Registries.ITEM,
+            new Identifier(AncientCurse.MOD_ID, "elixir_of_ras_spark"),
+            ELIXIR_OF_RAS_SPARK
+        );
+        Registry.register(
+            Registries.ITEM,
+            new Identifier(AncientCurse.MOD_ID, "ancient_pick"),
+            ANCIENT_PICK
+        );
+        Registry.register(
+            Registries.ITEM,
+            new Identifier(AncientCurse.MOD_ID, "snake_staff"),
+            SNAKE_STAFF
         );
     }
 }

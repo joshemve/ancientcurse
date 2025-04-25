@@ -32,9 +32,19 @@
   "item.ancientcurse.the_broken_crook": "The Broken Crook",
   "item.ancientcurse.canopic_heart_jar": "Canopic Heart Jar",
   "item.ancientcurse.eye_of_apophis": "Eye Of Apophis",
-  "item.ancientcurse.scarab_tali": "Scarab Talismen",
+  "item.ancientcurse.scarab_talisman": "Scarab Talisman",
+  "item.ancientcurse.scarab_talisman.tooltip": "Grants temporary protection and regeneration when activated",
   "item.ancientcurse.vessel_of_the_duat": "Vessel Of Duat",
   "item.ancientcurse.anubus__glyph": "Anubus Glyph",
+  
+  "item.ancientcurse.phial_of_lotus_essence": "Phial of Lotus Essence",
+  "item.ancientcurse.phial_of_lotus_essence.tooltip": "Grants water breathing, night vision, and dolphin's grace",
+  "item.ancientcurse.elixir_of_ras_spark": "Elixir of Ra's Spark",
+  "item.ancientcurse.elixir_of_ras_spark.tooltip": "Provides fire resistance and strength when consumed",
+  "item.ancientcurse.ancient_pick": "Ancient Pick",
+  "item.ancientcurse.ancient_pick.tooltip": "Chance to preserve durability and grant haste when mining",
+  "item.ancientcurse.snake_staff": "Snake Staff",
+  "item.ancientcurse.snake_staff.tooltip": "Poisons nearby enemies when charged",
 
 
 
@@ -164,5 +174,14 @@
   "preset.ancientcurse.ancient_curse": "Ancient Curse",
   "worldPreset.ancientcurse.ancient_curse": "Ancient Curse",
   "worldPreset.ancientcurse.nile_river_single_biome": "Nile River World",
-  "preset.ancientcurse.nile_river": "Nile River"
+  "preset.ancientcurse.nile_river": "Nile River",
+  
+  "effect.ancientcurse.khamsin_curse_stage_1": "Khamsin Curse I",
+  "effect.ancientcurse.khamsin_curse_stage_2": "Khamsin Curse II",
+  "effect.ancientcurse.khamsin_curse_stage_3": "Khamsin Curse III",
+  "effect.ancientcurse.khamsin_curse_stage_4": "Khamsin Curse IV",
+  "effect.ancientcurse.khamsin_curse_stage_5": "Khamsin Curse V",
+  
+  "commands.khamsin.success.single": "Applied Khamsin Curse (Stage %d) to %s",
+  "commands.khamsin.success.multiple": "Applied Khamsin Curse (Stage %d) to %d players"
 }

@@ -209,6 +209,12 @@ public class ModItemGroup {
                 safeAdd(entries, ModItems.SCARAB_TALISMAN);
                 safeAdd(entries, ModItems.THE_BROKEN_CROOK);
                 safeAdd(entries, ModItems.VESSEL_OF_THE_DUAT);
+                
+                // Magical items
+                safeAdd(entries, ModItems.PHIAL_OF_LOTUS_ESSENCE);
+                safeAdd(entries, ModItems.ELIXIR_OF_RAS_SPARK);
+                safeAdd(entries, ModItems.ANCIENT_PICK);
+                safeAdd(entries, ModItems.SNAKE_STAFF);
             })
             .build()
     );

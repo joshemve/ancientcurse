@@ -10,6 +10,8 @@ import net.minecraft.registry.RegistryKeys;
 import net.minecraft.util.Identifier;
 import net.minecraft.world.gen.WorldPreset;
 
+import com.ancientcurse.effect.ModStatusEffects;
+
 
 /**
  * Main mod class for Ancient Curse.
@@ -92,6 +94,9 @@ public class AncientCurse implements ModInitializer {
         
         // Register structures
         ModStructures.registerStructures();
+        
+        // Register status effects
+        ModStatusEffects.registerStatusEffects();
     }
     
     /**
