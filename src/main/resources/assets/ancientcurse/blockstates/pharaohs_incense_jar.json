@@ -1,5 +1,21 @@
 {
   "variants": {
-    "": { "model": "ancientcurse:block/pharaohs_incense_jar" }
+    "": [
+      {
+        "model": "ancientcurse:block/pharaohs_incense_jar"
+      },
+      {
+        "model": "ancientcurse:block/pharaohs_incense_jar",
+        "y": 90
+      },
+      {
+        "model": "ancientcurse:block/pharaohs_incense_jar",
+        "y": 180
+      },
+      {
+        "model": "ancientcurse:block/pharaohs_incense_jar",
+        "y": 270
+      }
+    ]
   }
 }

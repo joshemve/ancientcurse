@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "##",
+    "##"
+  ],
+  "key": {
+    "#": {
+      "item": "ancientcurse:bronze_ingot"
+    }
+  },
+  "result": {
+    "item": "ancientcurse:bronze_plate",
+    "count": 1
+  }
+}

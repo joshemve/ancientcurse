@@ -38,6 +38,7 @@ public class BlockRegistry {
         HeadstoneBlocks.registerBlocks();
         FurnitureBlocks.registerBlocks();
         DeshretBlocks.registerBlocks();
+        PotteryBlocks.registerBlocks();
         
         // Register plant blocks
         CursedPlantBlocks.registerBlocks();
@@ -64,6 +65,7 @@ public class BlockRegistry {
         HeadstoneBlocks.registerBlockItems();
         FurnitureBlocks.registerBlockItems();
         DeshretBlocks.registerBlockItems();
+        PotteryBlocks.registerBlockItems();
         
         // Register plant block items
         CursedPlantBlocks.registerBlockItems();

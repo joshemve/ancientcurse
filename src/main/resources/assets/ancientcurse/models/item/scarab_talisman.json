@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/handheld",
   "textures": {
-    "layer0": "ancientcurse:item/scarab_talismen"
+    "layer0": "ancientcurse:item/scarab_talisman"
   }
 }

@@ -1,5 +1,21 @@
 {
   "variants": {
-    "": { "model": "ancientcurse:block/scarab_sealed_urn" }
+    "": [
+      {
+        "model": "ancientcurse:block/scarab_sealed_urn"
+      },
+      {
+        "model": "ancientcurse:block/scarab_sealed_urn",
+        "y": 90
+      },
+      {
+        "model": "ancientcurse:block/scarab_sealed_urn",
+        "y": 180
+      },
+      {
+        "model": "ancientcurse:block/scarab_sealed_urn",
+        "y": 270
+      }
+    ]
   }
 }

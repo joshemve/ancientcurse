@@ -3,9 +3,16 @@ package com.ancientcurse.block;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.ShapeContext;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.particle.BlockStateParticleEffect;
+import net.minecraft.particle.ParticleTypes;
+import net.minecraft.sound.SoundCategory;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.random.Random;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.world.BlockView;
+import net.minecraft.world.World;
 
 /**
  * Canopic Urn of Bastet - a ceremonial container with glowing eyes
@@ -22,5 +29,42 @@ public class CanopicUrnOfBastetBlock extends Block {
     @Override
     public VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
         return SHAPE;
+    }
+    
+    @Override
+    public void onBreak(World world, BlockPos pos, BlockState state, PlayerEntity player) {
+        // Play a pottery breaking sound
+        world.playSound(
+            null, 
+            pos, 
+            SoundEvents.BLOCK_DECORATED_POT_SHATTER, // Use the decorated pot shatter sound
+            SoundCategory.BLOCKS, 
+            1.0F, // Volume
+            0.8F + world.getRandom().nextFloat() * 0.4F // Pitch variation for more natural sound
+        );
+        
+        // Spawn pottery breaking particles
+        if (world.isClient) {
+            // Client side - spawn particles locally
+            Random random = world.getRandom();
+            for (int i = 0; i < 15; i++) {
+                double xOffset = random.nextGaussian() * 0.15;
+                double yOffset = random.nextGaussian() * 0.15;
+                double zOffset = random.nextGaussian() * 0.15;
+                
+                world.addParticle(
+                    new BlockStateParticleEffect(ParticleTypes.BLOCK, state),
+                    pos.getX() + 0.5 + xOffset,
+                    pos.getY() + 0.5 + yOffset,
+                    pos.getZ() + 0.5 + zOffset,
+                    xOffset * 0.5,
+                    yOffset * 0.5,
+                    zOffset * 0.5
+                );
+            }
+        }
+        
+        // Call the parent method to handle the actual block breaking
+        super.onBreak(world, pos, state, player);
     }
 }

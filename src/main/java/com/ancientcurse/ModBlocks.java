@@ -1,6 +1,7 @@
 package com.ancientcurse;
 
 import com.ancientcurse.block.*;
+// PotteryBlocks is referenced in comments only, no import needed
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
 import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
 import net.minecraft.block.Block;
@@ -476,34 +477,11 @@ public class ModBlocks {
             .notSolid()
     );
     
-    // Canopic Urn of Bastet - a ceremonial container with glowing eyes
-    public static final Block CANOPIC_URN_OF_BASTET = new CanopicUrnOfBastetBlock(
-        FabricBlockSettings.create()
-            .mapColor(MapColor.TERRACOTTA_GRAY)
-            .strength(1.5f)
-            .sounds(BlockSoundGroup.STONE)
-            .nonOpaque()
-            .luminance(state -> 5) // Soft glow from the eyes
-    );
-    
-    // Scarab Sealed Urn - a ceremonial container sealed with a sacred scarab
-    public static final Block SCARAB_SEALED_URN = new ScarabSealedUrnBlock(
-        FabricBlockSettings.create()
-            .mapColor(MapColor.TERRACOTTA_GRAY)
-            .strength(1.5f)
-            .sounds(BlockSoundGroup.STONE)
-            .nonOpaque()
-    );
-    
-    // Pharaoh's Incense Jar - a ceremonial container for burning sacred incense
-    public static final Block PHARAOHS_INCENSE_JAR = new PharaohsIncenseJarBlock(
-        FabricBlockSettings.create()
-            .mapColor(MapColor.TERRACOTTA_GRAY)
-            .strength(1.5f)
-            .sounds(BlockSoundGroup.STONE)
-            .nonOpaque()
-            .luminance(state -> 4) // Soft glow from the incense
-    );
+    // POTTERY BLOCKS MOVED TO com.ancientcurse.block.registry.PotteryBlocks
+    // This includes:
+    // - CANOPIC_URN_OF_BASTET
+    // - SCARAB_SEALED_URN
+    // - PHARAOHS_INCENSE_JAR
 
     // Pistia Stratiotes - water lettuce, floats on water
     public static final Block PISTIA_STRATIOTES = new PistiaStratiotesBlock(
@@ -517,15 +495,8 @@ public class ModBlocks {
             .notSolid()
     );
 
-    // Offering Pot - decorative vase used in ancient Egyptian rituals
-    public static final Block OFFERING_POT = new OfferingPotBlock(
-        FabricBlockSettings.create()
-            .mapColor(MapColor.TERRACOTTA_GRAY)
-            .strength(1.5f)
-            .sounds(BlockSoundGroup.STONE)
-            .nonOpaque()
-            .requiresTool()
-    );
+    // OFFERING_POT moved to com.ancientcurse.block.registry.PotteryBlocks
+    // Access it via PotteryBlocks.OFFERING_POT
     
     // Clay Crucible - a special furnace for ancient metalworking
     public static final Block CLAY_CRUCIBLE = new ClayCrucibleBlock(
@@ -537,15 +508,14 @@ public class ModBlocks {
             .nonOpaque()
     );
     
-    // Vessel of Whispering Winds - a mystical pottery item that glows
-    public static final Block VESSEL_OF_WHISPERING_WINDS = new VesselOfWhisperingWindsBlock(
-        FabricBlockSettings.create()
-            .mapColor(MapColor.TERRACOTTA_GRAY)
-            .strength(1.5f)
-            .sounds(BlockSoundGroup.STONE)
-            .nonOpaque()
-            .luminance(state -> 8) // Constant light level of 8
-    );
+    // VESSEL_OF_WHISPERING_WINDS moved to com.ancientcurse.block.registry.PotteryBlocks
+    // Access it via PotteryBlocks.VESSEL_OF_WHISPERING_WINDS
+    
+    
+    // SERPENT_VESSEL_OF_WADJET moved to com.ancientcurse.block.registry.PotteryBlocks
+    // Access it via PotteryBlocks.SERPENT_VESSEL_OF_WADJET
+    
+    // ALL POTTERY BLOCKS MOVED TO com.ancientcurse.block.registry.PotteryBlocks
     
     // Black stone variants
     public static final Block BLACK_COBBLESTONE = new Block(
@@ -1120,12 +1090,7 @@ public class ModBlocks {
             PISTIA_STRATIOTES
         );
         
-        // Register Offering Pot
-        Registry.register(
-            Registries.BLOCK,
-            new Identifier(AncientCurse.MOD_ID, "offering_pot"),
-            OFFERING_POT
-        );
+        // OFFERING_POT registration moved to com.ancientcurse.block.registry.PotteryBlocks
         
         // Register Clay Crucible
         Registry.register(
@@ -1134,33 +1099,7 @@ public class ModBlocks {
             CLAY_CRUCIBLE
         );
         
-        // Register Vessel of Whispering Winds
-        Registry.register(
-            Registries.BLOCK,
-            new Identifier(AncientCurse.MOD_ID, "vessel_of_whispering_winds"),
-            VESSEL_OF_WHISPERING_WINDS
-        );
-        
-        // Register Canopic Urn of Bastet
-        Registry.register(
-            Registries.BLOCK,
-            new Identifier(AncientCurse.MOD_ID, "canopic_urn_of_bastet"),
-            CANOPIC_URN_OF_BASTET
-        );
-        
-        // Register Scarab Sealed Urn
-        Registry.register(
-            Registries.BLOCK,
-            new Identifier(AncientCurse.MOD_ID, "scarab_sealed_urn"),
-            SCARAB_SEALED_URN
-        );
-        
-        // Register Pharaoh's Incense Jar
-        Registry.register(
-            Registries.BLOCK,
-            new Identifier(AncientCurse.MOD_ID, "pharaohs_incense_jar"),
-            PHARAOHS_INCENSE_JAR
-        );
+        // POTTERY BLOCKS REGISTRATION MOVED TO com.ancientcurse.block.registry.PotteryBlocks
         
         // Register Black Cobblestone
         Registry.register(
@@ -1336,12 +1275,10 @@ public class ModBlocks {
         registerBlockItem(LIGHT_DEAD_FERN, ModItemGroup.ANCIENT_CURSE);
         registerBlockItem(MINI_CACTUS, ModItemGroup.ANCIENT_CURSE);
         registerBlockItem(PISTIA_STRATIOTES, ModItemGroup.ANCIENT_CURSE);
-        registerBlockItem(OFFERING_POT, ModItemGroup.ANCIENT_CURSE);
+        // OFFERING_POT moved to PotteryBlocks
         registerBlockItem(CLAY_CRUCIBLE, ModItemGroup.ANCIENT_CURSE);
-        registerBlockItem(VESSEL_OF_WHISPERING_WINDS, ModItemGroup.ANCIENT_CURSE);
-        registerBlockItem(CANOPIC_URN_OF_BASTET, ModItemGroup.ANCIENT_CURSE);
-        registerBlockItem(SCARAB_SEALED_URN, ModItemGroup.ANCIENT_CURSE);
-        registerBlockItem(PHARAOHS_INCENSE_JAR, ModItemGroup.ANCIENT_CURSE);
+        
+        // POTTERY BLOCK ITEMS REGISTRATION MOVED TO com.ancientcurse.block.registry.PotteryBlocks
         registerBlockItem(BLACK_COBBLESTONE, ModItemGroup.ANCIENT_CURSE);
         registerBlockItem(BLACK_DUST, ModItemGroup.ANCIENT_CURSE);
         registerBlockItem(BLACK_SAND, ModItemGroup.ANCIENT_CURSE);

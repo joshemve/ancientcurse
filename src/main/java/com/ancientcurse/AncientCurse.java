@@ -70,10 +70,12 @@ public class AncientCurse implements ModInitializer {
         // Register mod item groups
         ModItemGroup.registerItemGroups();
         
-        // Register mod blocks
+        // Register ModBlocks first to establish baseline registrations
+        // This ensures that blocks like OFFERING_POT are registered first
         ModBlocks.registerBlocks();
         
-        // Register specialized block registries
+        // Then register specialized block registries
+        // Note: We've modified PotteryBlocks.java to avoid re-registering OFFERING_POT
         com.ancientcurse.block.registry.BlockRegistry.registerAll();
         com.ancientcurse.block.registry.BlockRegistry.registerBlockItems();
         

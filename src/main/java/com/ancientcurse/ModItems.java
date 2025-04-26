@@ -3,7 +3,9 @@ package com.ancientcurse;
 import com.ancientcurse.item.AncientPickItem;
 import com.ancientcurse.item.CustomAnimatedItem;
 import com.ancientcurse.item.ElixirOfRasSparkItem;
+import com.ancientcurse.item.EternalSigilItem;
 import com.ancientcurse.item.PhialOfLotusEssenceItem;
+import com.ancientcurse.item.ScarabIncenseItem;
 import com.ancientcurse.item.ScarabTalismanItem;
 import com.ancientcurse.item.SekhemDateItem;
 import com.ancientcurse.item.SnakeStaffItem;
@@ -12,10 +14,17 @@ import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.item.AliasedBlockItem;
 import net.minecraft.item.FoodComponent;
+import net.minecraft.item.AxeItem;
+import net.minecraft.item.HoeItem;
 import net.minecraft.item.Item;
+import net.minecraft.item.PickaxeItem;
+import net.minecraft.item.ShovelItem;
+import net.minecraft.item.SwordItem;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.util.Identifier;
+
+import com.ancientcurse.item.BronzeToolMaterial;
 
 /**
  * Centralizes item registration for the mod
@@ -100,7 +109,7 @@ public class ModItems {
     // Scarab Talisman - A magical amulet with protective properties
     public static final ScarabTalismanItem SCARAB_TALISMAN = new ScarabTalismanItem(new FabricItemSettings());
 
-    // VESSEL OF DUAT
+    // Vessel items
     public static final Item VESSEL_OF_THE_DUAT = new Item(new FabricItemSettings());
     
     // New magical items
@@ -108,6 +117,10 @@ public class ModItems {
     public static final ElixirOfRasSparkItem ELIXIR_OF_RAS_SPARK = new ElixirOfRasSparkItem(new FabricItemSettings());
     public static final AncientPickItem ANCIENT_PICK = new AncientPickItem(new FabricItemSettings());
     public static final SnakeStaffItem SNAKE_STAFF = new SnakeStaffItem(new FabricItemSettings());
+    public static final ScarabIncenseItem SCARAB_INCENSE_ITEM = new ScarabIncenseItem(new FabricItemSettings());
+    public static final EternalSigilItem ETERNAL_SIGIL = new EternalSigilItem(new FabricItemSettings());
+    public static final Item SCARAB_SHELL = new Item(new FabricItemSettings());
+    public static final Item SCARAB_SHELL_FRAGMENT = new Item(new FabricItemSettings());
 
     // Bronze materials
     public static final Item BRONZE_BLEND = new Item(new FabricItemSettings());
@@ -117,11 +130,13 @@ public class ModItems {
     public static final Item BRONZE_PLATE = new Item(new FabricItemSettings());
     
     // Bronze tools
-    public static final Item BRONZE_SWORD = new Item(new FabricItemSettings());
-    public static final Item BRONZE_PICKAXE = new Item(new FabricItemSettings());
-    public static final Item BRONZE_AXE = new Item(new FabricItemSettings());
-    public static final Item BRONZE_SHOVEL = new Item(new FabricItemSettings());
-    public static final Item BRONZE_HOE = new Item(new FabricItemSettings());
+    public static final Item BRONZE_SWORD = new SwordItem(BronzeToolMaterial.INSTANCE, 3, -2.4F, new FabricItemSettings());
+    public static final Item BRONZE_PICKAXE = new PickaxeItem(BronzeToolMaterial.INSTANCE, 1, -2.8F, new FabricItemSettings());
+    public static final Item BRONZE_AXE = new AxeItem(BronzeToolMaterial.INSTANCE, 6.0F, -3.1F, new FabricItemSettings());
+    public static final Item BRONZE_CEREMONIAL_AXE = new AxeItem(BronzeToolMaterial.INSTANCE, 5.5F, -3.0F, new FabricItemSettings());
+    public static final Item BRONZE_SHOVEL = new ShovelItem(BronzeToolMaterial.INSTANCE, 1.5F, -3.0F, new FabricItemSettings());
+    public static final Item BRONZE_HOE = new HoeItem(BronzeToolMaterial.INSTANCE, -1, -2.0F, new FabricItemSettings());
+    public static final Item BRONZE_KHOPESH = new SwordItem(BronzeToolMaterial.INSTANCE, 4, -2.2F, new FabricItemSettings());
     
     // Bronze armor
     public static final Item BRONZE_HELMET = new Item(new FabricItemSettings());
@@ -296,6 +311,11 @@ public class ModItems {
         );
         Registry.register(
             Registries.ITEM,
+            new Identifier(AncientCurse.MOD_ID, "bronze_ceremonial_axe"),
+            BRONZE_CEREMONIAL_AXE
+        );
+        Registry.register(
+            Registries.ITEM,
             new Identifier(AncientCurse.MOD_ID, "bronze_shovel"),
             BRONZE_SHOVEL
         );
@@ -355,5 +375,40 @@ public class ModItems {
             new Identifier(AncientCurse.MOD_ID, "snake_staff"),
             SNAKE_STAFF
         );
+        
+        // Register Scarab Incense Item
+        Registry.register(
+            Registries.ITEM,
+            new Identifier(AncientCurse.MOD_ID, "scarab_incense_item"),
+            SCARAB_INCENSE_ITEM
+        );
+        
+        // Register Eternal Sigil
+        Registry.register(
+            Registries.ITEM,
+            new Identifier(AncientCurse.MOD_ID, "eternal_sigil"),
+            ETERNAL_SIGIL
+        );
+        
+        // Register Scarab Shell and Fragment
+        Registry.register(
+            Registries.ITEM,
+            new Identifier(AncientCurse.MOD_ID, "scarab_shell"),
+            SCARAB_SHELL
+        );
+        Registry.register(
+            Registries.ITEM,
+            new Identifier(AncientCurse.MOD_ID, "scarab_shell_fragment"),
+            SCARAB_SHELL_FRAGMENT
+        );
+        
+        // Register Bronze Khopesh
+        Registry.register(
+            Registries.ITEM,
+            new Identifier(AncientCurse.MOD_ID, "bronze_khopesh"),
+            BRONZE_KHOPESH
+        );
+        
+        // Vessel items are registered in ModBlocks.java
     }
 }

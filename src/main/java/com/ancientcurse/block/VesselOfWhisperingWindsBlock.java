@@ -5,14 +5,18 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.ShapeContext;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.particle.BlockStateParticleEffect;
+import net.minecraft.particle.ParticleTypes;
+import net.minecraft.sound.SoundCategory;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.random.Random;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
-import net.minecraft.particle.ParticleTypes;
 
 /**
  * Vessel of Whispering Winds - a mystical pottery item that glows and emits ethereal whispers
@@ -31,7 +35,66 @@ public class VesselOfWhisperingWindsBlock extends Block {
     }
     
     @Override
-    public void randomDisplayTick(BlockState state, World world, BlockPos pos, net.minecraft.util.math.random.Random random) {
+    public void onBreak(World world, BlockPos pos, BlockState state, PlayerEntity player) {
+        // Play a pottery breaking sound with a mystical wind effect
+        world.playSound(
+            null, 
+            pos, 
+            SoundEvents.BLOCK_DECORATED_POT_SHATTER, 
+            SoundCategory.BLOCKS, 
+            1.0F, 
+            0.7F + world.getRandom().nextFloat() * 0.3F // Lower pitch for the larger vessel
+        );
+        
+        // Add a wind sound effect
+        world.playSound(
+            null,
+            pos,
+            SoundEvents.ENTITY_PHANTOM_FLAP,
+            SoundCategory.BLOCKS,
+            0.6F,
+            1.2F + world.getRandom().nextFloat() * 0.2F
+        );
+        
+        // Spawn pottery breaking particles with mystical wind particles
+        if (world.isClient) {
+            Random random = world.getRandom();
+            // Pottery fragments
+            for (int i = 0; i < 15; i++) {
+                double xOffset = random.nextGaussian() * 0.15;
+                double yOffset = random.nextGaussian() * 0.15;
+                double zOffset = random.nextGaussian() * 0.15;
+                
+                world.addParticle(
+                    new BlockStateParticleEffect(ParticleTypes.BLOCK, state),
+                    pos.getX() + 0.5 + xOffset,
+                    pos.getY() + 0.5 + yOffset,
+                    pos.getZ() + 0.5 + zOffset,
+                    xOffset * 0.5,
+                    yOffset * 0.5,
+                    zOffset * 0.5
+                );
+            }
+            
+            // Add some mystical wind particles
+            for (int i = 0; i < 12; i++) {
+                world.addParticle(
+                    ParticleTypes.END_ROD,
+                    pos.getX() + 0.5 + (random.nextFloat() - 0.5) * 0.5,
+                    pos.getY() + 0.7 + (random.nextFloat() - 0.5) * 0.5,
+                    pos.getZ() + 0.5 + (random.nextFloat() - 0.5) * 0.5,
+                    (random.nextFloat() - 0.5) * 0.2,
+                    (random.nextFloat() - 0.5) * 0.2,
+                    (random.nextFloat() - 0.5) * 0.2
+                );
+            }
+        }
+        
+        super.onBreak(world, pos, state, player);
+    }
+    
+    @Override
+    public void randomDisplayTick(BlockState state, World world, BlockPos pos, Random random) {
         // Add ambient particles for a mystical effect
         if (random.nextInt(10) == 0) {
             double x = pos.getX() + 0.5D;

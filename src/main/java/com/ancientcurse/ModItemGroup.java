@@ -82,8 +82,14 @@ public class ModItemGroup {
                 safeAdd(entries, ModBlocks.OBELISK_STONE);
                 safeAdd(entries, ModBlocks.MUD_BRICK);
                 safeAdd(entries, ModBlocks.SUNBAKED_CLAY);
-                safeAdd(entries, ModBlocks.OFFERING_POT);
-                safeAdd(entries, ModBlocks.VESSEL_OF_WHISPERING_WINDS);
+                
+                // Pottery and vessel blocks
+                safeAdd(entries, com.ancientcurse.block.registry.PotteryBlocks.OFFERING_POT);
+                safeAdd(entries, com.ancientcurse.block.registry.PotteryBlocks.VESSEL_OF_WHISPERING_WINDS);
+                safeAdd(entries, com.ancientcurse.block.registry.PotteryBlocks.SERPENT_VESSEL_OF_WADJET);
+                safeAdd(entries, com.ancientcurse.block.registry.PotteryBlocks.SCARAB_SEALED_URN);
+                safeAdd(entries, com.ancientcurse.block.registry.PotteryBlocks.PHARAOHS_INCENSE_JAR);
+                safeAdd(entries, com.ancientcurse.block.registry.PotteryBlocks.CANOPIC_URN_OF_BASTET);
                 
                 // Plants and vegetation
                 safeAdd(entries, ModBlocks.LIGHT_NILE_MARSH);
@@ -128,12 +134,14 @@ public class ModItemGroup {
                 safeAdd(entries, ModBlocks.BRONZE_BLOCK);
                 safeAdd(entries, ModItems.BRONZE_PLATE);
                 
-                // Bronze Tools
+                // Bronze tools
                 safeAdd(entries, ModItems.BRONZE_SWORD);
                 safeAdd(entries, ModItems.BRONZE_PICKAXE);
                 safeAdd(entries, ModItems.BRONZE_AXE);
+                safeAdd(entries, ModItems.BRONZE_CEREMONIAL_AXE);
                 safeAdd(entries, ModItems.BRONZE_SHOVEL);
                 safeAdd(entries, ModItems.BRONZE_HOE);
+                safeAdd(entries, ModItems.BRONZE_KHOPESH);
                 
                 // Bronze Armor
                 safeAdd(entries, ModItems.BRONZE_HELMET);
@@ -207,14 +215,19 @@ public class ModItemGroup {
                 safeAdd(entries, ModItems.CANOPIC_HEART_JAR);
                 safeAdd(entries, ModItems.EYE_OF_APOPHIS);
                 safeAdd(entries, ModItems.SCARAB_TALISMAN);
+                safeAdd(entries, ModItems.SCARAB_SHELL);
+                safeAdd(entries, ModItems.SCARAB_SHELL_FRAGMENT);
                 safeAdd(entries, ModItems.THE_BROKEN_CROOK);
                 safeAdd(entries, ModItems.VESSEL_OF_THE_DUAT);
+                // Vessel items are already added in the Blocks section
                 
                 // Magical items
                 safeAdd(entries, ModItems.PHIAL_OF_LOTUS_ESSENCE);
                 safeAdd(entries, ModItems.ELIXIR_OF_RAS_SPARK);
                 safeAdd(entries, ModItems.ANCIENT_PICK);
                 safeAdd(entries, ModItems.SNAKE_STAFF);
+                safeAdd(entries, ModItems.SCARAB_INCENSE_ITEM);
+                safeAdd(entries, ModItems.ETERNAL_SIGIL);
             })
             .build()
     );

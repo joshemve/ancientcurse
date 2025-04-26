@@ -3,23 +3,9 @@
 	"texture_size": [64, 64],
 	"textures": {
 		"0": "ancientcurse:block/vessel_of_whispering_winds",
-		"1": "ancientcurse:block/vessel_of_whispering_winds_glow",
 		"particle": "ancientcurse:block/vessel_of_whispering_winds"
 	},
 	"elements": [
-		{
-			"from": [3.875, 7.25, 4.2125],
-			"to": [12.125, 9.75, 11.7125],
-			"rotation": {"angle": 0, "axis": "y", "origin": [6.875, 0, 7.2125]},
-			"faces": {
-				"north": {"uv": [5.75, 2.75, 7.75, 3.5], "texture": "#1", "emissive": true},
-				"east": {"uv": [0, 6.75, 2, 7.5], "texture": "#1", "emissive": true},
-				"south": {"uv": [6.75, 6, 8.75, 6.75], "texture": "#1", "emissive": true},
-				"west": {"uv": [6.75, 6.75, 8.75, 7.5], "texture": "#1", "emissive": true},
-				"up": {"uv": [2, 2, 0, 0], "texture": "#1", "emissive": true},
-				"down": {"uv": [2, 2, 0, 4], "texture": "#1", "emissive": true}
-			}
-		},
 		{
 			"from": [3.875, 7.25, 4.2125],
 			"to": [12.125, 9.75, 11.7125],
@@ -31,19 +17,6 @@
 				"west": {"uv": [6.75, 6.75, 8.75, 7.5], "texture": "#0"},
 				"up": {"uv": [2, 2, 0, 0], "texture": "#0"},
 				"down": {"uv": [2, 2, 0, 4], "texture": "#0"}
-			}
-		},
-		{
-			"from": [4.125, 3, 4.2125],
-			"to": [11.875, 7.25, 11.7125],
-			"rotation": {"angle": 0, "axis": "y", "origin": [6.875, -4.25, 7.2125]},
-			"faces": {
-				"north": {"uv": [5.25, 5, 7.25, 6], "texture": "#1", "emissive": true},
-				"east": {"uv": [5.5, 3.5, 7.5, 4.5], "texture": "#1", "emissive": true},
-				"south": {"uv": [0, 5.75, 2, 6.75], "texture": "#1", "emissive": true},
-				"west": {"uv": [5.75, 1.75, 7.75, 2.75], "texture": "#1", "emissive": true},
-				"up": {"uv": [4, 2, 2, 0], "texture": "#1", "emissive": true},
-				"down": {"uv": [4, 2, 2, 4], "texture": "#1", "emissive": true}
 			}
 		},
 		{
@@ -103,38 +76,12 @@
 			"to": [9, 16.25, 8.75],
 			"rotation": {"angle": 0, "axis": "y", "origin": [7, 10, 7]},
 			"faces": {
-				"north": {"uv": [3, 7, 3.5, 7.5], "texture": "#1", "emissive": true},
-				"east": {"uv": [4.5, 7.75, 5, 8.25], "texture": "#1", "emissive": true},
-				"south": {"uv": [5.75, 8.25, 6.25, 8.75], "texture": "#1", "emissive": true},
-				"west": {"uv": [6.25, 8.25, 6.75, 8.75], "texture": "#1", "emissive": true},
-				"up": {"uv": [7.25, 8.75, 6.75, 8.25], "texture": "#1", "emissive": true},
-				"down": {"uv": [7.75, 8.25, 7.25, 8.75], "texture": "#1", "emissive": true}
-			}
-		},
-		{
-			"from": [7, 14.75, 7.25],
-			"to": [9, 16.25, 8.75],
-			"rotation": {"angle": 0, "axis": "y", "origin": [7, 10, 7]},
-			"faces": {
 				"north": {"uv": [3, 7, 3.5, 7.5], "texture": "#0"},
 				"east": {"uv": [4.5, 7.75, 5, 8.25], "texture": "#0"},
 				"south": {"uv": [5.75, 8.25, 6.25, 8.75], "texture": "#0"},
 				"west": {"uv": [6.25, 8.25, 6.75, 8.75], "texture": "#0"},
 				"up": {"uv": [7.25, 8.75, 6.75, 8.25], "texture": "#0"},
 				"down": {"uv": [7.75, 8.25, 7.25, 8.75], "texture": "#0"}
-			}
-		},
-		{
-			"from": [6, 10.5, 5.9125],
-			"to": [10, 13.5, 10.1625],
-			"rotation": {"angle": 0, "axis": "y", "origin": [7, 10, 6.9125]},
-			"faces": {
-				"north": {"uv": [7.5, 1, 8.5, 1.75], "texture": "#1", "emissive": true},
-				"east": {"uv": [7.5, 3.5, 8.5, 4.25], "texture": "#1", "emissive": true},
-				"south": {"uv": [6, 7.5, 7, 8.25], "texture": "#1", "emissive": true},
-				"west": {"uv": [7, 7.5, 8, 8.25], "texture": "#1", "emissive": true},
-				"up": {"uv": [8.5, 1, 7.5, 0], "texture": "#1", "emissive": true},
-				"down": {"uv": [2, 7.5, 1, 8.5], "texture": "#1", "emissive": true}
 			}
 		},
 		{
@@ -208,7 +155,7 @@
 			"name": "vessel_of_whispering_winds",
 			"origin": [8, 8, 8],
 			"color": 0,
-			"children": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+			"children": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 		}
 	]
 }

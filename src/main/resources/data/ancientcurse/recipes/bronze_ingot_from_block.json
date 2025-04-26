@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "ancientcurse:bronze_block"
+    }
+  ],
+  "result": {
+    "item": "ancientcurse:bronze_ingot",
+    "count": 9
+  }
+}
