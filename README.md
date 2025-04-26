@@ -2,7 +2,7 @@
 
 A Minecraft Fabric mod that adds an Ancient Egyptian dimension with custom biomes, items, blocks, and gameplay mechanics.
 
-## Features
+## Features Included
 
 - Ancient Egyptian dimension with custom terrain generation
 - Nile River biome with unique flora and fauna
