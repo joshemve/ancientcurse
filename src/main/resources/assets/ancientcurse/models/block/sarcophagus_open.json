@@ -1,0 +1,12 @@
+{
+  "parent": "block/cube",
+  "textures": {
+    "particle": "ancientcurse:block/sarcophagus_side",
+    "north": "ancientcurse:block/sarcophagus_front_open",
+    "south": "ancientcurse:block/sarcophagus_back",
+    "east": "ancientcurse:block/sarcophagus_side",
+    "west": "ancientcurse:block/sarcophagus_side",
+    "up": "ancientcurse:block/sarcophagus_top_open",
+    "down": "ancientcurse:block/sarcophagus_bottom"
+  }
+}

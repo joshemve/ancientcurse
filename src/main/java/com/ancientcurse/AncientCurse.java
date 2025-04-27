@@ -2,6 +2,7 @@ package com.ancientcurse;
 
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.minecraft.world.World;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.bernie.geckolib.GeckoLib;
@@ -46,6 +47,8 @@ public class AncientCurse implements ModInitializer {
     public static final RegistryKey<WorldPreset> ANCIENT_CURSE_PRESET = RegistryKey.of(
         RegistryKeys.WORLD_PRESET, new Identifier(MOD_ID, "ancient_curse")
     );
+    public static final RegistryKey<World> ANCIENT_EGYPT_DIMENSION =
+            RegistryKey.of(RegistryKeys.WORLD, new Identifier(MOD_ID, "ancient_egypt"));
 
     @Override
     public void onInitialize() {
@@ -109,7 +112,7 @@ public class AncientCurse implements ModInitializer {
         // ModBiomes.registerBiomes();
         
         // Comment out dimension registration
-        // ModDimensions.register();
+
         
         // Comment out world presets
         // ModWorldPresets.register();

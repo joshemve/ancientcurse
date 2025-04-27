@@ -94,6 +94,10 @@
 
   "block.ancientcurse.anubus__glyph": "Anubus Glyph",
   "block.ancientcurse.anubus__glyph.tooltip": "Ancient Curse",
+  "block.ancientcurse.sarcophagus": "Ancient Sarcophagus",
+  "block.ancientcurse.sarcophagus.teleport_to_egypt": "The ancient powers pull you into another realm...",
+  "block.ancientcurse.sarcophagus.teleport_to_overworld": "You escape from the ancient realm...",
+
   "block.ancientcurse.sycamore_fig_log": "Sycamore Fig Log",
   "block.ancientcurse.sycamore_fig_log.tooltip": "Ancient Curse",
   "block.ancientcurse.sycamore_leaves": "Sycamore Leaves",
