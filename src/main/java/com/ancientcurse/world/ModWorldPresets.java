@@ -24,10 +24,6 @@ public class ModWorldPresets {
      * Registers all world presets for the mod.
      */
     public static void register() {
-        AncientCurse.LOGGER.info("Custom world presets disabled - using vanilla Minecraft generation");
-        
-        // All preset registration is disabled to use vanilla generation
-        /*
         // Simply define our world preset keys, actual registration happens in JSON
         AncientCurse.LOGGER.info("Ancient Curse preset key: " + ANCIENT_CURSE_PRESET.getValue());
         AncientCurse.LOGGER.info("Nile River preset key: " + NILE_RIVER_SINGLE_BIOME.getValue());
@@ -49,6 +45,5 @@ public class ModWorldPresets {
                 AncientCurse.LOGGER.info(" - " + key.getValue());
             });
         });
-        */
     }
 }

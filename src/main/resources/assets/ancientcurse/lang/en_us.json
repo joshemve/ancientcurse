@@ -270,6 +270,8 @@
   "worldPreset.ancientcurse.ancient_curse": "Ancient Curse",
   "worldPreset.ancientcurse.nile_river_single_biome": "Nile River World",
   "preset.ancientcurse.nile_river": "Nile River",
+  "generator.ancientcurse.ancient_curse": "Ancient Curse",
+  "generator.ancientcurse.ancient_desert": "Ancient Desert",
   
   "effect.ancientcurse.khamsin_curse_stage_1": "Khamsin Curse I",
   "effect.ancientcurse.khamsin_curse_stage_2": "Khamsin Curse II",

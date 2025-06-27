@@ -122,28 +122,12 @@ public class AncientCurse implements ModInitializer {
      * Registers all world generation components
      */
     private void registerWorldgenComponents() {
-        // Comment out biome-related code to revert to vanilla generation
-        // ModBiomes.registerBiomes();
+        // Enable world presets only - this will show the button
+        com.ancientcurse.world.ModWorldPresets.register();
         
-        // Comment out dimension registration
-
+        LOGGER.info("World presets registered - Ancient Curse world type available");
         
-        // Comment out world presets
-        // ModWorldPresets.register();
-        
-        // Disable custom surface rules and biome modifiers
-        ServerLifecycleEvents.SERVER_STARTING.register(server -> {
-            // Comment out surface rule registration
-            // ModSurfaceRuleRegistration.register();
-            
-            // Comment out biome modifiers
-            // BiomeModifier.register();
-            
-            // Initialize world generation with compatibility handling but skip custom biome code
-            // AncientWorldGeneration.init();
-            
-            // Log that we're using vanilla generation
-            LOGGER.info("Using vanilla Minecraft world generation (custom biomes disabled)");
-        });
+        // TEMPORARILY DISABLED: com.ancientcurse.world.biome.ModBiomes.registerBiomes();
+        // TEMPORARILY DISABLED: com.ancientcurse.world.ModChunkGenerators.register();
     }
 }
