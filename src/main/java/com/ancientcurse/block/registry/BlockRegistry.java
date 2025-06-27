@@ -24,6 +24,9 @@ public class BlockRegistry {
     public static void registerAll() {
         AncientCurse.LOGGER.info("Registering all blocks for " + AncientCurse.MOD_ID);
         
+        // CRITICAL: Register ModBlocks first to ensure all core blocks are registered
+        com.ancientcurse.ModBlocks.registerBlocks();
+        
         // Register blocks from each registry class
         // Note: These registry classes will be implemented in future updates
         // NatureBlocks.registerBlocks();

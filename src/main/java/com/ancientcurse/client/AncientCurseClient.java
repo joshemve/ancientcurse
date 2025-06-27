@@ -9,6 +9,7 @@ import com.ancientcurse.client.color.RockColorProvider;
 import com.ancientcurse.client.render.WitheredPharaohRenderer;
 import com.ancientcurse.client.render.entity.SnakeHeadProjectileRenderer;
 import com.ancientcurse.entity.renderer.AnubisEntityRenderer;
+import com.ancientcurse.entity.renderer.BabyLotusRenderer;
 import com.ancientcurse.entity.renderer.DjeserhathEntityRenderer;
 import com.ancientcurse.entity.renderer.LotusRenderer;
 import com.ancientcurse.entity.renderer.SpitBallRenderer;
@@ -98,6 +99,9 @@ public class AncientCurseClient implements ClientModInitializer {
         
         // Register the Lotus renderer
         EntityRendererRegistry.register(ModEntities.LOTUS, LotusRenderer::new);
+        
+        // Register the Baby Lotus renderer
+        EntityRendererRegistry.register(ModEntities.BABY_LOTUS, BabyLotusRenderer::new);
         
         // Register the SpitBall projectile renderer
         EntityRendererRegistry.register(ModEntities.SPIT_BALL, SpitBallRenderer::new);

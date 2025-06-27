@@ -1,7 +1,0 @@
-{
-    "loader": "geckolib:item_renderer",
-    "parent": "builtin/entity",
-    "textures": {
-        "layer0": "egyptianweapons:item/war_axe"
-    }
-} 

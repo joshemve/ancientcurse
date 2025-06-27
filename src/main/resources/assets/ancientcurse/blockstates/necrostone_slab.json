@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "ancientcurse:block/necrostone_slab"
+    },
+    "type=top": {
+      "model": "ancientcurse:block/necrostone_slab_top"
+    },
+    "type=double": {
+      "model": "ancientcurse:block/necrostone_smooth"
+    }
+  }
+} 

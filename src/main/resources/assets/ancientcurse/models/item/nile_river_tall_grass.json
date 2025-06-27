@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "ancientcurse:block/nile_river_tall_grass_top"
+  }
+} 

@@ -187,6 +187,12 @@ public class ModItemGroup {
                 safeAdd(entries, com.ancientcurse.block.registry.NecrostoneBlocks.NECROSTONE_CRACKED);
                 safeAdd(entries, com.ancientcurse.block.registry.NecrostoneBlocks.NECROSTONE_ROUGH);
                 safeAdd(entries, com.ancientcurse.block.registry.NecrostoneBlocks.NECROSTONE_WALL);
+                safeAdd(entries, com.ancientcurse.block.registry.NecrostoneBlocks.NECROSTONE_PILLAR);
+                safeAdd(entries, com.ancientcurse.block.registry.NecrostoneBlocks.NECROSTONE_CHISELED);
+                safeAdd(entries, com.ancientcurse.block.registry.NecrostoneBlocks.NECROSTONE_STAIRS);
+                safeAdd(entries, com.ancientcurse.block.registry.NecrostoneBlocks.NECROSTONE_SLAB);
+                safeAdd(entries, com.ancientcurse.block.registry.NecrostoneBlocks.NECROSTONE_CARVED);
+                safeAdd(entries, com.ancientcurse.block.registry.NecrostoneBlocks.NECROSTONE_SMOOTH);
                 safeAdd(entries, com.ancientcurse.block.registry.NecrostoneBlocks.NECROSTONE_CHAIN);
                 safeAdd(entries, com.ancientcurse.block.registry.NecrostoneBlocks.NECROSTONE_EYE);
                 safeAdd(entries, com.ancientcurse.block.registry.NecrostoneBlocks.NECROSTONE_ANKH);

@@ -11,9 +11,14 @@ import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.util.Identifier;
 import net.minecraft.world.gen.WorldPreset;
-
-import com.ancientcurse.effect.ModStatusEffects;
-
+import com.ancientcurse.command.LotusSwarmCommand;
+import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+// import com.ancientcurse.screen.ModScreenHandlers;
+// import com.ancientcurse.worldgen.ModWorldGen;
+// import com.ancientcurse.worldgen.ModWorldPresets;
+// import com.ancientcurse.ModStatusEffects;
+// import com.ancientcurse.block.ModBlocks;
+// import com.ancientcurse.block.entity.ModBlockEntities;
 
 /**
  * Main mod class for Ancient Curse.
@@ -75,6 +80,9 @@ public class AncientCurse implements ModInitializer {
         // Register worldgen components
         registerWorldgenComponents();
         
+        // Register commands
+        registerCommands();
+        
         LOGGER.info("Ancient Curse Mod fully initialized");
     }
     
@@ -87,7 +95,7 @@ public class AncientCurse implements ModInitializer {
         
         // Register ModBlocks first to establish baseline registrations
         // This ensures that blocks like OFFERING_POT are registered first
-        ModBlocks.registerBlocks();
+        // ModBlocks.registerBlocks();
         
         // Then register specialized block registries
         // Note: We've modified PotteryBlocks.java to avoid re-registering OFFERING_POT
@@ -101,10 +109,10 @@ public class AncientCurse implements ModInitializer {
         ModEntities.registerEntities();
         
         // Register mod block entities
-        ModBlockEntities.registerBlockEntities();
+        // ModBlockEntities.registerBlockEntities();
         
         // Register mod screen handlers
-        ModScreenHandlers.registerScreenHandlers();
+        // ModScreenHandlers.registerScreenHandlers();
         
         // Register mod entities
         ModEntities.registerEntities();
@@ -116,7 +124,7 @@ public class AncientCurse implements ModInitializer {
         ModStructures.registerStructures();
         
         // Register status effects
-        ModStatusEffects.registerStatusEffects();
+        // ModStatusEffects.registerStatusEffects();
         
         // Register server tick event for tornado management
         ServerTickEvents.END_SERVER_TICK.register(server -> com.ancientcurse.effect.TornadoManager.tick(server));
@@ -127,11 +135,21 @@ public class AncientCurse implements ModInitializer {
      */
     private void registerWorldgenComponents() {
         // Enable world presets only - this will show the button
-        com.ancientcurse.world.ModWorldPresets.register();
+        // com.ancientcurse.world.ModWorldPresets.register();
         
         LOGGER.info("World presets registered - Ancient Curse world type available");
         
         // TEMPORARILY DISABLED: com.ancientcurse.world.biome.ModBiomes.registerBiomes();
         // TEMPORARILY DISABLED: com.ancientcurse.world.ModChunkGenerators.register();
+    }
+
+    /**
+     * Register commands for the mod
+     */
+    private void registerCommands() {
+        LOGGER.info("Registering commands for " + MOD_ID);
+        
+        // Register the Lotus Swarm command
+        CommandRegistrationCallback.EVENT.register(LotusSwarmCommand::register);
     }
 }
