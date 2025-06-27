@@ -1,0 +1,36 @@
+{
+  "type": "minecraft:ore",
+  "config": {
+    "discard_chance_on_air_exposure": 0.0,
+    "size": 30,
+    "targets": [
+      {
+        "state": {
+          "Name": "ancientcurse:dry_nile_silt"
+        },
+        "target": {
+          "predicate_type": "minecraft:tag_match",
+          "tag": "minecraft:sand"
+        }
+      },
+      {
+        "state": {
+          "Name": "ancientcurse:sunbaked_clay"
+        },
+        "target": {
+          "predicate_type": "minecraft:block_match",
+          "block": "ancientcurse:smooth_sand"
+        }
+      },
+      {
+        "state": {
+          "Name": "ancientcurse:mud_flat"
+        },
+        "target": {
+          "predicate_type": "minecraft:block_match",
+          "block": "minecraft:sand"
+        }
+      }
+    ]
+  }
+}

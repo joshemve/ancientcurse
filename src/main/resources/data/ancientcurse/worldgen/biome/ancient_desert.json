@@ -24,13 +24,26 @@
     }
   },
   "spawners": {
-    "ambient": [],
+    "ambient": [
+      {
+        "type": "minecraft:bat",
+        "weight": 10,
+        "minCount": 8,
+        "maxCount": 8
+      }
+    ],
     "creature": [
       {
         "type": "minecraft:camel",
         "weight": 1,
         "minCount": 1,
         "maxCount": 1
+      },
+      {
+        "type": "minecraft:rabbit",
+        "weight": 4,
+        "minCount": 2,
+        "maxCount": 3
       }
     ],
     "misc": [],
@@ -82,7 +95,16 @@
     "water_ambient": [],
     "water_creature": []
   },
-  "spawn_costs": {},
+  "spawn_costs": {
+    "minecraft:camel": {
+      "energy_budget": 0.05,
+      "charge": 1.0
+    },
+    "minecraft:rabbit": {
+      "energy_budget": 0.15,
+      "charge": 0.5
+    }
+  },
   "carvers": {
     "air": [
       "minecraft:cave",
@@ -133,7 +155,6 @@
       "minecraft:ore_gold_extra",
       "ancientcurse:ore_gold_flaked_riverbed",
       "ancientcurse:underwater_riverbed",
-      "ancientcurse:water_edge_mud",
       "ancientcurse:riverbed_moss_patch"
     ],
     [],

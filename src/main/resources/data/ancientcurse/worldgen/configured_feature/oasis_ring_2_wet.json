@@ -1,0 +1,36 @@
+{
+  "type": "minecraft:ore",
+  "config": {
+    "discard_chance_on_air_exposure": 0.0,
+    "size": 25,
+    "targets": [
+      {
+        "state": {
+          "Name": "ancientcurse:fertile_nile_silt"
+        },
+        "target": {
+          "predicate_type": "minecraft:tag_match",
+          "tag": "minecraft:sand"
+        }
+      },
+      {
+        "state": {
+          "Name": "ancientcurse:nile_river_sand"
+        },
+        "target": {
+          "predicate_type": "minecraft:block_match",
+          "block": "ancientcurse:smooth_sand"
+        }
+      },
+      {
+        "state": {
+          "Name": "ancientcurse:light_nile_marsh"
+        },
+        "target": {
+          "predicate_type": "minecraft:block_match",
+          "block": "minecraft:sand"
+        }
+      }
+    ]
+  }
+}

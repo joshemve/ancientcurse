@@ -6,20 +6,20 @@
     "targets": [
       {
         "state": {
-          "Name": "ancientcurse:nile_mud"
-        },
-        "target": {
-          "predicate_type": "minecraft:block_match",
-          "block": "ancientcurse:smooth_sand"
-        }
-      },
-      {
-        "state": {
-          "Name": "ancientcurse:nile_mud"
+          "Name": "ancientcurse:arid_nile_turf"
         },
         "target": {
           "predicate_type": "minecraft:tag_match",
           "tag": "minecraft:sand"
+        }
+      },
+      {
+        "state": {
+          "Name": "ancientcurse:salt_bed"
+        },
+        "target": {
+          "predicate_type": "minecraft:block_match",
+          "block": "ancientcurse:smooth_sand"
         }
       }
     ]

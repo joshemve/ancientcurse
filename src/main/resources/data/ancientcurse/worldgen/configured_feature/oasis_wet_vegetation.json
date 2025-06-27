@@ -1,0 +1,54 @@
+{
+  "type": "minecraft:random_patch",
+  "config": {
+    "tries": 32,
+    "xz_spread": 2,
+    "y_spread": 0,
+    "feature": {
+      "feature": {
+        "type": "minecraft:simple_block",
+        "config": {
+          "to_place": {
+            "type": "minecraft:weighted_state_provider",
+            "entries": [
+              {
+                "weight": 4,
+                "data": {
+                  "Name": "ancientcurse:papyrus_reed"
+                }
+              },
+              {
+                "weight": 3,
+                "data": {
+                  "Name": "ancientcurse:dwarf_papyrus"
+                }
+              },
+              {
+                "weight": 2,
+                "data": {
+                  "Name": "ancientcurse:nile_river_grass"
+                }
+              },
+              {
+                "weight": 1,
+                "data": {
+                  "Name": "ancientcurse:nile_river_tall_grass"
+                }
+              }
+            ]
+          }
+        }
+      },
+      "placement": [
+        {
+          "type": "minecraft:block_predicate_filter",
+          "predicate": {
+            "type": "minecraft:matching_blocks",
+            "blocks": ["ancientcurse:nile_mud", "ancientcurse:heavy_marsh", "ancientcurse:light_nile_marsh", "ancientcurse:fertile_nile_silt", "ancientcurse:smooth_sand", "minecraft:sand", "minecraft:grass_block"],
+            "offset": [0, -1, 0]
+          }
+        }
+      ]
+    }
+  }
+}
