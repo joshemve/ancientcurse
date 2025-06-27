@@ -142,6 +142,7 @@ public class ModItemGroup {
                 safeAdd(entries, ModItems.BRONZE_SHOVEL);
                 safeAdd(entries, ModItems.BRONZE_HOE);
                 safeAdd(entries, ModItems.BRONZE_KHOPESH);
+                safeAdd(entries, ModItems.HORUS_MACE);
                 
                 // Bronze Armor
                 safeAdd(entries, ModItems.BRONZE_HELMET);
@@ -234,6 +235,7 @@ public class ModItemGroup {
                 // Spawn eggs
                 safeAdd(entries, ModItems.WITHERED_PHARAOH_SPAWN_EGG);
                 safeAdd(entries, ModItems.DJESERHATH_SPAWN_EGG);
+                safeAdd(entries, ModItems.ANUBIS_SPAWN_EGG);
             })
             .build()
     );

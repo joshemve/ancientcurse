@@ -4,6 +4,7 @@ import com.ancientcurse.item.AncientPickItem;
 import com.ancientcurse.item.CustomAnimatedItem;
 import com.ancientcurse.item.ElixirOfRasSparkItem;
 import com.ancientcurse.item.EternalSigilItem;
+import com.ancientcurse.item.HorusMaceItem;
 import com.ancientcurse.item.PhialOfLotusEssenceItem;
 import com.ancientcurse.item.ScarabIncenseItem;
 import com.ancientcurse.item.ScarabTalismanItem;
@@ -167,6 +168,14 @@ public class ModItems {
     public static final Item BRONZE_SHOVEL = new ShovelItem(BronzeToolMaterial.INSTANCE, 1.5F, -3.0F, new FabricItemSettings());
     public static final Item BRONZE_HOE = new HoeItem(BronzeToolMaterial.INSTANCE, -1, -2.0F, new FabricItemSettings());
     public static final Item BRONZE_KHOPESH = new SwordItem(BronzeToolMaterial.INSTANCE, 4, -2.2F, new FabricItemSettings());
+    
+    // Horus Mace - Divine weapon of the sky god
+    public static final HorusMaceItem HORUS_MACE = new HorusMaceItem(
+        BronzeToolMaterial.INSTANCE, 
+        7, // High base damage
+        -2.8F, // Moderate attack speed
+        new FabricItemSettings().maxCount(1)
+    );
     
     // Bronze armor
     public static final Item BRONZE_HELMET = new Item(new FabricItemSettings());
@@ -353,6 +362,11 @@ public class ModItems {
             Registries.ITEM,
             new Identifier(AncientCurse.MOD_ID, "bronze_hoe"),
             BRONZE_HOE
+        );
+        Registry.register(
+            Registries.ITEM,
+            new Identifier(AncientCurse.MOD_ID, "horus_mace"),
+            HORUS_MACE
         );
         
         // Register Bronze armor

@@ -61,6 +61,12 @@
   "item.ancientcurse.bronze_shovel.tooltip": "Ancient digging tool used along the Nile",
   "item.ancientcurse.bronze_hoe": "Bronze Hoe",
   "item.ancientcurse.bronze_hoe.tooltip": "Traditional farming implement of ancient Egypt",
+  "item.ancientcurse.horus_mace": "Mace of Horus",
+  "item.ancientcurse.horus_mace.tooltip": "Divine weapon blessed by the falcon god",
+  "item.ancientcurse.horus_mace.tooltip1": "Sky Strike: Right-click to call divine judgment",
+  "item.ancientcurse.horus_mace.tooltip2": "Falcon's Sight: Grants night vision when held",
+  "item.ancientcurse.horus_mace.tooltip3": "Divine Protection: May blind your attackers",
+  "item.ancientcurse.horus_mace.tooltip4": "Aerial Supremacy: +50% damage to airborne foes",
   
   "item.ancientcurse.bronze_helmet": "Bronze Helmet",
 
