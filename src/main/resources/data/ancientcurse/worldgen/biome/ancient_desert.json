@@ -28,9 +28,9 @@
     "creature": [
       {
         "type": "minecraft:camel",
-        "weight": 2,
-        "minCount": 2,
-        "maxCount": 4
+        "weight": 1,
+        "minCount": 1,
+        "maxCount": 2
       }
     ],
     "misc": [],
@@ -141,7 +141,11 @@
       "minecraft:glow_lichen",
       "minecraft:patch_dead_bush",
       "minecraft:patch_cactus_desert",
-      "minecraft:desert_well"
+      "minecraft:desert_well",
+      "ancientcurse:desert_rock_small",
+      "ancientcurse:desert_rock_medium",
+      "ancientcurse:desert_rock_large",
+      "ancientcurse:mini_cactus"
     ],
     [
       "minecraft:freeze_top_layer"

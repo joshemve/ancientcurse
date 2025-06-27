@@ -4,6 +4,7 @@ import com.ancientcurse.ModBlocks;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.block.PlantBlock;
 import net.minecraft.block.ShapeContext;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.damage.DamageSource;
@@ -17,7 +18,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
 import net.minecraft.world.WorldView;
 
-public class MiniCactusBlock extends Block {
+public class MiniCactusBlock extends PlantBlock {
     protected static final VoxelShape SHAPE = Block.createCuboidShape(5.0, 0.0, 5.0, 11.0, 10.0, 11.0);
 
     public MiniCactusBlock(Settings settings) {
@@ -27,6 +28,12 @@ public class MiniCactusBlock extends Block {
     @Override
     public VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
         return SHAPE;
+    }
+    
+    @Override
+    public VoxelShape getCollisionShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
+        // Return small collision box so entities can mostly walk through but still get hurt
+        return Block.createCuboidShape(6.0, 0.0, 6.0, 10.0, 8.0, 10.0);
     }
 
     @Override
@@ -49,11 +56,8 @@ public class MiniCactusBlock extends Block {
     protected boolean canPlantOnTop(BlockState floor, BlockView world, BlockPos pos) {
         return floor.isOf(Blocks.SAND) || 
                floor.isOf(Blocks.RED_SAND) || 
-               floor.isOf(ModBlocks.NILE_RIVER_SAND);
+               floor.isOf(ModBlocks.NILE_RIVER_SAND) ||
+               floor.isOf(ModBlocks.SMOOTH_SAND);
     }
 
-    @Override
-    public BlockState getStateForNeighborUpdate(BlockState state, Direction direction, BlockState neighborState, WorldAccess world, BlockPos pos, BlockPos neighborPos) {
-        return !state.canPlaceAt(world, pos) ? null : super.getStateForNeighborUpdate(state, direction, neighborState, world, pos, neighborPos);
-    }
 } 

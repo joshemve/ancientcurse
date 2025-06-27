@@ -470,10 +470,10 @@ public class ModBlocks {
     public static final Block MINI_CACTUS = new MiniCactusBlock(
         FabricBlockSettings.create()
             .mapColor(MapColor.DARK_GREEN)
-            .strength(0.3f)
-            .sounds(BlockSoundGroup.GRASS)
+            .strength(0.4f)
+            .sounds(BlockSoundGroup.WOOL)
             .nonOpaque()
-            .notSolid()
+            .breakInstantly()
     );
     
     // POTTERY BLOCKS MOVED TO com.ancientcurse.block.registry.PotteryBlocks
