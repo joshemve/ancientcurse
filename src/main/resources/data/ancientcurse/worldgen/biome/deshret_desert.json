@@ -4,12 +4,12 @@
   "has_precipitation": false,
   "temperature_modifier": "none",
   "effects": {
-    "sky_color": 14540607,
+    "sky_color": 15592941,
     "fog_color": 14018047,
     "water_color": 3830324,
     "water_fog_color": 4408131,
-    "grass_color": 13157632,
-    "foliage_color": 11445760,
+    "grass_color": 11445760,
+    "foliage_color": 10387789,
     "mood_sound": {
       "sound": "minecraft:ambient.cave",
       "tick_delay": 6000,
@@ -130,33 +130,24 @@
       "minecraft:ore_lapis_buried",
       "minecraft:ore_copper",
       "minecraft:underwater_magma",
-      "minecraft:ore_gold_extra",
-      "ancientcurse:ore_gold_flaked_riverbed",
-      "ancientcurse:underwater_riverbed",
-      "ancientcurse:water_edge_mud",
-      "ancientcurse:riverbed_moss_patch"
+      "minecraft:ore_gold_extra"
     ],
     [],
     [
       "minecraft:spring_water",
-      "minecraft:spring_lava",
-      "ancientcurse:salt_bed_patch",
-      "ancientcurse:oasis_spring"
+      "minecraft:spring_lava"
     ],
     [
       "minecraft:glow_lichen",
       "minecraft:patch_dead_bush",
       "minecraft:patch_cactus_desert",
-      "minecraft:desert_well",
       "ancientcurse:desert_rock_small",
       "ancientcurse:desert_rock_medium",
       "ancientcurse:desert_rock_large",
-      "ancientcurse:mini_cactus",
-      "ancientcurse:light_dead_fern",
-      "ancientcurse:dead_papyrus"
+      "ancientcurse:deshret_rock_outcrop"
     ],
     [
       "minecraft:freeze_top_layer"
     ]
   ]
-} 
+}
