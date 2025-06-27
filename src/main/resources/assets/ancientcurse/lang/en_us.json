@@ -31,6 +31,8 @@
   "item.ancientcurse.djeserhath_spawn_egg": "Djeserhath Spawn Egg",
   "item.ancientcurse.djeserhath_spawn_egg.tooltip": "Ancient Curse",
   
+  "entity.ancientcurse.snake_head_projectile": "Snake Head Projectile",
+  
   "entity.ancientcurse.anubis": "Anubis, the Jackal-Headed God",
   "item.ancientcurse.anubis_spawn_egg": "Anubis Spawn Egg",
   "item.ancientcurse.anubis_spawn_egg.tooltip": "Summon the god of death and judgment",
@@ -96,8 +98,11 @@
   "item.ancientcurse.elixir_of_ras_spark.tooltip": "Provides fire resistance and strength when consumed",
   "item.ancientcurse.ancient_pick": "Ancient Pick",
   "item.ancientcurse.ancient_pick.tooltip": "Chance to preserve durability and grant haste when mining",
-  "item.ancientcurse.snake_staff": "Snake Staff",
-  "item.ancientcurse.snake_staff.tooltip": "Poisons nearby enemies when charged",
+  "item.ancientcurse.serpent_staff": "Serpent Staff",
+  "item.ancientcurse.serpent_staff.tooltip": "Ancient staff that fires poisonous snake projectiles",
+  "item.ancientcurse.serpent_staff.tooltip1": "Right-click: Fire snake head projectiles",
+  "item.ancientcurse.serpent_staff.tooltip2": "Sneak + Right-click: Powerful targeted attack",
+  "item.ancientcurse.serpent_staff.tooltip3": "Snake projectiles apply Poison II and knockback",
   "item.ancientcurse.withered_staff": "Withered Staff",
   "item.ancientcurse.withered_staff.tooltip": "Launches wither skulls when charged",
   "item.ancientcurse.scarab_incense_item": "Scarab Incense",

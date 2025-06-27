@@ -2,6 +2,7 @@ package com.ancientcurse;
 
 import com.ancientcurse.entity.AnubisEntity;
 import com.ancientcurse.entity.DjeserhathEntity;
+import com.ancientcurse.entity.SnakeHeadProjectileEntity;
 import com.ancientcurse.entity.SpitBallEntity;
 import com.ancientcurse.entity.WitheredPharaohEntity;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
@@ -42,6 +43,17 @@ public class ModEntities {
         Registries.ENTITY_TYPE,
         new Identifier(AncientCurse.MOD_ID, "spit_ball"),
         FabricEntityTypeBuilder.<SpitBallEntity>create(SpawnGroup.MISC, SpitBallEntity::new)
+            .dimensions(EntityDimensions.fixed(0.5f, 0.5f))
+            .trackRangeBlocks(64)
+            .trackedUpdateRate(10) // Update more frequently for smooth movement
+            .build()
+    );
+    
+    // Register the snake head projectile
+    public static final EntityType<SnakeHeadProjectileEntity> SNAKE_HEAD_PROJECTILE = Registry.register(
+        Registries.ENTITY_TYPE,
+        new Identifier(AncientCurse.MOD_ID, "snake_head_projectile"),
+        FabricEntityTypeBuilder.<SnakeHeadProjectileEntity>create(SpawnGroup.MISC, SnakeHeadProjectileEntity::new)
             .dimensions(EntityDimensions.fixed(0.5f, 0.5f))
             .trackRangeBlocks(64)
             .trackedUpdateRate(10) // Update more frequently for smooth movement

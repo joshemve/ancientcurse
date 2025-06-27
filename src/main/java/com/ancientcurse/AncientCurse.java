@@ -2,6 +2,7 @@ package com.ancientcurse;
 
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.world.World;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -116,6 +117,9 @@ public class AncientCurse implements ModInitializer {
         
         // Register status effects
         ModStatusEffects.registerStatusEffects();
+        
+        // Register server tick event for tornado management
+        ServerTickEvents.END_SERVER_TICK.register(server -> com.ancientcurse.effect.TornadoManager.tick(server));
     }
     
     /**

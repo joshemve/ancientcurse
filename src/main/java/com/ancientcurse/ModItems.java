@@ -9,7 +9,7 @@ import com.ancientcurse.item.PhialOfLotusEssenceItem;
 import com.ancientcurse.item.ScarabIncenseItem;
 import com.ancientcurse.item.ScarabTalismanItem;
 import com.ancientcurse.item.SekhemDateItem;
-import com.ancientcurse.item.SnakeStaffItem;
+import com.ancientcurse.item.SerpentStaffItem;
 import com.ancientcurse.item.WitheredStaffItem;
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
 import net.minecraft.entity.effect.StatusEffectInstance;
@@ -119,7 +119,7 @@ public class ModItems {
     public static final PhialOfLotusEssenceItem PHIAL_OF_LOTUS_ESSENCE = new PhialOfLotusEssenceItem(new FabricItemSettings());
     public static final ElixirOfRasSparkItem ELIXIR_OF_RAS_SPARK = new ElixirOfRasSparkItem(new FabricItemSettings());
     public static final AncientPickItem ANCIENT_PICK = new AncientPickItem(new FabricItemSettings());
-    public static final SnakeStaffItem SNAKE_STAFF = new SnakeStaffItem(new FabricItemSettings());
+    public static final SerpentStaffItem SERPENT_STAFF = new SerpentStaffItem(new FabricItemSettings());
     public static final WitheredStaffItem WITHERED_STAFF = new WitheredStaffItem(new FabricItemSettings());
     public static final ScarabIncenseItem SCARAB_INCENSE_ITEM = new ScarabIncenseItem(new FabricItemSettings());
     public static final EternalSigilItem ETERNAL_SIGIL = new EternalSigilItem(
@@ -416,8 +416,8 @@ public class ModItems {
         );
         Registry.register(
             Registries.ITEM,
-            new Identifier(AncientCurse.MOD_ID, "snake_staff"),
-            SNAKE_STAFF
+            new Identifier(AncientCurse.MOD_ID, "serpent_staff"),
+            SERPENT_STAFF
         );
         
         // Register Withered Staff

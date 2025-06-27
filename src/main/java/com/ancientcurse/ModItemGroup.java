@@ -227,7 +227,7 @@ public class ModItemGroup {
                 safeAdd(entries, ModItems.PHIAL_OF_LOTUS_ESSENCE);
                 safeAdd(entries, ModItems.ELIXIR_OF_RAS_SPARK);
                 safeAdd(entries, ModItems.ANCIENT_PICK);
-                safeAdd(entries, ModItems.SNAKE_STAFF);
+                safeAdd(entries, ModItems.SERPENT_STAFF);
                 safeAdd(entries, ModItems.WITHERED_STAFF);
                 safeAdd(entries, ModItems.SCARAB_INCENSE_ITEM);
                 safeAdd(entries, ModItems.ETERNAL_SIGIL);
