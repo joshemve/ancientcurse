@@ -9,7 +9,7 @@
           "type": "minecraft:multi_noise",
           "biomes": [
             {
-              "biome": "minecraft:desert",
+              "biome": "ancientcurse:ancient_desert",
               "parameters": {
                 "temperature": [-1.0, 1.0],
                 "humidity": [-1.0, 1.0],

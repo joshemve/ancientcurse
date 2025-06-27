@@ -1,14 +1,16 @@
 # Ancient Curse
 
-A Minecraft Fabric mod that adds an Ancient Egyptian dimension with custom biomes, items, blocks, and gameplay mechanics.
+A Minecraft Fabric mod that adds an Ancient Egyptian-themed world generation with custom biomes, items, blocks, and gameplay mechanics.
 
 ## Features Included
 
-- Ancient Egyptian dimension with custom terrain generation
-- Nile River biome with unique flora and fauna
-- Special items inspired by Ancient Egyptian artifacts
-- Custom blocks including fertile Nile silt, river sand, and more
-- Custom crafting recipes and gameplay mechanics
+- **Ancient Curse World Type**: Custom world generation preset with desert-focused terrain
+- **Ancient Desert Biome**: Custom biome featuring smooth sand surfaces and reduced water generation
+- **Nile River Biome**: Lush river biome with unique flora and fauna
+- **Custom Blocks**: Including smooth sand, fertile Nile silt, river sand, and various Egyptian-themed blocks
+- **Special Items**: Ancient Egyptian artifacts including the Staff of Ra
+- **Custom Entities**: Including Djeserhath boss mob
+- **Egyptian Plants**: Papyrus reeds, lotus flowers, and more
 
 ## Installation
 
@@ -34,10 +36,33 @@ To set up the development environment:
 - Fabric API 0.87.0+
 - GeckoLib 4.2.3+
 
+## World Generation
+
+### Creating an Ancient Curse World
+
+1. Click "Create New World" in Minecraft
+2. Click "More World Options"
+3. Select "Ancient Curse" from the World Type dropdown
+4. Configure other settings as desired
+5. Create the world
+
+The Ancient Curse world type features:
+- Desert-only generation with custom ancient_desert biome
+- Smooth sand surfaces instead of regular sand
+- Reduced water generation (sea level at Y=45 instead of Y=63)
+- Flat terrain suitable for building Egyptian structures
+- All vanilla cave generation and ore distribution
+
+### Custom Biomes
+
+- **ancient_desert**: Main desert biome with smooth sand surface
+- **nile_river**: River biome with lush vegetation (work in progress)
+
 ## In-Game Commands
 
 - `/give @p ancientcurse:staff_of_ra` - Gives you the Staff of Ra
 - `/ra_staff` - Alternative command to get the Staff of Ra (requires op permission)
+- `/summon ancientcurse:djeserhath` - Summons the Djeserhath boss mob
 
 ## Customizing the Mod
 

@@ -4,12 +4,12 @@
   "has_precipitation": false,
   "temperature_modifier": "none",
   "effects": {
-    "sky_color": 14202471,
-    "fog_color": 14338676,
-    "water_color": 4566514,
-    "water_fog_color": 6953992,
-    "grass_color": 14665676,
-    "foliage_color": 14665676,
+    "sky_color": 14540607,
+    "fog_color": 14018047,
+    "water_color": 3830324,
+    "water_fog_color": 4408131,
+    "grass_color": 13157632,
+    "foliage_color": 11445760,
     "mood_sound": {
       "sound": "minecraft:ambient.cave",
       "tick_delay": 6000,
@@ -21,17 +21,18 @@
       "min_delay": 12000,
       "max_delay": 24000,
       "replace_current_music": false
-    },
-    "particle": {
-      "options": {
-        "type": "minecraft:dust"
-      },
-      "probability": 0.001
     }
   },
   "spawners": {
     "ambient": [],
-    "creature": [],
+    "creature": [
+      {
+        "type": "minecraft:camel",
+        "weight": 2,
+        "minCount": 2,
+        "maxCount": 4
+      }
+    ],
     "misc": [],
     "monster": [
       {
@@ -45,6 +46,36 @@
         "weight": 20,
         "minCount": 4,
         "maxCount": 4
+      },
+      {
+        "type": "minecraft:spider",
+        "weight": 100,
+        "minCount": 4,
+        "maxCount": 4
+      },
+      {
+        "type": "minecraft:zombie",
+        "weight": 19,
+        "minCount": 4,
+        "maxCount": 4
+      },
+      {
+        "type": "minecraft:creeper",
+        "weight": 100,
+        "minCount": 4,
+        "maxCount": 4
+      },
+      {
+        "type": "minecraft:enderman",
+        "weight": 10,
+        "minCount": 1,
+        "maxCount": 4
+      },
+      {
+        "type": "minecraft:witch",
+        "weight": 5,
+        "minCount": 1,
+        "maxCount": 1
       }
     ],
     "underground_water_creature": [],
@@ -62,8 +93,7 @@
   "features": [
     [],
     [
-      "minecraft:lake_lava_underground",
-      "minecraft:lake_lava_surface"
+      "minecraft:lake_lava_underground"
     ],
     [
       "minecraft:amethyst_geode"
@@ -109,7 +139,7 @@
     ],
     [
       "minecraft:glow_lichen",
-      "minecraft:patch_dead_bush_badlands",
+      "minecraft:patch_dead_bush",
       "minecraft:patch_cactus_desert",
       "minecraft:desert_well"
     ],

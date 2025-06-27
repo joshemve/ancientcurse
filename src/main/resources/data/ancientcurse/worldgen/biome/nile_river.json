@@ -130,9 +130,7 @@
     [
       "minecraft:glow_lichen",
       "minecraft:patch_sugar_cane",
-      "minecraft:patch_waterlily",
-      "ancientcurse:sycamore_fig_tree",
-      "ancientcurse:date_palm_tree"
+      "minecraft:patch_waterlily"
     ],
     [
       "minecraft:freeze_top_layer"
