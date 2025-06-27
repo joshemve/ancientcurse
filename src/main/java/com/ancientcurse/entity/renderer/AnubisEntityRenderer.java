@@ -26,6 +26,8 @@ public class AnubisEntityRenderer extends GeoEntityRenderer<AnubisEntity> {
     public void render(AnubisEntity entity, float entityYaw, float partialTick, MatrixStack poseStack,
                       VertexConsumerProvider bufferSource, int packedLight) {
         
+        poseStack.push();
+        
         // Scale based on boss phase for dramatic effect
         float scale = switch (entity.getBossPhase()) {
             case AWAKENING -> 1.1F;
@@ -37,9 +39,34 @@ public class AnubisEntityRenderer extends GeoEntityRenderer<AnubisEntity> {
             case DEAD -> 0.9F;
             default -> 1.0F;
         };
-
-        poseStack.push();
         poseStack.scale(scale, scale, scale);
+        
+        // Apply phase-specific visual effects using pose stack
+        switch (entity.getBossPhase()) {
+            case AWAKENING:
+                // Trembling effect during awakening
+                float shake = (float) (Math.sin(entity.age * 0.3f) * 0.02f);
+                poseStack.translate(shake, 0, shake);
+                break;
+                
+            case JUDGING:
+                // Subtle floating effect during judgment
+                float judgeFloat = (float) (Math.sin(entity.age * 0.05f) * 0.05f);
+                poseStack.translate(0, judgeFloat, 0);
+                break;
+                
+            case MERCIFUL:
+                // Gentle swaying when merciful
+                float sway = (float) (Math.sin(entity.age * 0.02f) * 0.03f);
+                poseStack.translate(sway, 0, 0);
+                break;
+                
+            case ENRAGED:
+                // Aggressive trembling when enraged
+                float rage = (float) (Math.sin(entity.age * 0.4f) * 0.01f);
+                poseStack.translate(rage, rage * 0.5f, rage);
+                break;
+        }
         
         super.render(entity, entityYaw, partialTick, poseStack, bufferSource, packedLight);
         
@@ -53,84 +80,16 @@ public class AnubisEntityRenderer extends GeoEntityRenderer<AnubisEntity> {
                                  float partialTick, int packedLight, int packedOverlay,
                                  float red, float green, float blue, float alpha) {
 
-        // Apply global transformations to the root bone to ensure the whole model moves together
-        if (bone.getName().equals("root")) {
-            // Subtle, constant floating and swaying
-            float sway = (float) Math.sin(animatable.age * 0.05f) * 0.03f;
-            float hover = (float) Math.sin(animatable.age * 0.07f) * 0.1f;
-            bone.setPivotY(bone.getPivotY() + hover);
-            bone.setRotZ(bone.getRotZ() + sway);
-
-            // Handle the more pronounced hovering effect
-            if (animatable.isHovering()) {
-                bone.setPivotY(bone.getPivotY() +
-                    (float) (Math.sin(animatable.age * 0.1f) * 1.0f)); // Reduced from 4.0f to be less extreme
-            }
-        }
-
-        // Special bone manipulations for different phases
-        switch (animatable.getBossPhase()) {
-            case JUDGING:
-                // Subtle floating animation during judgment, applied to root
-                if (bone.getName().equals("root")) {
-                    bone.setPivotY(bone.getPivotY() +
-                        (float) (Math.sin(animatable.age * 0.05f) * 0.5f)); // Reduced from 2.0f
-                }
-                break;
-
-            case AWAKENING:
-                // Trembling effect during awakening - this is a local shake, so it's fine on head/body
-                if (bone.getName().equals("head") || bone.getName().equals("body")) {
-                    bone.setPivotX(bone.getPivotX() +
-                        (float) (Math.sin(animatable.age * 0.3f) * 0.5f));
-                }
-                break;
-
-            case ENRAGED:
-                // Aggressive trembling when enraged - local shake on head
-                if (bone.getName().equals("head")) {
-                    bone.setPivotX(bone.getPivotX() +
-                        (float) (Math.sin(animatable.age * 0.4f) * 1.0f));
-                    bone.setPivotY(bone.getPivotY() +
-                        (float) (Math.cos(animatable.age * 0.3f) * 0.8f));
-                }
-                break;
-
-            case MERCIFUL:
-                // Gentle swaying when merciful - this should also be on root
-                if (bone.getName().equals("root")) {
-                    bone.setPivotX(bone.getPivotX() +
-                        (float) (Math.sin(animatable.age * 0.02f) * 0.2f)); // Reduced from 1.5f
-                }
-                break;
-
-            case COMBAT:
-                // Combat stance adjustments - this can be on body/arms if they are separate parts that need to move
-                if (bone.getName().equals("arms") || bone.getName().equals("body")) {
-                    bone.setPivotY(bone.getPivotY() - 1.0f); // Lower stance
-                }
-                break;
-
-            case DORMANT:
-                // Minimal movement when dormant - chest is fine if it's a subtle breathing animation
-                if (bone.getName().equals("chest")) {
-                    bone.setPivotY(bone.getPivotY() +
-                        (float) (Math.sin(animatable.age * 0.01f) * 0.3f));
-                }
-                break;
-
-            case DEAD:
-                // Death pose - falling over should affect the whole model via root
-                if (bone.getName().equals("root")) {
-                    bone.setRotZ(bone.getRotZ() + (float) Math.toRadians(90)); // Fall over
-                }
-                break;
-        }
-
-        // Handle special sky yell animation - head-specific is fine
-        if (animatable.isSkyYelling() && bone.getName().equals("head")) {
-            bone.setRotX(bone.getRotX() - (float) Math.toRadians(45)); // Look up
-        }
+        // IMPORTANT: Direct bone manipulation causes drift over time!
+        // The issue was that modifying bone positions directly (setPivotX/Y) causes cumulative changes
+        // that make body parts separate. Instead, let GeckoLib handle animations through the
+        // animation files, or use MatrixStack transformations that don't permanently modify bones.
+        
+        // For now, we'll rely on the animation system to handle all bone movements
+        // If custom effects are needed, they should be done through:
+        // 1. Animation files (recommended)
+        // 2. MatrixStack transformations (for temporary effects)
+        // 3. Storing original positions and resetting them each frame
 
         super.renderRecursively(poseStack, animatable, bone, renderType, bufferSource, buffer,
                                isReRender, partialTick, packedLight, packedOverlay, red, green, blue, alpha);

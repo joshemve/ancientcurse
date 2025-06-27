@@ -273,12 +273,21 @@ public class AnubisEntity extends HostileEntity implements GeoEntity {
             if (Math.abs(currentHeight - targetHoverHeight) > 0.1F) {
                 float newHeight = currentHeight + (targetHoverHeight - currentHeight) * 0.1F;
                 dataTracker.set(HOVER_HEIGHT, newHeight);
-                
-                // Apply hovering position
-                if (!this.hasVehicle()) {
-                    this.setPos(getX(), getY() + (newHeight - currentHeight), getZ());
-                }
             }
+            
+            // Apply hovering effect
+            if (!this.hasVehicle()) {
+                // Disable gravity while hovering
+                this.setNoGravity(true);
+                
+                // Gentle floating motion
+                double hoverOffset = Math.sin(this.age * 0.1) * 0.1;
+                this.setVelocity(this.getVelocity().x, hoverOffset, this.getVelocity().z);
+            }
+        } else {
+            // Re-enable gravity when not hovering
+            this.setNoGravity(false);
+            dataTracker.set(HOVER_HEIGHT, 0.0F);
         }
     }
 
@@ -491,68 +500,89 @@ public class AnubisEntity extends HostileEntity implements GeoEntity {
 
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar r) {
-        r.add(new AnimationController<>(this, "main", 0, this::mainPredicate));
-        r.add(new AnimationController<>(this, "attack2", 0, this::attack2Predicate));
-        r.add(new AnimationController<>(this, "judgement_idle", 0, this::judgementIdlePredicate));
-        r.add(new AnimationController<>(this, "judgement_safe", 0, this::judgementSafePredicate));
+        // Main controller handles movement and idle states
+        r.add(new AnimationController<>(this, "main", 5, this::mainPredicate));
+        // Attack controller handles all attack animations with priority
+        r.add(new AnimationController<>(this, "attack", 2, this::attackPredicate));
+        // Special state controllers for unique boss mechanics
+        r.add(new AnimationController<>(this, "special", 3, this::specialPredicate));
     }
 
     private <T extends GeoAnimatable> PlayState mainPredicate(AnimationState<T> s) {
-        if (playingSpecialAnimation) return PlayState.STOP;
+        // Don't play if special animation or attack is active
+        if (playingSpecialAnimation || this.handSwinging) return PlayState.STOP;
         
-        String targetAnim;
-        
-        switch (currentPhase) {
-            case DORMANT:
-                targetAnim = "animation.anubis.idle";
-                break;
-            case AWAKENING:
-                targetAnim = "animation.anubis.awaken";
-                break;
-            case COMBAT:
-            case ENRAGED:
-                targetAnim = s.isMoving() ? "animation.anubis.walk" : "animation.anubis.idle";
-                break;
-            case JUDGING:
-            case MERCIFUL:
-                return PlayState.STOP; // Special animations handle these
-            case DEAD:
-                targetAnim = "animation.anubis.death";
-                break;
-            default:
-                targetAnim = "animation.anubis.idle";
-        }
-
-        if (!targetAnim.equals(currentAnimation)) {
+        // Death animation takes priority
+        if (currentPhase == BossPhase.DEAD) {
             s.getController().setAnimation(RawAnimation.begin()
-                    .then(targetAnim, Animation.LoopType.LOOP));
-            currentAnimation = targetAnim;
+                    .then("animation.anubis.death", Animation.LoopType.PLAY_ONCE));
+            return PlayState.CONTINUE;
         }
+        
+        // Movement animations
+        if (s.isMoving()) {
+            // Use running animation for enraged phase
+            if (currentPhase == BossPhase.ENRAGED) {
+                s.getController().setAnimation(RawAnimation.begin()
+                        .then("animation.anubis.running", Animation.LoopType.LOOP));
+            } else {
+                s.getController().setAnimation(RawAnimation.begin()
+                        .then("animation.anubis.walking", Animation.LoopType.LOOP));
+            }
+            return PlayState.CONTINUE;
+        }
+        
+        // Default to idle
+        s.getController().setAnimation(RawAnimation.begin()
+                .then("animation.anubis.idle", Animation.LoopType.LOOP));
         return PlayState.CONTINUE;
     }
 
-    private <T extends GeoAnimatable> PlayState attack2Predicate(AnimationState<T> s) {
-        if (!isSkyYelling()) return PlayState.STOP;
+    private <T extends GeoAnimatable> PlayState attackPredicate(AnimationState<T> s) {
+        // Handle attack animations
+        if (this.handSwinging && this.handSwingTicks > 0) {
+            s.getController().setAnimation(RawAnimation.begin()
+                    .then("animation.anubis.attack_1", Animation.LoopType.PLAY_ONCE));
+            return PlayState.CONTINUE;
+        }
         
-        s.getController().setAnimation(RawAnimation.begin()
-                .then("animation.anubis.attack2", Animation.LoopType.PLAY_ONCE));
-        return PlayState.CONTINUE;
+        // Sky yelling special attack
+        if (isSkyYelling()) {
+            s.getController().setAnimation(RawAnimation.begin()
+                    .then("animation.anubis.attack_2", Animation.LoopType.PLAY_ONCE));
+            return PlayState.CONTINUE;
+        }
+        
+        return PlayState.STOP;
     }
 
-    private <T extends GeoAnimatable> PlayState judgementIdlePredicate(AnimationState<T> s) {
-        if (!isJudging()) return PlayState.STOP;
+    private <T extends GeoAnimatable> PlayState specialPredicate(AnimationState<T> s) {
+        // Judgment idle animation
+        if (isJudging()) {
+            s.getController().setAnimation(RawAnimation.begin()
+                    .then("animation.anubis.judgement_idle", Animation.LoopType.LOOP));
+            playingSpecialAnimation = true;
+            return PlayState.CONTINUE;
+        }
         
-        s.getController().setAnimation(RawAnimation.begin()
-                .then("animation.anubis.judgement_idle", Animation.LoopType.LOOP));
-        return PlayState.CONTINUE;
-    }
-
-    private <T extends GeoAnimatable> PlayState judgementSafePredicate(AnimationState<T> s) {
-        if (currentPhase != BossPhase.MERCIFUL) return PlayState.STOP;
+        // Merciful/safe animation
+        if (currentPhase == BossPhase.MERCIFUL) {
+            s.getController().setAnimation(RawAnimation.begin()
+                    .then("animation.anubis.judgement_safe", Animation.LoopType.LOOP));
+            playingSpecialAnimation = true;
+            return PlayState.CONTINUE;
+        }
         
-        s.getController().setAnimation(RawAnimation.begin()
-                .then("animation.anubis.judgement_safe", Animation.LoopType.LOOP));
-        return PlayState.CONTINUE;
+        // Awakening animation (using idle with special effects)
+        if (currentPhase == BossPhase.AWAKENING) {
+            s.getController().setAnimation(RawAnimation.begin()
+                    .then("animation.anubis.idle", Animation.LoopType.LOOP));
+            playingSpecialAnimation = true;
+            return PlayState.CONTINUE;
+        }
+        
+        playingSpecialAnimation = false;
+        return PlayState.STOP;
     }
 
     /* -------------------------------------------------------------------- */
