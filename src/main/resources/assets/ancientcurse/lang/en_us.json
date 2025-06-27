@@ -1,7 +1,11 @@
 {
   "tooltip.ancientcurse.ancient_curse": "Ancient Curse",
   "item.ancientcurse.staff_of_ra": "Staff of Ra",
-  "item.ancientcurse.staff_of_ra.tooltip": "Ancient Curse",
+  "item.ancientcurse.staff_of_ra.tooltip": "Divine staff blessed by the sun god himself",
+  "item.ancientcurse.staff_of_ra.tooltip1": "Hold right-click to charge a devastating sun beam",
+  "item.ancientcurse.staff_of_ra.tooltip2": "The longer you charge, the more powerful the attack",
+  "item.ancientcurse.staff_of_ra.tooltip3": "Sun beam sets enemies on fire and deals bonus damage to undead",
+  "item.ancientcurse.staff_of_ra.tooltip4": "Creates ambient light and warmth when held",
   "item.ancientcurse.sycamore_fig": "Sycamore Fig",
   "item.ancientcurse.sycamore_fig.tooltip": "Ancient Curse",
   "item.ancientcurse.golden_sycamore_fig": "Golden Sycamore Fig",
@@ -30,6 +34,10 @@
   "entity.ancientcurse.djeserhath": "Djeserhath",
   "item.ancientcurse.djeserhath_spawn_egg": "Djeserhath Spawn Egg",
   "item.ancientcurse.djeserhath_spawn_egg.tooltip": "Ancient Curse",
+  
+  "entity.ancientcurse.lotus": "Lotus",
+  "item.ancientcurse.lotus_spawn_egg": "Lotus Spawn Egg",
+  "item.ancientcurse.lotus_spawn_egg.tooltip": "Summon a mystical lotus creature",
   
   "entity.ancientcurse.snake_head_projectile": "Snake Head Projectile",
   

@@ -236,6 +236,7 @@ public class ModItemGroup {
                 safeAdd(entries, ModItems.WITHERED_PHARAOH_SPAWN_EGG);
                 safeAdd(entries, ModItems.DJESERHATH_SPAWN_EGG);
                 safeAdd(entries, ModItems.ANUBIS_SPAWN_EGG);
+                safeAdd(entries, ModItems.LOTUS_SPAWN_EGG);
             })
             .build()
     );

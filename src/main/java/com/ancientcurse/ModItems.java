@@ -10,6 +10,7 @@ import com.ancientcurse.item.ScarabIncenseItem;
 import com.ancientcurse.item.ScarabTalismanItem;
 import com.ancientcurse.item.SekhemDateItem;
 import com.ancientcurse.item.SerpentStaffItem;
+import com.ancientcurse.item.StaffOfRaItem;
 import com.ancientcurse.item.WitheredStaffItem;
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
 import net.minecraft.entity.effect.StatusEffectInstance;
@@ -34,7 +35,7 @@ import com.ancientcurse.item.BronzeToolMaterial;
  */
 public class ModItems {
     // Define items
-    public static final CustomAnimatedItem STAFF_OF_RA = new CustomAnimatedItem(new FabricItemSettings(), "staff_of_ra");
+    public static final StaffOfRaItem STAFF_OF_RA = new StaffOfRaItem(new FabricItemSettings(), "staff_of_ra");
 
 
     // Define the Sycamore Fig food item
@@ -147,6 +148,14 @@ public class ModItems {
         ModEntities.ANUBIS, 
         0x2B1B17, // Primary color (dark brown/black)
         0xFFD700, // Secondary color (gold)
+        new FabricItemSettings()
+    );
+    
+    // Lotus spawn egg
+    public static final SpawnEggItem LOTUS_SPAWN_EGG = new SpawnEggItem(
+        ModEntities.LOTUS, 
+        0x90EE90, // Primary color (light green)
+        0x32CD32, // Secondary color (lime green)
         new FabricItemSettings()
     );
     
@@ -479,6 +488,13 @@ public class ModItems {
             Registries.ITEM, 
             new Identifier(AncientCurse.MOD_ID, "anubis_spawn_egg"),
             ANUBIS_SPAWN_EGG
+        );
+        
+        // Register the Lotus spawn egg
+        Registry.register(
+            Registries.ITEM, 
+            new Identifier(AncientCurse.MOD_ID, "lotus_spawn_egg"),
+            LOTUS_SPAWN_EGG
         );
         
         // Vessel items are registered in ModBlocks.java

@@ -10,6 +10,7 @@ import com.ancientcurse.client.render.WitheredPharaohRenderer;
 import com.ancientcurse.client.render.entity.SnakeHeadProjectileRenderer;
 import com.ancientcurse.entity.renderer.AnubisEntityRenderer;
 import com.ancientcurse.entity.renderer.DjeserhathEntityRenderer;
+import com.ancientcurse.entity.renderer.LotusRenderer;
 import com.ancientcurse.entity.renderer.SpitBallRenderer;
 import com.ancientcurse.util.TooltipHelper;
 import net.fabricmc.api.ClientModInitializer;
@@ -94,6 +95,9 @@ public class AncientCurseClient implements ClientModInitializer {
         
         // Register the Djeserhath renderer
         EntityRendererRegistry.register(ModEntities.DJESERHATH, DjeserhathEntityRenderer::new);
+        
+        // Register the Lotus renderer
+        EntityRendererRegistry.register(ModEntities.LOTUS, LotusRenderer::new);
         
         // Register the SpitBall projectile renderer
         EntityRendererRegistry.register(ModEntities.SPIT_BALL, SpitBallRenderer::new);

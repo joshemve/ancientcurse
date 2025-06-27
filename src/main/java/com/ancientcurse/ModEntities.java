@@ -2,6 +2,7 @@ package com.ancientcurse;
 
 import com.ancientcurse.entity.AnubisEntity;
 import com.ancientcurse.entity.DjeserhathEntity;
+import com.ancientcurse.entity.LotusEntity;
 import com.ancientcurse.entity.SnakeHeadProjectileEntity;
 import com.ancientcurse.entity.SpitBallEntity;
 import com.ancientcurse.entity.WitheredPharaohEntity;
@@ -70,6 +71,16 @@ public class ModEntities {
             .build()
     );
     
+    // Register the Lotus entity
+    public static final EntityType<LotusEntity> LOTUS = Registry.register(
+        Registries.ENTITY_TYPE,
+        new Identifier(AncientCurse.MOD_ID, "lotus"),
+        FabricEntityTypeBuilder.create(SpawnGroup.MONSTER, LotusEntity::new)
+            .dimensions(EntityDimensions.fixed(1.0f, 1.5f))
+            .trackRangeBlocks(64)
+            .build()
+    );
+    
     /**
      * Registers all mod entities
      */
@@ -80,6 +91,7 @@ public class ModEntities {
         FabricDefaultAttributeRegistry.register(WITHERED_PHARAOH, WitheredPharaohEntity.createWitheredPharaohAttributes());
         FabricDefaultAttributeRegistry.register(DJESERHATH, DjeserhathEntity.createDjeserhathAttributes());
         FabricDefaultAttributeRegistry.register(ANUBIS, AnubisEntity.createAnubisAttributes());
+        FabricDefaultAttributeRegistry.register(LOTUS, LotusEntity.createLotusAttributes());
     }
     
     /**
