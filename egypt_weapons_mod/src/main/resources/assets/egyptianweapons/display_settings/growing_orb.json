@@ -1,0 +1,32 @@
+{
+  "credit": "Made with Blockbench",
+  "display": {
+    "gui": {
+      "translation": [
+        0,
+        -4,
+        0
+      ],
+      "scale": [
+        2.3,
+        3.08,
+        2.3
+      ]
+    },
+    "fixed": {
+      "translation": [
+        0,
+        -2.75,
+        0
+      ],
+      "scale": [
+        2.19,
+        2.19,
+        2.19
+      ]
+    }
+  },
+  "textures": {
+    "particle": "egyptianweapons:item/growing_orb"
+  }
+}

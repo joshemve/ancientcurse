@@ -1,0 +1,7 @@
+{
+    "loader": "geckolib:item_renderer",
+    "parent": "builtin/entity",
+    "textures": {
+        "layer0": "egyptianweapons:item/growing_orb"
+    }
+}
