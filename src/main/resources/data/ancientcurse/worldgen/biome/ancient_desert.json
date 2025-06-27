@@ -30,7 +30,7 @@
         "type": "minecraft:camel",
         "weight": 1,
         "minCount": 1,
-        "maxCount": 2
+        "maxCount": 1
       }
     ],
     "misc": [],
@@ -130,12 +130,17 @@
       "minecraft:ore_lapis_buried",
       "minecraft:ore_copper",
       "minecraft:underwater_magma",
-      "minecraft:ore_gold_extra"
+      "minecraft:ore_gold_extra",
+      "ancientcurse:ore_gold_flaked_riverbed",
+      "ancientcurse:riverbed_floor",
+      "ancientcurse:riverbed_moss_patch"
     ],
     [],
     [
       "minecraft:spring_water",
-      "minecraft:spring_lava"
+      "minecraft:spring_lava",
+      "ancientcurse:salt_bed_patch",
+      "ancientcurse:oasis_spring"
     ],
     [
       "minecraft:glow_lichen",
@@ -145,7 +150,9 @@
       "ancientcurse:desert_rock_small",
       "ancientcurse:desert_rock_medium",
       "ancientcurse:desert_rock_large",
-      "ancientcurse:mini_cactus"
+      "ancientcurse:mini_cactus",
+      "ancientcurse:light_dead_fern",
+      "ancientcurse:dead_papyrus"
     ],
     [
       "minecraft:freeze_top_layer"

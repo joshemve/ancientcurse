@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:disk",
+  "config": {
+    "state_provider": {
+      "fallback": {
+        "type": "minecraft:simple_state_provider",
+        "state": {
+          "Name": "ancientcurse:salt_bed"
+        }
+      },
+      "rules": [],
+      "type": "minecraft:block_state_provider"
+    },
+    "target": {
+      "type": "minecraft:matching_blocks",
+      "blocks": ["minecraft:sand", "minecraft:sandstone", "minecraft:stone", "minecraft:gravel"]
+    },
+    "radius": {
+      "type": "minecraft:uniform",
+      "value": {
+        "min_inclusive": 3,
+        "max_inclusive": 6
+      }
+    },
+    "half_height": 2
+  }
+}
