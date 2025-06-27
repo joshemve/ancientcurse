@@ -141,6 +141,14 @@ public class ModItems {
         new FabricItemSettings()
     );
     
+    // Anubis Boss spawn egg
+    public static final SpawnEggItem ANUBIS_SPAWN_EGG = new SpawnEggItem(
+        ModEntities.ANUBIS, 
+        0x2B1B17, // Primary color (dark brown/black)
+        0xFFD700, // Secondary color (gold)
+        new FabricItemSettings()
+    );
+    
     public static final Item SCARAB_SHELL = new Item(new FabricItemSettings());
     public static final Item SCARAB_SHELL_FRAGMENT = new Item(new FabricItemSettings());
 
@@ -450,6 +458,13 @@ public class ModItems {
             Registries.ITEM, 
             new Identifier(AncientCurse.MOD_ID, "djeserhath_spawn_egg"),
             DJESERHATH_SPAWN_EGG
+        );
+        
+        // Register the Anubis spawn egg
+        Registry.register(
+            Registries.ITEM, 
+            new Identifier(AncientCurse.MOD_ID, "anubis_spawn_egg"),
+            ANUBIS_SPAWN_EGG
         );
         
         // Vessel items are registered in ModBlocks.java

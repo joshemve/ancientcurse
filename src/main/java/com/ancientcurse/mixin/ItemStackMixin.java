@@ -15,7 +15,7 @@ import java.util.List;
 @Mixin(ItemStack.class)
 public class ItemStackMixin {
     
-    @Inject(method = "appendTooltip(Ljava/util/List;Lnet/minecraft/client/item/TooltipContext;)V", at = @At("TAIL"))
+    @Inject(method = "getTooltip", at = @At("RETURN"))
     private void appendModTooltip(List<Text> tooltip, TooltipContext context, CallbackInfo ci) {
         ItemStack stack = (ItemStack) (Object) this;
         

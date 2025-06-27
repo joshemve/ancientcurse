@@ -7,6 +7,7 @@ import com.ancientcurse.ModItems;
 import com.ancientcurse.block.registry.PotteryBlocks;
 import com.ancientcurse.client.color.RockColorProvider;
 import com.ancientcurse.client.render.WitheredPharaohRenderer;
+import com.ancientcurse.entity.renderer.AnubisEntityRenderer;
 import com.ancientcurse.entity.renderer.DjeserhathEntityRenderer;
 import com.ancientcurse.entity.renderer.SpitBallRenderer;
 import com.ancientcurse.util.TooltipHelper;
@@ -86,6 +87,9 @@ public class AncientCurseClient implements ClientModInitializer {
         
         // Register the Withered Pharaoh renderer
         EntityRendererRegistry.register(ModEntities.WITHERED_PHARAOH, WitheredPharaohRenderer::new);
+        
+        // Register the Anubis renderer
+        EntityRendererRegistry.register(ModEntities.ANUBIS, AnubisEntityRenderer::new);
         
         // Register the Djeserhath renderer
         EntityRendererRegistry.register(ModEntities.DJESERHATH, DjeserhathEntityRenderer::new);

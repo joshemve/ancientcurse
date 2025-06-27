@@ -1,5 +1,6 @@
 package com.ancientcurse;
 
+import com.ancientcurse.entity.AnubisEntity;
 import com.ancientcurse.entity.DjeserhathEntity;
 import com.ancientcurse.entity.SpitBallEntity;
 import com.ancientcurse.entity.WitheredPharaohEntity;
@@ -47,6 +48,16 @@ public class ModEntities {
             .build()
     );
     
+    // Register the Anubis boss entity
+    public static final EntityType<AnubisEntity> ANUBIS = Registry.register(
+        Registries.ENTITY_TYPE,
+        new Identifier(AncientCurse.MOD_ID, "anubis"),
+        FabricEntityTypeBuilder.create(SpawnGroup.MONSTER, AnubisEntity::new)
+            .dimensions(EntityDimensions.fixed(1.2f, 2.5f)) // Boss size
+            .trackRangeBlocks(128) // Larger tracking range for boss
+            .build()
+    );
+    
     /**
      * Registers all mod entities
      */
@@ -56,6 +67,7 @@ public class ModEntities {
         // Register entity attributes
         FabricDefaultAttributeRegistry.register(WITHERED_PHARAOH, WitheredPharaohEntity.createWitheredPharaohAttributes());
         FabricDefaultAttributeRegistry.register(DJESERHATH, DjeserhathEntity.createDjeserhathAttributes());
+        FabricDefaultAttributeRegistry.register(ANUBIS, AnubisEntity.createAnubisAttributes());
     }
     
     /**

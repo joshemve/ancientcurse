@@ -31,6 +31,11 @@
   "item.ancientcurse.djeserhath_spawn_egg": "Djeserhath Spawn Egg",
   "item.ancientcurse.djeserhath_spawn_egg.tooltip": "Ancient Curse",
   
+  "entity.ancientcurse.anubis": "Anubis, the Jackal-Headed God",
+  "item.ancientcurse.anubis_spawn_egg": "Anubis Spawn Egg",
+  "item.ancientcurse.anubis_spawn_egg.tooltip": "Summon the god of death and judgment",
+  "message.ancientcurse.anubis.mercy": "Anubis has judged you worthy. You are under his protection.",
+  
   "item.ancientcurse.bronze_blend": "Bronze Blend",
 
   "item.ancientcurse.raw_bronze_nugget": "Raw Bronze Nugget",
