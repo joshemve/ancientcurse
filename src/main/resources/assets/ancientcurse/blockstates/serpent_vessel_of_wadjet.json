@@ -1,21 +1,19 @@
 {
   "variants": {
-    "": [
-      {
-        "model": "ancientcurse:block/serpent_vessel_of_wadjet"
-      },
-      {
-        "model": "ancientcurse:block/serpent_vessel_of_wadjet",
-        "y": 90
-      },
-      {
-        "model": "ancientcurse:block/serpent_vessel_of_wadjet",
-        "y": 180
-      },
-      {
-        "model": "ancientcurse:block/serpent_vessel_of_wadjet",
-        "y": 270
-      }
-    ]
+    "facing=north": {
+      "model": "ancientcurse:block/serpent_vessel_of_wadjet"
+    },
+    "facing=east": {
+      "model": "ancientcurse:block/serpent_vessel_of_wadjet",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "ancientcurse:block/serpent_vessel_of_wadjet",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "ancientcurse:block/serpent_vessel_of_wadjet",
+      "y": 270
+    }
   }
 }

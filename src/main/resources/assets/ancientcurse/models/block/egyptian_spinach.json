@@ -2,5 +2,6 @@
   "parent": "minecraft:block/cross",
   "textures": {
     "cross": "ancientcurse:block/egyptian_spinach"
-  }
+  },
+  "render_type": "cutout"
 } 

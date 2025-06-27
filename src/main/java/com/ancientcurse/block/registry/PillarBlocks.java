@@ -29,6 +29,11 @@ public class PillarBlocks {
         .strength(1.8f, 5.0f)
         .sounds(BlockSoundGroup.STONE)
         .requiresTool());
+        
+    public static final Block STACKED_PILLAR = new PillarBlock(FabricBlockSettings.copyOf(Blocks.STONE)
+        .strength(2.2f, 6.0f)
+        .sounds(BlockSoundGroup.STONE)
+        .requiresTool());
 
     /**
      * Registers all pillar blocks
@@ -40,6 +45,7 @@ public class PillarBlocks {
         Registry.register(Registries.BLOCK, new Identifier(AncientCurse.MOD_ID, "deshret_pillar"), DESHRET_PILLAR);
         Registry.register(Registries.BLOCK, new Identifier(AncientCurse.MOD_ID, "egyptian_gold_pillar"), EGYPTIAN_GOLD_PILLAR);
         Registry.register(Registries.BLOCK, new Identifier(AncientCurse.MOD_ID, "mudstone_pillar"), MUDSTONE_PILLAR);
+        Registry.register(Registries.BLOCK, new Identifier(AncientCurse.MOD_ID, "stacked_pillar"), STACKED_PILLAR);
     }
     
     /**
@@ -52,5 +58,6 @@ public class PillarBlocks {
         Registry.register(Registries.ITEM, new Identifier(AncientCurse.MOD_ID, "deshret_pillar"), new net.minecraft.item.BlockItem(DESHRET_PILLAR, new net.fabricmc.fabric.api.item.v1.FabricItemSettings()));
         Registry.register(Registries.ITEM, new Identifier(AncientCurse.MOD_ID, "egyptian_gold_pillar"), new net.minecraft.item.BlockItem(EGYPTIAN_GOLD_PILLAR, new net.fabricmc.fabric.api.item.v1.FabricItemSettings()));
         Registry.register(Registries.ITEM, new Identifier(AncientCurse.MOD_ID, "mudstone_pillar"), new net.minecraft.item.BlockItem(MUDSTONE_PILLAR, new net.fabricmc.fabric.api.item.v1.FabricItemSettings()));
+        Registry.register(Registries.ITEM, new Identifier(AncientCurse.MOD_ID, "stacked_pillar"), new net.minecraft.item.BlockItem(STACKED_PILLAR, new net.fabricmc.fabric.api.item.v1.FabricItemSettings()));
     }
 }

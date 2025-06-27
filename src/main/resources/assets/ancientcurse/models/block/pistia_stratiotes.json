@@ -2,5 +2,6 @@
   "parent": "minecraft:block/tinted_cross",
   "textures": {
     "cross": "ancientcurse:block/pistia_stratiotes"
-  }
+  },
+  "render_type": "cutout"
 } 

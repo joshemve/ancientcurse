@@ -2,5 +2,6 @@
   "parent": "minecraft:block/cross",
   "textures": {
     "cross": "ancientcurse:block/khemnu_pod"
-  }
+  },
+  "render_type": "cutout"
 }

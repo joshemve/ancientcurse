@@ -36,8 +36,19 @@ import com.ancientcurse.effect.ModStatusEffects;
  *    - Blocks from registry classes should be referenced using their full path
  *    - Related blocks should be grouped together with appropriate comments
  * 
+ * 4. CLIENT INITIALIZATION:
+ *    - The ONLY client initializer is com.ancientcurse.client.AncientCurseClient
+ *    - All client-side registrations (render layers, HUD elements, etc.) should be done there
+ *    - NEVER create multiple classes implementing ClientModInitializer
+ *    - Duplicate client initializers cause transparency issues and duplicate tooltips
+ * 
+ * 5. TRANSPARENCY RENDERING:
+ *    - For transparent blocks, use BOTH .nonOpaque() AND .notSolid() in block settings
+ *    - Register transparent blocks with BlockRenderLayerMap.INSTANCE.putBlock(block, RenderLayer.getCutout())
+ *    - Only register each block for render layers ONCE to avoid conflicts
+ * 
  * Following these guidelines prevents registration conflicts and makes the codebase more maintainable.
- * See previous fixes for registration conflicts in the mod's history.
+ * See previous fixes for registration conflicts and transparency issues in the mod's history.
  */
 public class AncientCurse implements ModInitializer {
     public static final String MOD_ID = "ancientcurse";
@@ -84,6 +95,9 @@ public class AncientCurse implements ModInitializer {
         
         // Register mod items
         ModItems.registerItems();
+        
+        // Register mod entities
+        ModEntities.registerEntities();
         
         // Register mod block entities
         ModBlockEntities.registerBlockEntities();

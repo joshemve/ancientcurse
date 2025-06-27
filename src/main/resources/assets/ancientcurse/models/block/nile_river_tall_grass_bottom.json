@@ -2,5 +2,6 @@
   "parent": "minecraft:block/cross",
   "textures": {
     "cross": "ancientcurse:block/nile_river_tall_grass_bottom"
-  }
+  },
+  "render_type": "cutout"
 } 

@@ -2,5 +2,6 @@
   "parent": "minecraft:block/cross",
   "textures": {
     "cross": "ancientcurse:block/mini_cactus"
-  }
+  },
+  "render_type": "cutout"
 } 

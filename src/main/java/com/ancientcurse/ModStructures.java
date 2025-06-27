@@ -3,9 +3,6 @@ package com.ancientcurse;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.util.Identifier;
-import net.minecraft.world.gen.GenerationStep;
-import net.minecraft.world.gen.structure.Structure;
-import net.minecraft.world.gen.structure.StructureType;
 
 public class ModStructures {
     // Use fully qualified class name to avoid import conflicts
@@ -15,7 +12,6 @@ public class ModStructures {
     );
 
     public static void registerStructures() {
-        AncientCurse.LOGGER.info("Registering Ancient Egypt structures...");
         
         // In Minecraft 1.20.1, structure registration is primarily done through JSON files
         // The structure is defined in data/ancientcurse/worldgen/structure/pyramid.json

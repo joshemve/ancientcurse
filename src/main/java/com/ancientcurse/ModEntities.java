@@ -1,22 +1,51 @@
 package com.ancientcurse;
 
+import com.ancientcurse.entity.DjeserhathEntity;
+import com.ancientcurse.entity.SpitBallEntity;
+import com.ancientcurse.entity.WitheredPharaohEntity;
+import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
+import net.fabricmc.fabric.api.object.builder.v1.entity.FabricEntityTypeBuilder;
+import net.minecraft.entity.EntityDimensions;
+import net.minecraft.entity.EntityType;
+import net.minecraft.entity.SpawnGroup;
+import net.minecraft.registry.Registries;
+import net.minecraft.registry.Registry;
+import net.minecraft.util.Identifier;
+
 /**
  * Centralizes entity registration for the mod
  */
 public class ModEntities {
     
-    // Example entity registration (commented out until ready to implement)
-    /*
-    public static final EntityType<SunGolemEntity> SUN_GOLEM = Registry.register(
+        // Entity type declarations
+    public static final EntityType<WitheredPharaohEntity> WITHERED_PHARAOH = Registry.register(
         Registries.ENTITY_TYPE,
-        new Identifier(AncientCurse.MOD_ID, "sun_golem"),
-        FabricEntityTypeBuilder.create(SpawnGroup.CREATURE, SunGolemEntity::new)
-            .dimensions(EntityDimensions.fixed(0.9f, 1.8f))
+        new Identifier(AncientCurse.MOD_ID, "withered_pharaoh"),
+        FabricEntityTypeBuilder.create(SpawnGroup.MONSTER, WitheredPharaohEntity::new)
+            .dimensions(EntityDimensions.fixed(0.6f, 1.95f))
+            .trackRangeBlocks(64)
             .build()
     );
-    */
     
-        // Tentacle entity registrations removed
+    public static final EntityType<DjeserhathEntity> DJESERHATH = Registry.register(
+        Registries.ENTITY_TYPE,
+        new Identifier(AncientCurse.MOD_ID, "djeserhath"),
+        FabricEntityTypeBuilder.create(SpawnGroup.MONSTER, DjeserhathEntity::new)
+            .dimensions(EntityDimensions.fixed(1.0f, 2.0f))
+            .trackRangeBlocks(64)
+            .build()
+    );
+    
+    // Register the spit ball projectile
+    public static final EntityType<SpitBallEntity> SPIT_BALL = Registry.register(
+        Registries.ENTITY_TYPE,
+        new Identifier(AncientCurse.MOD_ID, "spit_ball"),
+        FabricEntityTypeBuilder.<SpitBallEntity>create(SpawnGroup.MISC, SpitBallEntity::new)
+            .dimensions(EntityDimensions.fixed(0.5f, 0.5f))
+            .trackRangeBlocks(64)
+            .trackedUpdateRate(10) // Update more frequently for smooth movement
+            .build()
+    );
     
     /**
      * Registers all mod entities
@@ -24,14 +53,9 @@ public class ModEntities {
     public static void registerEntities() {
         AncientCurse.LOGGER.info("Registering entities for " + AncientCurse.MOD_ID);
         
-        // Tentacle entity registrations removed
-        
-        // When you're ready to implement the SunGolem entity, uncomment the code above
-        // and then uncomment the following code for client-side rendering:
-        
-        /*
-        EntityRendererRegistry.register(SUN_GOLEM, SunGolemRenderer::new);
-        */
+        // Register entity attributes
+        FabricDefaultAttributeRegistry.register(WITHERED_PHARAOH, WitheredPharaohEntity.createWitheredPharaohAttributes());
+        FabricDefaultAttributeRegistry.register(DJESERHATH, DjeserhathEntity.createDjeserhathAttributes());
     }
     
     /**
@@ -39,6 +63,6 @@ public class ModEntities {
      * This should be called from the client initializer
      */
     public static void registerEntityRenderers() {
-        // Tentacle entity renderers removed
+        // Client-side renderer registration is done in AncientCurseClient
     }
 }

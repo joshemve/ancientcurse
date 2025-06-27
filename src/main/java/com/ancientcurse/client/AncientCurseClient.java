@@ -2,18 +2,46 @@ package com.ancientcurse.client;
 
 import com.ancientcurse.AncientCurse;
 import com.ancientcurse.ModBlocks;
-import com.ancientcurse.block.registry.CursedPlantBlocks;
+import com.ancientcurse.ModEntities;
+import com.ancientcurse.ModItems;
+import com.ancientcurse.block.registry.PotteryBlocks;
 import com.ancientcurse.client.color.RockColorProvider;
+import com.ancientcurse.client.render.WitheredPharaohRenderer;
+import com.ancientcurse.entity.renderer.DjeserhathEntityRenderer;
+import com.ancientcurse.entity.renderer.SpitBallRenderer;
+import com.ancientcurse.util.TooltipHelper;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
 import net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry;
+import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 import net.minecraft.client.render.RenderLayer;
 
 /**
  * Client-side initialization for the Ancient Curse mod.
  * Handles client-specific features and block rendering.
+ * 
+ * IMPORTANT IMPLEMENTATION NOTES:
+ * 
+ * 1. SINGLE CLIENT INITIALIZER:
+ *    - This is the ONLY client initializer class for the mod
+ *    - Previously, there was a duplicate AncientCurseClient in the root package
+ *    - Having multiple client initializers caused transparency issues and duplicate tooltips
+ * 
+ * 2. RENDER LAYER REGISTRATION:
+ *    - All transparent blocks must be registered with the appropriate render layer
+ *    - Use BlockRenderLayerMap.INSTANCE.putBlock(block, RenderLayer.getCutout())
+ *    - For plant blocks, use CursedPlantRenderLayer.register() to register all cursed plants at once
+ *    - NEVER register the same block for render layers in multiple places
+ * 
+ * 3. BLOCK PROPERTIES:
+ *    - For transparent blocks, use .nonOpaque() AND .notSolid() in block settings
+ *    - Both properties are required for proper transparency rendering
+ * 
+ * 4. TOOLTIP REGISTRATION:
+ *    - TooltipHelper.registerTooltipCallback() should only be called once
+ *    - This prevents duplicate "Ancient Curse" tags appearing in tooltips
  */
 @Environment(EnvType.CLIENT)
 public class AncientCurseClient implements ClientModInitializer {
@@ -28,7 +56,42 @@ public class AncientCurseClient implements ClientModInitializer {
         // Register color providers
         registerColorProviders();
         
+        // Register the Khamsin Curse HUD renderer
+        KhamsinCurseHudRenderer.register();
+        
+        // Register render layers for cursed plants
+        CursedPlantRenderLayer.register();
+        
+        // Register transparency handling for the Eternal Sigil
+        // This ensures the transparent parts of the texture are properly rendered
+        ColorProviderRegistry.ITEM.register((stack, tintIndex) -> {
+            // Return -1 for no tinting (allows transparency to work correctly)
+            return -1;
+        }, ModItems.ETERNAL_SIGIL);
+        
+        // Register entity renderers
+        registerEntityRenderers();
+        
+        // Register tooltip callback to add "Ancient Curse" to all mod items
+        TooltipHelper.registerTooltipCallback();
+        
         AncientCurse.LOGGER.info("Ancient Curse Client initialized");
+    }
+    
+    /**
+     * Register entity renderers for the mod
+     */
+    private void registerEntityRenderers() {
+        AncientCurse.LOGGER.info("Registering entity renderers for " + AncientCurse.MOD_ID);
+        
+        // Register the Withered Pharaoh renderer
+        EntityRendererRegistry.register(ModEntities.WITHERED_PHARAOH, WitheredPharaohRenderer::new);
+        
+        // Register the Djeserhath renderer
+        EntityRendererRegistry.register(ModEntities.DJESERHATH, DjeserhathEntityRenderer::new);
+        
+        // Register the SpitBall projectile renderer
+        EntityRendererRegistry.register(ModEntities.SPIT_BALL, SpitBallRenderer::new);
     }
     
     /**
@@ -39,6 +102,7 @@ public class AncientCurseClient implements ClientModInitializer {
         
         // Add vegetation blocks with transparency here as needed
         BlockRenderLayerMap.INSTANCE.putBlock(ModBlocks.NILE_RIVER_GRASS, RenderLayer.getCutout());
+        BlockRenderLayerMap.INSTANCE.putBlock(ModBlocks.NILE_RIVER_TALL_GRASS, RenderLayer.getCutout());
         BlockRenderLayerMap.INSTANCE.putBlock(ModBlocks.PAPYRUS_REED, RenderLayer.getCutout());
         BlockRenderLayerMap.INSTANCE.putBlock(ModBlocks.DEAD_PAPYRUS_REED, RenderLayer.getCutout());
         BlockRenderLayerMap.INSTANCE.putBlock(ModBlocks.DWARF_PAPYRUS, RenderLayer.getCutout());
@@ -49,24 +113,15 @@ public class AncientCurseClient implements ClientModInitializer {
         BlockRenderLayerMap.INSTANCE.putBlock(ModBlocks.PISTIA_STRATIOTES, RenderLayer.getCutout());
         BlockRenderLayerMap.INSTANCE.putBlock(ModBlocks.LOTUS_FLOWER_PAD, RenderLayer.getCutout());
         
-        // Note: NILE_RIVER_TALL_GRASS removed to fix compilation issues
+        // Register jar blocks with cutout render layer for proper transparency
+        BlockRenderLayerMap.INSTANCE.putBlock(PotteryBlocks.CANOPIC_URN_OF_BASTET, RenderLayer.getCutout());
+        BlockRenderLayerMap.INSTANCE.putBlock(PotteryBlocks.SCARAB_SEALED_URN, RenderLayer.getCutout());
+        BlockRenderLayerMap.INSTANCE.putBlock(PotteryBlocks.PHARAOHS_INCENSE_JAR, RenderLayer.getCutout());
+        BlockRenderLayerMap.INSTANCE.putBlock(PotteryBlocks.SERPENT_VESSEL_OF_WADJET, RenderLayer.getCutout());
+        BlockRenderLayerMap.INSTANCE.putBlock(PotteryBlocks.VESSEL_OF_WHISPERING_WINDS, RenderLayer.getCutout());
         
-        // Register all cursed plant blocks with cutout render layer
-        BlockRenderLayerMap.INSTANCE.putBlock(CursedPlantBlocks.CURSED_SPRIG, RenderLayer.getCutout());
-        BlockRenderLayerMap.INSTANCE.putBlock(CursedPlantBlocks.CURSED_SPROUT, RenderLayer.getCutout());
-        BlockRenderLayerMap.INSTANCE.putBlock(CursedPlantBlocks.DUAT_FERN, RenderLayer.getCutout());
-        BlockRenderLayerMap.INSTANCE.putBlock(CursedPlantBlocks.VINE_OF_APEP, RenderLayer.getCutout());
-        BlockRenderLayerMap.INSTANCE.putBlock(CursedPlantBlocks.BLOODSHADE_THICKET, RenderLayer.getCutout());
-        
-        // Register additional cursed plant blocks with cutout render layer
-        BlockRenderLayerMap.INSTANCE.putBlock(CursedPlantBlocks.DUAMUTEF_CAP, RenderLayer.getCutout());
-        BlockRenderLayerMap.INSTANCE.putBlock(CursedPlantBlocks.ISFET_FROND, RenderLayer.getCutout());
-        BlockRenderLayerMap.INSTANCE.putBlock(CursedPlantBlocks.ISFET_SHRUB, RenderLayer.getCutout());
-        BlockRenderLayerMap.INSTANCE.putBlock(CursedPlantBlocks.KHEMNU_POD, RenderLayer.getCutout());
-        BlockRenderLayerMap.INSTANCE.putBlock(CursedPlantBlocks.KHERU_MOSS, RenderLayer.getCutout());
-        BlockRenderLayerMap.INSTANCE.putBlock(CursedPlantBlocks.MENFET_SPRIG, RenderLayer.getCutout());
-        BlockRenderLayerMap.INSTANCE.putBlock(CursedPlantBlocks.REED_OF_SEKHEM, RenderLayer.getCutout());
-        BlockRenderLayerMap.INSTANCE.putBlock(CursedPlantBlocks.SUTEKH_COIL, RenderLayer.getCutout());
+        // Cursed plant blocks are registered in CursedPlantRenderLayer.register()
+        // which is called in onInitializeClient() - do not register them again here
     }
     
     /**

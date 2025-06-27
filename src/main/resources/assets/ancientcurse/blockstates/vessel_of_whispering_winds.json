@@ -1,7 +1,19 @@
 {
   "variants": {
-    "": {
+    "facing=north": {
       "model": "ancientcurse:block/vessel_of_whispering_winds"
+    },
+    "facing=east": {
+      "model": "ancientcurse:block/vessel_of_whispering_winds",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "ancientcurse:block/vessel_of_whispering_winds",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "ancientcurse:block/vessel_of_whispering_winds",
+      "y": 270
     }
   }
 }

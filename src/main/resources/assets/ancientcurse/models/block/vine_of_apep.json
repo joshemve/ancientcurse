@@ -2,5 +2,6 @@
   "parent": "minecraft:block/cross",
   "textures": {
     "cross": "ancientcurse:block/vine_of_apep"
-  }
+  },
+  "render_type": "cutout"
 }

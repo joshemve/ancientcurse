@@ -9,6 +9,7 @@ import com.ancientcurse.item.ScarabIncenseItem;
 import com.ancientcurse.item.ScarabTalismanItem;
 import com.ancientcurse.item.SekhemDateItem;
 import com.ancientcurse.item.SnakeStaffItem;
+import com.ancientcurse.item.WitheredStaffItem;
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
@@ -20,6 +21,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.PickaxeItem;
 import net.minecraft.item.ShovelItem;
 import net.minecraft.item.SwordItem;
+import net.minecraft.item.SpawnEggItem;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.util.Identifier;
@@ -117,8 +119,28 @@ public class ModItems {
     public static final ElixirOfRasSparkItem ELIXIR_OF_RAS_SPARK = new ElixirOfRasSparkItem(new FabricItemSettings());
     public static final AncientPickItem ANCIENT_PICK = new AncientPickItem(new FabricItemSettings());
     public static final SnakeStaffItem SNAKE_STAFF = new SnakeStaffItem(new FabricItemSettings());
+    public static final WitheredStaffItem WITHERED_STAFF = new WitheredStaffItem(new FabricItemSettings());
     public static final ScarabIncenseItem SCARAB_INCENSE_ITEM = new ScarabIncenseItem(new FabricItemSettings());
-    public static final EternalSigilItem ETERNAL_SIGIL = new EternalSigilItem(new FabricItemSettings());
+    public static final EternalSigilItem ETERNAL_SIGIL = new EternalSigilItem(
+        new FabricItemSettings().maxCount(1)
+    );
+    
+    // Define the Withered Pharaoh spawn egg
+    public static final SpawnEggItem WITHERED_PHARAOH_SPAWN_EGG = new SpawnEggItem(
+        ModEntities.WITHERED_PHARAOH, 
+        0x8B4513, // Primary color (dark brown)
+        0xFFD700, // Secondary color (gold)
+        new FabricItemSettings()
+    );
+    
+    // Define the Djeserhath spawn egg
+    public static final SpawnEggItem DJESERHATH_SPAWN_EGG = new SpawnEggItem(
+        ModEntities.DJESERHATH, 
+        0x4B7F52, // Primary color (dark green)
+        0xAD4E4E, // Secondary color (reddish)
+        new FabricItemSettings()
+    );
+    
     public static final Item SCARAB_SHELL = new Item(new FabricItemSettings());
     public static final Item SCARAB_SHELL_FRAGMENT = new Item(new FabricItemSettings());
 
@@ -376,6 +398,13 @@ public class ModItems {
             SNAKE_STAFF
         );
         
+        // Register Withered Staff
+        Registry.register(
+            Registries.ITEM,
+            new Identifier(AncientCurse.MOD_ID, "withered_staff"),
+            WITHERED_STAFF
+        );
+        
         // Register Scarab Incense Item
         Registry.register(
             Registries.ITEM,
@@ -407,6 +436,20 @@ public class ModItems {
             Registries.ITEM,
             new Identifier(AncientCurse.MOD_ID, "bronze_khopesh"),
             BRONZE_KHOPESH
+        );
+        
+        // Register the Withered Pharaoh spawn egg
+        Registry.register(
+            Registries.ITEM, 
+            new Identifier(AncientCurse.MOD_ID, "withered_pharaoh_spawn_egg"),
+            WITHERED_PHARAOH_SPAWN_EGG
+        );
+        
+        // Register the Djeserhath spawn egg
+        Registry.register(
+            Registries.ITEM, 
+            new Identifier(AncientCurse.MOD_ID, "djeserhath_spawn_egg"),
+            DJESERHATH_SPAWN_EGG
         );
         
         // Vessel items are registered in ModBlocks.java

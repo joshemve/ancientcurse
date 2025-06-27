@@ -1,21 +1,19 @@
 {
   "variants": {
-    "": [
-      {
-        "model": "ancientcurse:block/canopic_urn_of_bastet"
-      },
-      {
-        "model": "ancientcurse:block/canopic_urn_of_bastet",
-        "y": 90
-      },
-      {
-        "model": "ancientcurse:block/canopic_urn_of_bastet",
-        "y": 180
-      },
-      {
-        "model": "ancientcurse:block/canopic_urn_of_bastet",
-        "y": 270
-      }
-    ]
+    "facing=north": {
+      "model": "ancientcurse:block/canopic_urn_of_bastet"
+    },
+    "facing=east": {
+      "model": "ancientcurse:block/canopic_urn_of_bastet",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "ancientcurse:block/canopic_urn_of_bastet",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "ancientcurse:block/canopic_urn_of_bastet",
+      "y": 270
+    }
   }
 }

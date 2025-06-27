@@ -109,12 +109,12 @@ public class ModBlocks {
     
     // Dead Papyrus Reed - dried plant that grows near the Nile
     public static final Block DEAD_PAPYRUS_REED = new DeadPapyrusReedBlock(
-        FabricBlockSettings.create()
-            .mapColor(MapColor.PALE_YELLOW)
-            .strength(0.4f)
-            .sounds(BlockSoundGroup.GRASS)
+        FabricBlockSettings.copyOf(Blocks.GRASS)
             .nonOpaque()
             .noCollision()
+            .breakInstantly()
+            .sounds(BlockSoundGroup.GRASS)
+            .luminance(0)
             .notSolid()
     );
 
@@ -154,6 +154,7 @@ public class ModBlocks {
             .nonOpaque()
             .noCollision()
             .breakInstantly()
+            .notSolid()
     );
 
     // Nile Mud - thick mud deposits from the Nile
@@ -436,15 +437,13 @@ public class ModBlocks {
 
     // Egyptian Spinach - edible leafy plant
     public static final Block EGYPTIAN_SPINACH = new EgyptianSpinachBlock(
-        FabricBlockSettings.create()
-            .mapColor(MapColor.DARK_GREEN)
-            .strength(0.3f)
-            .sounds(BlockSoundGroup.GRASS)
+        FabricBlockSettings.copyOf(Blocks.GRASS)
             .nonOpaque()
             .noCollision()
-            .notSolid()
+            .breakInstantly()
+            .sounds(BlockSoundGroup.GRASS)
     );
-
+    
     // Euphorbia Helioscopia - desert flowering plant
     public static final Block EUPHORBIA_HELIOSCOPIA = new EuphorbiaHelioscopiaBlock(
         FabricBlockSettings.create()

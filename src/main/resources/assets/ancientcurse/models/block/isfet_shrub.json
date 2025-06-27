@@ -2,5 +2,6 @@
   "parent": "minecraft:block/cross",
   "textures": {
     "cross": "ancientcurse:block/isfet_shrub"
-  }
+  },
+  "render_type": "cutout"
 }

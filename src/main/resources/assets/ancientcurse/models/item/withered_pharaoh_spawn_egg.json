@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "ancientcurse:item/withered_pharaoh_spawn_egg"
+  }
+}

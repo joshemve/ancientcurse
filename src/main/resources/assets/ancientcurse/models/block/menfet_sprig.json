@@ -2,5 +2,6 @@
   "parent": "minecraft:block/cross",
   "textures": {
     "cross": "ancientcurse:block/menfet_sprig"
-  }
+  },
+  "render_type": "cutout"
 }

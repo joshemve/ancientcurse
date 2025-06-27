@@ -1,6 +1,7 @@
 {
   "parent": "minecraft:block/tinted_cross",
   "textures": {
-    "cross": "ancientcurse:block/dead_papyrus_reed"
-  }
+    "cross": "ancientcurse:block/dead_papyrus_reed_tinted"
+  },
+  "render_type": "cutout"
 } 

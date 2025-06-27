@@ -2,5 +2,6 @@
   "parent": "minecraft:block/cross",
   "textures": {
     "cross": "ancientcurse:block/sutekh_coil"
-  }
+  },
+  "render_type": "cutout"
 }

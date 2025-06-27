@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "axis=y": { "model": "ancientcurse:block/stacked_pillar" },
+    "axis=z": { "model": "ancientcurse:block/stacked_pillar", "x": 90 },
+    "axis=x": { "model": "ancientcurse:block/stacked_pillar", "x": 90, "y": 90 }
+  }
+}

@@ -1,9 +1,7 @@
 package com.ancientcurse.entity;
 
-import com.ancientcurse.AncientCurse;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.mob.PathAwareEntity;
-import net.minecraft.util.Identifier;
 import net.minecraft.world.World;
 import software.bernie.geckolib.animatable.GeoEntity;
 import software.bernie.geckolib.core.animatable.GeoAnimatable;

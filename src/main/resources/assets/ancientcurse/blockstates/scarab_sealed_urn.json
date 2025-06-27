@@ -1,21 +1,19 @@
 {
   "variants": {
-    "": [
-      {
-        "model": "ancientcurse:block/scarab_sealed_urn"
-      },
-      {
-        "model": "ancientcurse:block/scarab_sealed_urn",
-        "y": 90
-      },
-      {
-        "model": "ancientcurse:block/scarab_sealed_urn",
-        "y": 180
-      },
-      {
-        "model": "ancientcurse:block/scarab_sealed_urn",
-        "y": 270
-      }
-    ]
+    "facing=north": {
+      "model": "ancientcurse:block/scarab_sealed_urn"
+    },
+    "facing=east": {
+      "model": "ancientcurse:block/scarab_sealed_urn",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "ancientcurse:block/scarab_sealed_urn",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "ancientcurse:block/scarab_sealed_urn",
+      "y": 270
+    }
   }
 }

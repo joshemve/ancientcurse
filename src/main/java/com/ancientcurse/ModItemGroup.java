@@ -217,8 +217,9 @@ public class ModItemGroup {
                 safeAdd(entries, ModItems.SCARAB_TALISMAN);
                 safeAdd(entries, ModItems.SCARAB_SHELL);
                 safeAdd(entries, ModItems.SCARAB_SHELL_FRAGMENT);
-                safeAdd(entries, ModItems.THE_BROKEN_CROOK);
-                safeAdd(entries, ModItems.VESSEL_OF_THE_DUAT);
+                // Temporarily disabled items
+                // safeAdd(entries, ModItems.THE_BROKEN_CROOK);
+                // safeAdd(entries, ModItems.VESSEL_OF_THE_DUAT);
                 // Vessel items are already added in the Blocks section
                 
                 // Magical items
@@ -226,8 +227,13 @@ public class ModItemGroup {
                 safeAdd(entries, ModItems.ELIXIR_OF_RAS_SPARK);
                 safeAdd(entries, ModItems.ANCIENT_PICK);
                 safeAdd(entries, ModItems.SNAKE_STAFF);
+                safeAdd(entries, ModItems.WITHERED_STAFF);
                 safeAdd(entries, ModItems.SCARAB_INCENSE_ITEM);
                 safeAdd(entries, ModItems.ETERNAL_SIGIL);
+                
+                // Spawn eggs
+                safeAdd(entries, ModItems.WITHERED_PHARAOH_SPAWN_EGG);
+                safeAdd(entries, ModItems.DJESERHATH_SPAWN_EGG);
             })
             .build()
     );

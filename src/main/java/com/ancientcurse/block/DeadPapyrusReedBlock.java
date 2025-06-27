@@ -4,8 +4,8 @@ import com.ancientcurse.ModBlocks;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.block.PlantBlock;
 import net.minecraft.block.ShapeContext;
-import net.minecraft.client.render.RenderLayer;
 import net.minecraft.entity.ai.pathing.NavigationType;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.util.math.BlockPos;
@@ -19,7 +19,7 @@ import net.minecraft.world.WorldView;
  * Implements a dead papyrus reed block that can only be placed
  * on specific blocks and has a non-full collision box.
  */
-public class DeadPapyrusReedBlock extends Block {
+public class DeadPapyrusReedBlock extends PlantBlock {
     protected static final VoxelShape SHAPE = Block.createCuboidShape(2.0, 0.0, 2.0, 14.0, 14.0, 14.0);
     
     public DeadPapyrusReedBlock(Settings settings) {
@@ -72,4 +72,9 @@ public class DeadPapyrusReedBlock extends Block {
     public boolean canPathfindThrough(BlockState state, BlockView world, BlockPos pos, NavigationType type) {
         return type == NavigationType.AIR && !this.collidable || super.canPathfindThrough(state, world, pos, type);
     }
-} 
+    
+    @Override
+    protected boolean canPlantOnTop(BlockState floor, BlockView world, BlockPos pos) {
+        return isSupportingBlock(floor);
+    }
+}

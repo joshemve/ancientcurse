@@ -2,5 +2,6 @@
   "parent": "minecraft:block/cross",
   "textures": {
     "cross": "ancientcurse:block/papyrus_reed"
-  }
+  },
+  "render_type": "cutout"
 } 

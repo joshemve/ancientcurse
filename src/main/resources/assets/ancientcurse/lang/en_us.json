@@ -26,6 +26,10 @@
   "item.ancientcurse.spinach.tooltip": "Ancient Curse",
   "item.ancientcurse.rope": "Rope",
   "item.ancientcurse.rope.tooltip": "Ancient Curse",
+
+  "entity.ancientcurse.djeserhath": "Djeserhath",
+  "item.ancientcurse.djeserhath_spawn_egg": "Djeserhath Spawn Egg",
+  "item.ancientcurse.djeserhath_spawn_egg.tooltip": "Ancient Curse",
   
   "item.ancientcurse.bronze_blend": "Bronze Blend",
 
@@ -83,6 +87,8 @@
   "item.ancientcurse.ancient_pick.tooltip": "Chance to preserve durability and grant haste when mining",
   "item.ancientcurse.snake_staff": "Snake Staff",
   "item.ancientcurse.snake_staff.tooltip": "Poisons nearby enemies when charged",
+  "item.ancientcurse.withered_staff": "Withered Staff",
+  "item.ancientcurse.withered_staff.tooltip": "Launches wither skulls when charged",
   "item.ancientcurse.scarab_incense_item": "Scarab Incense",
   "item.ancientcurse.scarab_incense_item.tooltip": "Provides protection, regeneration, and night vision when used",
   "item.ancientcurse.eternal_sigil": "Eternal Sigil",
@@ -185,6 +191,9 @@
   "block.ancientcurse.scarab_sealed_urn": "Scarab Sealed Urn",
   "block.ancientcurse.scarab_sealed_urn.tooltip": "Ancient Curse",
   "block.ancientcurse.serpent_vessel_of_wadjet": "Serpent Vessel of Wadjet",
+  
+  "entity.ancientcurse.withered_pharaoh": "Withered Pharaoh",
+  "item.ancientcurse.withered_pharaoh_spawn_egg": "Withered Pharaoh Spawn Egg",
   "block.ancientcurse.serpent_vessel_of_wadjet.tooltip": "Ancient Curse",
   "block.ancientcurse.black_cobblestone": "Black Cobblestone",
   "block.ancientcurse.black_dust": "Black Dust",
@@ -207,15 +216,25 @@
   
   "block.ancientcurse.deshret_scale": "Deshret Scale",
   "block.ancientcurse.deshret_pillar": "Deshret Pillar",
+  "block.ancientcurse.deshret_pillar.tooltip": "Ancient Curse",
   "block.ancientcurse.egyptian_gold_pillar": "Egyptian Gold Pillar",
+  "block.ancientcurse.egyptian_gold_pillar.tooltip": "Ancient Curse",
   "block.ancientcurse.mudstone_pillar": "Mudstone Pillar",
+  "block.ancientcurse.mudstone_pillar.tooltip": "Ancient Curse",
+  "block.ancientcurse.stacked_pillar": "Stacked Pillar",
+  "block.ancientcurse.stacked_pillar.tooltip": "Ancient Curse",
   
   "block.ancientcurse.blue_head_stone": "Blue Headstone",
+  "block.ancientcurse.blue_head_stone.tooltip": "Ancient Curse",
   "block.ancientcurse.gold_headstone": "Gold Headstone",
+  "block.ancientcurse.gold_headstone.tooltip": "Ancient Curse",
   "block.ancientcurse.green_head_stone": "Green Headstone",
+  "block.ancientcurse.green_head_stone.tooltip": "Ancient Curse",
   
   "block.ancientcurse.scroll_shelf": "Scroll Shelf",
+  "block.ancientcurse.scroll_shelf.tooltip": "Ancient Curse",
   "block.ancientcurse.wooden_crate": "Wooden Crate",
+  "block.ancientcurse.wooden_crate.tooltip": "Ancient Curse",
   "block.ancientcurse.ancient_wood": "Ancient Wood",
   "block.ancientcurse.ancient_wood.tooltip": "Ancient Curse",
   "block.ancientcurse.ancient_udjat": "Ancient Udjat",

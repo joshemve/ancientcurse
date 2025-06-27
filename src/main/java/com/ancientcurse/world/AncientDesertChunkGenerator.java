@@ -1,7 +1,6 @@
 package com.ancientcurse.world;
 
 import com.ancientcurse.AncientCurse;
-import com.ancientcurse.world.biome.ModBiomes;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.BlockState;
@@ -11,7 +10,6 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.ChunkRegion;
 import net.minecraft.world.HeightLimitView;
 import net.minecraft.world.Heightmap;
-import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.source.BiomeAccess;
 import net.minecraft.world.biome.source.BiomeSource;
 import net.minecraft.world.chunk.Chunk;
@@ -24,8 +22,6 @@ import net.minecraft.world.gen.noise.NoiseConfig;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKey;
 import net.minecraft.world.StructureWorldAccess;
 
 public class AncientDesertChunkGenerator extends ChunkGenerator {
@@ -38,9 +34,6 @@ public class AncientDesertChunkGenerator extends ChunkGenerator {
 
     // Prevent early access to vanilla block states by making these non-static and initializing them on demand
     // This prevents intrusive holders errors during startup
-    private BlockState WATER_LILY;
-    private BlockState GRASS;
-    private BlockState DIRT;
     private BlockState SAND;
     private BlockState SANDSTONE;
     private BlockState WATER;
@@ -67,9 +60,6 @@ public class AncientDesertChunkGenerator extends ChunkGenerator {
         
         try {
             // Initialize all block states here
-            WATER_LILY = Blocks.LILY_PAD.getDefaultState();
-            GRASS = Blocks.GRASS_BLOCK.getDefaultState();
-            DIRT = Blocks.DIRT.getDefaultState();
             SAND = Blocks.SAND.getDefaultState();
             SANDSTONE = Blocks.SANDSTONE.getDefaultState();
             WATER = Blocks.WATER.getDefaultState();
@@ -352,6 +342,16 @@ public class AncientDesertChunkGenerator extends ChunkGenerator {
         return this;
     }
 
+    /**
+     * Places a palm tree at the specified position in the chunk.
+     * 
+     * NOTE: This method is currently not used in active code but is kept for future feature implementation.
+     * It will be used in a future update for custom palm tree generation in desert oases.
+     * Do not remove this method as it's part of planned features.
+     * 
+     * @param chunk The chunk to place the palm tree in
+     * @param pos The position to place the palm tree at
+     */
     private void placePalmTree(Chunk chunk, BlockPos pos) {
         try {
             // Simple palm tree generation
