@@ -1,6 +1,7 @@
 package com.ancientcurse.world;
 
 import com.ancientcurse.AncientCurse;
+import com.ancientcurse.ModBlocks;
 import net.fabricmc.fabric.api.biome.v1.BiomeModifications;
 import net.fabricmc.fabric.api.biome.v1.BiomeSelectors;
 import net.fabricmc.fabric.api.biome.v1.ModificationPhase;
@@ -32,39 +33,23 @@ public class AncientDesertSurfaceRules {
     
     // Create surface rules for the ancient desert biome
     public static MaterialRules.MaterialRule createAncientDesertSurfaceRules() {
-        // TEMPORARILY DISABLED TO PREVENT INTRUSIVE HOLDERS ERRORS
-        // This method was accessing vanilla block states too early in the initialization process
-        // We'll return an empty rule for now to allow the mod to load
-        AncientCurse.LOGGER.warn("Ancient Desert surface rules are temporarily disabled to prevent intrusive holders errors");
-        
-        // Return an empty sequence that doesn't access any vanilla blocks
-        return MaterialRules.sequence();
-        
-        /* Original implementation - commented out to fix intrusive holders error
-        // Create a biome condition for our ancient desert
-        @SuppressWarnings("unchecked")
-        MaterialRules.MaterialCondition isAncientDesert = MaterialRules.biome(
-            new RegistryKey[]{AncientDesertBiome.ANCIENT_DESERT_KEY}
-        );
-        
-        // Define the surface rules for our biome
-        MaterialRules.MaterialRule sandSurface = MaterialRules.sequence(
-            // Top layer is sand
+        // Create surface rules that use smooth sand
+        return MaterialRules.sequence(
+            // Top layer is smooth sand
             MaterialRules.condition(
                 MaterialRules.surface(),
-                MaterialRules.block(Blocks.SAND.getDefaultState())
+                MaterialRules.block(ModBlocks.SMOOTH_SAND.getDefaultState())
             ),
             // Subsurface layer is sandstone
             MaterialRules.condition(
-                MaterialRules.stoneDepth(1, true, VerticalSurfaceType.FLOOR),
-                MaterialRules.block(Blocks.SANDSTONE.getDefaultState())
+                MaterialRules.stoneDepth(0, true, VerticalSurfaceType.FLOOR),
+                MaterialRules.sequence(
+                    MaterialRules.condition(
+                        MaterialRules.stoneDepth(0, false, 5, VerticalSurfaceType.FLOOR),
+                        MaterialRules.block(Blocks.SANDSTONE.getDefaultState())
+                    )
+                )
             )
         );
-        
-        // Apply our rules only to our biome
-        return MaterialRules.sequence(
-            MaterialRules.condition(isAncientDesert, sandSurface)
-        );
-        */
     }
 }

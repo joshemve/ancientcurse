@@ -4,6 +4,7 @@
   "package": "com.ancientcurse.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
+    "SingleBiomePresetMixin"
   ],
   "client": [
   ],

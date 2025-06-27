@@ -3,8 +3,7 @@ package com.ancientcurse.world.biome;
 import com.ancientcurse.AncientCurse;
 
 /**
- * Template for biome modifications that can be implemented later.
- * Currently using vanilla Minecraft biome settings.
+ * Handles biome modifications for Ancient Curse
  */
 public class BiomeModifier {
     
@@ -12,9 +11,9 @@ public class BiomeModifier {
      * Register biome modifiers
      */
     public static void register() {
-        AncientCurse.LOGGER.info("Custom biome modifiers disabled - using vanilla Minecraft biome features");
+        AncientCurse.LOGGER.info("Registering Ancient Curse biome modifiers");
         
-        // Biome modifier registration is disabled.
-        // You can implement this method to register custom biome modifiers later.
+        // Biome modifications will be handled by the chunk generator mixin
+        // to ensure smooth sand replacement works properly
     }
 }

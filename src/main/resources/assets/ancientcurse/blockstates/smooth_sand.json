@@ -1,21 +1,7 @@
 {
   "variants": {
-    "": [
-      {
-        "model": "ancientcurse:block/smooth_sand"
-      },
-      {
-        "model": "ancientcurse:block/smooth_sand",
-        "y": 90
-      },
-      {
-        "model": "ancientcurse:block/smooth_sand",
-        "y": 180
-      },
-      {
-        "model": "ancientcurse:block/smooth_sand",
-        "y": 270
-      }
-    ]
+    "": {
+      "model": "ancientcurse:block/smooth_sand"
+    }
   }
 }
