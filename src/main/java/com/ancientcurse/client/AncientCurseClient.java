@@ -9,9 +9,9 @@ import com.ancientcurse.client.color.RockColorProvider;
 import com.ancientcurse.client.render.WitheredPharaohRenderer;
 import com.ancientcurse.client.render.entity.SnakeHeadProjectileRenderer;
 import com.ancientcurse.entity.renderer.AnubisEntityRenderer;
-import com.ancientcurse.entity.renderer.BabyLotusRenderer;
+import com.ancientcurse.entity.renderer.BabyLocusRenderer;
 import com.ancientcurse.entity.renderer.DjeserhathEntityRenderer;
-import com.ancientcurse.entity.renderer.LotusRenderer;
+import com.ancientcurse.entity.renderer.LocusRenderer;
 import com.ancientcurse.entity.renderer.SpitBallRenderer;
 import com.ancientcurse.util.TooltipHelper;
 import net.fabricmc.api.ClientModInitializer;
@@ -97,11 +97,11 @@ public class AncientCurseClient implements ClientModInitializer {
         // Register the Djeserhath renderer
         EntityRendererRegistry.register(ModEntities.DJESERHATH, DjeserhathEntityRenderer::new);
         
-        // Register the Lotus renderer
-        EntityRendererRegistry.register(ModEntities.LOTUS, LotusRenderer::new);
+        // Register the Locus renderer (correct naming to match asset files)
+        EntityRendererRegistry.register(ModEntities.LOCUS, LocusRenderer::new);
         
-        // Register the Baby Lotus renderer
-        EntityRendererRegistry.register(ModEntities.BABY_LOTUS, BabyLotusRenderer::new);
+        // Register the Baby Locus renderer (bug babies)
+        EntityRendererRegistry.register(ModEntities.BABY_LOCUS, BabyLocusRenderer::new);
         
         // Register the SpitBall projectile renderer
         EntityRendererRegistry.register(ModEntities.SPIT_BALL, SpitBallRenderer::new);

@@ -242,7 +242,8 @@ public class ModItemGroup {
                 safeAdd(entries, ModItems.WITHERED_PHARAOH_SPAWN_EGG);
                 safeAdd(entries, ModItems.DJESERHATH_SPAWN_EGG);
                 safeAdd(entries, ModItems.ANUBIS_SPAWN_EGG);
-                safeAdd(entries, ModItems.LOTUS_SPAWN_EGG);
+                safeAdd(entries, ModItems.LOCUS_SPAWN_EGG);
+                // Lotus spawn egg removed to fix conflicts
             })
             .build()
     );

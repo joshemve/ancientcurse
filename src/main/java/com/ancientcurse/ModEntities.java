@@ -1,9 +1,9 @@
 package com.ancientcurse;
 
 import com.ancientcurse.entity.AnubisEntity;
-import com.ancientcurse.entity.BabyLotusEntity;
+import com.ancientcurse.entity.BabyLocusEntity;
 import com.ancientcurse.entity.DjeserhathEntity;
-import com.ancientcurse.entity.LotusEntity;
+import com.ancientcurse.entity.LocusEntity;
 import com.ancientcurse.entity.SnakeHeadProjectileEntity;
 import com.ancientcurse.entity.SpitBallEntity;
 import com.ancientcurse.entity.WitheredPharaohEntity;
@@ -72,21 +72,22 @@ public class ModEntities {
             .build()
     );
     
-    // Register the Lotus entity
-    public static final EntityType<LotusEntity> LOTUS = Registry.register(
+    // Register the Locus entity (correctly named to match asset files)
+    public static final EntityType<LocusEntity> LOCUS = Registry.register(
         Registries.ENTITY_TYPE,
-        new Identifier(AncientCurse.MOD_ID, "lotus"),
-        FabricEntityTypeBuilder.create(SpawnGroup.MONSTER, LotusEntity::new)
+        new Identifier(AncientCurse.MOD_ID, "locus"),
+        FabricEntityTypeBuilder.create(SpawnGroup.MONSTER, LocusEntity::new)
             .dimensions(EntityDimensions.fixed(1.0f, 1.5f))
             .trackRangeBlocks(64)
+            .trackedUpdateRate(3)
             .build()
     );
     
-    // Register the Baby Lotus entity
-    public static final EntityType<BabyLotusEntity> BABY_LOTUS = Registry.register(
+    // Register the Baby Locus entity (bug babies, not plant babies)
+    public static final EntityType<BabyLocusEntity> BABY_LOCUS = Registry.register(
         Registries.ENTITY_TYPE,
-        new Identifier(AncientCurse.MOD_ID, "baby_lotus"),
-        FabricEntityTypeBuilder.create(SpawnGroup.MONSTER, BabyLotusEntity::new)
+        new Identifier(AncientCurse.MOD_ID, "baby_locus"),
+        FabricEntityTypeBuilder.create(SpawnGroup.MONSTER, BabyLocusEntity::new)
             .dimensions(EntityDimensions.fixed(0.5f, 0.75f)) // Half the size of adult
             .trackRangeBlocks(32)
             .build()
@@ -102,8 +103,8 @@ public class ModEntities {
         FabricDefaultAttributeRegistry.register(WITHERED_PHARAOH, WitheredPharaohEntity.createWitheredPharaohAttributes());
         FabricDefaultAttributeRegistry.register(DJESERHATH, DjeserhathEntity.createDjeserhathAttributes());
         FabricDefaultAttributeRegistry.register(ANUBIS, AnubisEntity.createAnubisAttributes());
-        FabricDefaultAttributeRegistry.register(LOTUS, LotusEntity.createLotusAttributes());
-        FabricDefaultAttributeRegistry.register(BABY_LOTUS, BabyLotusEntity.createBabyLotusAttributes());
+        FabricDefaultAttributeRegistry.register(LOCUS, LocusEntity.createLocusAttributes());
+        FabricDefaultAttributeRegistry.register(BABY_LOCUS, BabyLocusEntity.createBabyLocusAttributes());
     }
     
     /**

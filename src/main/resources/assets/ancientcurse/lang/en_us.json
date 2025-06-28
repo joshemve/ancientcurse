@@ -35,9 +35,11 @@
   "item.ancientcurse.djeserhath_spawn_egg": "Djeserhath Spawn Egg",
   "item.ancientcurse.djeserhath_spawn_egg.tooltip": "Ancient Curse",
   
-  "entity.ancientcurse.lotus": "Lotus",
-  "item.ancientcurse.lotus_spawn_egg": "Lotus Spawn Egg",
-  "item.ancientcurse.lotus_spawn_egg.tooltip": "Summon a mystical lotus creature",
+  "entity.ancientcurse.locus": "Locus",
+  "item.ancientcurse.locus_spawn_egg": "Locus Spawn Egg",
+  "item.ancientcurse.locus_spawn_egg.tooltip": "Summon a mystical desert locust",
+  
+  "entity.ancientcurse.baby_locus": "Baby Locus",
   
   "entity.ancientcurse.snake_head_projectile": "Snake Head Projectile",
   

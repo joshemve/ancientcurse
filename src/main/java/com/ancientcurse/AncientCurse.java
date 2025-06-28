@@ -11,7 +11,7 @@ import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.util.Identifier;
 import net.minecraft.world.gen.WorldPreset;
-import com.ancientcurse.command.LotusSwarmCommand;
+import com.ancientcurse.command.LocusSwarmCommand;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 // import com.ancientcurse.screen.ModScreenHandlers;
 // import com.ancientcurse.worldgen.ModWorldGen;
@@ -149,7 +149,7 @@ public class AncientCurse implements ModInitializer {
     private void registerCommands() {
         LOGGER.info("Registering commands for " + MOD_ID);
         
-        // Register the Lotus Swarm command
-        CommandRegistrationCallback.EVENT.register(LotusSwarmCommand::register);
+        // Register the Locus Swarm command
+        CommandRegistrationCallback.EVENT.register(LocusSwarmCommand::register);
     }
 }

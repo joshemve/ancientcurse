@@ -151,11 +151,11 @@ public class ModItems {
         new FabricItemSettings()
     );
     
-    // Lotus spawn egg
-    public static final SpawnEggItem LOTUS_SPAWN_EGG = new SpawnEggItem(
-        ModEntities.LOTUS, 
-        0x90EE90, // Primary color (light green)
-        0x32CD32, // Secondary color (lime green)
+    // Locus spawn egg (correctly named to match asset files: locus.geo.json, locus.png, etc.)
+    public static final SpawnEggItem LOCUS_SPAWN_EGG = new SpawnEggItem(
+        ModEntities.LOCUS, 
+        0x4A5D23, // Primary color (dark olive green)
+        0x7B8A3A, // Secondary color (olive green)
         new FabricItemSettings()
     );
     
@@ -490,13 +490,11 @@ public class ModItems {
             ANUBIS_SPAWN_EGG
         );
         
-        // Register the Lotus spawn egg
+        // Register the Locus spawn egg
         Registry.register(
             Registries.ITEM, 
-            new Identifier(AncientCurse.MOD_ID, "lotus_spawn_egg"),
-            LOTUS_SPAWN_EGG
+            new Identifier(AncientCurse.MOD_ID, "locus_spawn_egg"),
+            LOCUS_SPAWN_EGG
         );
-        
-        // Vessel items are registered in ModBlocks.java
     }
 }

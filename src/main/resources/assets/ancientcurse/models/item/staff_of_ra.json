@@ -1,10 +1,6 @@
 {
   "credit": "Made with Blockbench",
-  "parent": "geckolib:item",
-  "texture_size": [
-    32,
-    32
-  ],
+  "parent": "builtin/entity",
   "display": {
     "thirdperson_righthand": {
       "translation": [
@@ -90,9 +86,5 @@
         1.2
       ]
     }
-  },
-  "textures": {
-    "particle": "ancientcurse:item/staff_of_ra",
-    "layer0": "ancientcurse:item/staff_of_ra"
   }
 }

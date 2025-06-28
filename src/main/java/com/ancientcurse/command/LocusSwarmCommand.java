@@ -2,7 +2,7 @@ package com.ancientcurse.command;
 
 import com.ancientcurse.AncientCurse;
 import com.ancientcurse.ModEntities;
-import com.ancientcurse.entity.LotusEntity;
+import com.ancientcurse.entity.LocusEntity;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.context.CommandContext;
@@ -18,14 +18,14 @@ import net.minecraft.world.World;
 
 import java.util.Random;
 
-public class LotusSwarmCommand {
+public class LocusSwarmCommand {
     
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess access, CommandManager.RegistrationEnvironment environment) {
-        dispatcher.register(CommandManager.literal("lotusswarm")
+        dispatcher.register(CommandManager.literal("locusswarm")
             .requires(source -> source.hasPermissionLevel(2)) // Requires OP level 2
-            .executes(LotusSwarmCommand::executeDefault)
+            .executes(LocusSwarmCommand::executeDefault)
             .then(CommandManager.argument("count", IntegerArgumentType.integer(1, 100))
-                .executes(LotusSwarmCommand::executeWithCount)));
+                .executes(LocusSwarmCommand::executeWithCount)));
     }
     
     private static int executeDefault(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
@@ -51,13 +51,13 @@ public class LotusSwarmCommand {
         Random random = new Random();
         
         // Start the swarm event
-        LotusSwarmEvent swarmEvent = new LotusSwarmEvent(world, playerPos, count, duration, radius);
+        LocusSwarmEvent swarmEvent = new LocusSwarmEvent(world, playerPos, count, duration, radius);
         swarmEvent.start();
         
         // Send feedback to player
-        source.sendFeedback(() -> Text.literal("§6[Lotus Swarm] §fSpawning " + count + " Lotus entities for " + duration + " seconds within " + radius + " blocks radius"), true);
+        source.sendFeedback(() -> Text.literal("§6[Locus Swarm] §fSpawning " + count + " Locus entities for " + duration + " seconds within " + radius + " blocks radius"), true);
         
-        AncientCurse.LOGGER.info("Lotus swarm event started: " + count + " entities, " + duration + " seconds, " + radius + " blocks radius");
+        AncientCurse.LOGGER.info("Locus swarm event started: " + count + " entities, " + duration + " seconds, " + radius + " blocks radius");
         
         return 1;
     }
