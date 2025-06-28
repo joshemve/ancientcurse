@@ -175,6 +175,14 @@ public class ModItems {
         new FabricItemSettings()
     );
     
+    // Khamsin Spread Small spawn egg (Mystical floating rock - Curse system)
+    public static final SpawnEggItem KHAMSIN_SPREAD_SMALL_SPAWN_EGG = new SpawnEggItem(
+        ModEntities.KHAMSIN_SPREAD_SMALL,
+        0x8B4513, // Primary color (saddle brown - rock/sand)
+        0xFF4500, // Secondary color (orange red - mystical energy)
+        new FabricItemSettings()
+    );
+    
     public static final Item SCARAB_SHELL = new Item(new FabricItemSettings());
     public static final Item SCARAB_SHELL_FRAGMENT = new Item(new FabricItemSettings());
 
@@ -525,6 +533,13 @@ public class ModItems {
             Registries.ITEM, 
             new Identifier(AncientCurse.MOD_ID, "thoth_spawn_egg"),
             THOTH_SPAWN_EGG
+        );
+        
+        // Register the Khamsin Spread Small spawn egg
+        Registry.register(
+            Registries.ITEM, 
+            new Identifier(AncientCurse.MOD_ID, "khamsin_spread_small_spawn_egg"),
+            KHAMSIN_SPREAD_SMALL_SPAWN_EGG
         );
     }
 }

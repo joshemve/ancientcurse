@@ -10,10 +10,12 @@ import com.ancientcurse.client.render.WitheredPharaohRenderer;
 import com.ancientcurse.client.render.entity.SnakeHeadProjectileRenderer;
 import com.ancientcurse.entity.renderer.AnubisEntityRenderer;
 import com.ancientcurse.entity.renderer.DjeserhathEntityRenderer;
+import com.ancientcurse.entity.renderer.KhamsinSpreadSmallRenderer;
 import com.ancientcurse.entity.renderer.LocusRenderer;
 import com.ancientcurse.entity.renderer.ScarabBeetleRenderer;
 import com.ancientcurse.entity.renderer.SpitBallRenderer;
 import com.ancientcurse.entity.renderer.ThothRenderer;
+import com.ancientcurse.entity.renderer.KhamsinOrbRenderer;
 import com.ancientcurse.util.TooltipHelper;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
@@ -22,6 +24,7 @@ import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
 import net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 import net.minecraft.client.render.RenderLayer;
+import net.minecraft.client.render.entity.FlyingItemEntityRenderer;
 
 /**
  * Client-side initialization for the Ancient Curse mod.
@@ -107,11 +110,20 @@ public class AncientCurseClient implements ClientModInitializer {
         // Register the Thoth renderer (Egyptian God boss)
         EntityRendererRegistry.register(ModEntities.THOTH, ThothRenderer::new);
         
+        // Register the Khamsin Spread Small renderer (Floating mystical rock)
+        EntityRendererRegistry.register(ModEntities.KHAMSIN_SPREAD_SMALL, KhamsinSpreadSmallRenderer::new);
+        
         // Register the SpitBall projectile renderer
         EntityRendererRegistry.register(ModEntities.SPIT_BALL, SpitBallRenderer::new);
         
         // Register the SnakeHeadProjectile renderer
         EntityRendererRegistry.register(ModEntities.SNAKE_HEAD_PROJECTILE, SnakeHeadProjectileRenderer::new);
+
+        // Register the Khamsin Orb renderer
+        EntityRendererRegistry.register(ModEntities.KHAMSIN_ORB, KhamsinOrbRenderer::new);
+        
+        // Register the Thoth Magic Ball projectile renderer
+        EntityRendererRegistry.register(ModEntities.THOTH_MAGIC_BALL, FlyingItemEntityRenderer::new);
     }
     
     /**

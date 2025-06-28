@@ -238,13 +238,14 @@ public class ModItemGroup {
                 safeAdd(entries, ModItems.SCARAB_INCENSE_ITEM);
                 safeAdd(entries, ModItems.ETERNAL_SIGIL);
                 
-                                // Spawn eggs
+                // Spawn eggs
                 safeAdd(entries, ModItems.WITHERED_PHARAOH_SPAWN_EGG);
                 safeAdd(entries, ModItems.DJESERHATH_SPAWN_EGG);
                 safeAdd(entries, ModItems.ANUBIS_SPAWN_EGG);
                 safeAdd(entries, ModItems.LOCUS_SPAWN_EGG);
                 safeAdd(entries, ModItems.SCARAB_BEETLE_SPAWN_EGG);
                 safeAdd(entries, ModItems.THOTH_SPAWN_EGG);
+                safeAdd(entries, ModItems.KHAMSIN_SPREAD_SMALL_SPAWN_EGG);
                 // Lotus spawn egg removed to fix conflicts
             })
             .build()

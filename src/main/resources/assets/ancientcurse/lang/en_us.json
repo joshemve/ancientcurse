@@ -49,6 +49,10 @@
   "item.ancientcurse.thoth_spawn_egg": "Thoth Spawn Egg",
   "item.ancientcurse.thoth_spawn_egg.tooltip": "Summon the Egyptian god of wisdom and magic",
   
+  "entity.ancientcurse.khamsin_spread_small": "Khamsin Spread (Small)",
+  "item.ancientcurse.khamsin_spread_small_spawn_egg": "Khamsin Spread Small Spawn Egg",
+  "item.ancientcurse.khamsin_spread_small_spawn_egg.tooltip": "Summon a mystical floating rock that's part of the curse system",
+  
   "entity.ancientcurse.snake_head_projectile": "Snake Head Projectile",
   
   "entity.ancientcurse.anubis": "Anubis, the Jackal-Headed God",

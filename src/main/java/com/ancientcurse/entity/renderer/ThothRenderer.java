@@ -71,8 +71,11 @@ public class ThothRenderer extends GeoEntityRenderer<ThothEntity> {
         // Scale up the entity for boss presence
         poseStack.push();
         
-        // Eye tracking for intimidation
-        if (entity.getTarget() != null) {
+        // Base scale for boss presence
+        float baseScale = 1.2f;
+        
+        // Eye tracking for intimidation - only subtle when in combat
+        if (entity.getTarget() != null && entity.isInCombat()) {
             Vec3d targetPos = entity.getTarget().getEyePos();
             Vec3d entityPos = entity.getEyePos();
             Vec3d lookVec = targetPos.subtract(entityPos).normalize();
@@ -87,41 +90,24 @@ public class ThothRenderer extends GeoEntityRenderer<ThothEntity> {
         
         // Special effects during spawn transition
         if (entity.isInSpawnTransition()) {
-            float transitionProgress = (float) entity.getSpawnTransitionTicks() / ThothEntity.SPAWN_TRANSITION_DURATION;
-            
-            // Gradual scale-in effect during spawn
-            float spawnScale = 1.0f + (transitionProgress * 0.3f); // Start 30% larger, scale down to normal
-            poseStack.scale(1.2f * spawnScale, 1.2f * spawnScale, 1.2f * spawnScale);
-            
-            // Spiraling particles effect
-            float spiralAngle = transitionProgress * 720.0f; // Two full rotations
-            poseStack.multiply(net.minecraft.util.math.RotationAxis.POSITIVE_Y.rotationDegrees(spiralAngle));
-            
-            // Vertical oscillation during spawn
-            float yOffset = MathHelper.sin(transitionProgress * (float)Math.PI) * 0.5f;
-            poseStack.translate(0, yOffset, 0);
-            
-            // Lightning-like flicker during spawn (proper packed light usage)
-            if (entity.age % 5 < 2) {
-                packedLight = 0xF000F0; // Full bright flicker
-            }
-        } else {
-            poseStack.scale(1.2f, 1.2f, 1.2f);
+            // No flickering, just ensure base scale is applied
         }
+        // Apply base scale regardless of spawn transition
+        poseStack.scale(baseScale, baseScale, baseScale);
         
-        // Apply floating movement to rendering
-        if (entity.isFloating()) {
+        // Visual effects based on combat state
+        if (!entity.isInCombat() && !entity.isOnGround()) {
+            // Only apply floating effect if actually floating (not on ground)
             float bobOffset = MathHelper.sin((entity.age + partialTick) * 0.05f) * 0.1f;
             poseStack.translate(0, bobOffset, 0);
+        } else if (entity.isInCombat()) {
+            // Combat mode - minimal sway to show divine presence without disrupting movement
+            float groundedSway = MathHelper.sin((entity.age + partialTick) * 0.02f) * 0.02f;
+            poseStack.translate(0, groundedSway, 0);
         }
         
         // Attack-specific visual effects using entity getters
-        if (entity.isMagicBallAttack()) {
-            // Subtle hand glow effect - use safer light enhancement
-            float chargeProgress = (entity.age % 20) / 20.0f;
-            int extraLight = (int)(chargeProgress * 0x20); // Small boost to both components
-            packedLight = Math.min(packedLight + extraLight, 0xF000F0);
-        } else if (entity.isScrollBlastAttack()) {
+        if (entity.isScrollBlastAttack()) {
             // Enhanced vibration effect with Y component and charge progression
             int attackTicks = entity.age % 40; // Assume 2-second attack cycle
             float chargeProgress = Math.min(attackTicks / 20.0f, 1.0f); // First half is charge-up
@@ -132,10 +118,18 @@ public class ThothRenderer extends GeoEntityRenderer<ThothEntity> {
             float shakeZ = ((entity.age + 2) % 4) < 2 ? shakeIntensity : -shakeIntensity;
             
             poseStack.translate(shakeX, shakeY, shakeZ);
-        } else if (entity.isTimeBendAttack()) {
-            // Distortion effect
-            float distortion = MathHelper.sin((entity.age + partialTick) * 0.3f) * 0.05f;
-            poseStack.scale(1.0f + distortion, 1.0f - distortion, 1.0f + distortion);
+        } else if (entity.isTimeBendAttack() || entity.isCastingTimeMagic()) {
+            // Enhanced distortion effect for time magic - the cool red trippy effect!
+            float timeWarp = entity.age + partialTick;
+            float distortionX = MathHelper.sin(timeWarp * 0.3f) * 0.08f;
+            float distortionY = MathHelper.cos(timeWarp * 0.25f) * 0.06f;
+            float distortionZ = MathHelper.sin(timeWarp * 0.35f) * 0.07f;
+            
+            poseStack.scale(1.0f + distortionX, 1.0f + distortionY, 1.0f + distortionZ);
+            
+            // Additional reality-bending effect
+            float warpRotation = MathHelper.sin(timeWarp * 0.1f) * 0.05f;
+            poseStack.multiply(net.minecraft.util.math.RotationAxis.POSITIVE_Y.rotation(warpRotation));
         }
         
         // Enhanced lighting - ensure minimum brightness for boss visibility
@@ -151,7 +145,7 @@ public class ThothRenderer extends GeoEntityRenderer<ThothEntity> {
             enhancedLight = Math.min(enhancedLight, 0xF000F0); // Cap at maximum
         }
         
-        // Render with all the visual effects (scaling, rotation, lighting already provide great spawn transition)
+        // Render with all the visual effects
         super.render(entity, entityYaw, partialTick, poseStack, bufferSource, enhancedLight);
         
         poseStack.pop();
@@ -244,9 +238,6 @@ public class ThothRenderer extends GeoEntityRenderer<ThothEntity> {
             if (animatable.isCastingTimeMagic()) {
                 // Purple for time magic
                 r = 0.7f; g = 0.3f; b = 1.0f;
-            } else if (animatable.isMagicBallAttack()) {
-                // Blue for magic ball
-                r = 0.3f; g = 0.5f; b = 1.0f;
             } else if (animatable.isScrollBlastAttack()) {
                 // Gold for scroll blast
                 r = 1.0f; g = 0.8f; b = 0.3f;

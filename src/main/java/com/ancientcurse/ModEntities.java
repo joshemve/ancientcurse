@@ -2,12 +2,15 @@ package com.ancientcurse;
 
 import com.ancientcurse.entity.AnubisEntity;
 import com.ancientcurse.entity.DjeserhathEntity;
+import com.ancientcurse.entity.KhamsinSpreadSmallEntity;
 import com.ancientcurse.entity.LocusEntity;
 import com.ancientcurse.entity.BabyLocusEntity;
 import com.ancientcurse.entity.ScarabBeetleEntity;
 import com.ancientcurse.entity.SnakeHeadProjectileEntity;
 import com.ancientcurse.entity.SpitBallEntity;
 import com.ancientcurse.entity.ThothEntity;
+import com.ancientcurse.entity.ThothMagicBallEntity;
+import com.ancientcurse.entity.KhamsinOrbEntity;
 import com.ancientcurse.entity.WitheredPharaohEntity;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricEntityTypeBuilder;
@@ -106,7 +109,7 @@ public class ModEntities {
             .trackedUpdateRate(3)
             .build()
     );
-
+    
     // Register the Thoth entity (Egyptian God of Wisdom - Boss)
     public static final EntityType<ThothEntity> THOTH = Registry.register(
         Registries.ENTITY_TYPE,
@@ -117,6 +120,29 @@ public class ModEntities {
             .trackedUpdateRate(1) // Frequent updates for smooth boss movement
             .build()
     );
+    
+    // Register the Khamsin Spread Small entity (Floating mystical rock - Curse system)
+    public static final EntityType<KhamsinSpreadSmallEntity> KHAMSIN_SPREAD_SMALL = Registry.register(
+        Registries.ENTITY_TYPE,
+        new Identifier(AncientCurse.MOD_ID, "khamsin_spread_small"),
+        FabricEntityTypeBuilder.create(SpawnGroup.MONSTER, KhamsinSpreadSmallEntity::new)
+            .dimensions(EntityDimensions.fixed(0.8f, 0.8f)).build());
+
+    public static final EntityType<KhamsinOrbEntity> KHAMSIN_ORB = Registry.register(
+        Registries.ENTITY_TYPE,
+        new Identifier(AncientCurse.MOD_ID, "khamsin_orb"),
+        FabricEntityTypeBuilder.<KhamsinOrbEntity>create(SpawnGroup.MISC, KhamsinOrbEntity::new)
+            .dimensions(EntityDimensions.fixed(0.5f, 0.5f)).build());
+    
+    // Register the Thoth Magic Ball projectile
+    public static final EntityType<ThothMagicBallEntity> THOTH_MAGIC_BALL = Registry.register(
+        Registries.ENTITY_TYPE,
+        new Identifier(AncientCurse.MOD_ID, "thoth_magic_ball"),
+        FabricEntityTypeBuilder.<ThothMagicBallEntity>create(SpawnGroup.MISC, ThothMagicBallEntity::new)
+            .dimensions(EntityDimensions.fixed(0.5f, 0.5f))
+            .trackRangeBlocks(64)
+            .trackedUpdateRate(5) // Smooth projectile movement
+            .build());
     
     /**
      * Registers all mod entities
@@ -132,6 +158,7 @@ public class ModEntities {
         FabricDefaultAttributeRegistry.register(BABY_LOCUS, BabyLocusEntity.createBabyLocusAttributes());
         FabricDefaultAttributeRegistry.register(SCARAB_BEETLE, ScarabBeetleEntity.createScarabBeetleAttributes());
         FabricDefaultAttributeRegistry.register(THOTH, ThothEntity.createThothAttributes());
+        FabricDefaultAttributeRegistry.register(KHAMSIN_SPREAD_SMALL, KhamsinSpreadSmallEntity.createKhamsinSpreadSmallAttributes());
 
     }
     

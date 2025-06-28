@@ -1,0 +1,13 @@
+{
+	"format_version": "1.8.0",
+	"animations": {
+		"animation.khamsin_orb.idle": {
+			"loop": true,
+			"bones": {
+				"orb": {
+					"rotation": ["query.anim_time * 100", "query.anim_time * 100", "query.anim_time * 100"]
+				}
+			}
+		}
+	}
+}

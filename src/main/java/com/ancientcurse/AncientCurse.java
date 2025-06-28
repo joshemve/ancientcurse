@@ -12,6 +12,7 @@ import net.minecraft.registry.RegistryKeys;
 import net.minecraft.util.Identifier;
 import net.minecraft.world.gen.WorldPreset;
 import com.ancientcurse.command.LocusSwarmCommand;
+import com.ancientcurse.ModSounds;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 // import com.ancientcurse.screen.ModScreenHandlers;
 // import com.ancientcurse.worldgen.ModWorldGen;
@@ -103,7 +104,9 @@ public class AncientCurse implements ModInitializer {
         com.ancientcurse.block.registry.BlockRegistry.registerBlockItems();
         
         // Register mod items
+        // ModBlocks.registerBlocks(); // REMOVED: Blocks are now registered through BlockRegistry system
         ModItems.registerItems();
+        ModSounds.registerSounds();
         
         // Register mod entities
         ModEntities.registerEntities();
