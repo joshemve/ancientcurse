@@ -166,6 +166,14 @@ public class ModItems {
         0xB8860B, // Secondary color (dark golden rod - metallic sheen)
         new FabricItemSettings()
     );
+
+    // Thoth spawn egg (Egyptian God boss)
+    public static final SpawnEggItem THOTH_SPAWN_EGG = new SpawnEggItem(
+        ModEntities.THOTH,
+        0x9932CC, // Primary color (dark orchid - magical purple)
+        0xFFD700, // Secondary color (gold - divine)
+        new FabricItemSettings()
+    );
     
     public static final Item SCARAB_SHELL = new Item(new FabricItemSettings());
     public static final Item SCARAB_SHELL_FRAGMENT = new Item(new FabricItemSettings());
@@ -510,6 +518,13 @@ public class ModItems {
             Registries.ITEM, 
             new Identifier(AncientCurse.MOD_ID, "scarab_beetle_spawn_egg"),
             SCARAB_BEETLE_SPAWN_EGG
+        );
+        
+        // Register the Thoth spawn egg
+        Registry.register(
+            Registries.ITEM, 
+            new Identifier(AncientCurse.MOD_ID, "thoth_spawn_egg"),
+            THOTH_SPAWN_EGG
         );
     }
 }

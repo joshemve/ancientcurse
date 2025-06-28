@@ -1,13 +1,13 @@
 package com.ancientcurse;
 
 import com.ancientcurse.entity.AnubisEntity;
-
 import com.ancientcurse.entity.DjeserhathEntity;
 import com.ancientcurse.entity.LocusEntity;
 import com.ancientcurse.entity.BabyLocusEntity;
 import com.ancientcurse.entity.ScarabBeetleEntity;
 import com.ancientcurse.entity.SnakeHeadProjectileEntity;
 import com.ancientcurse.entity.SpitBallEntity;
+import com.ancientcurse.entity.ThothEntity;
 import com.ancientcurse.entity.WitheredPharaohEntity;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricEntityTypeBuilder;
@@ -106,8 +106,17 @@ public class ModEntities {
             .trackedUpdateRate(3)
             .build()
     );
-    
 
+    // Register the Thoth entity (Egyptian God of Wisdom - Boss)
+    public static final EntityType<ThothEntity> THOTH = Registry.register(
+        Registries.ENTITY_TYPE,
+        new Identifier(AncientCurse.MOD_ID, "thoth"),
+        FabricEntityTypeBuilder.create(SpawnGroup.MONSTER, ThothEntity::new)
+            .dimensions(EntityDimensions.fixed(1.5f, 3.0f)) // Tall floating god
+            .trackRangeBlocks(128) // Large tracking range for boss
+            .trackedUpdateRate(1) // Frequent updates for smooth boss movement
+            .build()
+    );
     
     /**
      * Registers all mod entities
@@ -122,6 +131,7 @@ public class ModEntities {
         FabricDefaultAttributeRegistry.register(LOCUS, LocusEntity.createAttributes());
         FabricDefaultAttributeRegistry.register(BABY_LOCUS, BabyLocusEntity.createBabyLocusAttributes());
         FabricDefaultAttributeRegistry.register(SCARAB_BEETLE, ScarabBeetleEntity.createScarabBeetleAttributes());
+        FabricDefaultAttributeRegistry.register(THOTH, ThothEntity.createThothAttributes());
 
     }
     

@@ -23,11 +23,12 @@ public class TooltipHelper {
         "phial_of_lotus_essence",
         "elixir_of_ras_spark",
         "scarab_incense_item",
-        // Exclude all spawn eggs from generic tooltip
+                // Exclude all spawn eggs from generic tooltip
         "locus_spawn_egg",
-        "anubis_spawn_egg", 
+        "anubis_spawn_egg",
         "djeserhath_spawn_egg",
-        "withered_pharaoh_spawn_egg"
+        "withered_pharaoh_spawn_egg",
+        "thoth_spawn_egg"
     );
     
     /**
