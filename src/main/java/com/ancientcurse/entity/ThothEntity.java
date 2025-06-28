@@ -79,6 +79,7 @@ public class ThothEntity extends HostileEntity implements GeoEntity {
     private static final int ATTACK_2_ANIMATION_DURATION = 80; // 4 seconds for attack_2 (scroll blast)
     private static final int TIME_BEND_ANIMATION_DURATION = 120; // 6 seconds for time_bend
     private static final int SUMMON_ANIMATION_DURATION = 100; // 5 seconds for entity_spawn (summon)
+    public static final int SPAWN_TRANSITION_DURATION = 100; // 5 seconds for spawn transition effects
     
     /* ---------- FIELDS ---------- */
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
@@ -797,7 +798,7 @@ public class ThothEntity extends HostileEntity implements GeoEntity {
         dataTracker.set(ATTACK_COOLDOWN, MAX_ATTACK_COOLDOWN * 2);
         dataTracker.set(IS_CASTING_TIME_MAGIC, true);
         timeMagicTicks = 0;
-        attackAnimationTicks = TIME_MAGIC_DURATION; // Longer for time magic
+        attackAnimationTicks = TIME_BEND_ANIMATION_DURATION; // Longer for time magic
         
         // Immediate time pulse effect
         performTimePulse();

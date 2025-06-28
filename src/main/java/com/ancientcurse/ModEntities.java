@@ -132,7 +132,10 @@ public class ModEntities {
         Registries.ENTITY_TYPE,
         new Identifier(AncientCurse.MOD_ID, "khamsin_orb"),
         FabricEntityTypeBuilder.<KhamsinOrbEntity>create(SpawnGroup.MISC, KhamsinOrbEntity::new)
-            .dimensions(EntityDimensions.fixed(0.5f, 0.5f)).build());
+            .dimensions(EntityDimensions.fixed(0.5f, 0.5f))
+            .trackRangeBlocks(64)
+            .trackedUpdateRate(5) // Smooth projectile movement
+            .build());
     
     // Register the Thoth Magic Ball projectile
     public static final EntityType<ThothMagicBallEntity> THOTH_MAGIC_BALL = Registry.register(

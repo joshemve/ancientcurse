@@ -193,7 +193,7 @@ public class KhamsinOrbEntity extends ProjectileEntity implements GeoEntity {
     }
 
     private <T extends GeoEntity> PlayState predicate(AnimationState<T> state) {
-        state.getController().setAnimation(RawAnimation.begin().then("animation.khamsin_orb.idle", Animation.LoopType.LOOP));
+        state.getController().setAnimation(RawAnimation.begin().then("animation.khamsin_orb.spin", Animation.LoopType.LOOP));
         return PlayState.CONTINUE;
     }
 }

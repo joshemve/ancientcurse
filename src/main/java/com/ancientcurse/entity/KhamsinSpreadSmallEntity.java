@@ -347,7 +347,7 @@ public class KhamsinSpreadSmallEntity extends HostileEntity implements GeoEntity
             state.getController().setAnimation(RawAnimation.begin().then("animation.khamsin_spread_small.activated", Animation.LoopType.LOOP));
         } else {
             // Dormant animation - gentle floating
-            state.getController().setAnimation(RawAnimation.begin().then("animation.khamsin_spread_small.dormant", Animation.LoopType.LOOP));
+            state.getController().setAnimation(RawAnimation.begin().then("animation.khamsin_spread_small.unactivated", Animation.LoopType.LOOP));
         }
         
         return PlayState.CONTINUE;
