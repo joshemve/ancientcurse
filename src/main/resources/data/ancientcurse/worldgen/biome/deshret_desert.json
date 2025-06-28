@@ -4,10 +4,10 @@
   "has_precipitation": false,
   "temperature_modifier": "none",
   "effects": {
-    "sky_color": 15592941,
-    "fog_color": 14018047,
-    "water_color": 3830324,
-    "water_fog_color": 4408131,
+    "sky_color": 7715071,
+    "fog_color": 14211263,
+    "water_color": 2395567,
+    "water_fog_color": 1079423,
     "grass_color": 11445760,
     "foliage_color": 10387789,
     "mood_sound": {
@@ -156,7 +156,6 @@
     ],
     [],
     [
-      "minecraft:spring_water",
       "minecraft:spring_lava"
     ],
     [

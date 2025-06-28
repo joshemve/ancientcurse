@@ -4,10 +4,10 @@
   "has_precipitation": false,
   "temperature_modifier": "none",
   "effects": {
-    "sky_color": 14540607,
-    "fog_color": 14018047,
-    "water_color": 3830324,
-    "water_fog_color": 4408131,
+    "sky_color": 8103167,
+    "fog_color": 13882323,
+    "water_color": 2854607,
+    "water_fog_color": 1406463,
     "grass_color": 13157632,
     "foliage_color": 11445760,
     "mood_sound": {
@@ -159,7 +159,6 @@
     ],
     [],
     [
-      "minecraft:spring_water",
       "minecraft:spring_lava",
       "ancientcurse:salt_bed_patch",
       "ancientcurse:oasis_spring"
@@ -168,6 +167,7 @@
       "minecraft:glow_lichen",
       "minecraft:patch_dead_bush",
       "minecraft:patch_cactus_desert",
+      "ancientcurse:cactus_smooth_sand",
       "minecraft:desert_well",
       "ancientcurse:desert_rock_small",
       "ancientcurse:desert_rock_medium",
