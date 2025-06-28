@@ -159,6 +159,14 @@ public class ModItems {
         new FabricItemSettings()
     );
     
+    // Scarab Beetle spawn egg
+    public static final SpawnEggItem SCARAB_BEETLE_SPAWN_EGG = new SpawnEggItem(
+        ModEntities.SCARAB_BEETLE, 
+        0x2B1B0A, // Primary color (dark brown/black - beetle shell)
+        0xB8860B, // Secondary color (dark golden rod - metallic sheen)
+        new FabricItemSettings()
+    );
+    
     public static final Item SCARAB_SHELL = new Item(new FabricItemSettings());
     public static final Item SCARAB_SHELL_FRAGMENT = new Item(new FabricItemSettings());
 
@@ -495,6 +503,13 @@ public class ModItems {
             Registries.ITEM, 
             new Identifier(AncientCurse.MOD_ID, "locus_spawn_egg"),
             LOCUS_SPAWN_EGG
+        );
+        
+        // Register the Scarab Beetle spawn egg
+        Registry.register(
+            Registries.ITEM, 
+            new Identifier(AncientCurse.MOD_ID, "scarab_beetle_spawn_egg"),
+            SCARAB_BEETLE_SPAWN_EGG
         );
     }
 }

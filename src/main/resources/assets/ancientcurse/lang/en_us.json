@@ -41,6 +41,10 @@
   
   "entity.ancientcurse.baby_locus": "Baby Locus",
   
+  "entity.ancientcurse.scarab_beetle": "Scarab Beetle",
+  "item.ancientcurse.scarab_beetle_spawn_egg": "Scarab Beetle Spawn Egg",
+  "item.ancientcurse.scarab_beetle_spawn_egg.tooltip": "Summon an ancient scarab beetle",
+  
   "entity.ancientcurse.snake_head_projectile": "Snake Head Projectile",
   
   "entity.ancientcurse.anubis": "Anubis, the Jackal-Headed God",

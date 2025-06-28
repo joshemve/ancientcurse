@@ -9,9 +9,11 @@ import com.ancientcurse.client.color.RockColorProvider;
 import com.ancientcurse.client.render.WitheredPharaohRenderer;
 import com.ancientcurse.client.render.entity.SnakeHeadProjectileRenderer;
 import com.ancientcurse.entity.renderer.AnubisEntityRenderer;
-import com.ancientcurse.entity.renderer.BabyLocusRenderer;
+
 import com.ancientcurse.entity.renderer.DjeserhathEntityRenderer;
 import com.ancientcurse.entity.renderer.LocusRenderer;
+import com.ancientcurse.entity.renderer.BabyLocusRenderer;
+import com.ancientcurse.entity.renderer.ScarabBeetleRenderer;
 import com.ancientcurse.entity.renderer.SpitBallRenderer;
 import com.ancientcurse.util.TooltipHelper;
 import net.fabricmc.api.ClientModInitializer;
@@ -102,6 +104,9 @@ public class AncientCurseClient implements ClientModInitializer {
         
         // Register the Baby Locus renderer (bug babies)
         EntityRendererRegistry.register(ModEntities.BABY_LOCUS, BabyLocusRenderer::new);
+        
+        // Register the Scarab Beetle renderer (ground-based beetle)
+        EntityRendererRegistry.register(ModEntities.SCARAB_BEETLE, ScarabBeetleRenderer::new);
         
         // Register the SpitBall projectile renderer
         EntityRendererRegistry.register(ModEntities.SPIT_BALL, SpitBallRenderer::new);

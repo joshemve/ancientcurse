@@ -126,8 +126,11 @@ public class AncientCurse implements ModInitializer {
         // Register status effects
         // ModStatusEffects.registerStatusEffects();
         
-        // Register server tick event for tornado management
-        ServerTickEvents.END_SERVER_TICK.register(server -> com.ancientcurse.effect.TornadoManager.tick(server));
+        // Register server tick event for tornado management and locust swarms
+        ServerTickEvents.END_SERVER_TICK.register(server -> {
+            com.ancientcurse.effect.TornadoManager.tick(server);
+            LocusSwarmCommand.tickSwarm();
+        });
     }
     
     /**

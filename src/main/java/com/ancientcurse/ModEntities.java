@@ -1,9 +1,11 @@
 package com.ancientcurse;
 
 import com.ancientcurse.entity.AnubisEntity;
-import com.ancientcurse.entity.BabyLocusEntity;
+
 import com.ancientcurse.entity.DjeserhathEntity;
 import com.ancientcurse.entity.LocusEntity;
+import com.ancientcurse.entity.BabyLocusEntity;
+import com.ancientcurse.entity.ScarabBeetleEntity;
 import com.ancientcurse.entity.SnakeHeadProjectileEntity;
 import com.ancientcurse.entity.SpitBallEntity;
 import com.ancientcurse.entity.WitheredPharaohEntity;
@@ -82,16 +84,30 @@ public class ModEntities {
             .trackedUpdateRate(3)
             .build()
     );
-    
-    // Register the Baby Locus entity (bug babies, not plant babies)
+
+    // Register the Baby Locus entity (bug babies)
     public static final EntityType<BabyLocusEntity> BABY_LOCUS = Registry.register(
         Registries.ENTITY_TYPE,
         new Identifier(AncientCurse.MOD_ID, "baby_locus"),
         FabricEntityTypeBuilder.create(SpawnGroup.MONSTER, BabyLocusEntity::new)
             .dimensions(EntityDimensions.fixed(0.5f, 0.75f)) // Half the size of adult
             .trackRangeBlocks(32)
+            .trackedUpdateRate(3)
             .build()
     );
+
+    // Register the Scarab Beetle entity (ground-based beetle with climbing)
+    public static final EntityType<ScarabBeetleEntity> SCARAB_BEETLE = Registry.register(
+        Registries.ENTITY_TYPE,
+        new Identifier(AncientCurse.MOD_ID, "scarab_beetle"),
+        FabricEntityTypeBuilder.create(SpawnGroup.MONSTER, ScarabBeetleEntity::new)
+            .dimensions(EntityDimensions.fixed(1.0f, 0.8f)) // Wide but low for beetle
+            .trackRangeBlocks(48)
+            .trackedUpdateRate(3)
+            .build()
+    );
+    
+
     
     /**
      * Registers all mod entities
@@ -103,8 +119,10 @@ public class ModEntities {
         FabricDefaultAttributeRegistry.register(WITHERED_PHARAOH, WitheredPharaohEntity.createWitheredPharaohAttributes());
         FabricDefaultAttributeRegistry.register(DJESERHATH, DjeserhathEntity.createDjeserhathAttributes());
         FabricDefaultAttributeRegistry.register(ANUBIS, AnubisEntity.createAnubisAttributes());
-        FabricDefaultAttributeRegistry.register(LOCUS, LocusEntity.createLocusAttributes());
+        FabricDefaultAttributeRegistry.register(LOCUS, LocusEntity.createAttributes());
         FabricDefaultAttributeRegistry.register(BABY_LOCUS, BabyLocusEntity.createBabyLocusAttributes());
+        FabricDefaultAttributeRegistry.register(SCARAB_BEETLE, ScarabBeetleEntity.createScarabBeetleAttributes());
+
     }
     
     /**
