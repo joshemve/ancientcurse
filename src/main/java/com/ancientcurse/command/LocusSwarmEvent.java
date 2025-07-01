@@ -29,10 +29,12 @@ import java.util.*;
 public class LocusSwarmEvent {
     // Constants (move to config later)
     private static final int TICKS_PER_SECOND = 20;
-    private static final int DISCOVERY_ERUPTION_DELAY = 3 * TICKS_PER_SECOND;
-    private static final int ERUPTION_DURATION = 5 * TICKS_PER_SECOND;
-    private static final int BASE_SWARM_SIZE = 40;
-    private static final int PARTICLE_THROTTLE_TICKS = 5;
+    private static final int DISCOVERY_ERUPTION_DELAY = 5 * TICKS_PER_SECOND; // More buildup
+    private static final int ERUPTION_DURATION = 8 * TICKS_PER_SECOND; // Longer eruption
+    private static final int BASE_SWARM_SIZE = 30; // Start smaller for performance
+    private static final int PARTICLE_THROTTLE_TICKS = 10; // Less frequent particles
+    private static final int MAX_SWARM_ABSOLUTE = 100; // Hard cap for server performance
+    private static final int CHUNK_CHECK_RADIUS = 3; // Only spawn in loaded chunks
     
     // Event phases
     private enum Phase { 
@@ -63,7 +65,9 @@ public class LocusSwarmEvent {
     private final Map<Integer, List<Runnable>> scheduledTasks = new HashMap<>();
     
     // Dynamic difficulty
-    private final int maxSwarmSize;
+    private int maxSwarmSize;
+    private float intensity = 1.0f;
+    private boolean cinematicMode = false;
     
     // Reusable vectors for performance
     private final Vec3d tmpVec1 = new Vec3d(0, 0, 0);
@@ -78,11 +82,11 @@ public class LocusSwarmEvent {
         this.nestCenters = new ArrayList<>();
         this.nestIntensity = new HashMap<>();
         
-        // Scale with player count and territory
+        // Scale with player count and territory, but cap for performance
         int playerCount = world.getPlayers().size();
         this.maxSwarmSize = Math.min(
-            BASE_SWARM_SIZE + (playerCount * 3), 
-            BASE_SWARM_SIZE + (territoryRadius / 2)
+            BASE_SWARM_SIZE + (playerCount * 2), 
+            MAX_SWARM_ABSOLUTE
         );
     }
     
@@ -171,32 +175,39 @@ public class LocusSwarmEvent {
     }
     
     private void updateDormantPhase() {
-        // Check for nearby players
-        for (BlockPos nest : nestCenters) {
-            List<ServerPlayerEntity> nearbyPlayers = world.getEntitiesByClass(
-                ServerPlayerEntity.class,
-                new Box(Vec3d.of(nest).add(-5, -2, -5), Vec3d.of(nest).add(5, 5, 5)),
-                player -> !player.isSpectator() && !player.isCreative()
-            );
-            
-            if (!nearbyPlayers.isEmpty() && !scoutShown) {
-                triggerPlayer = nearbyPlayers.get(0);
-                triggerDiscovery(nest);
-                return;
+        // Check for nearby players - throttled to every 10 ticks
+        if (phaseTicks % 10 == 0) {
+            for (BlockPos nest : nestCenters) {
+                // Only check if chunk is loaded
+                if (!world.isChunkLoaded(nest)) continue;
+                
+                List<ServerPlayerEntity> nearbyPlayers = world.getEntitiesByClass(
+                    ServerPlayerEntity.class,
+                    new Box(Vec3d.of(nest).add(-8, -2, -8), Vec3d.of(nest).add(8, 5, 8)),
+                    player -> !player.isSpectator() && !player.isCreative()
+                );
+                
+                if (!nearbyPlayers.isEmpty() && !scoutShown) {
+                    triggerPlayer = nearbyPlayers.get(0);
+                    triggerDiscovery(nest);
+                    return;
+                }
             }
         }
         
-        // Subtle hints - throttled
-        if (phaseTicks % (5 * TICKS_PER_SECOND) == 0) {
+        // Subtle hints - heavily throttled
+        if (phaseTicks % (10 * TICKS_PER_SECOND) == 0 && random.nextFloat() < 0.3) {
             BlockPos randomNest = nestCenters.get(random.nextInt(nestCenters.size()));
             
-            world.spawnParticles(
-                new BlockStateParticleEffect(ParticleTypes.BLOCK, Blocks.SAND.getDefaultState()),
-                randomNest.getX() + 0.5,
-                randomNest.getY() + 1.1, // Fixed: above ground
-                randomNest.getZ() + 0.5,
-                5, 0.5, 0.1, 0.5, 0.01
-            );
+            if (world.isChunkLoaded(randomNest)) {
+                world.spawnParticles(
+                    new BlockStateParticleEffect(ParticleTypes.BLOCK, Blocks.SAND.getDefaultState()),
+                    randomNest.getX() + 0.5,
+                    randomNest.getY() + 1.1,
+                    randomNest.getZ() + 0.5,
+                    3, 0.5, 0.1, 0.5, 0.01
+                );
+            }
         }
     }
     
@@ -354,13 +365,23 @@ public class LocusSwarmEvent {
             player.addStatusEffect(new StatusEffectInstance(StatusEffects.BLINDNESS, 20, 0));
         }
         
-        // Break ground at nests
+        // Break ground at nests - more dramatic in cinematic mode
         for (BlockPos nest : nestCenters) {
-            for (int x = -1; x <= 1; x++) {
-                for (int z = -1; z <= 1; z++) {
+            int radius = cinematicMode ? 2 : 1;
+            for (int x = -radius; x <= radius; x++) {
+                for (int z = -radius; z <= radius; z++) {
                     BlockPos pos = nest.add(x, 0, z);
-                    if (random.nextDouble() < 0.7) {
+                    if (random.nextDouble() < (cinematicMode ? 0.9 : 0.7)) {
                         world.breakBlock(pos, false); // No drops
+                        
+                        // Extra particles in cinematic mode
+                        if (cinematicMode && random.nextFloat() < 0.5) {
+                            world.spawnParticles(
+                                ParticleTypes.EXPLOSION,
+                                pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5,
+                                1, 0, 0, 0, 0
+                            );
+                        }
                     }
                 }
             }
@@ -369,21 +390,27 @@ public class LocusSwarmEvent {
     
     private void updateEruptingPhase() {
         if (swarmMembers.size() < maxSwarmSize && phaseTicks < ERUPTION_DURATION) {
-            // Dynamic spawn rate based on server load
-            int baseSpawns = MathHelper.nextBetween(random, 2, 4);
-            int spawnsThisTick = Math.min(baseSpawns, maxSwarmSize - swarmMembers.size());
-            
-            // Reduce spawns if many players for performance
-            if (world.getPlayers().size() > 20) {
-                spawnsThisTick = Math.max(1, spawnsThisTick / 2);
-            }
-            
-            for (int i = 0; i < spawnsThisTick; i++) {
-                if (swarmMembers.size() >= maxSwarmSize) break;
+            // Staggered spawning for better visuals and performance
+            if (phaseTicks % 5 == 0) { // Spawn every 5 ticks instead of every tick
+                // Dynamic spawn rate based on phase progress
+                int phaseProgress = phaseTicks * 100 / ERUPTION_DURATION;
+                int baseSpawns = phaseProgress < 30 ? 1 : phaseProgress < 70 ? 2 : 3;
+                int spawnsThisTick = Math.min(baseSpawns, maxSwarmSize - swarmMembers.size());
                 
-                // Use nest intensity for weighted selection
-                BlockPos selectedNest = selectNestByIntensity();
-                spawnEruptingLocus(selectedNest);
+                // Reduce spawns if TPS is low (simplified check)
+                if (world.getPlayers().size() > 10) {
+                    spawnsThisTick = Math.max(1, spawnsThisTick / 2);
+                }
+                
+                for (int i = 0; i < spawnsThisTick; i++) {
+                    if (swarmMembers.size() >= maxSwarmSize) break;
+                    
+                    // Use nest intensity for weighted selection
+                    BlockPos selectedNest = selectNestByIntensity();
+                    if (world.isChunkLoaded(selectedNest)) {
+                        spawnEruptingLocus(selectedNest);
+                    }
+                }
             }
         }
         
@@ -392,17 +419,31 @@ public class LocusSwarmEvent {
             phaseTicks = 0;
             
             world.getPlayers().forEach(player -> {
-                player.sendMessage(
-                    Text.literal("§4☥ THE EIGHTH PLAGUE HAS RISEN ☥").formatted(Formatting.BOLD),
-                    false
-                );
+                // Epic announcement with cinematic flair
+                if (cinematicMode) {
+                    player.sendMessage(
+                        Text.literal("§4§l☥ THE EIGHTH PLAGUE HAS RISEN ☥").formatted(Formatting.BOLD),
+                        false
+                    );
+                    player.sendMessage(
+                        Text.literal("§c§oThe sky darkens with a living cloud of destruction...").formatted(Formatting.ITALIC),
+                        false
+                    );
+                    // Add darkness effect for atmosphere
+                    player.addStatusEffect(new StatusEffectInstance(StatusEffects.DARKNESS, 100, 0));
+                } else {
+                    player.sendMessage(
+                        Text.literal("§4☥ THE EIGHTH PLAGUE HAS RISEN ☥").formatted(Formatting.BOLD),
+                        false
+                    );
+                }
             });
         }
     }
     
     private void spawnEruptingLocus(BlockPos nest) {
-        // 30% chance to spawn babies in early eruption
-        if (phaseTicks < 40 && random.nextFloat() < 0.3) {
+        // 30% chance to spawn babies in early eruption (affected by intensity)
+        if (phaseTicks < 40 && random.nextFloat() < 0.3 * intensity) {
             com.ancientcurse.entity.BabyLocusEntity baby = ModEntities.BABY_LOCUS.create(world);
             if (baby == null) return;
             
@@ -455,7 +496,7 @@ public class LocusSwarmEvent {
                                 world.spawnParticles(
                                     new BlockStateParticleEffect(ParticleTypes.BLOCK, Blocks.COARSE_DIRT.getDefaultState()),
                                     locus.getX(), locus.getY() + 0.5, locus.getZ(),
-                                    3, 0.2, 0.2, 0.2, 0.01
+                                    cinematicMode ? 5 : 3, 0.2, 0.2, 0.2, 0.01
                                 );
                             }
                         }, i * 10);
@@ -463,12 +504,20 @@ public class LocusSwarmEvent {
                 }
             }, 0);
             
-            // 10% chance for alpha variant
-            if (random.nextFloat() < 0.1) {
+            // Alpha variant chance based on intensity and cinematic mode
+            float alphaChance = cinematicMode ? 0.15f : 0.1f;
+            if (random.nextFloat() < alphaChance * intensity) {
                 locus.setHealth(locus.getMaxHealth() * 1.5f);
                 locus.addStatusEffect(new StatusEffectInstance(
                     StatusEffects.SPEED, Integer.MAX_VALUE, 0, false, false
                 ));
+                
+                // Visual indicator for alpha variants in cinematic mode
+                if (cinematicMode) {
+                    locus.addStatusEffect(new StatusEffectInstance(
+                        StatusEffects.GLOWING, Integer.MAX_VALUE, 0, false, false
+                    ));
+                }
             }
         }
     }
@@ -507,42 +556,62 @@ public class LocusSwarmEvent {
         return nestCenters.get(0);
     }
     private void destroyVegetation() {
-        // Check if chunk is loaded first
-        BlockPos centerPos = new BlockPos(
-            (int)(originPoint.x + random.nextGaussian() * 20), // Reduced range
-            (int)originPoint.y,
-            (int)(originPoint.z + random.nextGaussian() * 20)
-        );
+        // Only process if there are active locusts nearby
+        if (swarmMembers.isEmpty()) return;
+        
+        // Pick a random active locust to center destruction around
+        List<LocusEntity> activeLocusts = swarmMembers.values().stream()
+            .filter(l -> l != null && !l.isRemoved())
+            .limit(5) // Only check first 5 for performance
+            .toList();
+        
+        if (activeLocusts.isEmpty()) return;
+        
+        LocusEntity centerLocust = activeLocusts.get(random.nextInt(activeLocusts.size()));
+        BlockPos centerPos = centerLocust.getBlockPos();
         
         if (!world.isChunkLoaded(centerPos)) return;
         
-        // Destroy vegetation in area
+        // Smaller, more focused destruction
         boolean anythingDestroyed = false;
-        for (int x = -2; x <= 2; x++) {
-            for (int z = -2; z <= 2; z++) {
-                for (int y = -3; y <= 3; y++) {
+        for (int x = -1; x <= 1; x++) {
+            for (int z = -1; z <= 1; z++) {
+                for (int y = -1; y <= 1; y++) {
+                    if (random.nextFloat() > 0.3) continue; // 30% chance per block
+                    
                     BlockPos checkPos = centerPos.add(x, y, z);
                     BlockState state = world.getBlockState(checkPos);
                     
-                    if (state.isIn(BlockTags.LEAVES) || 
-                        state.isOf(Blocks.WHEAT) || 
+                    // Focus on crops and grass for biblical accuracy
+                    if (state.isOf(Blocks.WHEAT) || 
                         state.isOf(Blocks.CARROTS) || 
-                        state.isOf(Blocks.GRASS)) {
+                        state.isOf(Blocks.POTATOES) ||
+                        state.isOf(Blocks.BEETROOTS) ||
+                        state.isOf(Blocks.GRASS) ||
+                        state.isOf(Blocks.TALL_GRASS)) {
                         world.breakBlock(checkPos, false); // No drops
                         anythingDestroyed = true;
+                        
+                        // Small chance to damage farmland too
+                        if (random.nextFloat() < 0.1) {
+                            BlockPos below = checkPos.down();
+                            if (world.getBlockState(below).isOf(Blocks.FARMLAND)) {
+                                world.setBlockState(below, Blocks.DIRT.getDefaultState());
+                            }
+                        }
                     }
                 }
             }
         }
         
-        // Visual feedback - dust cloud
-        if (anythingDestroyed) {
+        // More subtle visual feedback
+        if (anythingDestroyed && random.nextFloat() < 0.5) {
             world.spawnParticles(
-                new BlockStateParticleEffect(ParticleTypes.FALLING_DUST, Blocks.DIRT.getDefaultState()),
-                centerPos.getX(),
-                centerPos.getY() + 2,
-                centerPos.getZ(),
-                20, 3.0, 0.0, 3.0, 0.1
+                ParticleTypes.SMOKE,
+                centerPos.getX() + 0.5,
+                centerPos.getY() + 0.5,
+                centerPos.getZ() + 0.5,
+                5, 1.0, 0.5, 1.0, 0.01
             );
         }
     }
@@ -568,26 +637,58 @@ public class LocusSwarmEvent {
     private void applySwarmBehavior(LocusEntity locus) {
         if (locus == null || locus.isRemoved()) return;
         
+        // Skip every other tick for performance
+        if (locus.age % 2 != 0) return;
+        
         Vec3d center = Vec3d.ZERO;
         Vec3d avoidance = Vec3d.ZERO;
+        Vec3d alignment = Vec3d.ZERO;
         int neighbors = 0;
         
+        // Limit neighbor checks for performance
+        int checked = 0;
         for (LocusEntity other : swarmMembers.values()) {
-            if (other != null && other != locus && !other.isRemoved() && other.squaredDistanceTo(locus) < 64) {
-                center = center.add(other.getPos());
-                neighbors++;
-                
-                if (other.squaredDistanceTo(locus) < 4) {
-                    Vec3d away = locus.getPos().subtract(other.getPos()).normalize();
-                    avoidance = avoidance.add(away);
+            if (checked++ > 10) break; // Check max 10 neighbors
+            
+            if (other != null && other != locus && !other.isRemoved()) {
+                double distSq = other.squaredDistanceTo(locus);
+                if (distSq < 100) { // 10 block radius
+                    center = center.add(other.getPos());
+                    alignment = alignment.add(other.getVelocity());
+                    neighbors++;
+                    
+                    if (distSq < 6) { // Separation distance
+                        Vec3d away = locus.getPos().subtract(other.getPos()).normalize();
+                        avoidance = avoidance.add(away.multiply(6 / distSq)); // Stronger avoidance when closer
+                    }
                 }
             }
         }
         
         if (neighbors > 0) {
+            // Classic boid behavior: cohesion, alignment, separation
             center = center.multiply(1.0 / neighbors);
-            Vec3d toCenter = center.subtract(locus.getPos()).normalize().multiply(0.05);
-            Vec3d velocity = locus.getVelocity().add(toCenter).add(avoidance.multiply(0.1));
+            alignment = alignment.multiply(1.0 / neighbors);
+            
+            Vec3d cohesion = center.subtract(locus.getPos()).normalize().multiply(0.02);
+            Vec3d alignVec = alignment.normalize().multiply(0.03);
+            Vec3d separation = avoidance.multiply(0.15);
+            
+            // Add some vertical variation for more realistic movement
+            double verticalNoise = (random.nextDouble() - 0.5) * 0.02;
+            
+            Vec3d velocity = locus.getVelocity()
+                .add(cohesion)
+                .add(alignVec)
+                .add(separation)
+                .add(0, verticalNoise, 0);
+            
+            // Limit speed
+            double speed = velocity.length();
+            if (speed > 0.5) {
+                velocity = velocity.normalize().multiply(0.5);
+            }
+            
             locus.setVelocity(velocity);
         }
     }
@@ -636,7 +737,7 @@ public class LocusSwarmEvent {
     
     // Getters for command info
     public boolean isActive() {
-        return !cancelled && (!swarmMembers.isEmpty() || currentPhase != Phase.DORMANT);
+        return !cancelled && (currentPhase != Phase.DORMANT || !nestCenters.isEmpty());
     }
     
     public int getSwarmSize() {
@@ -658,12 +759,25 @@ public class LocusSwarmEvent {
     
     public int getDormantEggs() {
         if (currentPhase == Phase.DORMANT) {
-            return nestCenters.size() * 20;
+            return nestCenters.size() * 20; // Estimate based on nest count
+        } else if (currentPhase == Phase.DISCOVERED) {
+            return nestCenters.size() * 15; // Some are preparing to emerge
         }
         return 0;
     }
     
     public Vec3d getSwarmCenter() {
         return originPoint;
+    }
+    
+    public void setCinematicMode(boolean cinematic) {
+        this.cinematicMode = cinematic;
+    }
+    
+    public void setIntensity(float intensity) {
+        this.intensity = MathHelper.clamp(intensity, 0.1f, 2.0f);
+        // Adjust max swarm size based on intensity
+        this.maxSwarmSize = (int)(BASE_SWARM_SIZE * intensity);
+        this.maxSwarmSize = Math.min(this.maxSwarmSize, MAX_SWARM_ABSOLUTE);
     }
 }

@@ -25,6 +25,10 @@ public class LocusSwarmCommand {
     private static LocusSwarmEvent activeSwarm = null;
     private static final Random random = new Random();
     
+    // YouTube-friendly features
+    private static boolean cinematicMode = false;
+    private static int swarmIntensity = 100; // Percentage
+    
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess access, CommandManager.RegistrationEnvironment environment) {
         dispatcher.register(CommandManager.literal("locusswarm")
             .requires(source -> source.hasPermissionLevel(2)) // Requires OP level 2
@@ -35,7 +39,12 @@ public class LocusSwarmCommand {
             .then(CommandManager.literal("stop")
                 .executes(LocusSwarmCommand::stopSwarm))
             .then(CommandManager.literal("info")
-                .executes(LocusSwarmCommand::showInfo)));
+                .executes(LocusSwarmCommand::showInfo))
+            .then(CommandManager.literal("cinematic")
+                .executes(LocusSwarmCommand::toggleCinematic))
+            .then(CommandManager.literal("intensity")
+                .then(CommandManager.argument("percent", IntegerArgumentType.integer(10, 200))
+                    .executes(LocusSwarmCommand::setIntensity))));
     }
     
     private static int executeSwarm(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
@@ -58,6 +67,8 @@ public class LocusSwarmCommand {
         
         // Create the swarm centered on admin with default settings
         activeSwarm = new LocusSwarmEvent(world, playerPos, 100); // 100 block radius
+        activeSwarm.setCinematicMode(cinematicMode);
+        activeSwarm.setIntensity(swarmIntensity / 100.0f);
         activeSwarm.beginInfestation();
         
         // Send subtle admin confirmation
@@ -85,6 +96,8 @@ public class LocusSwarmCommand {
         
         // Create the swarm centered on target player
         activeSwarm = new LocusSwarmEvent(world, targetPos, 100); // 100 block radius
+        activeSwarm.setCinematicMode(cinematicMode);
+        activeSwarm.setIntensity(swarmIntensity / 100.0f);
         activeSwarm.beginInfestation();
         
         // Send subtle admin confirmation
@@ -108,6 +121,9 @@ public class LocusSwarmCommand {
             return 0;
         }
         
+        // Store swarm center before clearing
+        Vec3d swarmCenter = activeSwarm.getSwarmCenter();
+        
         activeSwarm.naturalDispersion();
         activeSwarm = null;
         
@@ -115,7 +131,7 @@ public class LocusSwarmCommand {
         
         // Natural dispersion message to players who can see locusts
         source.getWorld().getPlayers().forEach(p -> {
-            if (p.getPos().distanceTo(activeSwarm.getSwarmCenter()) < 150) {
+            if (p.getPos().distanceTo(swarmCenter) < 150) {
                 p.sendMessage(Text.literal("§7The swarm begins to scatter to the winds...").formatted(Formatting.ITALIC), false);
             }
         });
@@ -136,6 +152,34 @@ public class LocusSwarmCommand {
         source.sendFeedback(() -> Text.literal("§eDormant Eggs: §f" + activeSwarm.getDormantEggs()), false);
         source.sendFeedback(() -> Text.literal("§eSwarm Agitation: §f" + String.format("%.0f%%", activeSwarm.getSwarmAgitation() * 100)), false);
         source.sendFeedback(() -> Text.literal("§ePhase: §f" + activeSwarm.getPhaseDescription()), false);
+        source.sendFeedback(() -> Text.literal("§eCinematic Mode: §f" + (cinematicMode ? "ON" : "OFF")), false);
+        source.sendFeedback(() -> Text.literal("§eIntensity: §f" + swarmIntensity + "%"), false);
+        
+        return 1;
+    }
+    
+    private static int toggleCinematic(CommandContext<ServerCommandSource> context) {
+        ServerCommandSource source = context.getSource();
+        cinematicMode = !cinematicMode;
+        
+        source.sendFeedback(() -> Text.literal("§eCinematic mode " + (cinematicMode ? "§aENABLED" : "§cDISABLED")), false);
+        
+        if (activeSwarm != null) {
+            activeSwarm.setCinematicMode(cinematicMode);
+        }
+        
+        return 1;
+    }
+    
+    private static int setIntensity(CommandContext<ServerCommandSource> context) {
+        ServerCommandSource source = context.getSource();
+        swarmIntensity = IntegerArgumentType.getInteger(context, "percent");
+        
+        source.sendFeedback(() -> Text.literal("§eSwarm intensity set to §f" + swarmIntensity + "%"), false);
+        
+        if (activeSwarm != null) {
+            activeSwarm.setIntensity(swarmIntensity / 100.0f);
+        }
         
         return 1;
     }

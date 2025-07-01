@@ -33,7 +33,7 @@
 
   "entity.ancientcurse.djeserhath": "Djeserhath",
   "item.ancientcurse.djeserhath_spawn_egg": "Djeserhath Spawn Egg",
-  "item.ancientcurse.djeserhath_spawn_egg.tooltip": "Ancient Curse",
+  "item.ancientcurse.djeserhath_spawn_egg.tooltip": "Summon a powerful ancient guardian with divine protection",
   
   "entity.ancientcurse.locus": "Locus",
   "item.ancientcurse.locus_spawn_egg": "Locus Spawn Egg",
@@ -235,6 +235,7 @@
   
   "entity.ancientcurse.withered_pharaoh": "Withered Pharaoh",
   "item.ancientcurse.withered_pharaoh_spawn_egg": "Withered Pharaoh Spawn Egg",
+  "item.ancientcurse.withered_pharaoh_spawn_egg.tooltip": "Summon an ancient undead pharaoh with dark magic powers",
   "block.ancientcurse.serpent_vessel_of_wadjet.tooltip": "Ancient Curse",
   "block.ancientcurse.black_cobblestone": "Black Cobblestone",
   "block.ancientcurse.black_dust": "Black Dust",
