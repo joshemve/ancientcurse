@@ -53,6 +53,7 @@ public class ModItemGroup {
                 safeAdd(entries, ModItems.RAW_RIVERBED_CLAY);
                 safeAdd(entries, ModItems.LOTUS_FLOWER);
                 safeAdd(entries, ModItems.ROPE);
+                safeAdd(entries, ModItems.SALT);
                 
                 // Tree blocks
                 safeAdd(entries, ModBlocks.SYCAMORE_FIG_LOG);

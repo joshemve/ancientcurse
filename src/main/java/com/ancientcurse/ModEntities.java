@@ -125,7 +125,7 @@ public class ModEntities {
     public static final EntityType<KhamsinSpreadSmallEntity> KHAMSIN_SPREAD_SMALL = Registry.register(
         Registries.ENTITY_TYPE,
         new Identifier(AncientCurse.MOD_ID, "khamsin_spread_small"),
-        FabricEntityTypeBuilder.create(SpawnGroup.MONSTER, KhamsinSpreadSmallEntity::new)
+        FabricEntityTypeBuilder.create(SpawnGroup.MISC, KhamsinSpreadSmallEntity::new)
             .dimensions(EntityDimensions.fixed(0.8f, 0.8f)).build());
 
     public static final EntityType<KhamsinOrbEntity> KHAMSIN_ORB = Registry.register(

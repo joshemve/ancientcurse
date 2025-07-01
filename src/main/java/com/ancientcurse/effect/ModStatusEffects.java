@@ -30,4 +30,15 @@ public class ModStatusEffects {
         
         AncientCurse.LOGGER.info("Registering ModStatusEffects for " + AncientCurse.MOD_ID);
     }
+
+    public static StatusEffect getCurseStage(int stage) {
+        return switch (stage) {
+            case 1 -> KHAMSIN_CURSE_STAGE_1;
+            case 2 -> KHAMSIN_CURSE_STAGE_2;
+            case 3 -> KHAMSIN_CURSE_STAGE_3;
+            case 4 -> KHAMSIN_CURSE_STAGE_4;
+            case 5 -> KHAMSIN_CURSE_STAGE_5;
+            default -> null;
+        };
+    }
 }

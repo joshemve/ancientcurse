@@ -12,12 +12,14 @@ import net.minecraft.registry.RegistryKeys;
 import net.minecraft.util.Identifier;
 import net.minecraft.world.gen.WorldPreset;
 import com.ancientcurse.command.LocusSwarmCommand;
+import com.ancientcurse.command.CursedEarthCommand;
+import com.ancientcurse.system.CursedEarthManager;
 import com.ancientcurse.ModSounds;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 // import com.ancientcurse.screen.ModScreenHandlers;
 // import com.ancientcurse.worldgen.ModWorldGen;
 // import com.ancientcurse.worldgen.ModWorldPresets;
-// import com.ancientcurse.ModStatusEffects;
+import com.ancientcurse.effect.ModStatusEffects;
 // import com.ancientcurse.block.ModBlocks;
 // import com.ancientcurse.block.entity.ModBlockEntities;
 
@@ -84,6 +86,10 @@ public class AncientCurse implements ModInitializer {
         // Register commands
         registerCommands();
         
+        // Initialize Cursed Earth Manager
+        CursedEarthManager.getInstance();
+        LOGGER.info("Cursed Earth performance system initialized");
+        
         LOGGER.info("Ancient Curse Mod fully initialized");
     }
     
@@ -127,7 +133,7 @@ public class AncientCurse implements ModInitializer {
         ModStructures.registerStructures();
         
         // Register status effects
-        // ModStatusEffects.registerStatusEffects();
+        ModStatusEffects.registerStatusEffects();
         
         // Register server tick event for tornado management and locust swarms
         ServerTickEvents.END_SERVER_TICK.register(server -> {
@@ -157,5 +163,8 @@ public class AncientCurse implements ModInitializer {
         
         // Register the Locus Swarm command
         CommandRegistrationCallback.EVENT.register(LocusSwarmCommand::register);
+        
+        // Register the Cursed Earth command
+        CommandRegistrationCallback.EVENT.register(CursedEarthCommand::register);
     }
 }

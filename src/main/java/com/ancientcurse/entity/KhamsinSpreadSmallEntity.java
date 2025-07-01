@@ -3,6 +3,7 @@ package com.ancientcurse.entity;
 import com.ancientcurse.AncientCurse;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.goal.*;
 import net.minecraft.entity.attribute.DefaultAttributeContainer;
@@ -13,7 +14,11 @@ import net.minecraft.entity.data.DataTracker;
 import net.minecraft.entity.data.TrackedData;
 import net.minecraft.entity.data.TrackedDataHandlerRegistry;
 import net.minecraft.entity.mob.HostileEntity;
+import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.Arm;
+import java.util.Collections;
 import com.ancientcurse.entity.KhamsinOrbEntity;
 import net.minecraft.entity.projectile.thrown.ThrownItemEntity;
 import net.minecraft.item.Item;
@@ -27,6 +32,7 @@ import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.Box;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import software.bernie.geckolib.animatable.GeoEntity;
@@ -41,7 +47,7 @@ import java.util.List;
  * Khamsin Spread Small - A floating mystical rock that's part of the curse system
  * Remains dormant until a player approaches, then shoots slow-moving destructible orbs
  */
-public class KhamsinSpreadSmallEntity extends HostileEntity implements GeoEntity {
+public class KhamsinSpreadSmallEntity extends MobEntity implements GeoEntity {
     
     /* ---------- DATA TRACKERS ---------- */
     private static final TrackedData<Boolean> IS_ACTIVATED = 
@@ -58,6 +64,7 @@ public class KhamsinSpreadSmallEntity extends HostileEntity implements GeoEntity
     private static final int GLOW_CYCLE_DURATION = 80; // 4 seconds per glow cycle for smoother transition
     private static final int SHOOT_INTERVAL = 60; // 3 seconds between shots when activated
     private static final int DEACTIVATION_DELAY = 200; // 10 seconds after last player contact
+    private static final float ACTIVATION_SPEED = 0.05f; // Speed of texture transition
     
     /* ---------- FIELDS ---------- */
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
@@ -66,29 +73,44 @@ public class KhamsinSpreadSmallEntity extends HostileEntity implements GeoEntity
     private boolean isFalling = false;
     private int groundCheckCooldown = 0;
     
-    public KhamsinSpreadSmallEntity(EntityType<? extends HostileEntity> entityType, World world) {
+    // Smooth transition fields
+    private float activationProgress = 0.0f;
+    private float previousActivationProgress = 0.0f;
+    
+    public KhamsinSpreadSmallEntity(EntityType<? extends MobEntity> entityType, World world) {
         super(entityType, world);
-        this.experiencePoints = 5; // Small XP reward
         this.setNoGravity(true); // Always float
         this.setInvulnerable(false); // Can be destroyed by players
     }
     
     /* ---------- ATTRIBUTES ---------- */
     public static DefaultAttributeContainer.Builder createKhamsinSpreadSmallAttributes() {
-        return HostileEntity.createHostileAttributes()
+        return MobEntity.createMobAttributes()
                 .add(EntityAttributes.GENERIC_MAX_HEALTH, 20.0) // Moderate health
                 .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.0) // No movement - stays in place
-                .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 0.0) // No direct damage
-                .add(EntityAttributes.GENERIC_FOLLOW_RANGE, ACTIVATION_RANGE)
                 .add(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE, 1.0) // Immune to knockback
                 .add(EntityAttributes.GENERIC_FLYING_SPEED, 0.0); // No flying movement
     }
     
-    /* ---------- INITIALIZATION ---------- */
+    /* ---------- REQUIRED ABSTRACT METHODS ---------- */
     @Override
-    protected void initGoals() {
-        // No AI goals - this entity doesn't move or chase players
-        // All behavior is handled in tick()
+    public Iterable<ItemStack> getArmorItems() {
+        return Collections.emptyList();
+    }
+    
+    @Override
+    public ItemStack getEquippedStack(EquipmentSlot slot) {
+        return ItemStack.EMPTY;
+    }
+    
+    @Override
+    public void equipStack(EquipmentSlot slot, ItemStack stack) {
+        // This entity doesn't use equipment
+    }
+    
+    @Override
+    public Arm getMainArm() {
+        return Arm.RIGHT;
     }
     
     @Override
@@ -112,6 +134,9 @@ public class KhamsinSpreadSmallEntity extends HostileEntity implements GeoEntity
         // Handle activation based on nearby players
         handlePlayerDetection();
         
+        // Update activation progress for smooth transitions
+        updateActivationProgress();
+        
         // Handle glow effect when activated
         if (dataTracker.get(IS_ACTIVATED)) {
             handleGlowEffect();
@@ -126,6 +151,28 @@ public class KhamsinSpreadSmallEntity extends HostileEntity implements GeoEntity
             this.setNoGravity(true);
             this.setOnGround(false);
         }
+    }
+    
+    private void updateActivationProgress() {
+        // Store previous progress for interpolation
+        previousActivationProgress = activationProgress;
+        
+        if (isActivated()) {
+            // Transition to light (1.0)
+            if (activationProgress < 1.0f) {
+                activationProgress = Math.min(1.0f, activationProgress + ACTIVATION_SPEED);
+            }
+        } else {
+            // Transition to dark (0.0)
+            if (activationProgress > 0.0f) {
+                activationProgress = Math.max(0.0f, activationProgress - ACTIVATION_SPEED);
+            }
+        }
+    }
+    
+    public float getActivationProgress(float partialTick) {
+        // Interpolate between previous and current progress for smooth rendering
+        return MathHelper.lerp(partialTick, previousActivationProgress, activationProgress);
     }
     
     private void handlePlayerDetection() {
@@ -379,6 +426,8 @@ public class KhamsinSpreadSmallEntity extends HostileEntity implements GeoEntity
         nbt.putInt("DeactivationTimer", this.deactivationTimer);
         nbt.putBoolean("IsFalling", this.isFalling);
         nbt.putInt("GroundCheckCooldown", this.groundCheckCooldown);
+        nbt.putFloat("ActivationProgress", this.activationProgress);
+        nbt.putFloat("PreviousActivationProgress", this.previousActivationProgress);
         
         if (spawnPosition != null) {
             nbt.putDouble("SpawnX", spawnPosition.x);
@@ -397,6 +446,8 @@ public class KhamsinSpreadSmallEntity extends HostileEntity implements GeoEntity
         this.deactivationTimer = nbt.getInt("DeactivationTimer");
         this.isFalling = nbt.getBoolean("IsFalling");
         this.groundCheckCooldown = nbt.getInt("GroundCheckCooldown");
+        this.activationProgress = nbt.getFloat("ActivationProgress");
+        this.previousActivationProgress = nbt.getFloat("PreviousActivationProgress");
         
         if (nbt.contains("SpawnX")) {
             this.spawnPosition = new Vec3d(
@@ -433,11 +484,6 @@ public class KhamsinSpreadSmallEntity extends HostileEntity implements GeoEntity
     
     /* ---------- SOUNDS ---------- */
     @Override
-    protected SoundEvent getAmbientSound() {
-        return dataTracker.get(IS_ACTIVATED) ? SoundEvents.BLOCK_BEACON_AMBIENT : null;
-    }
-    
-    @Override
     protected SoundEvent getHurtSound(DamageSource damageSource) {
         return SoundEvents.BLOCK_STONE_HIT;
     }
@@ -458,13 +504,17 @@ public class KhamsinSpreadSmallEntity extends HostileEntity implements GeoEntity
             );
         }
         
-        return super.damage(source, amount);
+        // Call super but ensure we don't show damage tint
+        boolean result = super.damage(source, amount);
+        
+        // Immediately reset hurt time to prevent damage tint
+        this.hurtTime = 0;
+        this.maxHurtTime = 0;
+        
+        return result;
     }
     
-    @Override
     public boolean cannotDespawn() {
         return true; // Curse entities should persist
     }
-    
-    
-} 
+}

@@ -10,13 +10,13 @@ import net.minecraft.client.render.entity.EntityRendererFactory;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
+import org.jetbrains.annotations.Nullable;
 
 import software.bernie.geckolib.cache.object.BakedGeoModel;
 import software.bernie.geckolib.renderer.GeoEntityRenderer;
 
 public class KhamsinSpreadSmallRenderer extends GeoEntityRenderer<KhamsinSpreadSmallEntity> {
-    private float lastPulseIntensity = 0f;
-    private long lastRenderTime = 0;
+    private static final Identifier TEXTURE = new Identifier(AncientCurse.MOD_ID, "textures/entity/khamsin_spread_small.png");
     
     public KhamsinSpreadSmallRenderer(EntityRendererFactory.Context renderManager) {
         super(renderManager, new KhamsinSpreadSmallModel());
@@ -24,12 +24,8 @@ public class KhamsinSpreadSmallRenderer extends GeoEntityRenderer<KhamsinSpreadS
     
     @Override
     public Identifier getTextureLocation(KhamsinSpreadSmallEntity entity) {
-        // Switch between dark and normal texture based on activation state
-        if (entity.isActivated()) {
-            return new Identifier(AncientCurse.MOD_ID, "textures/entity/khamsin_spread_small.png");
-        } else {
-            return new Identifier(AncientCurse.MOD_ID, "textures/entity/khamsin_spread_small_dark.png");
-        }
+        // Use only the normal texture - we'll darken it with color tinting
+        return TEXTURE;
     }
     
     @Override
@@ -41,71 +37,43 @@ public class KhamsinSpreadSmallRenderer extends GeoEntityRenderer<KhamsinSpreadS
         poseStack.translate(0, bobOffset, 0);
         
         // Enhanced lighting for better visibility
-        int enhancedLight = Math.max(packedLight + 0x20, 0x80F0);
+        int enhancedLight = Math.max(packedLight + 0x20, 0xF000F0);
         
-        // Get current time for smooth interpolation
-        long currentTime = System.currentTimeMillis();
-        float deltaTime = Math.min(0.1f, (currentTime - lastRenderTime) / 1000f);
-        lastRenderTime = currentTime;
-        
-        // Get pulse intensity and smooth it
-        float targetPulseIntensity = entity.getPulseIntensity();
-        float pulseIntensity = MathHelper.lerp(deltaTime * 10f, lastPulseIntensity, targetPulseIntensity);
-        lastPulseIntensity = pulseIntensity;
-        
-        // Calculate color and alpha based on activation and pulse intensity
-        float alpha = entity.isActivated() ? 0.8f + (pulseIntensity * 0.2f) : 0.6f;
-        
-        // Use normal brightness for activated state, darker for dormant state
-        float brightness = entity.isActivated() ? 1.0f : 0.4f;
-        
-        // Add pulse effect to brightness when activated
-        if (entity.isActivated()) {
-            brightness += pulseIntensity * 0.3f;
-        }
-        
-        // Get the model and render type
-        BakedGeoModel model = this.model.getBakedModel(this.getGeoModel().getModelResource(entity));
-        RenderLayer renderType = this.getRenderType(entity, this.getTextureLocation(entity), bufferSource, partialTick);
-        
-        // Apply color and render
-        this.actuallyRender(
-            poseStack, entity, model, renderType,
-            bufferSource, bufferSource.getBuffer(renderType),
-            false, partialTick, enhancedLight, 0,
-            brightness, brightness, brightness, alpha
-        );
+        // Render the entity with custom color tinting
+        super.render(entity, entityYaw, partialTick, poseStack, bufferSource, enhancedLight);
         
         poseStack.pop();
     }
     
     @Override
-    public void actuallyRender(MatrixStack poseStack, KhamsinSpreadSmallEntity animatable, BakedGeoModel model, 
-                              RenderLayer renderType, VertexConsumerProvider bufferSource, VertexConsumer buffer,
-                              boolean isReRender, float partialTick, int packedLight, int packedOverlay,
-                              float red, float green, float blue, float alpha) {
-        // Apply the color and alpha to the model
-        poseStack.push();
-        poseStack.translate(0, 0.01f, 0); // Slight offset to prevent z-fighting
+    public void preRender(MatrixStack poseStack, KhamsinSpreadSmallEntity entity, BakedGeoModel model,
+                         VertexConsumerProvider bufferSource, VertexConsumer buffer, boolean isReRender,
+                         float partialTick, int packedLight, int packedOverlay, float red, float green,
+                         float blue, float alpha) {
+        // Calculate transition value (0.0 = dark, 1.0 = normal)
+        float transitionValue = entity.getActivationProgress(partialTick);
         
-        // Ensure we use neutral colors (no red tinting) and let the texture do the work
-        float neutralRed = red;
-        float neutralGreen = green;
-        float neutralBlue = blue;
+        // Apply darkening effect (0.3 = dark multiplier, 1.0 = normal)
+        float darkness = 0.3f + (0.7f * transitionValue);
         
-        // Let the parent class handle the actual rendering with our modified colors
-        super.actuallyRender(poseStack, animatable, model, renderType, bufferSource, buffer, 
-                           isReRender, partialTick, packedLight, packedOverlay, 
-                           neutralRed, neutralGreen, neutralBlue, alpha);
+        // Add pulse effect when fully activated
+        if (entity.isActivated() && transitionValue >= 1.0f) {
+            float pulseIntensity = entity.getPulseIntensity();
+            darkness += pulseIntensity * 0.2f;
+            darkness = Math.min(darkness, 1.2f); // Allow slight over-brightening for pulse
+        }
         
-        poseStack.pop();
+        // Apply the color tinting
+        super.preRender(poseStack, entity, model, bufferSource, buffer, isReRender,
+                       partialTick, packedLight, packedOverlay,
+                       darkness, darkness, darkness, alpha);
     }
 
     @Override
-    public RenderLayer getRenderType(KhamsinSpreadSmallEntity entity, Identifier texture, 
-                                   @org.jetbrains.annotations.Nullable VertexConsumerProvider bufferSource, 
+    public RenderLayer getRenderType(KhamsinSpreadSmallEntity entity, Identifier texture,
+                                   @Nullable VertexConsumerProvider bufferSource,
                                    float partialTick) {
-        // Use translucent render layer for smooth blending
-        return RenderLayer.getEntityTranslucent(texture);
+        // Use standard entity cutout for better texture quality
+        return RenderLayer.getEntityCutoutNoCull(texture);
     }
 }

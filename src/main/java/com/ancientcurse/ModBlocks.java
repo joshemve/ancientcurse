@@ -191,6 +191,17 @@ public class ModBlocks {
             .strength(0.5f)
             .sounds(BlockSoundGroup.CALCITE) // Crystalline sound
     );
+    
+    // Salt Dust - placeable salt dust similar to redstone dust
+    public static final Block SALT_DUST = new SaltDustBlock(
+        FabricBlockSettings.create()
+            .mapColor(MapColor.WHITE)
+            .strength(0.0f)
+            .sounds(BlockSoundGroup.SAND)
+            .nonOpaque()
+            .noCollision()
+            .breakInstantly()
+    );
 
     // Dried Reed Thatch - bundled dried reeds for construction
     public static final Block DRIED_REED_THATCH = new Block(
@@ -755,6 +766,13 @@ public class ModBlocks {
             SALT_BED
         );
         
+        // Register Salt Dust
+        Registry.register(
+            Registries.BLOCK,
+            new Identifier(AncientCurse.MOD_ID, "salt_dust"),
+            SALT_DUST
+        );
+        
         // Register Dried Reed Thatch
         Registry.register(
             Registries.BLOCK,
@@ -1116,6 +1134,7 @@ public class ModBlocks {
         registerBlockItem(GOLD_FLAKED_RIVER_BED, ModItemGroup.ANCIENT_CURSE);
         registerBlockItem(MUD_FLAT, ModItemGroup.ANCIENT_CURSE);
         registerBlockItem(SALT_BED, ModItemGroup.ANCIENT_CURSE);
+        registerBlockItem(SALT_DUST, ModItemGroup.ANCIENT_CURSE);
         registerBlockItem(DRIED_REED_THATCH, ModItemGroup.ANCIENT_CURSE);
         registerBlockItem(RIVERBED_CLAY, ModItemGroup.ANCIENT_CURSE);
         registerBlockItem(OBELISK_STONE, ModItemGroup.ANCIENT_CURSE);

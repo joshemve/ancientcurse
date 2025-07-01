@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/redstone_dust_line1",
+  "textures": {
+    "particle": "ancientcurse:block/salt_dust",
+    "line": "ancientcurse:block/salt_dust_line"
+  }
+} 

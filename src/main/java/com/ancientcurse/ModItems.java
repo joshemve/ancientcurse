@@ -7,6 +7,7 @@ import com.ancientcurse.item.EternalSigilItem;
 import com.ancientcurse.item.HorusMaceItem;
 import com.ancientcurse.item.PhialOfLotusEssenceItem;
 import com.ancientcurse.item.ScarabIncenseItem;
+import com.ancientcurse.item.SaltItem;
 import com.ancientcurse.item.ScarabTalismanItem;
 import com.ancientcurse.item.SekhemDateItem;
 import com.ancientcurse.item.SerpentStaffItem;
@@ -178,13 +179,16 @@ public class ModItems {
     // Khamsin Spread Small spawn egg (Mystical floating rock - Curse system)
     public static final SpawnEggItem KHAMSIN_SPREAD_SMALL_SPAWN_EGG = new SpawnEggItem(
         ModEntities.KHAMSIN_SPREAD_SMALL,
-        0x8B4513, // Primary color (saddle brown - rock/sand)
-        0xFF4500, // Secondary color (orange red - mystical energy)
+        0x1C1C1C, // Primary color (dark black/charcoal)
+        0x8B008B, // Secondary color (dark magenta/purple)
         new FabricItemSettings()
     );
     
     public static final Item SCARAB_SHELL = new Item(new FabricItemSettings());
     public static final Item SCARAB_SHELL_FRAGMENT = new Item(new FabricItemSettings());
+    
+    // Salt for creating protective circles against cursed earth
+    public static final SaltItem SALT = new SaltItem(new FabricItemSettings());
 
     // Bronze materials
     public static final Item BRONZE_BLEND = new Item(new FabricItemSettings());
@@ -335,6 +339,13 @@ public class ModItems {
             Registries.ITEM,
             new Identifier(AncientCurse.MOD_ID, "rope"),
             ROPE
+        );
+        
+        // Register Salt
+        Registry.register(
+            Registries.ITEM,
+            new Identifier(AncientCurse.MOD_ID, "salt"),
+            SALT
         );
         
         // Register Bronze materials
@@ -536,8 +547,9 @@ public class ModItems {
         );
         
         // Register the Khamsin Spread Small spawn egg
+        // Register Khamsin Spread Small spawn egg
         Registry.register(
-            Registries.ITEM, 
+            Registries.ITEM,
             new Identifier(AncientCurse.MOD_ID, "khamsin_spread_small_spawn_egg"),
             KHAMSIN_SPREAD_SMALL_SPAWN_EGG
         );

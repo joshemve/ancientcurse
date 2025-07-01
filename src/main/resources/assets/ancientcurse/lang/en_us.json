@@ -135,6 +135,9 @@
   "item.ancientcurse.scarab_shell.tooltip": "Ancient Curse",
   "item.ancientcurse.scarab_shell_fragment": "Scarab Shell Fragment",
   "item.ancientcurse.scarab_shell_fragment.tooltip": "Ancient Curse",
+  "item.ancientcurse.salt": "Salt",
+  "item.ancientcurse.salt.tooltip": "Pure salt crystals used to create protective circles against cursed earth",
+  "block.ancientcurse.salt_dust": "Salt Dust",
 
   "block.ancientcurse.anubus__glyph": "Anubus Glyph",
   "block.ancientcurse.anubus__glyph.tooltip": "Ancient Curse",
