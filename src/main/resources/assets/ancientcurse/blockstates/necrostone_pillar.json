@@ -1,5 +1,16 @@
 {
   "variants": {
-    "": { "model": "ancientcurse:block/necrostone_pillar" }
+    "axis=y": {
+      "model": "ancientcurse:block/necrostone_pillar"
+    },
+    "axis=z": {
+      "model": "ancientcurse:block/necrostone_pillar",
+      "x": 90
+    },
+    "axis=x": {
+      "model": "ancientcurse:block/necrostone_pillar",
+      "x": 90,
+      "y": 90
+    }
   }
 }

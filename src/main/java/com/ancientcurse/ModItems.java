@@ -7,9 +7,11 @@ import com.ancientcurse.item.EternalSigilItem;
 import com.ancientcurse.item.HorusMaceItem;
 import com.ancientcurse.item.PhialOfLotusEssenceItem;
 import com.ancientcurse.item.ScarabIncenseItem;
+import com.ancientcurse.item.SaltItem;
 import com.ancientcurse.item.ScarabTalismanItem;
 import com.ancientcurse.item.SekhemDateItem;
-import com.ancientcurse.item.SnakeStaffItem;
+import com.ancientcurse.item.SerpentStaffItem;
+import com.ancientcurse.item.StaffOfRaItem;
 import com.ancientcurse.item.WitheredStaffItem;
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
 import net.minecraft.entity.effect.StatusEffectInstance;
@@ -34,7 +36,7 @@ import com.ancientcurse.item.BronzeToolMaterial;
  */
 public class ModItems {
     // Define items
-    public static final CustomAnimatedItem STAFF_OF_RA = new CustomAnimatedItem(new FabricItemSettings(), "staff_of_ra");
+    public static final StaffOfRaItem STAFF_OF_RA = new StaffOfRaItem(new FabricItemSettings(), "staff_of_ra");
 
 
     // Define the Sycamore Fig food item
@@ -119,7 +121,7 @@ public class ModItems {
     public static final PhialOfLotusEssenceItem PHIAL_OF_LOTUS_ESSENCE = new PhialOfLotusEssenceItem(new FabricItemSettings());
     public static final ElixirOfRasSparkItem ELIXIR_OF_RAS_SPARK = new ElixirOfRasSparkItem(new FabricItemSettings());
     public static final AncientPickItem ANCIENT_PICK = new AncientPickItem(new FabricItemSettings());
-    public static final SnakeStaffItem SNAKE_STAFF = new SnakeStaffItem(new FabricItemSettings());
+    public static final SerpentStaffItem SERPENT_STAFF = new SerpentStaffItem(new FabricItemSettings());
     public static final WitheredStaffItem WITHERED_STAFF = new WitheredStaffItem(new FabricItemSettings());
     public static final ScarabIncenseItem SCARAB_INCENSE_ITEM = new ScarabIncenseItem(new FabricItemSettings());
     public static final EternalSigilItem ETERNAL_SIGIL = new EternalSigilItem(
@@ -150,8 +152,43 @@ public class ModItems {
         new FabricItemSettings()
     );
     
+    // Locus spawn egg (correctly named to match asset files: locus.geo.json, locus.png, etc.)
+    public static final SpawnEggItem LOCUS_SPAWN_EGG = new SpawnEggItem(
+        ModEntities.LOCUS, 
+        0x4A5D23, // Primary color (dark olive green)
+        0x7B8A3A, // Secondary color (olive green)
+        new FabricItemSettings()
+    );
+    
+    // Scarab Beetle spawn egg
+    public static final SpawnEggItem SCARAB_BEETLE_SPAWN_EGG = new SpawnEggItem(
+        ModEntities.SCARAB_BEETLE, 
+        0x2B1B0A, // Primary color (dark brown/black - beetle shell)
+        0xB8860B, // Secondary color (dark golden rod - metallic sheen)
+        new FabricItemSettings()
+    );
+
+    // Thoth spawn egg (Egyptian God boss)
+    public static final SpawnEggItem THOTH_SPAWN_EGG = new SpawnEggItem(
+        ModEntities.THOTH,
+        0x9932CC, // Primary color (dark orchid - magical purple)
+        0xFFD700, // Secondary color (gold - divine)
+        new FabricItemSettings()
+    );
+    
+    // Khamsin Spread Small spawn egg (Mystical floating rock - Curse system)
+    public static final SpawnEggItem KHAMSIN_SPREAD_SMALL_SPAWN_EGG = new SpawnEggItem(
+        ModEntities.KHAMSIN_SPREAD_SMALL,
+        0x1C1C1C, // Primary color (dark black/charcoal)
+        0x8B008B, // Secondary color (dark magenta/purple)
+        new FabricItemSettings()
+    );
+    
     public static final Item SCARAB_SHELL = new Item(new FabricItemSettings());
     public static final Item SCARAB_SHELL_FRAGMENT = new Item(new FabricItemSettings());
+    
+    // Salt for creating protective circles against cursed earth
+    public static final SaltItem SALT = new SaltItem(new FabricItemSettings());
 
     // Bronze materials
     public static final Item BRONZE_BLEND = new Item(new FabricItemSettings());
@@ -304,6 +341,13 @@ public class ModItems {
             ROPE
         );
         
+        // Register Salt
+        Registry.register(
+            Registries.ITEM,
+            new Identifier(AncientCurse.MOD_ID, "salt"),
+            SALT
+        );
+        
         // Register Bronze materials
         Registry.register(
             Registries.ITEM,
@@ -416,8 +460,8 @@ public class ModItems {
         );
         Registry.register(
             Registries.ITEM,
-            new Identifier(AncientCurse.MOD_ID, "snake_staff"),
-            SNAKE_STAFF
+            new Identifier(AncientCurse.MOD_ID, "serpent_staff"),
+            SERPENT_STAFF
         );
         
         // Register Withered Staff
@@ -481,6 +525,33 @@ public class ModItems {
             ANUBIS_SPAWN_EGG
         );
         
-        // Vessel items are registered in ModBlocks.java
+        // Register the Locus spawn egg
+        Registry.register(
+            Registries.ITEM, 
+            new Identifier(AncientCurse.MOD_ID, "locus_spawn_egg"),
+            LOCUS_SPAWN_EGG
+        );
+        
+        // Register the Scarab Beetle spawn egg
+        Registry.register(
+            Registries.ITEM, 
+            new Identifier(AncientCurse.MOD_ID, "scarab_beetle_spawn_egg"),
+            SCARAB_BEETLE_SPAWN_EGG
+        );
+        
+        // Register the Thoth spawn egg
+        Registry.register(
+            Registries.ITEM, 
+            new Identifier(AncientCurse.MOD_ID, "thoth_spawn_egg"),
+            THOTH_SPAWN_EGG
+        );
+        
+        // Register the Khamsin Spread Small spawn egg
+        // Register Khamsin Spread Small spawn egg
+        Registry.register(
+            Registries.ITEM,
+            new Identifier(AncientCurse.MOD_ID, "khamsin_spread_small_spawn_egg"),
+            KHAMSIN_SPREAD_SMALL_SPAWN_EGG
+        );
     }
 }

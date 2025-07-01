@@ -1,7 +1,11 @@
 {
   "tooltip.ancientcurse.ancient_curse": "Ancient Curse",
   "item.ancientcurse.staff_of_ra": "Staff of Ra",
-  "item.ancientcurse.staff_of_ra.tooltip": "Ancient Curse",
+  "item.ancientcurse.staff_of_ra.tooltip": "Divine staff blessed by the sun god himself",
+  "item.ancientcurse.staff_of_ra.tooltip1": "Hold right-click to charge a devastating sun beam",
+  "item.ancientcurse.staff_of_ra.tooltip2": "The longer you charge, the more powerful the attack",
+  "item.ancientcurse.staff_of_ra.tooltip3": "Sun beam sets enemies on fire and deals bonus damage to undead",
+  "item.ancientcurse.staff_of_ra.tooltip4": "Creates ambient light and warmth when held",
   "item.ancientcurse.sycamore_fig": "Sycamore Fig",
   "item.ancientcurse.sycamore_fig.tooltip": "Ancient Curse",
   "item.ancientcurse.golden_sycamore_fig": "Golden Sycamore Fig",
@@ -30,6 +34,26 @@
   "entity.ancientcurse.djeserhath": "Djeserhath",
   "item.ancientcurse.djeserhath_spawn_egg": "Djeserhath Spawn Egg",
   "item.ancientcurse.djeserhath_spawn_egg.tooltip": "Ancient Curse",
+  
+  "entity.ancientcurse.locus": "Locus",
+  "item.ancientcurse.locus_spawn_egg": "Locus Spawn Egg",
+  "item.ancientcurse.locus_spawn_egg.tooltip": "Summon a mystical desert locust",
+  
+  "entity.ancientcurse.baby_locus": "Baby Locus",
+  
+  "entity.ancientcurse.scarab_beetle": "Scarab Beetle",
+  "item.ancientcurse.scarab_beetle_spawn_egg": "Scarab Beetle Spawn Egg",
+  "item.ancientcurse.scarab_beetle_spawn_egg.tooltip": "Summon an ancient scarab beetle",
+  
+  "entity.ancientcurse.thoth": "Thoth, the God of Wisdom",
+  "item.ancientcurse.thoth_spawn_egg": "Thoth Spawn Egg",
+  "item.ancientcurse.thoth_spawn_egg.tooltip": "Summon the Egyptian god of wisdom and magic",
+  
+  "entity.ancientcurse.khamsin_spread_small": "Khamsin Spread (Small)",
+  "item.ancientcurse.khamsin_spread_small_spawn_egg": "Khamsin Spread Small Spawn Egg",
+  "item.ancientcurse.khamsin_spread_small_spawn_egg.tooltip": "Summon a mystical floating rock that's part of the curse system",
+  
+  "entity.ancientcurse.snake_head_projectile": "Snake Head Projectile",
   
   "entity.ancientcurse.anubis": "Anubis, the Jackal-Headed God",
   "item.ancientcurse.anubis_spawn_egg": "Anubis Spawn Egg",
@@ -96,8 +120,11 @@
   "item.ancientcurse.elixir_of_ras_spark.tooltip": "Provides fire resistance and strength when consumed",
   "item.ancientcurse.ancient_pick": "Ancient Pick",
   "item.ancientcurse.ancient_pick.tooltip": "Chance to preserve durability and grant haste when mining",
-  "item.ancientcurse.snake_staff": "Snake Staff",
-  "item.ancientcurse.snake_staff.tooltip": "Poisons nearby enemies when charged",
+  "item.ancientcurse.serpent_staff": "Serpent Staff",
+  "item.ancientcurse.serpent_staff.tooltip": "Ancient staff that fires poisonous snake projectiles",
+  "item.ancientcurse.serpent_staff.tooltip1": "Right-click: Fire snake head projectiles",
+  "item.ancientcurse.serpent_staff.tooltip2": "Sneak + Right-click: Powerful targeted attack",
+  "item.ancientcurse.serpent_staff.tooltip3": "Snake projectiles apply Poison II and knockback",
   "item.ancientcurse.withered_staff": "Withered Staff",
   "item.ancientcurse.withered_staff.tooltip": "Launches wither skulls when charged",
   "item.ancientcurse.scarab_incense_item": "Scarab Incense",
@@ -108,6 +135,9 @@
   "item.ancientcurse.scarab_shell.tooltip": "Ancient Curse",
   "item.ancientcurse.scarab_shell_fragment": "Scarab Shell Fragment",
   "item.ancientcurse.scarab_shell_fragment.tooltip": "Ancient Curse",
+  "item.ancientcurse.salt": "Salt",
+  "item.ancientcurse.salt.tooltip": "Pure salt crystals used to create protective circles against cursed earth",
+  "block.ancientcurse.salt_dust": "Salt Dust",
 
   "block.ancientcurse.anubus__glyph": "Anubus Glyph",
   "block.ancientcurse.anubus__glyph.tooltip": "Ancient Curse",

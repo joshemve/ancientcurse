@@ -44,6 +44,6 @@
     }
   },
   "textures": {
-    "particle": "ancientweapons:item/withered_staff"
+    "particle": "ancientcurse:item/withered_staff"
   }
 }

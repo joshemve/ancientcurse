@@ -63,7 +63,7 @@ public class CustomAnimatedItem extends Item implements GeoItem {
     private <T extends GeoAnimatable> PlayState predicate(AnimationState<T> tAnimationState) {
         // Always play the sun animation
         tAnimationState.getController().setAnimation(RawAnimation.begin()
-                .then("animation.ancientcurse.staff_of_ra.sun", Animation.LoopType.LOOP));
+                .then("animation.model.sun", Animation.LoopType.LOOP));
         return PlayState.CONTINUE;
     }
 

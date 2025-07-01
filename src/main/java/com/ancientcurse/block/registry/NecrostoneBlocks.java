@@ -125,6 +125,9 @@ public class NecrostoneBlocks {
         Registry.register(Registries.ITEM, new Identifier(AncientCurse.MOD_ID, "necrostone_cracked"), new net.minecraft.item.BlockItem(NECROSTONE_CRACKED, new net.fabricmc.fabric.api.item.v1.FabricItemSettings()));
         Registry.register(Registries.ITEM, new Identifier(AncientCurse.MOD_ID, "necrostone_rough"), new net.minecraft.item.BlockItem(NECROSTONE_ROUGH, new net.fabricmc.fabric.api.item.v1.FabricItemSettings()));
         Registry.register(Registries.ITEM, new Identifier(AncientCurse.MOD_ID, "necrostone_wall"), new net.minecraft.item.BlockItem(NECROSTONE_WALL, new net.fabricmc.fabric.api.item.v1.FabricItemSettings()));
+        Registry.register(Registries.ITEM, new Identifier(AncientCurse.MOD_ID, "necrostone_pillar"), new net.minecraft.item.BlockItem(NECROSTONE_PILLAR, new net.fabricmc.fabric.api.item.v1.FabricItemSettings()));
+        Registry.register(Registries.ITEM, new Identifier(AncientCurse.MOD_ID, "necrostone_chiseled"), new net.minecraft.item.BlockItem(NECROSTONE_CHISELED, new net.fabricmc.fabric.api.item.v1.FabricItemSettings()));
+        Registry.register(Registries.ITEM, new Identifier(AncientCurse.MOD_ID, "necrostone_stairs"), new net.minecraft.item.BlockItem(NECROSTONE_STAIRS, new net.fabricmc.fabric.api.item.v1.FabricItemSettings()));
         Registry.register(Registries.ITEM, new Identifier(AncientCurse.MOD_ID, "necrostone_chain"), new net.minecraft.item.BlockItem(NECROSTONE_CHAIN, new net.fabricmc.fabric.api.item.v1.FabricItemSettings()));
         Registry.register(Registries.ITEM, new Identifier(AncientCurse.MOD_ID, "necrostone_eye"), new net.minecraft.item.BlockItem(NECROSTONE_EYE, new net.fabricmc.fabric.api.item.v1.FabricItemSettings()));
         Registry.register(Registries.ITEM, new Identifier(AncientCurse.MOD_ID, "necrostone_slab"), new net.minecraft.item.BlockItem(NECROSTONE_SLAB, new net.fabricmc.fabric.api.item.v1.FabricItemSettings()));

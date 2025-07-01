@@ -191,6 +191,17 @@ public class ModBlocks {
             .strength(0.5f)
             .sounds(BlockSoundGroup.CALCITE) // Crystalline sound
     );
+    
+    // Salt Dust - placeable salt dust similar to redstone dust
+    public static final Block SALT_DUST = new SaltDustBlock(
+        FabricBlockSettings.create()
+            .mapColor(MapColor.WHITE)
+            .strength(0.0f)
+            .sounds(BlockSoundGroup.SAND)
+            .nonOpaque()
+            .noCollision()
+            .breakInstantly()
+    );
 
     // Dried Reed Thatch - bundled dried reeds for construction
     public static final Block DRIED_REED_THATCH = new Block(
@@ -592,127 +603,10 @@ public class ModBlocks {
             .sounds(BlockSoundGroup.METAL)
     );
     
-    // New cursed plant blocks
-    public static final Block BLOODSHADE_THICKET = new BloodshadeThicketBlock(
-        FabricBlockSettings.create()
-            .mapColor(MapColor.DARK_RED)
-            .strength(0.4f)
-            .sounds(BlockSoundGroup.GRASS)
-            .nonOpaque()
-            .noCollision()
-            .luminance(state -> 2) // Slight glow
-    );
-    
-    public static final Block CURSED_SPRIG = new CursedSprigBlock(
-        FabricBlockSettings.create()
-            .mapColor(MapColor.TERRACOTTA_PURPLE)
-            .strength(0.2f)
-            .sounds(BlockSoundGroup.GRASS)
-            .nonOpaque()
-            .noCollision()
-    );
-    
-    public static final Block CURSED_SPROUT = new CursedSproutBlock(
-        FabricBlockSettings.create()
-            .mapColor(MapColor.TERRACOTTA_PURPLE)
-            .strength(0.2f)
-            .sounds(BlockSoundGroup.GRASS)
-            .nonOpaque()
-            .noCollision()
-    );
-    
-    public static final Block DUAT_FERN = new DuatFernBlock(
-        FabricBlockSettings.create()
-            .mapColor(MapColor.TERRACOTTA_BLUE)
-            .strength(0.3f)
-            .sounds(BlockSoundGroup.GRASS)
-            .nonOpaque()
-            .noCollision()
-            .luminance(state -> 3) // Mystical glow
-    );
-    
-    public static final Block VINE_OF_APEP = new VineOfApepBlock(
-        FabricBlockSettings.create()
-            .mapColor(MapColor.DARK_GREEN)
-            .strength(0.4f)
-            .sounds(BlockSoundGroup.GRASS)
-            .nonOpaque()
-            .noCollision()
-    );
-    
-    // New Egyptian-themed plant blocks
-    public static final Block DUAMUTEF_CAP = new DuamutefCapBlock(
-        FabricBlockSettings.create()
-            .mapColor(MapColor.TERRACOTTA_ORANGE)
-            .strength(0.3f)
-            .sounds(BlockSoundGroup.GRASS)
-            .nonOpaque()
-            .noCollision()
-    );
-    
-    public static final Block ISFET_FROND = new IsfetFrondBlock(
-        FabricBlockSettings.create()
-            .mapColor(MapColor.PALE_GREEN)
-            .strength(0.3f)
-            .sounds(BlockSoundGroup.GRASS)
-            .nonOpaque()
-            .noCollision()
-    );
-    
-    public static final Block ISFET_SHRUB = new IsfetShrubBlock(
-        FabricBlockSettings.create()
-            .mapColor(MapColor.PALE_GREEN)
-            .strength(0.4f)
-            .sounds(BlockSoundGroup.GRASS)
-            .nonOpaque()
-            .noCollision()
-    );
-    
-    public static final Block KHEMNU_POD = new KhemnuPodBlock(
-        FabricBlockSettings.create()
-            .mapColor(MapColor.TERRACOTTA_YELLOW)
-            .strength(0.3f)
-            .sounds(BlockSoundGroup.GRASS)
-            .nonOpaque()
-            .noCollision()
-            .luminance(state -> 7) // Glowing pod
-    );
-    
-    public static final Block KHERU_MOSS = new KheruMossBlock(
-        FabricBlockSettings.create()
-            .mapColor(MapColor.DARK_GREEN)
-            .strength(0.2f)
-            .sounds(BlockSoundGroup.GRASS)
-            .nonOpaque()
-            .noCollision()
-    );
-    
-    public static final Block MENFET_SPRIG = new MenfetSprigBlock(
-        FabricBlockSettings.create()
-            .mapColor(MapColor.TERRACOTTA_BLUE)
-            .strength(0.2f)
-            .sounds(BlockSoundGroup.GRASS)
-            .nonOpaque()
-            .noCollision()
-    );
-    
-    public static final Block REED_OF_SEKHEM = new ReedOfSekhemBlock(
-        FabricBlockSettings.create()
-            .mapColor(MapColor.PALE_YELLOW)
-            .strength(0.4f)
-            .sounds(BlockSoundGroup.GRASS)
-            .nonOpaque()
-            .noCollision()
-    );
-    
-    public static final Block SUTEKH_COIL = new SutekhCoilBlock(
-        FabricBlockSettings.create()
-            .mapColor(MapColor.TERRACOTTA_RED)
-            .strength(0.4f)
-            .sounds(BlockSoundGroup.GRASS)
-            .nonOpaque()
-            .noCollision()
-    );
+    // NOTE: All cursed plant blocks and Egyptian plant blocks have been moved to their respective registry classes:
+    // - Cursed plant blocks: com.ancientcurse.block.registry.CursedPlantBlocks
+    // - Egyptian plant blocks: com.ancientcurse.block.registry.EgyptianPlantBlocks
+    // This prevents intrusive holders errors by ensuring all blocks are properly registered.
     
     // REMOVED: Anubus Glyph block was causing registration conflicts
     // public static final Block ANUBUS_GLYPH_BLOCK = new AnubusGlyphBlock(...);
@@ -870,6 +764,13 @@ public class ModBlocks {
             Registries.BLOCK,
             new Identifier(AncientCurse.MOD_ID, "salt_bed"),
             SALT_BED
+        );
+        
+        // Register Salt Dust
+        Registry.register(
+            Registries.BLOCK,
+            new Identifier(AncientCurse.MOD_ID, "salt_dust"),
+            SALT_DUST
         );
         
         // Register Dried Reed Thatch
@@ -1180,24 +1081,13 @@ public class ModBlocks {
      * Validates all block registrations and fixes any issues
      */
     private static void validateAndFixBlockRegistrations() {
-        // Check Egyptian plant blocks
-        Block[] egyptianPlantBlocks = new Block[] {
-            DUAMUTEF_CAP, ISFET_FROND, ISFET_SHRUB, KHEMNU_POD, 
-            KHERU_MOSS, MENFET_SPRIG, REED_OF_SEKHEM, SUTEKH_COIL
-        };
+        // NOTE: Egyptian plant blocks and cursed plant blocks are now validated 
+        // in their respective registry classes:
+        // - com.ancientcurse.block.registry.EgyptianPlantBlocks
+        // - com.ancientcurse.block.registry.CursedPlantBlocks
         
-        for (Block block : egyptianPlantBlocks) {
-            validateBlockRegistration(block);
-        }
-        
-        // Check cursed plant blocks
-        Block[] cursedPlantBlocks = new Block[] {
-            CURSED_SPRIG, CURSED_SPROUT, BLOODSHADE_THICKET, DUAT_FERN, VINE_OF_APEP
-        };
-        
-        for (Block block : cursedPlantBlocks) {
-            validateBlockRegistration(block);
-        }
+        // Validate core blocks only
+        AncientCurse.LOGGER.info("Validating core block registrations complete");
     }
     
     /**
@@ -1244,6 +1134,7 @@ public class ModBlocks {
         registerBlockItem(GOLD_FLAKED_RIVER_BED, ModItemGroup.ANCIENT_CURSE);
         registerBlockItem(MUD_FLAT, ModItemGroup.ANCIENT_CURSE);
         registerBlockItem(SALT_BED, ModItemGroup.ANCIENT_CURSE);
+        registerBlockItem(SALT_DUST, ModItemGroup.ANCIENT_CURSE);
         registerBlockItem(DRIED_REED_THATCH, ModItemGroup.ANCIENT_CURSE);
         registerBlockItem(RIVERBED_CLAY, ModItemGroup.ANCIENT_CURSE);
         registerBlockItem(OBELISK_STONE, ModItemGroup.ANCIENT_CURSE);

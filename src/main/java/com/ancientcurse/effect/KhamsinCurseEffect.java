@@ -33,13 +33,7 @@ public class KhamsinCurseEffect extends StatusEffect {
         return stage;
     }
     
-    /**
-     * Gets the texture for the current stage of the curse
-     * @return The identifier for the texture
-     */
-    public Identifier getTexture() {
-        return new Identifier("ancientcurse", "textures/gui/curse_phase_" + stage + "_icon.png");
-    }
+
     
     @Override
     public boolean canApplyUpdateEffect(int duration, int amplifier) {
@@ -54,34 +48,31 @@ public class KhamsinCurseEffect extends StatusEffect {
             switch (stage) {
                 case 1 -> {
                     // Stage 1: Mild effects - slight slowness
-                    if (player.getRandom().nextFloat() < 0.1f) {
-                        player.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 100, 0, false, false, true));
-                    }
+                    player.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 100, 0, false, false, true));
                 }
                 case 2 -> {
                     // Stage 2: Moderate effects - hunger
-                    if (player.getRandom().nextFloat() < 0.15f) {
-                        player.addStatusEffect(new StatusEffectInstance(StatusEffects.HUNGER, 200, 0, false, false, true));
-                    }
+                    player.addStatusEffect(new StatusEffectInstance(StatusEffects.HUNGER, 200, 0, false, false, true));
                 }
                 case 3 -> {
                     // Stage 3: Severe effects - weakness
-                    if (player.getRandom().nextFloat() < 0.2f) {
-                        player.addStatusEffect(new StatusEffectInstance(StatusEffects.WEAKNESS, 300, 1, false, false, true));
-                    }
+                    player.addStatusEffect(new StatusEffectInstance(StatusEffects.WEAKNESS, 300, 1, false, false, true));
                 }
                 case 4 -> {
                     // Stage 4: Critical effects - mining fatigue
-                    if (player.getRandom().nextFloat() < 0.25f) {
-                        player.addStatusEffect(new StatusEffectInstance(StatusEffects.MINING_FATIGUE, 400, 1, false, false, true));
-                    }
+                    player.addStatusEffect(new StatusEffectInstance(StatusEffects.MINING_FATIGUE, 400, 1, false, false, true));
                 }
                 case 5 -> {
                     // Stage 5: Terminal effects - wither
-                    if (player.getRandom().nextFloat() < 0.3f) {
-                        player.addStatusEffect(new StatusEffectInstance(StatusEffects.WITHER, 100, 0, false, false, true));
-                    }
+                    player.addStatusEffect(new StatusEffectInstance(StatusEffects.WITHER, 100, 0, false, false, true));
                 }
+            }
+        }
+
+        // Check if the curse should advance to the next stage
+        if (entity.getStatusEffect(this).getDuration() <= 1) {
+            if (stage < 5) {
+                entity.addStatusEffect(new StatusEffectInstance(ModStatusEffects.getCurseStage(stage + 1), STAGE_DURATION, 0, false, false, true));
             }
         }
     }

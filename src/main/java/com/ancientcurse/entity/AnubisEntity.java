@@ -549,7 +549,7 @@ public class AnubisEntity extends HostileEntity implements GeoEntity {
         // Sky yelling special attack
         if (isSkyYelling()) {
             s.getController().setAnimation(RawAnimation.begin()
-                    .then("animation.anubis.attack_2", Animation.LoopType.PLAY_ONCE));
+                    .then("animation.anubis.attack_2_howl", Animation.LoopType.PLAY_ONCE));
             return PlayState.CONTINUE;
         }
         

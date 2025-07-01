@@ -53,6 +53,7 @@ public class ModItemGroup {
                 safeAdd(entries, ModItems.RAW_RIVERBED_CLAY);
                 safeAdd(entries, ModItems.LOTUS_FLOWER);
                 safeAdd(entries, ModItems.ROPE);
+                safeAdd(entries, ModItems.SALT);
                 
                 // Tree blocks
                 safeAdd(entries, ModBlocks.SYCAMORE_FIG_LOG);
@@ -187,6 +188,12 @@ public class ModItemGroup {
                 safeAdd(entries, com.ancientcurse.block.registry.NecrostoneBlocks.NECROSTONE_CRACKED);
                 safeAdd(entries, com.ancientcurse.block.registry.NecrostoneBlocks.NECROSTONE_ROUGH);
                 safeAdd(entries, com.ancientcurse.block.registry.NecrostoneBlocks.NECROSTONE_WALL);
+                safeAdd(entries, com.ancientcurse.block.registry.NecrostoneBlocks.NECROSTONE_PILLAR);
+                safeAdd(entries, com.ancientcurse.block.registry.NecrostoneBlocks.NECROSTONE_CHISELED);
+                safeAdd(entries, com.ancientcurse.block.registry.NecrostoneBlocks.NECROSTONE_STAIRS);
+                safeAdd(entries, com.ancientcurse.block.registry.NecrostoneBlocks.NECROSTONE_SLAB);
+                safeAdd(entries, com.ancientcurse.block.registry.NecrostoneBlocks.NECROSTONE_CARVED);
+                safeAdd(entries, com.ancientcurse.block.registry.NecrostoneBlocks.NECROSTONE_SMOOTH);
                 safeAdd(entries, com.ancientcurse.block.registry.NecrostoneBlocks.NECROSTONE_CHAIN);
                 safeAdd(entries, com.ancientcurse.block.registry.NecrostoneBlocks.NECROSTONE_EYE);
                 safeAdd(entries, com.ancientcurse.block.registry.NecrostoneBlocks.NECROSTONE_ANKH);
@@ -227,7 +234,7 @@ public class ModItemGroup {
                 safeAdd(entries, ModItems.PHIAL_OF_LOTUS_ESSENCE);
                 safeAdd(entries, ModItems.ELIXIR_OF_RAS_SPARK);
                 safeAdd(entries, ModItems.ANCIENT_PICK);
-                safeAdd(entries, ModItems.SNAKE_STAFF);
+                safeAdd(entries, ModItems.SERPENT_STAFF);
                 safeAdd(entries, ModItems.WITHERED_STAFF);
                 safeAdd(entries, ModItems.SCARAB_INCENSE_ITEM);
                 safeAdd(entries, ModItems.ETERNAL_SIGIL);
@@ -236,6 +243,11 @@ public class ModItemGroup {
                 safeAdd(entries, ModItems.WITHERED_PHARAOH_SPAWN_EGG);
                 safeAdd(entries, ModItems.DJESERHATH_SPAWN_EGG);
                 safeAdd(entries, ModItems.ANUBIS_SPAWN_EGG);
+                safeAdd(entries, ModItems.LOCUS_SPAWN_EGG);
+                safeAdd(entries, ModItems.SCARAB_BEETLE_SPAWN_EGG);
+                safeAdd(entries, ModItems.THOTH_SPAWN_EGG);
+                safeAdd(entries, ModItems.KHAMSIN_SPREAD_SMALL_SPAWN_EGG);
+                // Lotus spawn egg removed to fix conflicts
             })
             .build()
     );
