@@ -40,15 +40,9 @@ public class ThothModel extends GeoModel<ThothEntity> {
         return MODEL; 
     }
     
-    @Override 
-    public Identifier getTextureResource(ThothEntity entity) { 
-        // Different texture variants based on magic state
-        if (entity.isCastingTimeMagic()) {
-            return TEXTURE_PURPLE; // Purple when casting time magic
-        } else if (entity.isReading()) {
-            return TEXTURE_GREEN; // Green when reading scrolls
-        }
-        return TEXTURE; // Default texture
+    @Override
+    public Identifier getTextureResource(ThothEntity entity) {
+        return TEXTURE_GREEN; // Always use the green texture
     }
     
     @Override 

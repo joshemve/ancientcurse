@@ -32,18 +32,12 @@ import software.bernie.geckolib.renderer.layer.GeoRenderLayer;
  */
 public class ThothRenderer extends GeoEntityRenderer<ThothEntity> {
     
-    private static final Identifier TEXTURE = new Identifier(AncientCurse.MOD_ID, "textures/entity/thoth.png");
     private static final Identifier TEXTURE_GREEN = new Identifier(AncientCurse.MOD_ID, "textures/entity/thoth_green.png");
-    private static final Identifier TEXTURE_PURPLE = new Identifier(AncientCurse.MOD_ID, "textures/entity/thoth_purple.png");
-    private static final Identifier DAMAGE_TEXTURE = new Identifier(AncientCurse.MOD_ID, "textures/entity/thoth_damaged.png");
-    private static final Identifier GLOW_TEXTURE = new Identifier(AncientCurse.MOD_ID, "textures/entity/thoth_glow.png");
+    private static final Identifier EYES_TEXTURE = new Identifier(AncientCurse.MOD_ID, "textures/entity/thoth_eyes.png");
     
     // Cached RenderLayers to avoid map lookups each frame
-    private static final RenderLayer RENDER_LAYER_DEFAULT = RenderLayer.getEntityTranslucent(TEXTURE);
     private static final RenderLayer RENDER_LAYER_GREEN = RenderLayer.getEntityTranslucent(TEXTURE_GREEN);
-    private static final RenderLayer RENDER_LAYER_PURPLE = RenderLayer.getEntityTranslucent(TEXTURE_PURPLE);
-    private static final RenderLayer RENDER_LAYER_DAMAGE = RenderLayer.getEntityTranslucent(DAMAGE_TEXTURE);
-    private static final RenderLayer RENDER_LAYER_GLOW = RenderLayer.getEyes(GLOW_TEXTURE);
+    private static final RenderLayer RENDER_LAYER_EYES = RenderLayer.getEyes(EYES_TEXTURE);
     
     // Attack state constants (matching ThothEntity)
     private static final int ATTACK_NONE = 0;
@@ -56,8 +50,7 @@ public class ThothRenderer extends GeoEntityRenderer<ThothEntity> {
         super(renderManager, new ThothModel());
         
         // Add layers in order of rendering
-        this.addRenderLayer(new ThothDamageLayer(this));
-        this.addRenderLayer(new ThothMagicGlowLayer(this));
+        this.addRenderLayer(new ThothGlowingEyesLayer(this));
         this.addRenderLayer(new ThothParticleLayer(this));
         
         // Scale up for boss presence
@@ -152,33 +145,23 @@ public class ThothRenderer extends GeoEntityRenderer<ThothEntity> {
     }
     
     public Identifier getTextureResource(ThothEntity animatable) {
-        // Dynamic texture selection based on state
-        if (animatable.isCastingTimeMagic()) {
-            return TEXTURE_PURPLE; // Purple during time magic
-        } else if (animatable.getHealth() < animatable.getMaxHealth() * 0.3f) {
-            return TEXTURE_GREEN; // Green when low health (desperate/enraged)
-        }
-        return TEXTURE; // Default texture
+        // Always use green texture
+        return TEXTURE_GREEN;
     }
     
     @Override
     public RenderLayer getRenderType(ThothEntity animatable, Identifier texture, 
                                    VertexConsumerProvider bufferSource, float partialTick) {
-        // Use cached render layers
-        if (texture == TEXTURE_PURPLE) {
-            return RENDER_LAYER_PURPLE;
-        } else if (texture == TEXTURE_GREEN) {
-            return RENDER_LAYER_GREEN;
-        }
-        return RENDER_LAYER_DEFAULT;
+        // Always use green render layer
+        return RENDER_LAYER_GREEN;
     }
     
     /**
-     * Damage Layer - Shows visual damage as health decreases
+     * Glowing Eyes Layer - Adds emissive eyes to Thoth with soft glow effects
      */
-    public static class ThothDamageLayer extends GeoRenderLayer<ThothEntity> {
+    public static class ThothGlowingEyesLayer extends GeoRenderLayer<ThothEntity> {
         
-        public ThothDamageLayer(GeoEntityRenderer<ThothEntity> entityRenderer) {
+        public ThothGlowingEyesLayer(GeoEntityRenderer<ThothEntity> entityRenderer) {
             super(entityRenderer);
         }
         
@@ -187,75 +170,77 @@ public class ThothRenderer extends GeoEntityRenderer<ThothEntity> {
                           RenderLayer renderType, VertexConsumerProvider bufferSource, VertexConsumer buffer,
                           float partialTick, int packedLight, int packedOverlay) {
             
-            float healthPercent = animatable.getHealth() / animatable.getMaxHealth();
-            if (healthPercent >= 0.7f) return; // Early bailout for performance
+            // Always render eyes, but with different intensities based on state
+            boolean isCasting = animatable.isCastingTimeMagic();
+            boolean isAttacking = animatable.isAttackingWithMagic();
+            boolean isInCombat = animatable.isInCombat();
             
-            float damageAlpha = (0.7f - healthPercent) / 0.7f; // 0 at 70% health, 1 at 0% health
-            if (damageAlpha <= 0) return; // Additional bailout check
+            // Base glow intensity - always present but subtle
+            float baseGlow = 0.3f;
             
-            VertexConsumer damageBuffer = bufferSource.getBuffer(RENDER_LAYER_DAMAGE);
-            
-            this.getRenderer().reRender(
-                bakedModel, poseStack, bufferSource, animatable, RENDER_LAYER_DAMAGE,
-                damageBuffer, partialTick, packedLight, packedOverlay,
-                1.0f, 1.0f, 1.0f, damageAlpha * 0.5f
-            );
-        }
-        
-        @Override
-        public Identifier getTextureResource(ThothEntity animatable) {
-            return DAMAGE_TEXTURE;
-        }
-    }
-    
-    /**
-     * Magic Glow Layer - Adds glowing effects during spellcasting
-     */
-    public static class ThothMagicGlowLayer extends GeoRenderLayer<ThothEntity> {
-        
-        public ThothMagicGlowLayer(GeoEntityRenderer<ThothEntity> entityRenderer) {
-            super(entityRenderer);
-        }
-        
-        @Override
-        public void render(MatrixStack poseStack, ThothEntity animatable, BakedGeoModel bakedModel,
-                          RenderLayer renderType, VertexConsumerProvider bufferSource, VertexConsumer buffer,
-                          float partialTick, int packedLight, int packedOverlay) {
-            
-            // Early bailout using entity getters instead of magic numbers
-            boolean shouldGlow = animatable.isCastingTimeMagic() || animatable.isAttackingWithMagic();
-            
-            if (!shouldGlow) {
-                return; // Early bailout for performance
+            // Enhanced glow during magical activities
+            if (isCasting || isAttacking) {
+                baseGlow = 0.8f;
+            } else if (isInCombat) {
+                baseGlow = 0.5f;
             }
             
             // Create pulsing glow effect
-            float glowIntensity = (MathHelper.sin((animatable.age + partialTick) * 0.2f) + 1.0f) * 0.5f;
-            if (glowIntensity <= 0) return; // Additional bailout check
+            float pulseIntensity = (MathHelper.sin((animatable.age + partialTick) * 0.15f) + 1.0f) * 0.5f;
+            float finalGlow = baseGlow + (pulseIntensity * 0.2f);
             
-            // Different glow colors for different attacks
+            if (finalGlow <= 0.1f) return; // Early bailout if too dim
+            
+            // Different glow colors for different states
             float r = 1.0f, g = 1.0f, b = 1.0f;
-            if (animatable.isCastingTimeMagic()) {
+            if (isCasting) {
                 // Purple for time magic
                 r = 0.7f; g = 0.3f; b = 1.0f;
             } else if (animatable.isScrollBlastAttack()) {
                 // Gold for scroll blast
                 r = 1.0f; g = 0.8f; b = 0.3f;
+            } else if (animatable.isMagicBallAttack()) {
+                // Blue for magic ball
+                r = 0.3f; g = 0.7f; b = 1.0f;
+            } else if (isInCombat) {
+                // Orange-red for combat
+                r = 1.0f; g = 0.5f; b = 0.2f;
             }
             
-            VertexConsumer glowBuffer = bufferSource.getBuffer(RENDER_LAYER_GLOW);
+            // Render multiple layers for soft glow effect
+            VertexConsumer eyesBuffer = bufferSource.getBuffer(RENDER_LAYER_EYES);
             
-            // Render the glow with full brightness
+            // Layer 1: Core eye glow (brightest)
             this.getRenderer().reRender(
-                bakedModel, poseStack, bufferSource, animatable, RENDER_LAYER_GLOW,
-                glowBuffer, partialTick, 0xF000F0, packedOverlay,
-                r, g, b, glowIntensity
+                bakedModel, poseStack, bufferSource, animatable, RENDER_LAYER_EYES,
+                eyesBuffer, partialTick, 0xF000F0, packedOverlay,
+                r, g, b, finalGlow
             );
+            
+            // Layer 2: Soft outer glow (slightly larger, more transparent)
+            poseStack.push();
+            poseStack.scale(1.05f, 1.05f, 1.05f);
+            this.getRenderer().reRender(
+                bakedModel, poseStack, bufferSource, animatable, RENDER_LAYER_EYES,
+                eyesBuffer, partialTick, 0xF000F0, packedOverlay,
+                r, g, b, finalGlow * 0.6f
+            );
+            poseStack.pop();
+            
+            // Layer 3: Ambient glow (largest, most transparent)
+            poseStack.push();
+            poseStack.scale(1.1f, 1.1f, 1.1f);
+            this.getRenderer().reRender(
+                bakedModel, poseStack, bufferSource, animatable, RENDER_LAYER_EYES,
+                eyesBuffer, partialTick, 0xF000F0, packedOverlay,
+                r, g, b, finalGlow * 0.3f
+            );
+            poseStack.pop();
         }
         
         @Override
         public Identifier getTextureResource(ThothEntity animatable) {
-            return GLOW_TEXTURE;
+            return EYES_TEXTURE;
         }
     }
     
@@ -295,7 +280,7 @@ public class ThothRenderer extends GeoEntityRenderer<ThothEntity> {
             poseStack.push();
             
             // Cache VertexConsumer once per aura render instead of getting it in loop
-            VertexConsumer auraBuffer = bufferSource.getBuffer(RENDER_LAYER_PURPLE);
+            VertexConsumer auraBuffer = bufferSource.getBuffer(RENDER_LAYER_GREEN);
             
             // Multiple layers for depth
             for (int i = 0; i < 3; i++) {
@@ -312,7 +297,7 @@ public class ThothRenderer extends GeoEntityRenderer<ThothEntity> {
                 float alpha = 0.1f - (i * 0.03f);
                 if (alpha > 0) { // Only render if alpha is positive
                     this.getRenderer().reRender(
-                        bakedModel, poseStack, bufferSource, animatable, RENDER_LAYER_PURPLE,
+                        bakedModel, poseStack, bufferSource, animatable, RENDER_LAYER_GREEN,
                         auraBuffer, partialTick, 0xF000F0, 0,
                         0.5f, 0.2f, 0.8f, alpha // Purple tint with low alpha
                     );
@@ -337,10 +322,10 @@ public class ThothRenderer extends GeoEntityRenderer<ThothEntity> {
             float auraScale = 1.0f + (1.0f - transitionProgress) * 2.0f;
             poseStack.scale(auraScale, auraScale, auraScale);
             
-            VertexConsumer auraBuffer = bufferSource.getBuffer(RENDER_LAYER_PURPLE);
+            VertexConsumer auraBuffer = bufferSource.getBuffer(RENDER_LAYER_GREEN);
             
             this.getRenderer().reRender(
-                bakedModel, poseStack, bufferSource, animatable, RENDER_LAYER_PURPLE,
+                bakedModel, poseStack, bufferSource, animatable, RENDER_LAYER_GREEN,
                 auraBuffer, partialTick, 0xF000F0, 0,
                 1.0f, 1.0f, 1.0f, alpha
             );
@@ -350,7 +335,7 @@ public class ThothRenderer extends GeoEntityRenderer<ThothEntity> {
         
         @Override
         public Identifier getTextureResource(ThothEntity animatable) {
-            return TEXTURE_PURPLE; // Use purple texture for energy aura
+            return TEXTURE_GREEN; // Use green texture for energy aura
         }
     }
 }

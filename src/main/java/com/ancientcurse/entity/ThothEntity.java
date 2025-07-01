@@ -1202,4 +1202,59 @@ public class ThothEntity extends HostileEntity implements GeoEntity {
     public boolean cannotDespawn() {
         return true;
     }
+    
+    /* ---------- DYNAMIC LIGHTING ---------- */
+    /**
+     * Provides dynamic lighting from glowing eyes
+     * Returns light level 0-15 based on current state
+     */
+    public int getEyeLightLevel() {
+        if (isCastingTimeMagic()) {
+            return 12; // Bright purple glow during time magic
+        } else if (isAttackingWithMagic()) {
+            return 10; // Bright glow during magical attacks
+        } else if (isInCombat()) {
+            return 8; // Moderate glow during combat
+        } else if (isReading()) {
+            return 6; // Subtle glow while reading
+        }
+        return 4; // Base glow always present
+    }
+    
+    /**
+     * Gets the color of the eye glow as RGB values (0.0-1.0)
+     */
+    public Vec3d getEyeGlowColor() {
+        if (isCastingTimeMagic()) {
+            return new Vec3d(0.7, 0.3, 1.0); // Purple
+        } else if (isScrollBlastAttack()) {
+            return new Vec3d(1.0, 0.8, 0.3); // Gold
+        } else if (isMagicBallAttack()) {
+            return new Vec3d(0.3, 0.7, 1.0); // Blue
+        } else if (isInCombat()) {
+            return new Vec3d(1.0, 0.5, 0.2); // Orange-red
+        }
+        return new Vec3d(1.0, 1.0, 1.0); // White
+    }
+    
+    /**
+     * Gets the intensity of the eye glow (0.0-1.0)
+     */
+    public float getEyeGlowIntensity() {
+        float baseIntensity = 0.3f;
+        
+        if (isCastingTimeMagic()) {
+            baseIntensity = 0.9f;
+        } else if (isAttackingWithMagic()) {
+            baseIntensity = 0.8f;
+        } else if (isInCombat()) {
+            baseIntensity = 0.6f;
+        } else if (isReading()) {
+            baseIntensity = 0.4f;
+        }
+        
+        // Add pulsing effect
+        float pulse = (float) Math.sin((age * 0.15f)) * 0.1f + 0.9f;
+        return baseIntensity * pulse;
+    }
 }
