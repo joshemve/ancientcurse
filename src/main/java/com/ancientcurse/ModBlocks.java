@@ -1,6 +1,7 @@
 package com.ancientcurse;
 
 import com.ancientcurse.block.*;
+import com.ancientcurse.block.BloodLotusBlock;
 // PotteryBlocks is referenced in comments only, no import needed
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
 import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
@@ -339,6 +340,18 @@ public class ModBlocks {
             .nonOpaque()
             .noCollision()
             .ticksRandomly() // For day/night cycle updates
+            .breakInstantly()
+            .notSolid()
+    );
+    
+    // Blood Lotus - rare crimson lotus used in Pharaoh's Blood crafting
+    public static final Block BLOOD_LOTUS = new BloodLotusBlock(
+        FabricBlockSettings.create()
+            .mapColor(MapColor.RED)
+            .strength(0.0f, 0.0f)
+            .sounds(BlockSoundGroup.LILY_PAD)
+            .nonOpaque()
+            .noCollision()
             .breakInstantly()
             .notSolid()
     );
@@ -855,6 +868,13 @@ public class ModBlocks {
             Registries.BLOCK,
             new Identifier(AncientCurse.MOD_ID, "lotus_flower_pad"),
             LOTUS_FLOWER_PAD
+        );
+        
+        // Register Blood Lotus
+        Registry.register(
+            Registries.BLOCK,
+            new Identifier(AncientCurse.MOD_ID, "blood_lotus"),
+            BLOOD_LOTUS
         );
         
         // Register Nile River Grass

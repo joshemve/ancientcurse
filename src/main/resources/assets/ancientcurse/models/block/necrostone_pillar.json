@@ -1,7 +1,7 @@
 {
   "parent": "minecraft:block/cube_column",
   "textures": {
-    "end": "ancientcurse:block/necrostone/necrostone_smooth",
+    "end": "ancientcurse:block/necrostone/necrostone_pillar_top",
     "side": "ancientcurse:block/necrostone/necrostone_rough"
   }
-} 
+}

@@ -16,7 +16,8 @@ import software.bernie.geckolib.cache.object.BakedGeoModel;
 import software.bernie.geckolib.renderer.GeoEntityRenderer;
 
 public class KhamsinSpreadSmallRenderer extends GeoEntityRenderer<KhamsinSpreadSmallEntity> {
-    private static final Identifier TEXTURE = new Identifier(AncientCurse.MOD_ID, "textures/entity/khamsin_spread_small.png");
+    private static final Identifier TEXTURE_LIGHT = new Identifier(AncientCurse.MOD_ID, "textures/entity/khamsin_spread_small.png");
+    private static final Identifier TEXTURE_DARK = new Identifier(AncientCurse.MOD_ID, "textures/entity/khamsin_spread_small_dark.png");
     
     public KhamsinSpreadSmallRenderer(EntityRendererFactory.Context renderManager) {
         super(renderManager, new KhamsinSpreadSmallModel());
@@ -24,8 +25,8 @@ public class KhamsinSpreadSmallRenderer extends GeoEntityRenderer<KhamsinSpreadS
     
     @Override
     public Identifier getTextureLocation(KhamsinSpreadSmallEntity entity) {
-        // Use only the normal texture - we'll darken it with color tinting
-        return TEXTURE;
+        // Use dark texture when not activated
+        return entity.isActivated() ? TEXTURE_LIGHT : TEXTURE_DARK;
     }
     
     @Override
@@ -50,23 +51,26 @@ public class KhamsinSpreadSmallRenderer extends GeoEntityRenderer<KhamsinSpreadS
                          VertexConsumerProvider bufferSource, VertexConsumer buffer, boolean isReRender,
                          float partialTick, int packedLight, int packedOverlay, float red, float green,
                          float blue, float alpha) {
-        // Calculate transition value (0.0 = dark, 1.0 = normal)
-        float transitionValue = entity.getActivationProgress(partialTick);
-        
-        // Apply darkening effect (0.3 = dark multiplier, 1.0 = normal)
-        float darkness = 0.3f + (0.7f * transitionValue);
-        
-        // Add pulse effect when fully activated
-        if (entity.isActivated() && transitionValue >= 1.0f) {
+        // Check if entity is hurt for damage flash
+        if (entity.hurtTime > 0) {
+            // Apply red tint for damage
+            float hurtIntensity = (float)entity.hurtTime / (float)entity.maxHurtTime;
+            super.preRender(poseStack, entity, model, bufferSource, buffer, isReRender,
+                           partialTick, packedLight, packedOverlay,
+                           1.0f, 1.0f - hurtIntensity * 0.5f, 1.0f - hurtIntensity * 0.5f, alpha);
+        } else if (entity.isActivated()) {
+            // Add subtle pulse effect when activated
             float pulseIntensity = entity.getPulseIntensity();
-            darkness += pulseIntensity * 0.2f;
-            darkness = Math.min(darkness, 1.2f); // Allow slight over-brightening for pulse
+            float brightness = 1.0f + pulseIntensity * 0.2f;
+            super.preRender(poseStack, entity, model, bufferSource, buffer, isReRender,
+                           partialTick, packedLight, packedOverlay,
+                           brightness, brightness, brightness, alpha);
+        } else {
+            // Normal rendering
+            super.preRender(poseStack, entity, model, bufferSource, buffer, isReRender,
+                           partialTick, packedLight, packedOverlay,
+                           red, green, blue, alpha);
         }
-        
-        // Apply the color tinting
-        super.preRender(poseStack, entity, model, bufferSource, buffer, isReRender,
-                       partialTick, packedLight, packedOverlay,
-                       darkness, darkness, darkness, alpha);
     }
 
     @Override

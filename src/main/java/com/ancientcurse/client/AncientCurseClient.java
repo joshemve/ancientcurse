@@ -18,7 +18,12 @@ import com.ancientcurse.entity.renderer.SpitBallRenderer;
 import com.ancientcurse.entity.renderer.ThothRenderer;
 import com.ancientcurse.entity.renderer.KhamsinOrbRenderer;
 import com.ancientcurse.util.TooltipHelper;
+import com.ancientcurse.network.CurseZonePackets;
+import com.ancientcurse.client.render.CurseZoneRenderer;
+import com.ancientcurse.client.render.WandSelectionRenderer;
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
@@ -68,6 +73,9 @@ public class AncientCurseClient implements ClientModInitializer {
         // Register the Khamsin Curse HUD renderer
         KhamsinCurseHudRenderer.register();
         
+        // Register the Ankh Counter HUD renderer
+        AnkhCounterHudRenderer.register();
+        
         // Register render layers for cursed plants
         CursedPlantRenderLayer.register();
         
@@ -83,6 +91,30 @@ public class AncientCurseClient implements ClientModInitializer {
         
         // Register tooltip callback to add "Ancient Curse" to all mod items
         TooltipHelper.registerTooltipCallback();
+        
+        // Register network packets
+        CurseZonePackets.registerClientPackets();
+        
+        // Register disconnect handler to clear client cache
+        ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
+            CurseZoneClientCache.clear();
+        });
+        
+        // Register world render events for curse zone visualization
+        WorldRenderEvents.LAST.register((context) -> {
+            CurseZoneRenderer.renderZones(
+                context.matrixStack(),
+                context.camera(),
+                context.tickDelta()
+            );
+            
+            // Render wand selection boxes
+            WandSelectionRenderer.renderSelection(
+                context.matrixStack(),
+                context.camera(),
+                context.tickDelta()
+            );
+        });
         
         AncientCurse.LOGGER.info("Ancient Curse Client initialized");
     }
@@ -148,6 +180,7 @@ public class AncientCurseClient implements ClientModInitializer {
         BlockRenderLayerMap.INSTANCE.putBlock(ModBlocks.MINI_CACTUS, RenderLayer.getCutout());
         BlockRenderLayerMap.INSTANCE.putBlock(ModBlocks.PISTIA_STRATIOTES, RenderLayer.getCutout());
         BlockRenderLayerMap.INSTANCE.putBlock(ModBlocks.LOTUS_FLOWER_PAD, RenderLayer.getCutout());
+        BlockRenderLayerMap.INSTANCE.putBlock(ModBlocks.BLOOD_LOTUS, RenderLayer.getCutout());
         
         // Register jar blocks with cutout render layer for proper transparency
         BlockRenderLayerMap.INSTANCE.putBlock(PotteryBlocks.CANOPIC_URN_OF_BASTET, RenderLayer.getCutout());

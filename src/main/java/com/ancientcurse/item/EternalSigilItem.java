@@ -17,11 +17,13 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
 
+import com.ancientcurse.effect.ModStatusEffects;
+
 import java.util.List;
 
 /**
  * Eternal Sigil - A powerful ancient artifact that provides long-lasting protection
- * When activated, it grants the user powerful protective effects and can be toggled on/off
+ * When activated, it removes all Khamsin curse effects and grants powerful protective buffs
  */
 public class EternalSigilItem extends Item {
     
@@ -58,6 +60,20 @@ public class EternalSigilItem extends Item {
             if (isActive(stack)) {
                 // Sigil was just activated
                 player.sendMessage(Text.literal("The Eternal Sigil awakens with ancient power").formatted(Formatting.GOLD), true);
+                
+                // Remove all Khamsin curse effects
+                boolean hadCurse = false;
+                for (int stage = 1; stage <= 5; stage++) {
+                    StatusEffectInstance curseEffect = player.getStatusEffect(ModStatusEffects.getCurseStage(stage));
+                    if (curseEffect != null) {
+                        player.removeStatusEffect(ModStatusEffects.getCurseStage(stage));
+                        hadCurse = true;
+                    }
+                }
+                
+                if (hadCurse) {
+                    player.sendMessage(Text.literal("The divine power of the Eternal Sigil cleanses your soul of the Khamsin curse!").formatted(Formatting.LIGHT_PURPLE), false);
+                }
                 
                 // Apply powerful protective effects
                 player.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, 6000, 1)); // 5 minutes of Resistance II
@@ -212,6 +228,7 @@ public class EternalSigilItem extends Item {
     public void appendTooltip(ItemStack stack, World world, List<Text> tooltip, TooltipContext context) {
         super.appendTooltip(stack, world, tooltip, context);
         tooltip.add(Text.translatable("item.ancientcurse.eternal_sigil.tooltip").formatted(Formatting.GOLD));
+        tooltip.add(Text.literal("Removes all Khamsin curse effects when activated").formatted(Formatting.LIGHT_PURPLE));
         
         // Show active state
         if (isActive(stack)) {

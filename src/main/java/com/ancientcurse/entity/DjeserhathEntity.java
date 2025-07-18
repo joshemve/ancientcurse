@@ -246,15 +246,19 @@ public class DjeserhathEntity extends HostileEntity implements GeoEntity {
                     double dz = target.getZ() - this.getZ();
                     float targetYaw = (float) (Math.atan2(dz, dx) * 180.0 / Math.PI) - 90.0F;
                     
-                    // Smoothly rotate towards target
+                    // Don't rotate the entire entity - this keeps the bottom_plant stationary
+                    // The renderer will handle rotating individual body parts to track the target
+                    // Comment out the rotation code:
+                    /*
                     float yawDiff = MathHelper.wrapDegrees(targetYaw - this.getYaw());
-                    float rotationSpeed = 4.0F; // Adjust for faster/slower turning
+                    float rotationSpeed = 4.0F;
                     
-                    if (Math.abs(yawDiff) > 5.0F) { // Only rotate if difference is significant
+                    if (Math.abs(yawDiff) > 5.0F) {
                         this.setYaw(this.getYaw() + MathHelper.clamp(yawDiff, -rotationSpeed, rotationSpeed));
-                        this.bodyYaw = this.getYaw(); // Update body rotation too
-                        this.headYaw = this.getYaw(); // Keep head aligned with body
+                        this.bodyYaw = this.getYaw();
+                        this.headYaw = this.getYaw();
                     }
+                    */
                 }
             }
         }

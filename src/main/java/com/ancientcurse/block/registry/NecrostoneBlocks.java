@@ -4,6 +4,9 @@ import com.ancientcurse.AncientCurse;
 import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
+import net.minecraft.block.PillarBlock;
+import net.minecraft.block.SlabBlock;
+import net.minecraft.block.StairsBlock;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.sound.BlockSoundGroup;
@@ -34,7 +37,7 @@ public class NecrostoneBlocks {
         .sounds(BlockSoundGroup.STONE)
         .requiresTool());
         
-    public static final Block NECROSTONE_PILLAR = new Block(FabricBlockSettings.copyOf(Blocks.STONE)
+    public static final Block NECROSTONE_PILLAR = new PillarBlock(FabricBlockSettings.copyOf(Blocks.STONE)
         .strength(2.0f, 6.0f)
         .sounds(BlockSoundGroup.STONE)
         .requiresTool());
@@ -44,7 +47,7 @@ public class NecrostoneBlocks {
         .sounds(BlockSoundGroup.STONE)
         .requiresTool());
         
-    public static final Block NECROSTONE_STAIRS = new Block(FabricBlockSettings.copyOf(Blocks.STONE)
+    public static final Block NECROSTONE_STAIRS = new StairsBlock(NECROSTONE_ROUGH.getDefaultState(), FabricBlockSettings.copyOf(Blocks.STONE)
         .strength(2.0f, 6.0f)
         .sounds(BlockSoundGroup.STONE)
         .requiresTool());
@@ -60,7 +63,7 @@ public class NecrostoneBlocks {
         .requiresTool()
         .luminance(4)); // Slight glow for the eye
         
-    public static final Block NECROSTONE_SLAB = new Block(FabricBlockSettings.copyOf(Blocks.STONE)
+    public static final Block NECROSTONE_SLAB = new SlabBlock(FabricBlockSettings.copyOf(Blocks.STONE)
         .strength(2.0f, 6.0f)
         .sounds(BlockSoundGroup.STONE)
         .requiresTool());

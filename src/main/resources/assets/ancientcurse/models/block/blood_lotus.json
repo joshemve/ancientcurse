@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cross",
+  "textures": {
+    "cross": "ancientcurse:block/blood_lotus"
+  },
+  "render_type": "cutout"
+}

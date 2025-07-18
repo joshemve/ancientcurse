@@ -239,6 +239,20 @@ public class ModItemGroup {
                 safeAdd(entries, ModItems.SCARAB_INCENSE_ITEM);
                 safeAdd(entries, ModItems.ETERNAL_SIGIL);
                 
+                // Ankh restoration items
+                safeAdd(entries, ModItems.SCARAB_SERUM);
+                safeAdd(entries, ModItems.PHARAOHS_BLOOD);
+                safeAdd(entries, ModItems.MUMMY_HEART);
+                safeAdd(entries, ModBlocks.BLOOD_LOTUS);
+                
+                // Curse removal items
+                safeAdd(entries, ModItems.SCROLL_OF_UNBINDING);
+                safeAdd(entries, ModItems.TABLET_OF_THOTH);
+                safeAdd(entries, ModItems.HIEROGLYPH_FRAGMENT);
+                
+                // Admin tools
+                safeAdd(entries, ModItems.CURSE_ZONE_ADMIN_WAND);
+                
                 // Spawn eggs
                 safeAdd(entries, ModItems.WITHERED_PHARAOH_SPAWN_EGG);
                 safeAdd(entries, ModItems.DJESERHATH_SPAWN_EGG);

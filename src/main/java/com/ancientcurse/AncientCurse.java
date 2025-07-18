@@ -15,6 +15,8 @@ import com.ancientcurse.command.LocusSwarmCommand;
 import com.ancientcurse.command.CursedEarthCommand;
 import com.ancientcurse.system.CursedEarthManager;
 import com.ancientcurse.ModSounds;
+import com.ancientcurse.network.CurseZonePackets;
+import com.ancientcurse.event.PlayerJoinHandler;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 // import com.ancientcurse.screen.ModScreenHandlers;
 // import com.ancientcurse.worldgen.ModWorldGen;
@@ -86,6 +88,10 @@ public class AncientCurse implements ModInitializer {
         // Register commands
         registerCommands();
         
+        // Register network packets
+        CurseZonePackets.registerServerPackets();
+        LOGGER.info("Curse Zone network packets registered");
+        
         // Initialize Cursed Earth Manager
         CursedEarthManager.getInstance();
         LOGGER.info("Cursed Earth performance system initialized");
@@ -139,7 +145,11 @@ public class AncientCurse implements ModInitializer {
         ServerTickEvents.END_SERVER_TICK.register(server -> {
             com.ancientcurse.effect.TornadoManager.tick(server);
             LocusSwarmCommand.tickSwarm();
+            com.ancientcurse.system.CurseZoneEffectHandler.tick(server);
         });
+        
+        // Register player join handler for curse zone syncing
+        PlayerJoinHandler.register();
     }
     
     /**

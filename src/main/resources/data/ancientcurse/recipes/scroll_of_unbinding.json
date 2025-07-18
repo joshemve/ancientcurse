@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " P ",
+    "PGP",
+    " P "
+  ],
+  "key": {
+    "P": {
+      "item": "ancientcurse:papyrus_paper"
+    },
+    "G": {
+      "item": "minecraft:enchanted_golden_apple"
+    }
+  },
+  "result": {
+    "item": "ancientcurse:scroll_of_unbinding",
+    "count": 3
+  }
+}

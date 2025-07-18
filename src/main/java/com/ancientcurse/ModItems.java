@@ -1,22 +1,29 @@
 package com.ancientcurse;
 
 import com.ancientcurse.item.AncientPickItem;
+import com.ancientcurse.item.CurseZoneAdminWand;
 import com.ancientcurse.item.CustomAnimatedItem;
 import com.ancientcurse.item.ElixirOfRasSparkItem;
 import com.ancientcurse.item.EternalSigilItem;
+import com.ancientcurse.item.HieroglyphFragmentItem;
 import com.ancientcurse.item.HorusMaceItem;
 import com.ancientcurse.item.PhialOfLotusEssenceItem;
+import com.ancientcurse.item.PharaohsBloodItem;
 import com.ancientcurse.item.ScarabIncenseItem;
+import com.ancientcurse.item.ScarabSerumItem;
 import com.ancientcurse.item.SaltItem;
 import com.ancientcurse.item.ScarabTalismanItem;
+import com.ancientcurse.item.ScrollOfUnbindingItem;
 import com.ancientcurse.item.SekhemDateItem;
 import com.ancientcurse.item.SerpentStaffItem;
 import com.ancientcurse.item.StaffOfRaItem;
+import com.ancientcurse.item.TabletOfThothItem;
 import com.ancientcurse.item.WitheredStaffItem;
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.item.AliasedBlockItem;
+import net.minecraft.item.BlockItem;
 import net.minecraft.item.FoodComponent;
 import net.minecraft.item.AxeItem;
 import net.minecraft.item.HoeItem;
@@ -37,6 +44,22 @@ import com.ancientcurse.item.BronzeToolMaterial;
 public class ModItems {
     // Define items
     public static final StaffOfRaItem STAFF_OF_RA = new StaffOfRaItem(new FabricItemSettings(), "staff_of_ra");
+    
+    // Admin tool for managing curse zones
+    public static final CurseZoneAdminWand CURSE_ZONE_ADMIN_WAND = new CurseZoneAdminWand(new FabricItemSettings().maxCount(1));
+    
+    // Ankh restoration items
+    public static final ScarabSerumItem SCARAB_SERUM = new ScarabSerumItem(new FabricItemSettings());
+    public static final PharaohsBloodItem PHARAOHS_BLOOD = new PharaohsBloodItem(new FabricItemSettings());
+    
+    // Crafting ingredients for Ankh items
+    public static final Item MUMMY_HEART = new Item(new FabricItemSettings().maxCount(16));
+    public static final Item BLOOD_LOTUS = new BlockItem(ModBlocks.BLOOD_LOTUS, new FabricItemSettings());
+    
+    // Curse removal items
+    public static final ScrollOfUnbindingItem SCROLL_OF_UNBINDING = new ScrollOfUnbindingItem(new FabricItemSettings());
+    public static final TabletOfThothItem TABLET_OF_THOTH = new TabletOfThothItem(new FabricItemSettings());
+    public static final HieroglyphFragmentItem HIEROGLYPH_FRAGMENT = new HieroglyphFragmentItem(new FabricItemSettings());
 
 
     // Define the Sycamore Fig food item
@@ -440,6 +463,52 @@ public class ModItems {
             Registries.ITEM,
             new Identifier(AncientCurse.MOD_ID, "scarab_talisman"),
             SCARAB_TALISMAN
+        );
+        
+        // Register Curse Zone Admin Wand
+        Registry.register(
+            Registries.ITEM,
+            new Identifier(AncientCurse.MOD_ID, "ankh_wand"),
+            CURSE_ZONE_ADMIN_WAND
+        );
+        
+        // Register Ankh restoration items
+        Registry.register(
+            Registries.ITEM,
+            new Identifier(AncientCurse.MOD_ID, "scarab_serum"),
+            SCARAB_SERUM
+        );
+        Registry.register(
+            Registries.ITEM,
+            new Identifier(AncientCurse.MOD_ID, "pharaohs_blood"),
+            PHARAOHS_BLOOD
+        );
+        Registry.register(
+            Registries.ITEM,
+            new Identifier(AncientCurse.MOD_ID, "mummy_heart"),
+            MUMMY_HEART
+        );
+        Registry.register(
+            Registries.ITEM,
+            new Identifier(AncientCurse.MOD_ID, "blood_lotus"),
+            BLOOD_LOTUS
+        );
+        
+        // Register curse removal items
+        Registry.register(
+            Registries.ITEM,
+            new Identifier(AncientCurse.MOD_ID, "scroll_of_unbinding"),
+            SCROLL_OF_UNBINDING
+        );
+        Registry.register(
+            Registries.ITEM,
+            new Identifier(AncientCurse.MOD_ID, "tablet_of_thoth"),
+            TABLET_OF_THOTH
+        );
+        Registry.register(
+            Registries.ITEM,
+            new Identifier(AncientCurse.MOD_ID, "hieroglyph_fragment"),
+            HIEROGLYPH_FRAGMENT
         );
         
         // Register new magical items

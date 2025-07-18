@@ -19,12 +19,13 @@ import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.UseAction;
 import net.minecraft.world.World;
 import net.minecraft.client.item.TooltipContext;
+import com.ancientcurse.util.AnkhManager;
 
 import java.util.List;
 
 /**
- * Scarab Incense Item - A magical incense that provides protection and calming effects
- * When used, it creates a cloud of protective particles and grants beneficial effects
+ * Scarab Incense Item - A magical incense that restores Ankh points and provides protection
+ * When used, it restores 30 Ankh points and grants beneficial effects
  */
 public class ScarabIncenseItem extends Item {
     
@@ -45,6 +46,17 @@ public class ScarabIncenseItem extends Item {
             player.incrementStat(Stats.USED.getOrCreateStat(this));
             
             if (!world.isClient) {
+                // Restore Ankh points
+                int currentAnkh = AnkhManager.getAnkhValue(player);
+                int restored = 0;
+                if (currentAnkh < 100) {
+                    int newAnkh = AnkhManager.increaseAnkhValue(player, 30);
+                    restored = newAnkh - currentAnkh;
+                    player.sendMessage(Text.literal(String.format("§bAnkh restored by %d points! §a(Now at %d/100)§r", restored, newAnkh)).formatted(Formatting.AQUA), false);
+                } else {
+                    player.sendMessage(Text.literal("Your Ankh is already at maximum").formatted(Formatting.YELLOW), true);
+                }
+                
                 // Apply beneficial effects
                 player.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, 600, 0)); // 30 seconds of Resistance I
                 player.addStatusEffect(new StatusEffectInstance(StatusEffects.REGENERATION, 200, 0)); // 10 seconds of Regeneration I
@@ -134,5 +146,6 @@ public class ScarabIncenseItem extends Item {
     public void appendTooltip(ItemStack stack, World world, List<Text> tooltip, TooltipContext context) {
         super.appendTooltip(stack, world, tooltip, context);
         tooltip.add(Text.translatable("item.ancientcurse.scarab_incense_item.tooltip").formatted(Formatting.GOLD));
+        tooltip.add(Text.literal("Restores 30 Ankh points when used").formatted(Formatting.AQUA));
     }
 }

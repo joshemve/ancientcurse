@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "LLL",
+    "LML",
+    "LGL"
+  ],
+  "key": {
+    "M": {
+      "item": "ancientcurse:mummy_heart"
+    },
+    "L": {
+      "item": "ancientcurse:blood_lotus"
+    },
+    "G": {
+      "item": "minecraft:gold_block"
+    }
+  },
+  "result": {
+    "item": "ancientcurse:pharaohs_blood",
+    "count": 1
+  }
+}

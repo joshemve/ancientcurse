@@ -1,8 +1,8 @@
 {
   "parent": "minecraft:block/slab",
   "textures": {
-    "bottom": "ancientcurse:block/necrostone/necrostone_smooth",
-    "top": "ancientcurse:block/necrostone/necrostone_smooth",
-    "side": "ancientcurse:block/necrostone/necrostone_smooth"
+    "bottom": "ancientcurse:block/necrostone/necrostone_rough",
+    "top": "ancientcurse:block/necrostone/necrostone_rough",
+    "side": "ancientcurse:block/necrostone/necrostone_rough"
   }
 } 

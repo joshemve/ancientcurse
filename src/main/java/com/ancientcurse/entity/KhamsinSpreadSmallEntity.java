@@ -502,16 +502,20 @@ public class KhamsinSpreadSmallEntity extends MobEntity implements GeoEntity {
                 this.getX(), this.getY() + 0.5, this.getZ(),
                 5, 0.2, 0.2, 0.2, 0.1
             );
+            
+            // Additional purple particles for visual feedback
+            ((ServerWorld)this.getWorld()).spawnParticles(
+                ParticleTypes.PORTAL,
+                this.getX(), this.getY() + 0.5, this.getZ(),
+                10, 0.3, 0.3, 0.3, 0.05
+            );
         }
         
-        // Call super but ensure we don't show damage tint
-        boolean result = super.damage(source, amount);
+        // Play hurt sound
+        this.playSound(this.getHurtSound(source), 1.0f, 1.0f);
         
-        // Immediately reset hurt time to prevent damage tint
-        this.hurtTime = 0;
-        this.maxHurtTime = 0;
-        
-        return result;
+        // Call super to handle damage normally (this will set hurtTime for red flash)
+        return super.damage(source, amount);
     }
     
     public boolean cannotDespawn() {

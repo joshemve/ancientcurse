@@ -2,7 +2,12 @@ package com.ancientcurse.block;
 
 import com.ancientcurse.AncientCurse;
 import com.ancientcurse.ModBlocks;
+import com.ancientcurse.ModEntities;
 import com.ancientcurse.system.CursedEarthManager;
+import com.ancientcurse.block.registry.CursedPlantBlocks;
+import com.ancientcurse.block.CursedPlantBlock;
+import com.ancientcurse.effect.ModStatusEffects;
+import com.ancientcurse.util.CurseZoneManager;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -49,6 +54,12 @@ public class CursedEarthBlock extends BaseAncientCurseBlock {
     private static final java.util.Map<BlockPos, Long> lastSpreadTime = new java.util.concurrent.ConcurrentHashMap<>();
     private static final java.util.Map<BlockPos, Long> deathBurstCooldowns = new java.util.concurrent.ConcurrentHashMap<>();
     
+    // === KHAMSIN CURSE TRACKING ===
+    private static final java.util.Map<java.util.UUID, Long> playerExposureTime = new java.util.concurrent.ConcurrentHashMap<>();
+    private static final int EXPOSURE_CHECK_INTERVAL = 20; // Check every second
+    private static final int INITIAL_CURSE_THRESHOLD = 100; // 5 seconds for first chance
+    private static final float BASE_CURSE_CHANCE = 0.1f; // 10% base chance
+    
     public CursedEarthBlock(Settings settings) {
         super(settings
             .nonOpaque()
@@ -87,14 +98,29 @@ public class CursedEarthBlock extends BaseAncientCurseBlock {
             return; // Chunk is at capacity
         }
         
+        // === CURSE ZONE BOOST ===
+        CurseZoneManager zoneManager = CurseZoneManager.get(world);
+        float khamsinLevel = zoneManager.getInterpolatedKhamsinLevel(pos);
+        double boostedSpreadChance = SPREAD_CHANCE * (1 + khamsinLevel / 10.0); // Up to 2x spread in max zones
+        
         // === SPREAD MECHANICS ===
-        if (random.nextDouble() < SPREAD_CHANCE) {
+        if (random.nextDouble() < boostedSpreadChance) {
             attemptSpread(world, pos, random);
         }
         
         // === ENTITY EFFECTS ===
         if (random.nextInt(20) == 0) {
             applyEntityEffects(world, pos);
+        }
+        
+        // === CURSED PLANT/ENTITY SPAWNING ===
+        if (random.nextInt(100) == 0) { // 1% chance per random tick
+            // Very rare chance to spawn special entities instead of plants
+            if (random.nextFloat() < 0.05f) { // 5% of the 1% = 0.05% total chance
+                attemptEntitySpawn(world, pos.up(), random);
+            } else {
+                attemptPlantSpawn(world, pos.up(), random);
+            }
         }
     }
     
@@ -176,15 +202,229 @@ public class CursedEarthBlock extends BaseAncientCurseBlock {
     }
     
     /**
-     * Applies effects to nearby entities
+     * Applies Khamsin Curse to players standing on cursed earth
      */
     private void applyEntityEffects(ServerWorld world, BlockPos pos) {
-        Box box = new Box(pos).expand(3.0);
-        List<LivingEntity> entities = world.getNonSpectatingEntities(LivingEntity.class, box);
+        Box box = new Box(pos).expand(3.0, 1.0, 3.0); // Check 3 blocks around, 1 block up
+        List<PlayerEntity> players = world.getNonSpectatingEntities(PlayerEntity.class, box);
         
-        for (LivingEntity entity : entities) {
-            if (!(entity instanceof PlayerEntity) || !((PlayerEntity) entity).isCreative()) {
-                entity.addStatusEffect(new StatusEffectInstance(StatusEffects.WITHER, 60, 0, false, false));
+        for (PlayerEntity player : players) {
+            if (player.isCreative() || player.isSpectator()) {
+                continue;
+            }
+            
+            // Check if player is actually standing on cursed earth
+            BlockPos playerPos = player.getBlockPos().down();
+            if (!world.getBlockState(playerPos).isOf(this)) {
+                continue;
+            }
+            
+            // Track exposure time
+            java.util.UUID playerId = player.getUuid();
+            long currentTime = world.getTime();
+            long exposureStart = playerExposureTime.getOrDefault(playerId, currentTime);
+            long exposureDuration = currentTime - exposureStart;
+            
+            // Update exposure time
+            playerExposureTime.put(playerId, exposureStart);
+            
+            // Only check for curse application every second
+            if (currentTime % EXPOSURE_CHECK_INTERVAL != 0) {
+                continue;
+            }
+            
+            // Check if player already has curse
+            boolean hasCurse = false;
+            int currentStage = 0;
+            for (int i = 1; i <= 5; i++) {
+                if (player.hasStatusEffect(ModStatusEffects.getCurseStage(i))) {
+                    hasCurse = true;
+                    currentStage = i;
+                    break;
+                }
+            }
+            
+            // Calculate curse chance based on exposure time
+            if (exposureDuration >= INITIAL_CURSE_THRESHOLD) {
+                float timeMultiplier = Math.min(3.0f, exposureDuration / (float)INITIAL_CURSE_THRESHOLD);
+                float curseChance = BASE_CURSE_CHANCE * timeMultiplier;
+                
+                // Higher chance if already cursed (progression)
+                if (hasCurse && currentStage < 5) {
+                    curseChance *= 1.5f;
+                }
+                
+                if (world.random.nextFloat() < curseChance) {
+                    if (!hasCurse) {
+                        // Apply initial curse
+                        player.addStatusEffect(new StatusEffectInstance(
+                            ModStatusEffects.KHAMSIN_CURSE_STAGE_1, 
+                            600, // 30 seconds
+                            0, 
+                            false, 
+                            true
+                        ));
+                        
+                        // Visual feedback - dark curse particles
+                        for (int i = 0; i < 5; i++) {
+                            world.addParticle(
+                                new DustParticleEffect(new Vector3f(0.5f, 0.2f, 0.6f), 1.0f), // Purple curse particles
+                                player.getX() + (world.random.nextDouble() - 0.5),
+                                player.getY() + 1,
+                                player.getZ() + (world.random.nextDouble() - 0.5),
+                                0, 0.1, 0
+                            );
+                        }
+                        
+                        AncientCurse.LOGGER.debug("Player {} contracted Khamsin Curse from cursed earth exposure", player.getName().getString());
+                    }
+                }
+            }
+        }
+        
+        // Clean up old exposure times
+        if (world.getTime() % 200 == 0) { // Every 10 seconds
+            long currentTime = world.getTime();
+            playerExposureTime.entrySet().removeIf(entry -> {
+                // Remove if player hasn't been exposed for 10 seconds
+                return currentTime - entry.getValue() > 200;
+            });
+        }
+    }
+    
+    /**
+     * Attempts to spawn a cursed plant on top of cursed earth
+     */
+    private void attemptPlantSpawn(ServerWorld world, BlockPos pos, Random random) {
+        // Check if position is air and can support a plant
+        if (!world.getBlockState(pos).isAir()) {
+            return;
+        }
+        
+        // Check if there's already a plant nearby (prevent overcrowding)
+        Box searchBox = new Box(pos).expand(2, 1, 2);
+        for (int x = (int)searchBox.minX; x <= (int)searchBox.maxX; x++) {
+            for (int z = (int)searchBox.minZ; z <= (int)searchBox.maxZ; z++) {
+                for (int y = (int)searchBox.minY; y <= (int)searchBox.maxY; y++) {
+                    BlockPos checkPos = new BlockPos(x, y, z);
+                    BlockState state = world.getBlockState(checkPos);
+                    if (state.getBlock() instanceof CursedPlantBlock) {
+                        return; // Too crowded
+                    }
+                }
+            }
+        }
+        
+        // Select a random cursed plant
+        Block[] cursedPlants = {
+            CursedPlantBlocks.CURSED_SPRIG,
+            CursedPlantBlocks.CURSED_SPROUT,
+            CursedPlantBlocks.BLOODSHADE_THICKET,
+            CursedPlantBlocks.DUAT_FERN,
+            CursedPlantBlocks.ISFET_FROND,
+            CursedPlantBlocks.ISFET_SHRUB,
+            CursedPlantBlocks.KHEMNU_POD,
+            CursedPlantBlocks.MENFET_SPRIG,
+            CursedPlantBlocks.REED_OF_SEKHEM,
+            CursedPlantBlocks.SUTEKH_COIL
+        };
+        
+        // Weight towards common plants
+        Block selectedPlant;
+        if (random.nextFloat() < 0.7f) {
+            // 70% chance for common plants
+            selectedPlant = random.nextBoolean() ? CursedPlantBlocks.CURSED_SPRIG : CursedPlantBlocks.CURSED_SPROUT;
+        } else {
+            // 30% chance for rarer plants
+            selectedPlant = cursedPlants[random.nextInt(cursedPlants.length)];
+        }
+        
+        // Try to place the plant
+        BlockState plantState = selectedPlant.getDefaultState();
+        if (plantState.canPlaceAt(world, pos)) {
+            world.setBlockState(pos, plantState);
+            
+            // Spawn particles for visual effect
+            for (int i = 0; i < 5; i++) {
+                double x = pos.getX() + 0.5 + (random.nextDouble() - 0.5) * 0.3;
+                double y = pos.getY() + 0.5;
+                double z = pos.getZ() + 0.5 + (random.nextDouble() - 0.5) * 0.3;
+                world.addParticle(
+                    new DustParticleEffect(CURSED_PARTICLE_COLOR, 0.5f),
+                    x, y, z,
+                    0, 0.05D, 0
+                );
+            }
+            
+            AncientCurse.LOGGER.debug("Spawned {} at {}", selectedPlant.getTranslationKey(), pos);
+        }
+    }
+    
+    /**
+     * Attempts to spawn a rare cursed entity on top of cursed earth
+     */
+    private void attemptEntitySpawn(ServerWorld world, BlockPos pos, Random random) {
+        // Check if position is suitable for entity spawn
+        if (!world.getBlockState(pos).isAir() || !world.getBlockState(pos.up()).isAir()) {
+            return;
+        }
+        
+        // Check for nearby entities to prevent overcrowding
+        Box searchBox = new Box(pos).expand(5, 3, 5);
+        List<LivingEntity> nearbyEntities = world.getNonSpectatingEntities(LivingEntity.class, searchBox);
+        if (nearbyEntities.size() > 2) {
+            return; // Too crowded
+        }
+        
+        // Select which entity to spawn
+        boolean spawnDjeserhath = random.nextBoolean();
+        
+        if (spawnDjeserhath) {
+            // Spawn Djeserhath (cactus eye entity)
+            com.ancientcurse.entity.DjeserhathEntity djeserhath = ModEntities.DJESERHATH.create(world);
+            if (djeserhath != null) {
+                djeserhath.setPosition(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5);
+                
+                // Make it start in dormant state
+                djeserhath.setHealth(djeserhath.getMaxHealth());
+                
+                if (world.spawnEntity(djeserhath)) {
+                    // Spawn emergence particles
+                    for (int i = 0; i < 10; i++) {
+                        double x = pos.getX() + 0.5 + (random.nextDouble() - 0.5) * 0.5;
+                        double y = pos.getY() + 0.5;
+                        double z = pos.getZ() + 0.5 + (random.nextDouble() - 0.5) * 0.5;
+                        world.addParticle(
+                            new DustParticleEffect(new Vector3f(0.5f, 0.1f, 0.5f), 1.0f),
+                            x, y, z,
+                            0, 0.1D, 0
+                        );
+                    }
+                    
+                    AncientCurse.LOGGER.info("Rare spawn: Djeserhath emerged from cursed earth at {}", pos);
+                }
+            }
+        } else {
+            // Spawn Khamsin Spread Small (floating mystical rock)
+            com.ancientcurse.entity.KhamsinSpreadSmallEntity khamsin = ModEntities.KHAMSIN_SPREAD_SMALL.create(world);
+            if (khamsin != null) {
+                khamsin.setPosition(pos.getX() + 0.5, pos.getY() + 1.5, pos.getZ() + 0.5); // Float above ground
+                
+                if (world.spawnEntity(khamsin)) {
+                    // Spawn dark mystical particles for the obsidian entity
+                    for (int i = 0; i < 15; i++) {
+                        double x = pos.getX() + 0.5 + (random.nextDouble() - 0.5) * 0.8;
+                        double y = pos.getY() + 1.5 + (random.nextDouble() - 0.5) * 0.8;
+                        double z = pos.getZ() + 0.5 + (random.nextDouble() - 0.5) * 0.8;
+                        world.addParticle(
+                            new DustParticleEffect(new Vector3f(0.4f, 0.1f, 0.5f), 0.8f), // Dark purple for obsidian
+                            x, y, z,
+                            0, 0.02D, 0
+                        );
+                    }
+                    
+                    AncientCurse.LOGGER.info("Rare spawn: Khamsin Spread Small manifested from cursed earth at {}", pos);
+                }
             }
         }
     }
