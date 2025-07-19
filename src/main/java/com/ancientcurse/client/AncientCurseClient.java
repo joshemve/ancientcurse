@@ -86,6 +86,13 @@ public class AncientCurseClient implements ClientModInitializer {
             return -1;
         }, ModItems.ETERNAL_SIGIL);
         
+        // Register transparency handling for Pharaoh's Blood
+        // This ensures the bottle/liquid transparency renders correctly
+        ColorProviderRegistry.ITEM.register((stack, tintIndex) -> {
+            // Return -1 for no tinting (allows transparency to work correctly)
+            return -1;
+        }, ModItems.PHARAOHS_BLOOD);
+        
         // Register entity renderers
         registerEntityRenderers();
         

@@ -10,14 +10,12 @@ import com.ancientcurse.item.HorusMaceItem;
 import com.ancientcurse.item.PhialOfLotusEssenceItem;
 import com.ancientcurse.item.PharaohsBloodItem;
 import com.ancientcurse.item.ScarabIncenseItem;
-import com.ancientcurse.item.ScarabSerumItem;
 import com.ancientcurse.item.SaltItem;
 import com.ancientcurse.item.ScarabTalismanItem;
 import com.ancientcurse.item.ScrollOfUnbindingItem;
 import com.ancientcurse.item.SekhemDateItem;
 import com.ancientcurse.item.SerpentStaffItem;
 import com.ancientcurse.item.StaffOfRaItem;
-import com.ancientcurse.item.TabletOfThothItem;
 import com.ancientcurse.item.WitheredStaffItem;
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
 import net.minecraft.entity.effect.StatusEffectInstance;
@@ -49,7 +47,6 @@ public class ModItems {
     public static final CurseZoneAdminWand CURSE_ZONE_ADMIN_WAND = new CurseZoneAdminWand(new FabricItemSettings().maxCount(1));
     
     // Ankh restoration items
-    public static final ScarabSerumItem SCARAB_SERUM = new ScarabSerumItem(new FabricItemSettings());
     public static final PharaohsBloodItem PHARAOHS_BLOOD = new PharaohsBloodItem(new FabricItemSettings());
     
     // Crafting ingredients for Ankh items
@@ -58,7 +55,6 @@ public class ModItems {
     
     // Curse removal items
     public static final ScrollOfUnbindingItem SCROLL_OF_UNBINDING = new ScrollOfUnbindingItem(new FabricItemSettings());
-    public static final TabletOfThothItem TABLET_OF_THOTH = new TabletOfThothItem(new FabricItemSettings());
     public static final HieroglyphFragmentItem HIEROGLYPH_FRAGMENT = new HieroglyphFragmentItem(new FabricItemSettings());
 
 
@@ -475,11 +471,6 @@ public class ModItems {
         // Register Ankh restoration items
         Registry.register(
             Registries.ITEM,
-            new Identifier(AncientCurse.MOD_ID, "scarab_serum"),
-            SCARAB_SERUM
-        );
-        Registry.register(
-            Registries.ITEM,
             new Identifier(AncientCurse.MOD_ID, "pharaohs_blood"),
             PHARAOHS_BLOOD
         );
@@ -499,11 +490,6 @@ public class ModItems {
             Registries.ITEM,
             new Identifier(AncientCurse.MOD_ID, "scroll_of_unbinding"),
             SCROLL_OF_UNBINDING
-        );
-        Registry.register(
-            Registries.ITEM,
-            new Identifier(AncientCurse.MOD_ID, "tablet_of_thoth"),
-            TABLET_OF_THOTH
         );
         Registry.register(
             Registries.ITEM,

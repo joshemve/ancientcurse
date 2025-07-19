@@ -66,8 +66,7 @@ public class ScarabIncenseItem extends Item {
                 world.playSound(null, player.getX(), player.getY(), player.getZ(), 
                     SoundEvents.BLOCK_FIRE_EXTINGUISH, SoundCategory.PLAYERS, 0.5F, 0.8F);
                 
-                // Create a message
-                player.sendMessage(Text.literal("The scarab incense fills the air with protective energy").formatted(Formatting.DARK_PURPLE), true);
+                // Removed chat message for cleaner experience
                 
                 // Consume the item
                 if (!player.getAbilities().creativeMode) {

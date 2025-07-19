@@ -1,6 +1,6 @@
 {
   "parent": "item/generated",
   "textures": {
-    "layer0": "ancientcurse:block/blood_lotus"
+    "layer0": "ancientcurse:item/blood_lotus"
   }
 }

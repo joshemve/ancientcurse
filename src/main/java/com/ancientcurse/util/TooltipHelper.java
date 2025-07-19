@@ -14,22 +14,9 @@ import java.util.Set;
 public class TooltipHelper {
     
     // Items that have their own specific tooltips and don't need the generic "Ancient Curse" tag
+    // Empty set - all items should show the Ancient Curse tag for consistency
     private static final Set<String> ITEMS_WITH_SPECIFIC_TOOLTIPS = Set.of(
-        "serpent_staff",
-        "horus_mace",
-        "scarab_talisman",
-        "eternal_sigil",
-        "ancient_pick",
-        "phial_of_lotus_essence",
-        "elixir_of_ras_spark",
-        "scarab_incense_item",
-        // Exclude all spawn eggs from generic tooltip
-        "locus_spawn_egg",
-        "anubis_spawn_egg", 
-        "djeserhath_spawn_egg",
-        "withered_pharaoh_spawn_egg",
-        "thoth_spawn_egg",
-        "khamsin_spread_small_spawn_egg"
+        // All items now show the Ancient Curse tag
     );
     
     /**
@@ -46,7 +33,7 @@ public class TooltipHelper {
                 
                 // Only add generic tooltip to items that don't have specific tooltips
                 if (!ITEMS_WITH_SPECIFIC_TOOLTIPS.contains(itemName)) {
-                    Text modTooltip = Text.translatable("tooltip.ancientcurse.ancient_curse").formatted(Formatting.DARK_PURPLE);
+                    Text modTooltip = Text.translatable("tooltip.ancientcurse.ancient_curse").formatted(Formatting.BLUE);
 
                     // Add the tooltip only if it's not already present to prevent duplicates
                     if (!lines.contains(modTooltip)) {

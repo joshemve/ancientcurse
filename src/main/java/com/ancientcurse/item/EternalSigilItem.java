@@ -27,9 +27,7 @@ import java.util.List;
  */
 public class EternalSigilItem extends Item {
     
-    private static final int COOLDOWN_TICKS = 1200; // 1-minute cooldown (20 ticks per second * 60 seconds)
-    private static final String ACTIVE_KEY = "Active";
-    private static final String LAST_USED_KEY = "LastUsedTime";
+    // Removed cooldown and active state tracking since item is consumed
     
     public EternalSigilItem(Settings settings) {
         super(settings.maxCount(1).fireproof()); // Can only stack to 1 and is fireproof
@@ -39,92 +37,62 @@ public class EternalSigilItem extends Item {
     public TypedActionResult<ItemStack> use(World world, PlayerEntity player, Hand hand) {
         ItemStack stack = player.getStackInHand(hand);
         
-        // Check if the sigil is on cooldown
-        if (isOnCooldown(stack, world)) {
-            if (!world.isClient) {
-                long timeLeft = getCooldownTimeLeft(stack, world);
-                int secondsLeft = (int) (timeLeft / 20);
-                player.sendMessage(Text.literal("The Eternal Sigil is still recharging. (" + secondsLeft + "s remaining)").formatted(Formatting.RED), true);
-            }
-            return TypedActionResult.fail(stack);
-        }
-        
-        // Toggle the sigil's active state
-        boolean isActive = isActive(stack);
-        setActive(stack, !isActive);
-        
         if (!world.isClient) {
-            // Set the cooldown
-            setLastUsedTime(stack, world.getTime());
+            // Clear ALL status effects (both positive and negative)
+            player.clearStatusEffects();
             
-            if (isActive(stack)) {
-                // Sigil was just activated
-                player.sendMessage(Text.literal("The Eternal Sigil awakens with ancient power").formatted(Formatting.GOLD), true);
-                
-                // Remove all Khamsin curse effects
-                boolean hadCurse = false;
-                for (int stage = 1; stage <= 5; stage++) {
-                    StatusEffectInstance curseEffect = player.getStatusEffect(ModStatusEffects.getCurseStage(stage));
-                    if (curseEffect != null) {
-                        player.removeStatusEffect(ModStatusEffects.getCurseStage(stage));
-                        hadCurse = true;
-                    }
-                }
-                
-                if (hadCurse) {
-                    player.sendMessage(Text.literal("The divine power of the Eternal Sigil cleanses your soul of the Khamsin curse!").formatted(Formatting.LIGHT_PURPLE), false);
-                }
-                
-                // Apply powerful protective effects
-                player.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, 6000, 1)); // 5 minutes of Resistance II
-                player.addStatusEffect(new StatusEffectInstance(StatusEffects.FIRE_RESISTANCE, 6000, 0)); // 5 minutes of Fire Resistance
-                player.addStatusEffect(new StatusEffectInstance(StatusEffects.ABSORPTION, 6000, 1)); // 5 minutes of Absorption II
-                
-                // Play activation sound
-                world.playSound(null, player.getX(), player.getY(), player.getZ(), 
-                    SoundEvents.BLOCK_BEACON_ACTIVATE, SoundCategory.PLAYERS, 0.8F, 0.8F);
-            } else {
-                // Sigil was just deactivated
-                player.sendMessage(Text.literal("The Eternal Sigil returns to dormancy").formatted(Formatting.GRAY), true);
-                
-                // Play deactivation sound
-                world.playSound(null, player.getX(), player.getY(), player.getZ(), 
-                    SoundEvents.BLOCK_BEACON_DEACTIVATE, SoundCategory.PLAYERS, 0.8F, 0.8F);
+            player.sendMessage(Text.literal("The Eternal Sigil's divine power cleanses your body and soul!").formatted(Formatting.GOLD), false);
+            
+            // Apply golden apple-like effects
+            player.addStatusEffect(new StatusEffectInstance(StatusEffects.REGENERATION, 400, 1)); // 20 seconds of Regeneration II
+            player.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, 6000, 0)); // 5 minutes of Resistance I
+            player.addStatusEffect(new StatusEffectInstance(StatusEffects.FIRE_RESISTANCE, 6000, 0)); // 5 minutes of Fire Resistance
+            player.addStatusEffect(new StatusEffectInstance(StatusEffects.ABSORPTION, 2400, 3)); // 2 minutes of Absorption IV (8 extra hearts)
+            
+            // Play activation sound
+            world.playSound(null, player.getX(), player.getY(), player.getZ(), 
+                SoundEvents.BLOCK_BEACON_ACTIVATE, SoundCategory.PLAYERS, 1.0F, 1.0F);
+            world.playSound(null, player.getX(), player.getY(), player.getZ(), 
+                SoundEvents.ENTITY_PLAYER_LEVELUP, SoundCategory.PLAYERS, 0.5F, 0.8F);
+            
+            // Consume the item
+            if (!player.getAbilities().creativeMode) {
+                stack.decrement(1);
             }
         } else {
             // Client-side particle effects
-            createToggleParticles(world, player, isActive(stack));
+            createActivationParticles(world, player);
         }
         
-        return TypedActionResult.success(stack);
+        return TypedActionResult.success(stack, world.isClient());
     }
     
-    private void createToggleParticles(World world, PlayerEntity player, boolean active) {
-        // Create different particle effects based on whether the sigil is being activated or deactivated
-        for (int i = 0; i < 25; i++) {
-            double radius = 1.0;
-            double angle = i * (Math.PI * 2) / 25;
+    private void createActivationParticles(World world, PlayerEntity player) {
+        // Create a burst of divine particles
+        for (int i = 0; i < 50; i++) {
+            double radius = 2.0;
+            double angle = i * (Math.PI * 2) / 50;
             
             double offsetX = Math.cos(angle) * radius;
             double offsetZ = Math.sin(angle) * radius;
             
-            if (active) {
-                // Golden particles for activation
+            // Golden particles
+            world.addParticle(
+                ParticleTypes.END_ROD,
+                player.getX() + offsetX,
+                player.getY() + 1.0,
+                player.getZ() + offsetZ,
+                offsetX * 0.1, 0.2, offsetZ * 0.1
+            );
+            
+            // Some totem particles for extra effect
+            if (i % 5 == 0) {
                 world.addParticle(
-                    ParticleTypes.END_ROD,
-                    player.getX() + offsetX,
-                    player.getY() + 1.0,
-                    player.getZ() + offsetZ,
-                    offsetX * 0.1, 0.1, offsetZ * 0.1
-                );
-            } else {
-                // Purple particles for deactivation
-                world.addParticle(
-                    ParticleTypes.REVERSE_PORTAL,
-                    player.getX() + offsetX,
-                    player.getY() + 1.0,
-                    player.getZ() + offsetZ,
-                    0, -0.05, 0
+                    ParticleTypes.TOTEM_OF_UNDYING,
+                    player.getX() + offsetX * 0.5,
+                    player.getY() + 2.0,
+                    player.getZ() + offsetZ * 0.5,
+                    offsetX * 0.05, 0.1, offsetZ * 0.05
                 );
             }
         }
@@ -134,114 +102,42 @@ public class EternalSigilItem extends Item {
     public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
         super.inventoryTick(stack, world, entity, slot, selected);
         
-        // Add ambient effects when the sigil is active or selected
+        // Add ambient effects when held
         if (world.isClient) {
-            // Emit purple light when held in hand
+            // Emit divine light when held in hand
             if (selected || (entity instanceof PlayerEntity player && player.getOffHandStack() == stack)) {
-                // Emit purple particles for the light effect
-                if (world.getTime() % 5 == 0) { // More frequent for better light effect
+                // Emit golden particles for the light effect
+                if (world.getTime() % 10 == 0) {
                     double offsetX = (world.random.nextFloat() - 0.5) * 0.5;
                     double offsetY = (world.random.nextFloat() - 0.5) * 0.5;
                     double offsetZ = (world.random.nextFloat() - 0.5) * 0.5;
-                    
-                    world.addParticle(
-                        ParticleTypes.PORTAL, // Purple particles
-                        entity.getX() + offsetX,
-                        entity.getY() + 1.0 + offsetY,
-                        entity.getZ() + offsetZ,
-                        0, 0.1, 0 // Slight upward movement
-                    );
-                }
-            }
-            
-            // Additional effects when active
-            if (isActive(stack) && entity instanceof PlayerEntity) {
-                if (world.getTime() % 20 == 0) { // Once per second
-                    // Emit subtle particles around the player
-                    double offsetX = world.random.nextGaussian() * 0.5;
-                    double offsetY = world.random.nextGaussian() * 0.5;
-                    double offsetZ = world.random.nextGaussian() * 0.5;
                     
                     world.addParticle(
                         ParticleTypes.END_ROD,
                         entity.getX() + offsetX,
                         entity.getY() + 1.0 + offsetY,
                         entity.getZ() + offsetZ,
-                        0, 0, 0
+                        0, 0.05, 0
                     );
                 }
-            }
-        }
-        
-        // Apply effects if active
-        if (!world.isClient && entity instanceof PlayerEntity player && isActive(stack)) {
-            // Apply effects every 20 ticks (once per second)
-            if (world.getTime() % 20 == 0) {
-                // Apply protection effects
-                player.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, 40, 1, false, false, true));
-                player.addStatusEffect(new StatusEffectInstance(StatusEffects.REGENERATION, 40, 0, false, false, true));
-                player.addStatusEffect(new StatusEffectInstance(StatusEffects.FIRE_RESISTANCE, 6000, 0, false, false, true));
-                player.addStatusEffect(new StatusEffectInstance(StatusEffects.ABSORPTION, 6000, 1, false, false, true));
             }
         }
     }
     
 
-    
-    private boolean isOnCooldown(ItemStack stack, World world) {
-        long lastUsed = getLastUsedTime(stack);
-        return world.getTime() - lastUsed < COOLDOWN_TICKS;
-    }
-    
-    private long getCooldownTimeLeft(ItemStack stack, World world) {
-        long lastUsed = getLastUsedTime(stack);
-        return COOLDOWN_TICKS - (world.getTime() - lastUsed);
-    }
-    
-    private long getLastUsedTime(ItemStack stack) {
-        NbtCompound nbt = stack.getOrCreateNbt();
-        return nbt.getLong(LAST_USED_KEY);
-    }
-    
-    private void setLastUsedTime(ItemStack stack, long time) {
-        NbtCompound nbt = stack.getOrCreateNbt();
-        nbt.putLong(LAST_USED_KEY, time);
-    }
-    
-    private boolean isActive(ItemStack stack) {
-        NbtCompound nbt = stack.getOrCreateNbt();
-        return nbt.getBoolean(ACTIVE_KEY);
-    }
-    
-    private void setActive(ItemStack stack, boolean active) {
-        NbtCompound nbt = stack.getOrCreateNbt();
-        nbt.putBoolean(ACTIVE_KEY, active);
-    }
+    // Removed state tracking methods since item is consumed on use
     
     @Override
     public boolean hasGlint(ItemStack stack) {
-        // Show the enchantment glint when the sigil is active
-        return isActive(stack);
+        // Always show enchantment glint for this divine artifact
+        return true;
     }
     
     @Override
     public void appendTooltip(ItemStack stack, World world, List<Text> tooltip, TooltipContext context) {
         super.appendTooltip(stack, world, tooltip, context);
         tooltip.add(Text.translatable("item.ancientcurse.eternal_sigil.tooltip").formatted(Formatting.GOLD));
-        tooltip.add(Text.literal("Removes all Khamsin curse effects when activated").formatted(Formatting.LIGHT_PURPLE));
-        
-        // Show active state
-        if (isActive(stack)) {
-            tooltip.add(Text.literal("Status: Active").formatted(Formatting.GREEN));
-        } else {
-            tooltip.add(Text.literal("Status: Dormant").formatted(Formatting.GRAY));
-        }
-        
-        // Show cooldown information if the sigil is on cooldown
-        if (world != null && isOnCooldown(stack, world)) {
-            long timeLeft = getCooldownTimeLeft(stack, world);
-            int secondsLeft = (int) (timeLeft / 20);
-            tooltip.add(Text.literal("Recharging: " + secondsLeft + "s").formatted(Formatting.RED));
-        }
+        tooltip.add(Text.literal("Cleanses all effects and grants divine protection").formatted(Formatting.LIGHT_PURPLE));
+        tooltip.add(Text.literal("Consumed on use").formatted(Formatting.RED));
     }
 }
