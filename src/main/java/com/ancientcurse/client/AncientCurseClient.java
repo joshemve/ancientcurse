@@ -17,7 +17,7 @@ import com.ancientcurse.entity.renderer.ScarabBeetleRenderer;
 import com.ancientcurse.entity.renderer.SpitBallRenderer;
 import com.ancientcurse.entity.renderer.ThothRenderer;
 import com.ancientcurse.entity.renderer.KhamsinOrbRenderer;
-import com.ancientcurse.util.TooltipHelper;
+// import com.ancientcurse.util.TooltipHelper; - Removed, not needed
 import com.ancientcurse.network.CurseZonePackets;
 import com.ancientcurse.client.render.CurseZoneRenderer;
 import com.ancientcurse.client.render.WandSelectionRenderer;
@@ -97,7 +97,7 @@ public class AncientCurseClient implements ClientModInitializer {
         registerEntityRenderers();
         
         // Register tooltip callback to add "Ancient Curse" to all mod items
-        TooltipHelper.registerTooltipCallback();
+        // TooltipHelper.registerTooltipCallback(); - Removed, Minecraft already shows mod ID
         
         // Register network packets
         CurseZonePackets.registerClientPackets();

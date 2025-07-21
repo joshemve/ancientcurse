@@ -1,5 +1,4 @@
 {
-  "tooltip.ancientcurse.ancient_curse": "Ancient Curse",
   "item.ancientcurse.staff_of_ra": "Staff of Ra",
   "item.ancientcurse.staff_of_ra.tooltip": "Divine staff blessed by the sun god himself",
   "item.ancientcurse.staff_of_ra.tooltip1": "Hold right-click to charge a devastating sun beam",
@@ -197,6 +196,15 @@
   "item.ancientcurse.hieroglyph_fragment": "Hieroglyph Fragment",
   "item.ancientcurse.hieroglyph_fragment.tooltip": "Ancient piece of sacred text",
   
+  "item.ancientcurse.purification_staff": "Purification Staff",
+  "item.ancientcurse.purification_staff.tooltip": "Channels limited divine energy to cleanse small areas",
+  "item.ancientcurse.purification_staff.tooltip1": "Requires a salt circle to activate",
+  "item.ancientcurse.purification_staff.tooltip2": "Hold right-click for 3 seconds to channel",
+  "item.ancientcurse.purification_staff.tooltip3": "Cleanses up to 8 blocks radius (uses 5 durability)",
+  "item.ancientcurse.purification_staff.no_salt_circle": "You must stand in a salt circle to use this!",
+  "item.ancientcurse.purification_staff.interrupted": "Cleansing ritual interrupted!",
+  "item.ancientcurse.purification_staff.wave_started": "Cleansing wave initiated!",
+  
   "block.ancientcurse.salt_dust": "Salt Dust",
 
   "block.ancientcurse.anubus__glyph": "Anubus Glyph",
@@ -257,6 +265,12 @@
   "block.ancientcurse.hardened_deshret_stone": "Hardened Deshret Stone",
   "block.ancientcurse.polished_deshret_stone": "Polished Deshret Stone",
   "block.ancientcurse.cursed_earth": "Cursed Earth",
+  "block.ancientcurse.cleansing_station": "Cleansing Station",
+  "block.ancientcurse.cleansing_station.already_active": "The station is already cleansing!",
+  "block.ancientcurse.cleansing_station.no_corruption": "No corruption detected nearby",
+  "block.ancientcurse.cleansing_station.activated": "Cleansing process initiated!",
+  "block.ancientcurse.cleansing_station.complete": "Cleansing complete! %s blocks restored",
+  "block.ancientcurse.cleansing_station.protection_active": "Area protected from cursed earth for 10 days",
   "block.ancientcurse.bloodshade_thicket": "Bloodshade Thicket",
   "block.ancientcurse.cursed_sprig": "Cursed Sprig",
   "block.ancientcurse.cursed_sprout": "Cursed Sprout",
@@ -376,5 +390,7 @@
   "effect.ancientcurse.khamsin_curse_stage_5": "Khamsin Curse V",
   
   "commands.khamsin.success.single": "Applied Khamsin Curse (Stage %d) to %s",
-  "commands.khamsin.success.multiple": "Applied Khamsin Curse (Stage %d) to %d players"
+  "commands.khamsin.success.multiple": "Applied Khamsin Curse (Stage %d) to %d players",
+  
+  "tooltip.ancientcurse.ancient_curse": "Ancient Curse"
 }

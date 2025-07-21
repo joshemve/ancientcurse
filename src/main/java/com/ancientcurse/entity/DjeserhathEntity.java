@@ -174,27 +174,7 @@ public class DjeserhathEntity extends HostileEntity implements GeoEntity {
         goalSelector.add(2, new DjeserhathSpitAttackGoal(this));
         goalSelector.add(3, new LuringGoal(this));
         
-        // Look goals still work for head rotation
-        goalSelector.add(4, new LookAtEntityGoal(this, PlayerEntity.class, 12.0F) {
-            @Override
-            public boolean canStart() {
-                return DjeserhathEntity.this.isActivated() && super.canStart();
-            }
-            
-            @Override
-            public boolean shouldContinue() {
-                return DjeserhathEntity.this.isActivated() && super.shouldContinue();
-            }
-        });
-        
-        goalSelector.add(5, new LookAroundGoal(this) {
-            @Override
-            public boolean canStart() {
-                return DjeserhathEntity.this.isActivated() && 
-                       currentHuntingState != HuntingState.DORMANT && 
-                       super.canStart();
-            }
-        });
+        // Removed look goals - rotation is handled in the renderer for upper body only
 
         // Target selection
         targetSelector.add(1, new RevengeGoal(this));
@@ -763,9 +743,7 @@ public class DjeserhathEntity extends HostileEntity implements GeoEntity {
         @Override
         public void tick() {
             if (spitTarget != null) {
-                host.getLookControl().lookAt(spitTarget.getX(), 
-                                            spitTarget.getEyeY(), 
-                                            spitTarget.getZ());
+                // Look control disabled - rotation handled in renderer
                 
                 // Begin opening jaw as we prepare to spit
                 host.dataTracker.set(JAW_OPENNESS, Math.min(1.0f, host.getJawOpenness() + 0.1f));

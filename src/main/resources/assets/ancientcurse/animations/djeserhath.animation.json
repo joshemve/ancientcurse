@@ -169,9 +169,7 @@
 					}
 				}
 			},
-			"timeline": {
-				"0.0": "make it so body base aims towards target which will make it so the rest of the body and head will face target;"
-			}
+			"timeline": {}
 		},
 		"animation.djeserhath.idle_activated": {
 			"loop": true,
@@ -634,9 +632,7 @@
 					}
 				}
 			},
-			"timeline": {
-				"0.0": "make it so body base aims towards target which will make it so the rest of the body and head will face target;"
-			}
+			"timeline": {}
 		},
 		"animation.djeserhath.spit_attack": {
 			"animation_length": 2.8333,
@@ -912,12 +908,7 @@
 				}
 			},
 			"particle_effects": {},
-			"timeline": {
-				"0.0": "make it so body base aims towards target which will make it so the rest of the body and head will face target;",
-				"0.3333": "mouth should be foaming poison like particles slowly building up until it fires;",
-				"1.5417": "shoot a dragon like particle blast out of mouth here;",
-				"1.7917": "here is where the actual poison spit ball should be launched towards target;"
-			}
+			"timeline": {}
 		}
 	},
 	"geckolib_format_version": 2

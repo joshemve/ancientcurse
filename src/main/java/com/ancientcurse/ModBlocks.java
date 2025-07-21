@@ -590,6 +590,16 @@ public class ModBlocks {
             .luminance(state -> 2) // Slight glow effect
     );
     
+    // Cleansing Station - Used with Eternal Sigil to cleanse ALL connected cursed earth
+    public static final Block CLEANSING_STATION = new CleansingStationBlock(
+        FabricBlockSettings.create()
+            .mapColor(MapColor.WHITE)
+            .strength(3.5f, 1200.0f) // Strong like enchantment table
+            .requiresTool()
+            .sounds(BlockSoundGroup.STONE)
+            .luminance(state -> state.get(CleansingStationBlock.ACTIVATED) ? 15 : 7)
+    );
+    
     public static final Block HARDENED_BLACK_STONE = new Block(
         FabricBlockSettings.create()
             .mapColor(MapColor.BLACK)
@@ -1077,6 +1087,13 @@ public class ModBlocks {
             CURSED_EARTH
         );
         
+        // Register Cleansing Station
+        Registry.register(
+            Registries.BLOCK,
+            new Identifier(AncientCurse.MOD_ID, "cleansing_station"),
+            CLEANSING_STATION
+        );
+        
         // Register Bronze Blocks
         Registry.register(
             Registries.BLOCK,
@@ -1197,6 +1214,7 @@ public class ModBlocks {
         registerBlockItem(HARDENED_BLACK_STONE, ModItemGroup.ANCIENT_CURSE);
         registerBlockItem(WIND_SWEPT_BLACKSTONE, ModItemGroup.ANCIENT_CURSE);
         registerBlockItem(CURSED_EARTH, ModItemGroup.ANCIENT_CURSE);
+        registerBlockItem(CLEANSING_STATION, ModItemGroup.ANCIENT_CURSE);
         
         // Register Bronze Blocks
         registerBlockItem(BRONZE_BLOCK, ModItemGroup.ANCIENT_CURSE);

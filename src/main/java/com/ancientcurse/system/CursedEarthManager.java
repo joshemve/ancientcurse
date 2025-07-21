@@ -3,6 +3,7 @@ package com.ancientcurse.system;
 import com.ancientcurse.AncientCurse;
 import com.ancientcurse.block.CursedEarthBlock;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.minecraft.block.BlockState;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
@@ -39,6 +40,7 @@ public class CursedEarthManager {
     private static final Queue<SpreadRequest> spreadQueue = new LinkedList<>();
     private static final Map<World, Set<ChunkPos>> loadedChunks = new ConcurrentHashMap<>();
     private static final Map<BlockPos, SaltCircle> saltCircles = new ConcurrentHashMap<>();
+    private static final Map<BlockPos, CleansingProtection> cleansingProtections = new ConcurrentHashMap<>();
     
     // === PERFORMANCE MONITORING ===
     private static long lastPerformanceCheck = 0;
@@ -81,6 +83,12 @@ public class CursedEarthManager {
         if (currentTick % 1200 == 0) {
             cleanupUnloadedChunks(server);
             cleanupExpiredSaltCircles(server);
+            cleanupExpiredProtections(server);
+        }
+        
+        // Clean up old tracking data every 5 minutes
+        if (currentTick % 6000 == 0) {
+            cleanupOldTrackingData(server);
         }
     }
     
@@ -120,8 +128,30 @@ public class CursedEarthManager {
                 return false;
             }
             
+            // Check for cleansing protection
+            if (isProtectedByCleansingStation(request.toPos)) {
+                return false;
+            }
+            
+            // ALSO check if we're in an active cleansing zone
+            if (com.ancientcurse.block.CleansingStationBlock.isInActiveCleansingZone(request.toPos)) {
+                return false; // Don't spread into active cleansing zones
+            }
+            
             // Attempt the spread
             if (CursedEarthBlock.canSpreadToStatic(world, request.toPos)) {
+                // Track original block before converting
+                BlockState originalState = world.getBlockState(request.toPos);
+                
+                // Debug logging
+                if (processedSpreads % 50 == 0) {
+                    AncientCurse.LOGGER.debug("Tracking original block at {}: {}", request.toPos, originalState.getBlock());
+                }
+                
+                OriginalBlockTracker blockTracker = OriginalBlockTracker.get(world);
+                blockTracker.trackOriginalBlock(request.toPos, originalState);
+                
+                // Now convert to cursed earth
                 world.setBlockState(request.toPos, request.newState);
                 tracker.incrementCurseCount();
                 return true;
@@ -171,6 +201,25 @@ public class CursedEarthManager {
         
         if (!chunksToRemove.isEmpty()) {
             AncientCurse.LOGGER.debug("Cleaned up {} stale chunk trackers", chunksToRemove.size());
+        }
+    }
+    
+    /**
+     * Cleans up old tracking data for blocks that no longer exist
+     */
+    private void cleanupOldTrackingData(MinecraftServer server) {
+        // This cleanup is handled by the OriginalBlockTracker when chunks are unloaded
+        // But we can log statistics here
+        for (ServerWorld world : server.getWorlds()) {
+            OriginalBlockTracker tracker = OriginalBlockTracker.get(world);
+            OriginalBlockTracker.TrackerStats stats = tracker.getStats();
+            
+            if (stats.blocksTracked > 10000) {
+                AncientCurse.LOGGER.info("Original block tracker for {} - Blocks: {}, Memory: {}", 
+                    world.getRegistryKey().getValue(), 
+                    stats.blocksTracked, 
+                    stats.getMemoryUsageString());
+            }
         }
     }
     
@@ -248,6 +297,133 @@ public class CursedEarthManager {
             SaltCircle circle = entry.getValue();
             return !circle.isActive() || currentTime > circle.getExpirationTime();
         });
+    }
+    
+    /**
+     * Cleans up expired cleansing protections
+     */
+    private void cleanupExpiredProtections(MinecraftServer server) {
+        long currentTime = server.getTicks();
+        int sizeBefore = cleansingProtections.size();
+        cleansingProtections.entrySet().removeIf(entry -> {
+            CleansingProtection protection = entry.getValue();
+            return currentTime > protection.getExpirationTime();
+        });
+        int removed = sizeBefore - cleansingProtections.size();
+        if (removed > 0) {
+            AncientCurse.LOGGER.debug("Removed {} expired cleansing protections", removed);
+        }
+    }
+    
+    /**
+     * Creates cleansing protection for a position
+     */
+    public void createCleansingProtection(ServerWorld world, BlockPos pos, int duration) {
+        long expirationTime = world.getTime() + duration;
+        CleansingProtection protection = new CleansingProtection(pos, expirationTime);
+        cleansingProtections.put(pos, protection);
+        
+    }
+    
+    /**
+     * Checks if a position is protected by cleansing station
+     */
+    public boolean isProtectedByCleansingStation(BlockPos pos) {
+        // Check the exact position
+        CleansingProtection protection = cleansingProtections.get(pos);
+        if (protection != null && protection.isActive()) {
+            return true;
+        }
+        
+        // Also check vertical column (5 blocks up and down) to prevent surface finding bypass
+        for (int y = -5; y <= 5; y++) {
+            BlockPos checkPos = pos.add(0, y, 0);
+            protection = cleansingProtections.get(checkPos);
+            if (protection != null && protection.isActive()) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+    
+    /**
+     * Clears protection at a specific position
+     * @return true if protection was cleared, false if no protection existed
+     */
+    public boolean clearProtectionAt(BlockPos pos) {
+        CleansingProtection removed = cleansingProtections.remove(pos);
+        return removed != null;
+    }
+    
+    /**
+     * Clears all connected protection starting from a given position
+     * Uses flood fill to find all connected protected blocks
+     * @return number of blocks cleared
+     */
+    public int clearAllConnectedProtection(BlockPos startPos) {
+        if (!isProtectedByCleansingStation(startPos)) {
+            return 0;
+        }
+        
+        Set<BlockPos> toProcess = new HashSet<>();
+        Set<BlockPos> processed = new HashSet<>();
+        Queue<BlockPos> queue = new LinkedList<>();
+        queue.add(startPos);
+        
+        // Find all connected protected blocks
+        while (!queue.isEmpty()) {
+            BlockPos current = queue.poll();
+            if (processed.contains(current)) continue;
+            processed.add(current);
+            
+            if (isProtectedByCleansingStation(current)) {
+                toProcess.add(current);
+                
+                // Check all 26 adjacent positions (including diagonals)
+                for (int x = -1; x <= 1; x++) {
+                    for (int y = -1; y <= 1; y++) {
+                        for (int z = -1; z <= 1; z++) {
+                            if (x == 0 && y == 0 && z == 0) continue;
+                            BlockPos neighbor = current.add(x, y, z);
+                            if (!processed.contains(neighbor)) {
+                                queue.add(neighbor);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        // Clear all found protections
+        int cleared = 0;
+        for (BlockPos pos : toProcess) {
+            if (clearProtectionAt(pos)) {
+                cleared++;
+            }
+        }
+        
+        if (cleared > 0) {
+            AncientCurse.LOGGER.info("Cleared protection from {} connected blocks", cleared);
+        }
+        
+        return cleared;
+    }
+    
+    /**
+     * Clears all spread requests within a given radius of a position
+     * Called when a cleansing station is activated
+     */
+    public void clearSpreadRequestsInRadius(BlockPos center, int radius) {
+        int sizeBefore = spreadQueue.size();
+        spreadQueue.removeIf(request -> 
+            request.toPos.isWithinDistance(center, radius)
+        );
+        int removed = sizeBefore - spreadQueue.size();
+        
+        if (removed > 0) {
+            AncientCurse.LOGGER.info("Cleared {} pending spread requests near cleansing station", removed);
+        }
     }
     
     // === INNER CLASSES ===
@@ -363,5 +539,30 @@ public class CursedEarthManager {
         public long getExpirationTime() { return expirationTime; }
         public BlockPos getCenter() { return center; }
         public int getRadius() { return radius; }
+    }
+    
+    /**
+     * Represents cleansing protection for a single block
+     */
+    public static class CleansingProtection {
+        private final BlockPos pos;
+        private final long expirationTime;
+        
+        public CleansingProtection(BlockPos pos, long expirationTime) {
+            this.pos = pos;
+            this.expirationTime = expirationTime;
+        }
+        
+        public boolean isActive() {
+            return true; // Always active until expiration
+        }
+        
+        public long getExpirationTime() {
+            return expirationTime;
+        }
+        
+        public BlockPos getPos() {
+            return pos;
+        }
     }
 } 

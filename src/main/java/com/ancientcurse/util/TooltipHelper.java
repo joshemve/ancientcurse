@@ -20,7 +20,7 @@ public class TooltipHelper {
     );
     
     /**
-     * Register the tooltip callback to add "Ancient Curse" to mod items that don't have specific tooltips.
+     * Register the tooltip callback to add "Ancient Curse" to mod items.
      * This should be called during client initialization.
      */
     public static void registerTooltipCallback() {
@@ -29,17 +29,8 @@ public class TooltipHelper {
 
             // Check if the item belongs to the Ancient Curse mod
             if (id != null && id.getNamespace().equals(AncientCurse.MOD_ID)) {
-                String itemName = id.getPath();
-                
-                // Only add generic tooltip to items that don't have specific tooltips
-                if (!ITEMS_WITH_SPECIFIC_TOOLTIPS.contains(itemName)) {
-                    Text modTooltip = Text.translatable("tooltip.ancientcurse.ancient_curse").formatted(Formatting.BLUE);
-
-                    // Add the tooltip only if it's not already present to prevent duplicates
-                    if (!lines.contains(modTooltip)) {
-                        lines.add(modTooltip);
-                    }
-                }
+                // Don't add the tooltip - let vanilla handle mod ID display
+                // This prevents duplicate mod IDs from appearing
             }
         });
     }

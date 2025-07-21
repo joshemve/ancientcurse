@@ -1,0 +1,6 @@
+{
+  "variants": {
+    "activated=false": { "model": "ancientcurse:block/cleansing_station" },
+    "activated=true": { "model": "ancientcurse:block/cleansing_station_active" }
+  }
+}

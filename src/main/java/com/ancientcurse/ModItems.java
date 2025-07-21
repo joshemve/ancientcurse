@@ -9,6 +9,7 @@ import com.ancientcurse.item.HieroglyphFragmentItem;
 import com.ancientcurse.item.HorusMaceItem;
 import com.ancientcurse.item.PhialOfLotusEssenceItem;
 import com.ancientcurse.item.PharaohsBloodItem;
+import com.ancientcurse.item.PurificationStaffItem;
 import com.ancientcurse.item.ScarabIncenseItem;
 import com.ancientcurse.item.SaltItem;
 import com.ancientcurse.item.ScarabTalismanItem;
@@ -144,6 +145,11 @@ public class ModItems {
     public static final WitheredStaffItem WITHERED_STAFF = new WitheredStaffItem(new FabricItemSettings());
     public static final ScarabIncenseItem SCARAB_INCENSE_ITEM = new ScarabIncenseItem(new FabricItemSettings());
     public static final EternalSigilItem ETERNAL_SIGIL = new EternalSigilItem(
+        new FabricItemSettings().maxCount(1)
+    );
+    
+    // Purification Staff - Player-craftable item for cleansing cursed earth
+    public static final PurificationStaffItem PURIFICATION_STAFF = new PurificationStaffItem(
         new FabricItemSettings().maxCount(1)
     );
     
@@ -538,6 +544,13 @@ public class ModItems {
             Registries.ITEM,
             new Identifier(AncientCurse.MOD_ID, "eternal_sigil"),
             ETERNAL_SIGIL
+        );
+        
+        // Register Purification Staff
+        Registry.register(
+            Registries.ITEM,
+            new Identifier(AncientCurse.MOD_ID, "purification_staff"),
+            PURIFICATION_STAFF
         );
         
         // Register Scarab Shell and Fragment

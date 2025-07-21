@@ -59,9 +59,9 @@ public class DjeserhathEntityRenderer extends GeoEntityRenderer<DjeserhathEntity
     private void handleHuntingStateEffects(DjeserhathEntity entity, BakedGeoModel model, float partialTick) {
         DjeserhathEntity.HuntingState state = entity.getHuntingState();
         
-        // Get the root bone to apply global transformations
-        GeoBone root = model.getBone("root").orElse(null);
-        if (root == null) return;
+        // Get the djeserhath bone for applying visual effects
+        GeoBone djeserhath = model.getBone("djeserhath").orElse(null);
+        if (djeserhath == null) return;
         
         switch (state) {
             case DORMANT:
@@ -69,20 +69,20 @@ public class DjeserhathEntityRenderer extends GeoEntityRenderer<DjeserhathEntity
                 break;
                 
             case SENSING:
-                // Slight trembling effect - apply to root for cohesive movement
+                // Slight trembling effect - apply to main body
                 float tremble = MathHelper.sin((entity.age + partialTick) * 0.3f) * 0.02f;
-                root.setPosY(tremble);
+                djeserhath.setPosY(tremble);
                 break;
                 
             case LURING:
-                // Subtle swaying motion - apply to root
+                // Subtle swaying motion - apply to main body
                 float sway = MathHelper.sin((entity.age + partialTick) * 0.05f) * 0.1f;
-                root.setRotZ(sway);
+                djeserhath.setRotZ(sway);
                 break;
                 
             case STALKING:
-                // Tense, focused state - slight forward lean on whole model
-                root.setRotX(0.1f);
+                // Tense, focused state - slight forward lean
+                djeserhath.setRotX(0.1f);
                 break;
                 
             case STRIKING:
@@ -90,8 +90,7 @@ public class DjeserhathEntityRenderer extends GeoEntityRenderer<DjeserhathEntity
                 break;
                 
             case DIGESTING:
-                // For digesting, we still want local scaling effects on body segments
-                // These are local animations and should be fine to apply to specific bones
+                // Local scaling effects on body segments
                 GeoBone body2 = model.getBone("body2").orElse(null);
                 GeoBone body3 = model.getBone("body3").orElse(null);
                 if (body2 != null && body3 != null) {
@@ -104,9 +103,9 @@ public class DjeserhathEntityRenderer extends GeoEntityRenderer<DjeserhathEntity
                 break;
                 
             case SATISFIED:
-                // Gentle, content swaying - apply to root for cohesive movement
+                // Gentle, content swaying
                 float contentSway = MathHelper.sin((entity.age + partialTick) * 0.03f) * 0.05f;
-                root.setRotZ(contentSway);
+                djeserhath.setRotZ(contentSway);
                 break;
         }
     }

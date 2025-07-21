@@ -182,6 +182,7 @@ public class ModItemGroup {
                 safeAdd(entries, ModBlocks.HARDENED_BLACK_STONE);
                 safeAdd(entries, ModBlocks.WIND_SWEPT_BLACKSTONE);
                 safeAdd(entries, ModBlocks.CURSED_EARTH);
+                safeAdd(entries, ModBlocks.CLEANSING_STATION);
 
                 // Necrostone blocks
                 safeAdd(entries, com.ancientcurse.block.registry.NecrostoneBlocks.NECROSTONE_BRICK);

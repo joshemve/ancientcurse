@@ -3,14 +3,20 @@ package com.ancientcurse.block;
 import com.ancientcurse.AncientCurse;
 import com.ancientcurse.ModBlocks;
 import com.ancientcurse.ModEntities;
+import com.ancientcurse.command.CursedEarthCommand;
 import com.ancientcurse.system.CursedEarthManager;
 import com.ancientcurse.block.registry.CursedPlantBlocks;
 import com.ancientcurse.block.CursedPlantBlock;
+import com.ancientcurse.block.CleansingStationBlock;
 import com.ancientcurse.effect.ModStatusEffects;
 import com.ancientcurse.util.CurseZoneManager;
+import com.ancientcurse.util.AnkhManager;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.registry.tag.BlockTags;
+import net.minecraft.registry.tag.TagKey;
+import net.minecraft.registry.Registries;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
@@ -19,12 +25,21 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.ChunkPos;
+import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.world.World;
+import net.minecraft.client.item.TooltipContext;
+import net.minecraft.item.ItemStack;
+import net.minecraft.text.Text;
+import net.minecraft.world.BlockView;
 import net.minecraft.particle.DustParticleEffect;
 import org.joml.Vector3f;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Cursed Earth - Performance-first implementation with strict limits
@@ -33,253 +48,707 @@ import java.util.List;
  * - Never process more than 100 blocks per tick
  * - Spread cap: Maximum 256 cursed blocks per chunk
  * - Server-friendly: TPS should never drop below 18
+ * - Prioritizes surface and horizontal spread for natural-looking biome takeover
  */
 public class CursedEarthBlock extends BaseAncientCurseBlock {
+    // Constants for spread behavior
+    private static final int MAX_BLOCKS_PER_CHUNK = 256;
+    private static final int MAX_BLOCKS_PER_SECTION = 64;
+    private static final int SURFACE_SECTION_BONUS = 32;
+    private static final int SPREAD_COOLDOWN = 100; // 5 seconds - faster for sweeping effect
+    private static final int DEATH_BURST_COOLDOWN = 6000; // 5 minutes
+    private static final int DEATH_BURST_SIZE = 12; // Diameter of death burst
+    private static final float HORIZONTAL_SPREAD_CHANCE = 0.85f; // Strong favor for horizontal spread
+    private static final float SURFACE_SPREAD_BONUS = 0.4f; // High bonus for surface blocks
+    private static final float BRANCH_CHANCE = 0.45f; // Increased chance to create branching patterns
+    private static final float MOMENTUM_BONUS = 0.15f; // Reduced momentum for more variation
+    private static final int MAX_BRANCH_LENGTH = 5; // Shorter branches for more spider-webbing
+    private static final float MULTI_SPREAD_CHANCE = 0.25f; // Chance to spread to multiple blocks
+    private static final float ROTATION_CHANCE = 0.35f; // Chance to rotate direction
+    private static final Vector3f CURSED_PARTICLE_COLOR = new Vector3f(0.4f, 0.1f, 0.5f);
     
-    // === PERFORMANCE CONSTANTS ===
-    private static final double SPREAD_CHANCE = 0.01; // 1% per random tick
-    private static final int MAX_SPREAD_DISTANCE = 32; // blocks from origin
-    private static final int SPREAD_COOLDOWN = 200; // 10 seconds
-    private static final int MAX_CURSED_PER_CHUNK = 256; // hard limit per chunk
-    private static final int MAX_CURSED_PER_SECTION = 16; // 16x16x16 section limit
-    private static final int DEATH_BURST_SIZE = 5; // 5x5 burst on death
-    private static final int DEATH_BURST_COOLDOWN = 6000; // 5 minutes (300 seconds)
-    
-    // === PARTICLE CONSTANTS ===
-    private static final Vector3f CURSED_PARTICLE_COLOR = new Vector3f(0.3f, 0.0f, 0.3f);
-    private static final int LIGHT_LEVEL = 3;
-    
-    // === SPREAD TRACKING ===
-    private static final java.util.Map<ChunkPos, Integer> chunkCurseCount = new java.util.concurrent.ConcurrentHashMap<>();
-    private static final java.util.Map<BlockPos, Long> lastSpreadTime = new java.util.concurrent.ConcurrentHashMap<>();
-    private static final java.util.Map<BlockPos, Long> deathBurstCooldowns = new java.util.concurrent.ConcurrentHashMap<>();
-    
-    // === KHAMSIN CURSE TRACKING ===
-    private static final java.util.Map<java.util.UUID, Long> playerExposureTime = new java.util.concurrent.ConcurrentHashMap<>();
-    private static final int EXPOSURE_CHECK_INTERVAL = 20; // Check every second
-    private static final int INITIAL_CURSE_THRESHOLD = 100; // 5 seconds for first chance
-    private static final float BASE_CURSE_CHANCE = 0.1f; // 10% base chance
+    // Tracking maps
+    private static final Map<ChunkPos, Integer> chunkCounts = new HashMap<>();
+    private static final Map<Long, Integer> sectionCounts = new HashMap<>();
+    private static final Map<BlockPos, Long> spreadCooldowns = new HashMap<>();
+    private static final Map<BlockPos, Long> deathBurstCooldowns = new HashMap<>();
+    private static final Map<PlayerEntity, Long> playerExposureTime = new HashMap<>();
+    // New tracking for branching spread
+    private static final Map<BlockPos, Direction> spreadDirections = new HashMap<>();
+    private static final Map<BlockPos, Integer> branchLengths = new HashMap<>();
+    private static final Map<BlockPos, BlockPos> spreadOrigins = new HashMap<>();
+    // Cache for block spreadability to optimize performance
+    private static final Map<Block, Boolean> spreadableBlockCache = new HashMap<>();
     
     public CursedEarthBlock(Settings settings) {
-        super(settings
-            .nonOpaque()
-            .luminance((state) -> LIGHT_LEVEL));
+        super(settings);
     }
     
     @Override
-    public void randomDisplayTick(BlockState state, World world, BlockPos pos, Random random) {
-        // Optimized particle system - max 10 particles per block, LOD beyond 32 blocks
-        if (random.nextInt(8) == 0) {
-            double x = pos.getX() + random.nextDouble();
-            double y = pos.getY() + 1.1D;
-            double z = pos.getZ() + random.nextDouble();
-            
-            float intensity = 0.9f;
-            
-            world.addParticle(
-                new DustParticleEffect(CURSED_PARTICLE_COLOR, intensity),
-                x, y, z,
-                0, 0.05D, 0
-            );
-        }
+    public void appendTooltip(ItemStack stack, BlockView world, List<Text> tooltip, TooltipContext options) {
+        // Don't add the base Ancient Curse tooltip for cursed earth
+        // If you want a specific tooltip, add it here instead
     }
     
     @Override
     public void randomTick(BlockState state, ServerWorld world, BlockPos pos, Random random) {
-        // === PERFORMANCE CHECK ===
-        if (world.getServer().getTicks() % 20 != 0) {
-            return; // Only process every 20 ticks (1 second) for performance
+        // FIRST check if we're in an active cleansing zone - if so, do NOTHING
+        if (CleansingStationBlock.isInActiveCleansingZone(pos)) {
+            return; // No spreading, no effects, nothing while cleansing is active
         }
         
-        // === CHUNK LIMIT CHECK ===
-        ChunkPos chunkPos = new ChunkPos(pos);
-        int currentChunkCount = chunkCurseCount.getOrDefault(chunkPos, 0);
-        if (currentChunkCount >= MAX_CURSED_PER_CHUNK) {
-            return; // Chunk is at capacity
-        }
-        
-        // === CURSE ZONE BOOST ===
-        CurseZoneManager zoneManager = CurseZoneManager.get(world);
-        float khamsinLevel = zoneManager.getInterpolatedKhamsinLevel(pos);
-        double boostedSpreadChance = SPREAD_CHANCE * (1 + khamsinLevel / 10.0); // Up to 2x spread in max zones
-        
-        // === SPREAD MECHANICS ===
-        if (random.nextDouble() < boostedSpreadChance) {
+        // Attempt to spread the curse to nearby blocks
+        if (CursedEarthCommand.isEnabled() && random.nextFloat() < 0.3f) {
             attemptSpread(world, pos, random);
+        } else if (!CursedEarthCommand.isEnabled() && world.getTime() % 100 == 0) {
+            // Log once every 5 seconds if spreading is disabled
+            // Debug: Cursed earth spreading is disabled
         }
         
-        // === ENTITY EFFECTS ===
-        if (random.nextInt(20) == 0) {
-            applyEntityEffects(world, pos);
+        // Attempt to spawn cursed plants on top (rare)
+        if (random.nextFloat() < 0.01f && world.getBlockState(pos.up()).isAir()) {
+            attemptPlantSpawn(world, pos.up(), random);
         }
         
-        // === CURSED PLANT/ENTITY SPAWNING ===
-        if (random.nextInt(100) == 0) { // 1% chance per random tick
-            // Very rare chance to spawn special entities instead of plants
-            if (random.nextFloat() < 0.05f) { // 5% of the 1% = 0.05% total chance
-                attemptEntitySpawn(world, pos.up(), random);
-            } else {
-                attemptPlantSpawn(world, pos.up(), random);
-            }
+        // Very rare chance to spawn cursed entities
+        if (random.nextFloat() < 0.001f) {
+            attemptEntitySpawn(world, pos.up(), random);
         }
+        
+        // Apply effects to nearby players
+        applyEffectsToNearbyPlayers(world, pos);
     }
     
     /**
-     * Attempts to spread cursed earth to an adjacent block
+     * Attempts to spread the curse to nearby blocks
+     * Uses tree-branching patterns and directional momentum for organic spread
      */
     private void attemptSpread(ServerWorld world, BlockPos pos, Random random) {
-        // Check cooldown
-        long currentTime = world.getTime();
-        if (currentTime - lastSpreadTime.getOrDefault(pos, 0L) < SPREAD_COOLDOWN) {
+        // Early optimization: verify we're still cursed earth
+        if (world.getBlockState(pos).getBlock() != ModBlocks.CURSED_EARTH) {
             return;
         }
         
-        // Get valid adjacent positions
-        BlockPos[] adjacentPositions = {
-            pos.north(), pos.south(), pos.east(), pos.west(),
-            pos.up(), pos.down()
-        };
+        // Check cooldown
+        long currentTime = world.getTime();
+        if (currentTime - spreadCooldowns.getOrDefault(pos, 0L) < SPREAD_COOLDOWN) {
+            return;
+        }
         
-        // Shuffle and find valid target
-        java.util.List<BlockPos> shuffled = java.util.Arrays.asList(adjacentPositions);
-        java.util.Collections.shuffle(shuffled);
+        // Update cooldown with variation for organic feel
+        spreadCooldowns.put(pos, currentTime - (random.nextInt(30))); 
         
-        for (BlockPos targetPos : shuffled) {
-            if (canSpreadTo(world, targetPos)) {
-                // Queue the spread through the performance manager
-                CursedEarthManager.getInstance().queueSpread(world, pos, targetPos, this.getDefaultState());
-                lastSpreadTime.put(pos, currentTime);
+        // Check if we've hit the chunk limit
+        ChunkPos chunkPos = new ChunkPos(pos);
+        int currentCount = chunkCounts.getOrDefault(chunkPos, 0);
+        if (currentCount >= MAX_BLOCKS_PER_CHUNK) {
+            return;
+        }
+        
+        // Get or determine spread direction for this block
+        Direction currentDirection = spreadDirections.get(pos);
+        BlockPos origin = spreadOrigins.getOrDefault(pos, pos);
+        int branchLength = branchLengths.getOrDefault(pos, 0);
+        
+        // Check if we're at the surface
+        boolean isSurface = world.isSkyVisible(pos.up());
+        
+        // Create list of potential spread targets
+        List<SpreadCandidate> candidates = new ArrayList<>();
+        
+        // Determine if we should rotate direction (for more organic patterns)
+        boolean shouldRotate = random.nextFloat() < ROTATION_CHANCE || branchLength > MAX_BRANCH_LENGTH;
+        
+        // Create more dynamic direction list with weighted randomness
+        List<Direction> primaryDirs = new ArrayList<>();
+        List<Direction> secondaryDirs = new ArrayList<>();
+        
+        // If we have momentum, favor directions based on current direction
+        if (currentDirection != null && !shouldRotate) {
+            // Primary direction (forward)
+            primaryDirs.add(currentDirection);
+            
+            // Adjacent directions (45 degrees)
+            if (currentDirection.getAxis() != Direction.Axis.Y) {
+                Direction left = currentDirection.rotateYCounterclockwise();
+                Direction right = currentDirection.rotateYClockwise();
+                if (random.nextFloat() < 0.7f) primaryDirs.add(left);
+                if (random.nextFloat() < 0.7f) primaryDirs.add(right);
+                secondaryDirs.add(currentDirection.getOpposite());
+            }
+        }
+        
+        // Add remaining cardinal directions
+        for (Direction dir : Direction.Type.HORIZONTAL) {
+            if (!primaryDirs.contains(dir) && !secondaryDirs.contains(dir)) {
+                secondaryDirs.add(dir);
+            }
+        }
+        
+        // Shuffle secondary directions for randomness
+        Collections.shuffle(secondaryDirs, new java.util.Random(pos.hashCode() + world.getTime()));
+        
+        // Process primary directions first
+        for (Direction dir : primaryDirs) {
+            BlockPos targetPos = pos.offset(dir);
+            BlockPos surfacePos = findSurfaceBlock(world, targetPos, 3, 5);
+            if (surfacePos != null && canSpreadTo(world, surfacePos)) {
+                float weight = calculateSpreadWeight(world, pos, surfacePos, dir, currentDirection, isSurface, random);
+                weight *= 1.2f; // Bonus for primary directions
+                candidates.add(new SpreadCandidate(surfacePos, dir, weight));
+            }
+        }
+        
+        // Process secondary directions
+        for (Direction dir : secondaryDirs) {
+            BlockPos targetPos = pos.offset(dir);
+            BlockPos surfacePos = findSurfaceBlock(world, targetPos, 3, 5);
+            if (surfacePos != null && canSpreadTo(world, surfacePos)) {
+                float weight = calculateSpreadWeight(world, pos, surfacePos, dir, currentDirection, isSurface, random);
+                candidates.add(new SpreadCandidate(surfacePos, dir, weight));
+            }
+        }
+        
+        // Add diagonal positions with varied distances for organic shape
+        int diagonalDistance = random.nextFloat() < 0.3f ? 2 : 1; // Sometimes reach further
+        List<BlockPos> diagonalPositions = new ArrayList<>();
+        
+        // Close diagonals
+        diagonalPositions.add(pos.north().east());
+        diagonalPositions.add(pos.north().west());
+        diagonalPositions.add(pos.south().east());
+        diagonalPositions.add(pos.south().west());
+        
+        // Far diagonals for more variation
+        if (diagonalDistance > 1) {
+            diagonalPositions.add(pos.north(2).east());
+            diagonalPositions.add(pos.north().east(2));
+            diagonalPositions.add(pos.south(2).west());
+            diagonalPositions.add(pos.south().west(2));
+        }
+        
+        for (BlockPos targetPos : diagonalPositions) {
+            BlockPos surfacePos = findSurfaceBlock(world, targetPos, 3, 5);
+            if (surfacePos != null && canSpreadTo(world, surfacePos)) {
+                Direction primaryDir = Direction.fromVector(targetPos.getX() - pos.getX(), 0, targetPos.getZ() - pos.getZ());
+                float weight = calculateSpreadWeight(world, pos, surfacePos, primaryDir, currentDirection, isSurface, random);
+                weight *= (0.7f + random.nextFloat() * 0.3f); // More variation for diagonals
+                candidates.add(new SpreadCandidate(surfacePos, primaryDir, weight));
+            }
+        }
+        
+        // Sort candidates by weight but add some randomness to avoid too predictable patterns
+        if (!candidates.isEmpty() && random.nextFloat() < 0.3f) {
+            // Sometimes shuffle top candidates for more organic feel
+            int topCount = Math.min(3, candidates.size());
+            List<SpreadCandidate> topCandidates = new ArrayList<>(candidates.subList(0, topCount));
+            Collections.shuffle(topCandidates);
+            for (int i = 0; i < topCount; i++) {
+                candidates.set(i, topCandidates.get(i));
+            }
+        } else {
+            candidates.sort((a, b) -> Float.compare(b.weight, a.weight));
+        }
+        
+        // Determine number of spreads this tick
+        int spreadsThisTick = 0;
+        int maxSpreads = 1;
+        
+        // Multi-spread chances for more organic growth
+        if (random.nextFloat() < MULTI_SPREAD_CHANCE) {
+            if (isSurface && candidates.size() >= 3) {
+                maxSpreads = 2 + (random.nextFloat() < 0.1f ? 1 : 0); // Rarely 3
+            } else if (candidates.size() >= 2) {
+                maxSpreads = 2;
+            }
+        }
+        
+        // Special burst spreading for very organic patterns
+        boolean burstSpread = random.nextFloat() < 0.05f && candidates.size() >= 4;
+        if (burstSpread) {
+            maxSpreads = Math.min(4, candidates.size());
+        }
+        
+        // Track if we're creating new branches
+        boolean createdNewBranch = false;
+        
+        for (int i = 0; i < candidates.size() && spreadsThisTick < maxSpreads; i++) {
+            SpreadCandidate candidate = candidates.get(i);
+            
+            // Use weighted random selection with decay
+            float selectionChance = candidate.weight * (1.0f - (i * 0.15f));
+            if (random.nextFloat() < selectionChance) {
+                // FINAL CHECK: Don't queue spread if target is in active cleansing zone
+                if (CleansingStationBlock.isInActiveCleansingZone(candidate.pos)) {
+                    continue; // Skip this candidate
+                }
                 
-                AncientCurse.LOGGER.debug("Cursed Earth spread queued from {} to {}", pos, targetPos);
-                break; // Only spread to one block per attempt
+                BlockState targetState = ModBlocks.CURSED_EARTH.getDefaultState();
+                
+                // Queue the spread
+                CursedEarthManager.getInstance().queueSpread(world, pos, candidate.pos, targetState);
+                
+                // Update tracking
+                chunkCounts.put(chunkPos, currentCount + spreadsThisTick + 1);
+                
+                // Determine if this is a new branch
+                boolean isNewBranch = createdNewBranch || random.nextFloat() < BRANCH_CHANCE || 
+                                     (candidate.direction != currentDirection && random.nextFloat() < 0.5f);
+                
+                // Set direction for the new block
+                if (candidate.direction != null) {
+                    // Add slight direction variation for more organic growth
+                    Direction finalDirection = candidate.direction;
+                    if (random.nextFloat() < 0.15f && candidate.direction.getAxis() != Direction.Axis.Y) {
+                        // Occasionally shift direction slightly
+                        finalDirection = random.nextBoolean() ? 
+                            candidate.direction.rotateYClockwise() : 
+                            candidate.direction.rotateYCounterclockwise();
+                    }
+                    spreadDirections.put(candidate.pos, finalDirection);
+                    
+                    // Track branch length
+                    if (candidate.direction == currentDirection && !isNewBranch) {
+                        branchLengths.put(candidate.pos, branchLength + 1);
+                    } else {
+                        branchLengths.put(candidate.pos, 1);
+                        createdNewBranch = true;
+                    }
+                    
+                    // Set origin
+                    if (isNewBranch) {
+                        spreadOrigins.put(candidate.pos, candidate.pos); // Start new branch
+                    } else {
+                        spreadOrigins.put(candidate.pos, origin); // Continue current branch
+                    }
+                }
+                
+                // Create sweeping particle effect
+                createSpreadParticles(world, pos, candidate.pos, random);
+                
+                spreadsThisTick++;
             }
         }
     }
     
     /**
-     * Checks if cursed earth can spread to the given position
+     * Calculate weight for spreading to a target position
      */
-    private boolean canSpreadTo(ServerWorld world, BlockPos pos) {
-        // Check if block is valid for spreading
-        BlockState currentState = world.getBlockState(pos);
-        if (!currentState.isOf(Blocks.DIRT) && !currentState.isOf(Blocks.GRASS_BLOCK)) {
-            return false;
-        }
+    private float calculateSpreadWeight(ServerWorld world, BlockPos from, BlockPos to, Direction dir, 
+                                       Direction currentDir, boolean isSurface, Random random) {
+        float weight = 0.4f + random.nextFloat() * 0.2f; // More variable base weight
         
-        // Check if position is protected by a salt circle
-        if (CursedEarthManager.getInstance().isProtectedBySaltCircle(pos)) {
-            return false;
-        }
-        
-        // Check chunk limits
-        ChunkPos chunkPos = new ChunkPos(pos);
-        int currentCount = chunkCurseCount.getOrDefault(chunkPos, 0);
-        if (currentCount >= MAX_CURSED_PER_CHUNK) {
-            return false;
-        }
-        
-        // Check section limits (16x16x16)
-        int sectionX = pos.getX() >> 4;
-        int sectionZ = pos.getZ() >> 4;
-        int sectionY = pos.getY() >> 4;
-        
-        // Count cursed blocks in this section
-        int sectionCount = 0;
-        for (int x = sectionX * 16; x < (sectionX + 1) * 16; x++) {
-            for (int z = sectionZ * 16; z < (sectionZ + 1) * 16; z++) {
-                for (int y = sectionY * 16; y < (sectionY + 1) * 16; y++) {
-                    if (world.getBlockState(new BlockPos(x, y, z)).isOf(this)) {
-                        sectionCount++;
-                        if (sectionCount >= MAX_CURSED_PER_SECTION) {
-                            return false;
-                        }
-                    }
+        // Surface bonus - strongly favor surface spreading
+        if (isSurface && world.isSkyVisible(to.up())) {
+            weight += SURFACE_SPREAD_BONUS;
+            
+            // Extra bonus for connecting surface patches
+            int nearbySurfaceCount = 0;
+            for (Direction d : Direction.Type.HORIZONTAL) {
+                BlockPos check = to.offset(d);
+                if (world.isSkyVisible(check.up())) {
+                    nearbySurfaceCount++;
                 }
+            }
+            weight += nearbySurfaceCount * 0.03f;
+        }
+        
+        // Reduced momentum bonus with variation
+        if (dir != null && dir == currentDir) {
+            weight += MOMENTUM_BONUS * (0.5f + random.nextFloat() * 0.5f);
+        }
+        
+        // Smart height handling for hills and slopes
+        int heightDiff = to.getY() - from.getY();
+        
+        // Check if we're following a slope
+        boolean isFollowingSlope = isPartOfSlope(world, from, to);
+        
+        if (heightDiff == 0) {
+            weight += 0.15f * (0.8f + random.nextFloat() * 0.4f); // Variable preference
+        } else if (Math.abs(heightDiff) == 1) {
+            // Single block height difference is natural for terrain
+            if (isFollowingSlope) {
+                weight += 0.12f + random.nextFloat() * 0.05f; // Bonus for following natural slopes
+            } else {
+                weight += 0.08f;
+            }
+        } else if (Math.abs(heightDiff) == 2) {
+            // Two block difference can happen on steep hills
+            if (isFollowingSlope) {
+                weight += 0.05f;
+            } else {
+                weight -= 0.1f * random.nextFloat(); // Variable penalty
+            }
+        } else {
+            // Large height differences are penalized less if following terrain
+            weight -= isFollowingSlope ? 0.05f * Math.abs(heightDiff) : 0.15f * Math.abs(heightDiff);
+        }
+        
+        // Prefer spreading downhill slightly (water-like flow) with variation
+        if (heightDiff < 0 && heightDiff >= -2) {
+            weight += 0.05f + random.nextFloat() * 0.03f;
+        }
+        
+        // Check if target leads to more spreadable blocks (branching potential)
+        int spreadableSurrounding = 0;
+        int cursedSurrounding = 0;
+        for (Direction checkDir : Direction.Type.HORIZONTAL) {
+            BlockPos checkPos = to.offset(checkDir);
+            if (canSpreadTo(world, checkPos)) {
+                spreadableSurrounding++;
+            } else if (world.getBlockState(checkPos).getBlock() == ModBlocks.CURSED_EARTH) {
+                cursedSurrounding++;
             }
         }
         
+        // Favor spreading to areas with potential but not already surrounded
+        weight += spreadableSurrounding * 0.05f;
+        weight -= cursedSurrounding * 0.08f; // Avoid areas already heavily corrupted
+        
+        // Add clustering tendency - sometimes prefer to fill gaps
+        if (random.nextFloat() < 0.3f && cursedSurrounding >= 2) {
+            weight += 0.15f; // Fill in gaps between corrupted areas
+        }
+        
+        // Distance-based variation for more organic shapes
+        double distance = Math.sqrt(Math.pow(to.getX() - from.getX(), 2) + Math.pow(to.getZ() - from.getZ(), 2));
+        if (distance > 1.5) { // Diagonal or far spread
+            weight *= 0.85f + random.nextFloat() * 0.15f;
+        }
+        
+        // Add final randomness layer for organic feel
+        weight *= 0.8f + random.nextFloat() * 0.4f;
+        
+        return Math.max(0.1f, Math.min(1.0f, weight));
+    }
+    
+    /**
+     * Create particle effects showing spread direction
+     */
+    private void createSpreadParticles(ServerWorld world, BlockPos from, BlockPos to, Random random) {
+        // Create a line of particles from source to target
+        double steps = 5;
+        for (int i = 0; i <= steps; i++) {
+            double progress = i / steps;
+            double x = from.getX() + 0.5 + (to.getX() - from.getX()) * progress;
+            double y = from.getY() + 0.2 + (to.getY() - from.getY()) * progress;
+            double z = from.getZ() + 0.5 + (to.getZ() - from.getZ()) * progress;
+            
+            // Add some randomness
+            x += (random.nextDouble() - 0.5) * 0.2;
+            z += (random.nextDouble() - 0.5) * 0.2;
+            
+            world.addParticle(
+                new DustParticleEffect(CURSED_PARTICLE_COLOR, 0.6f),
+                x, y, z,
+                0, 0.02, 0
+            );
+        }
+    }
+    
+    // Helper class for spread candidates
+    private static class SpreadCandidate {
+        final BlockPos pos;
+        final Direction direction;
+        final float weight;
+        
+        SpreadCandidate(BlockPos pos, Direction direction, float weight) {
+            this.pos = pos;
+            this.direction = direction;
+            this.weight = weight;
+        }
+    }
+    
+    /**
+     * Find the surface block at a given position, checking up and down
+     */
+    private BlockPos findSurfaceBlock(ServerWorld world, BlockPos pos, int maxUp, int maxDown) {
+        // IMPORTANT: We want to REPLACE blocks, not place on top of them
+        // Skip if this position is already cursed earth
+        if (world.getBlockState(pos).getBlock() == ModBlocks.CURSED_EARTH) {
+            return null;
+        }
+        
+        // First check the exact position - can we replace this block?
+        if (canSpreadTo(world, pos)) {
+            return pos;
+        }
+        
+        // Check upward for blocks to replace (like when going up hills)
+        for (int i = 1; i <= maxUp; i++) {
+            BlockPos checkPos = pos.up(i);
+            BlockState state = world.getBlockState(checkPos);
+            
+            // Skip if already cursed earth
+            if (state.getBlock() == ModBlocks.CURSED_EARTH) {
+                continue;
+            }
+            
+            if (canSpreadTo(world, checkPos)) {
+                return checkPos;
+            }
+        }
+        
+        // Check downward for blocks to replace (like when going down into valleys)
+        for (int i = 1; i <= maxDown; i++) {
+            BlockPos checkPos = pos.down(i);
+            BlockState state = world.getBlockState(checkPos);
+            
+            // Skip if already cursed earth
+            if (state.getBlock() == ModBlocks.CURSED_EARTH) {
+                continue;
+            }
+            
+            if (canSpreadTo(world, checkPos)) {
+                return checkPos;
+            }
+            
+            // Stop searching down if we hit something we can't replace
+            if (!state.isAir() && !canSpreadTo(world, checkPos)) {
+                break;
+            }
+        }
+        
+        return null;
+    }
+    
+    /**
+     * Check if movement from one position to another follows natural terrain slope
+     */
+    private boolean isPartOfSlope(ServerWorld world, BlockPos from, BlockPos to) {
+        int heightDiff = to.getY() - from.getY();
+        if (heightDiff == 0) return true;
+        
+        // Check if there's a gradual slope in the direction we're moving
+        Direction moveDir = Direction.fromVector(to.getX() - from.getX(), 0, to.getZ() - from.getZ());
+        if (moveDir == null) return false;
+        
+        // Check the block in the opposite direction to see if we're on a slope
+        BlockPos behindPos = from.offset(moveDir.getOpposite());
+        BlockPos behindSurface = findSurfaceBlock(world, behindPos, 2, 2);
+        
+        if (behindSurface != null) {
+            int behindHeightDiff = from.getY() - behindSurface.getY();
+            // We're on a slope if the height changes consistently
+            return (heightDiff > 0 && behindHeightDiff < 0) || (heightDiff < 0 && behindHeightDiff > 0);
+        }
+        
+        return false;
+    }
+    
+    /**
+     * Find surface for tendril spreading - handles overhangs and cliffs better
+     */
+    private static BlockPos findSurfaceForTendril(ServerWorld world, BlockPos pos) {
+        // Start from a reasonable height
+        int startY = Math.min(world.getTopY() - 1, pos.getY() + 10);
+        BlockPos.Mutable mutable = new BlockPos.Mutable(pos.getX(), startY, pos.getZ());
+        
+        // Search downward for the first SOLID block we can replace
+        for (int y = startY; y >= world.getBottomY(); y--) {
+            mutable.setY(y);
+            BlockState state = world.getBlockState(mutable);
+            
+            // Skip air - we want to find solid blocks to replace
+            if (state.isAir()) {
+                continue;
+            }
+            
+            // Skip if already cursed earth
+            if (state.getBlock() == ModBlocks.CURSED_EARTH) {
+                continue;
+            }
+            
+            // Found a solid block - can we replace it?
+            if (canSpreadToStatic(world, mutable)) {
+                return mutable.toImmutable();
+            }
+            
+            // If we can't spread to this solid block, stop searching
+            break;
+        }
+        
+        return null;
+    }
+    
+    /**
+     * Checks if the curse can spread to the target position
+     * Uses smart detection for any modded blocks
+     */
+    private boolean canSpreadTo(ServerWorld world, BlockPos pos) {
+        // Check for cleansing protection FIRST
+        if (CursedEarthManager.getInstance().isProtectedByCleansingStation(pos)) {
+            return false;
+        }
+        
+        // Check for salt circle protection
+        // TODO: Implement salt circle protection
+        // if (SaltCircleBlock.isProtected(world, pos)) {
+        //     return false;
+        // }
+        
+        BlockState state = world.getBlockState(pos);
+        Block block = state.getBlock();
+        
+        // Don't spread to air or liquids
+        if (state.isAir() || state.isLiquid()) {
+            return false;
+        }
+        
+        // Check cache first for performance
+        Boolean cached = spreadableBlockCache.get(block);
+        if (cached != null) {
+            return cached;
+        }
+        
+        // Smart detection system
+        boolean canSpread = isBlockSpreadable(state, block);
+        
+        // Cache the result
+        spreadableBlockCache.put(block, canSpread);
+        
+        // Debug logging for first time block checks
+        if (canSpread) {
+            // Debug: Block is spreadable
+        }
+        
+        return canSpread;
+    }
+    
+    /**
+     * Smart block detection that works with any mod
+     * Goal: Corrupt almost everything except functional/special blocks
+     */
+    private boolean isBlockSpreadable(BlockState state, Block block) {
+        // BLACKLIST approach - explicitly exclude what we DON'T want to corrupt
+        
+        // Never spread to cursed earth itself
+        if (block == ModBlocks.CURSED_EARTH) {
+            return false;
+        }
+        
+        // Never spread to air or liquids
+        if (state.isAir() || state.isLiquid()) {
+            return false;
+        }
+        
+        // Check if it has a block entity (usually means it's functional)
+        if (state.hasBlockEntity()) {
+            // Some block entities are OK to corrupt (like signs, banners)
+            String blockName = block.getTranslationKey().toLowerCase();
+            if (!blockName.contains("sign") && !blockName.contains("banner") && 
+                !blockName.contains("skull") && !blockName.contains("head")) {
+                return false; // Don't corrupt chests, furnaces, etc.
+            }
+        }
+        
+        // Check hardness - bedrock and similar are indestructible
+        float hardness = block.getHardness();
+        if (hardness < 0 || hardness > 50.0f) {
+            return false; // Bedrock, barriers, etc.
+        }
+        
+        // Explicit blacklist of functional blocks that might not have block entities
+        String blockName = block.getTranslationKey().toLowerCase();
+        String[] blacklist = {
+            "enchant", "anvil", "beacon", "spawner", "conduit", "lodestone",
+            "respawn", "crying", "portal", "gateway", "frame", "chest", "barrel",
+            "hopper", "dropper", "dispenser", "furnace", "blast", "smoker",
+            "brewing", "cauldron", "composter", "lectern", "cartography", "loom",
+            "stonecutter", "grindstone", "smithing", "fletching", "crafting",
+            "shulker", "ender", "command", "structure", "jigsaw", "daylight",
+            "comparator", "repeater", "lever", "button", "pressure", "detector",
+            "piston", "observer", "note", "jukebox", "target", "tnt", "rail",
+            "powered", "activator", "minecart", "boat", "redstone", "torch",
+            "machine", "generator", "engine", "dynamo", "reactor", "turbine",
+            "pipe", "tube", "duct", "cable", "wire", "energy", "power", "rf",
+            "eu", "fe", "mana", "flux", "quantum", "nuclear", "solar", "thermal",
+            "void", "storage", "tank", "cell", "battery", "capacitor", "upgrade"
+        };
+        
+        for (String excluded : blacklist) {
+            if (blockName.contains(excluded)) {
+                return false;
+            }
+        }
+        
+        // Special check for modded functional blocks
+        String namespace = Registries.BLOCK.getId(block).getNamespace();
+        if (!namespace.equals("minecraft") && !namespace.equals(AncientCurse.MOD_ID)) {
+            // For modded blocks, be more careful about technical blocks
+            if (blockName.contains("_on") || blockName.contains("_off") ||
+                blockName.contains("_active") || blockName.contains("_inactive") ||
+                blockName.contains("tier") || blockName.contains("mk")) {
+                return false; // Likely a machine with states
+            }
+        }
+        
+        // Everything else can be corrupted!
+        // This includes:
+        // - All stone types (including obsidian)
+        // - All wood types (logs, planks, etc.)
+        // - All concrete, terracotta, wool
+        // - All glass types
+        // - All metal blocks (iron, gold, etc.)
+        // - All decorative blocks
+        // - All building blocks from any mod
         return true;
     }
     
     /**
-     * Applies Khamsin Curse to players standing on cursed earth
+     * Static version of canSpreadTo for death burst
      */
-    private void applyEntityEffects(ServerWorld world, BlockPos pos) {
-        Box box = new Box(pos).expand(3.0, 1.0, 3.0); // Check 3 blocks around, 1 block up
-        List<PlayerEntity> players = world.getNonSpectatingEntities(PlayerEntity.class, box);
+    public static boolean canSpreadToStatic(ServerWorld world, BlockPos pos) {
+        // Create a temporary instance to use the smart detection
+        CursedEarthBlock temp = (CursedEarthBlock) ModBlocks.CURSED_EARTH;
+        return temp.canSpreadTo(world, pos);
+    }
+    
+    /**
+     * Apply effects to nearby players
+     */
+    private void applyEffectsToNearbyPlayers(ServerWorld world, BlockPos pos) {
+        // Find players within range
+        Box effectBox = new Box(pos).expand(1.5, 1, 1.5);
+        List<PlayerEntity> nearbyPlayers = world.getNonSpectatingEntities(PlayerEntity.class, effectBox);
         
-        for (PlayerEntity player : players) {
+        for (PlayerEntity player : nearbyPlayers) {
+            // Skip creative/spectator players
             if (player.isCreative() || player.isSpectator()) {
                 continue;
             }
             
-            // Check if player is actually standing on cursed earth
-            BlockPos playerPos = player.getBlockPos().down();
-            if (!world.getBlockState(playerPos).isOf(this)) {
-                continue;
-            }
-            
             // Track exposure time
-            java.util.UUID playerId = player.getUuid();
             long currentTime = world.getTime();
-            long exposureStart = playerExposureTime.getOrDefault(playerId, currentTime);
-            long exposureDuration = currentTime - exposureStart;
+            playerExposureTime.put(player, currentTime);
             
-            // Update exposure time
-            playerExposureTime.put(playerId, exposureStart);
+            // Apply curse effect
+            player.addStatusEffect(new StatusEffectInstance(
+                ModStatusEffects.KHAMSIN_CURSE_STAGE_1,
+                200, // 10 seconds
+                0,
+                false,
+                true
+            ));
             
-            // Only check for curse application every second
-            if (currentTime % EXPOSURE_CHECK_INTERVAL != 0) {
-                continue;
+            // Decrease ankh value when standing on cursed earth
+            if (currentTime % 100 == 0) { // Every 5 seconds
+                AnkhManager.decreaseAnkhValue(player, 1);
             }
             
-            // Check if player already has curse
-            boolean hasCurse = false;
-            int currentStage = 0;
-            for (int i = 1; i <= 5; i++) {
-                if (player.hasStatusEffect(ModStatusEffects.getCurseStage(i))) {
-                    hasCurse = true;
-                    currentStage = i;
-                    break;
-                }
-            }
-            
-            // Calculate curse chance based on exposure time
-            if (exposureDuration >= INITIAL_CURSE_THRESHOLD) {
-                float timeMultiplier = Math.min(3.0f, exposureDuration / (float)INITIAL_CURSE_THRESHOLD);
-                float curseChance = BASE_CURSE_CHANCE * timeMultiplier;
-                
-                // Higher chance if already cursed (progression)
-                if (hasCurse && currentStage < 5) {
-                    curseChance *= 1.5f;
-                }
-                
-                if (world.random.nextFloat() < curseChance) {
-                    if (!hasCurse) {
-                        // Apply initial curse
-                        player.addStatusEffect(new StatusEffectInstance(
-                            ModStatusEffects.KHAMSIN_CURSE_STAGE_1, 
-                            600, // 30 seconds
-                            0, 
-                            false, 
-                            true
-                        ));
-                        
-                        // Visual feedback - dark curse particles
-                        for (int i = 0; i < 5; i++) {
-                            world.addParticle(
-                                new DustParticleEffect(new Vector3f(0.5f, 0.2f, 0.6f), 1.0f), // Purple curse particles
-                                player.getX() + (world.random.nextDouble() - 0.5),
-                                player.getY() + 1,
-                                player.getZ() + (world.random.nextDouble() - 0.5),
-                                0, 0.1, 0
-                            );
-                        }
-                        
-                        AncientCurse.LOGGER.debug("Player {} contracted Khamsin Curse from cursed earth exposure", player.getName().getString());
-                    }
-                }
-            }
+            // Apply additional effects based on exposure time
+            // TODO: Implement curse zone checking
+            // if (CurseZoneManager.getInstance().isInCurseZone(player)) {
+            //     // In curse zone, apply stronger effects
+            //     player.addStatusEffect(new StatusEffectInstance(
+            //         StatusEffects.WEAKNESS,
+            //         100, // 5 seconds
+            //         1,
+            //         false,
+            //         true
+            //     ));
+            // }
         }
         
         // Clean up old exposure times
@@ -315,15 +784,18 @@ public class CursedEarthBlock extends BaseAncientCurseBlock {
             }
         }
         
-        // Select a random cursed plant
+        // Select a random cursed plant - includes ALL cursed plants
         Block[] cursedPlants = {
             CursedPlantBlocks.CURSED_SPRIG,
             CursedPlantBlocks.CURSED_SPROUT,
             CursedPlantBlocks.BLOODSHADE_THICKET,
             CursedPlantBlocks.DUAT_FERN,
+            CursedPlantBlocks.VINE_OF_APEP,
+            CursedPlantBlocks.DUAMUTEF_CAP,
             CursedPlantBlocks.ISFET_FROND,
             CursedPlantBlocks.ISFET_SHRUB,
             CursedPlantBlocks.KHEMNU_POD,
+            CursedPlantBlocks.KHERU_MOSS,
             CursedPlantBlocks.MENFET_SPRIG,
             CursedPlantBlocks.REED_OF_SEKHEM,
             CursedPlantBlocks.SUTEKH_COIL
@@ -356,7 +828,7 @@ public class CursedEarthBlock extends BaseAncientCurseBlock {
                 );
             }
             
-            AncientCurse.LOGGER.debug("Spawned {} at {}", selectedPlant.getTranslationKey(), pos);
+            // Debug: Spawned plant
         }
     }
     
@@ -377,7 +849,8 @@ public class CursedEarthBlock extends BaseAncientCurseBlock {
         }
         
         // Select which entity to spawn
-        boolean spawnDjeserhath = random.nextBoolean();
+        // 80% chance for Djeserhath, 20% for Khamsin Spread Small (reduced by 60%)
+        boolean spawnDjeserhath = random.nextFloat() < 0.8f;
         
         if (spawnDjeserhath) {
             // Spawn Djeserhath (cactus eye entity)
@@ -401,7 +874,7 @@ public class CursedEarthBlock extends BaseAncientCurseBlock {
                         );
                     }
                     
-                    AncientCurse.LOGGER.info("Rare spawn: Djeserhath emerged from cursed earth at {}", pos);
+                    // Rare spawn: Djeserhath emerged from cursed earth
                 }
             }
         } else {
@@ -423,7 +896,7 @@ public class CursedEarthBlock extends BaseAncientCurseBlock {
                         );
                     }
                     
-                    AncientCurse.LOGGER.info("Rare spawn: Khamsin Spread Small manifested from cursed earth at {}", pos);
+                    // Rare spawn: Khamsin Spread Small manifested from cursed earth
                 }
             }
         }
@@ -431,79 +904,212 @@ public class CursedEarthBlock extends BaseAncientCurseBlock {
     
     /**
      * Creates a death burst when a player dies
-     * Called from player death event
+     * Creates an organic, sweeping corruption pattern that branches outward
      */
     public static void createDeathBurst(ServerWorld world, BlockPos deathPos) {
+        // Check cooldown
         long currentTime = world.getTime();
-        
-        // Check cooldown for this area
         if (currentTime - deathBurstCooldowns.getOrDefault(deathPos, 0L) < DEATH_BURST_COOLDOWN) {
             return;
         }
         
-        // Create 5x5 burst
-        int radius = DEATH_BURST_SIZE / 2;
-        int blocksCreated = 0;
+        // Update cooldown
+        deathBurstCooldowns.put(deathPos, currentTime);
+        
+        // Find the ground level
+        BlockPos groundPos = deathPos;
+        while (world.getBlockState(groundPos).isAir() && groundPos.getY() > world.getBottomY()) {
+            groundPos = groundPos.down();
+        }
+        
+        // Create multiple tendrils that branch out from death point
+        int numTendrils = 5 + world.random.nextInt(3); // 5-7 tendrils
+        int totalConverted = 0;
+        
+        for (int i = 0; i < numTendrils; i++) {
+            // Random initial direction for each tendril
+            double angle = (Math.PI * 2 * i / numTendrils) + (world.random.nextDouble() - 0.5) * 0.5;
+            Direction primaryDir = getDirectionFromAngle(angle);
+            
+            // Create a tendril
+            totalConverted += createTendril(world, groundPos, primaryDir, DEATH_BURST_SIZE, world.random);
+        }
+        
+        // Create an initial burst at center
+        totalConverted += createCenterBurst(world, groundPos, 3, world.random);
+        
+        // Created death burst with totalConverted blocks
+    }
+    
+    /**
+     * Creates a single tendril of corruption
+     */
+    private static int createTendril(ServerWorld world, BlockPos start, Direction primaryDir, int maxLength, Random random) {
+        int converted = 0;
+        BlockPos current = start;
+        Direction currentDir = primaryDir;
+        
+        for (int length = 0; length < maxLength; length++) {
+            // Smart surface finding that handles cliffs and overhangs
+            BlockPos surfacePos = findSurfaceForTendril(world, current);
+            if (surfacePos == null) {
+                // If no surface found, try to continue in the direction
+                current = current.offset(currentDir);
+                continue;
+            }
+            
+            // Try to convert current position
+            if (canSpreadToStatic(world, surfacePos)) {
+                CursedEarthManager.getInstance().queueSpread(
+                    world, start, surfacePos, 
+                    ModBlocks.CURSED_EARTH.getDefaultState());
+                converted++;
+                
+                // Set spread direction for continued growth
+                spreadDirections.put(surfacePos, currentDir);
+                
+                // Sometimes widen the tendril
+                if (random.nextFloat() < 0.4f) {
+                    // Convert adjacent blocks
+                    for (Direction side : Direction.Type.HORIZONTAL) {
+                        if (side == currentDir || side == currentDir.getOpposite()) continue;
+                        
+                        BlockPos sidePos = surfacePos.offset(side);
+                        BlockPos sideSurface = findSurfaceForTendril(world, sidePos);
+                        
+                        if (sideSurface != null && canSpreadToStatic(world, sideSurface) && random.nextFloat() < 0.6f) {
+                            CursedEarthManager.getInstance().queueSpread(
+                                world, surfacePos, sideSurface, 
+                                ModBlocks.CURSED_EARTH.getDefaultState());
+                            converted++;
+                        }
+                    }
+                }
+                
+                // Sometimes branch off
+                if (length > 3 && random.nextFloat() < 0.3f) {
+                    Direction branchDir = random.nextBoolean() ? currentDir.rotateYClockwise() : currentDir.rotateYCounterclockwise();
+                    converted += createTendril(world, current, branchDir, maxLength - length - 2, random);
+                }
+            }
+            
+            // Move to next position
+            current = current.offset(currentDir);
+            
+            // Sometimes change direction slightly
+            if (random.nextFloat() < 0.3f) {
+                currentDir = random.nextBoolean() ? currentDir.rotateYClockwise() : currentDir.rotateYCounterclockwise();
+            }
+            
+            // Sometimes move diagonally
+            if (random.nextFloat() < 0.2f) {
+                Direction secondDir = random.nextBoolean() ? currentDir.rotateYClockwise() : currentDir.rotateYCounterclockwise();
+                current = current.offset(secondDir);
+            }
+        }
+        
+        return converted;
+    }
+    
+    /**
+     * Creates the initial burst at death location
+     */
+    private static int createCenterBurst(ServerWorld world, BlockPos center, int radius, Random random) {
+        int converted = 0;
         
         for (int x = -radius; x <= radius; x++) {
             for (int z = -radius; z <= radius; z++) {
-                BlockPos targetPos = deathPos.add(x, 0, z);
+                double distance = Math.sqrt(x*x + z*z);
+                if (distance > radius) continue;
                 
-                // Check if we can spread here
-                if (canSpreadToStatic(world, targetPos)) {
-                    world.setBlockState(targetPos, ModBlocks.CURSED_EARTH.getDefaultState());
-                    blocksCreated++;
+                // Higher chance near center
+                if (random.nextFloat() < (1.0 - distance / radius)) {
+                    BlockPos checkPos = center.add(x, 0, z);
+                    BlockPos surfacePos = world.getTopPosition(net.minecraft.world.Heightmap.Type.WORLD_SURFACE, checkPos);
                     
-                    // Update chunk count
-                    ChunkPos chunkPos = new ChunkPos(targetPos);
-                    chunkCurseCount.merge(chunkPos, 1, Integer::sum);
+                    if (canSpreadToStatic(world, surfacePos)) {
+                        CursedEarthManager.getInstance().queueSpread(
+                            world, center, surfacePos, 
+                            ModBlocks.CURSED_EARTH.getDefaultState());
+                        converted++;
+                    }
                 }
             }
         }
         
-        // Set cooldown
-        deathBurstCooldowns.put(deathPos, currentTime);
-        
-        AncientCurse.LOGGER.info("Death burst created {} cursed earth blocks at {}", blocksCreated, deathPos);
+        return converted;
     }
     
     /**
-     * Static version of canSpreadTo for death burst
+     * Convert angle to closest Direction
      */
-    public static boolean canSpreadToStatic(ServerWorld world, BlockPos pos) {
-        BlockState currentState = world.getBlockState(pos);
-        if (!currentState.isOf(Blocks.DIRT) && !currentState.isOf(Blocks.GRASS_BLOCK)) {
-            return false;
+    private static Direction getDirectionFromAngle(double angle) {
+        // Normalize angle to 0-2π
+        while (angle < 0) angle += Math.PI * 2;
+        while (angle > Math.PI * 2) angle -= Math.PI * 2;
+        
+        // Convert to 8 directions
+        int octant = (int)((angle + Math.PI / 8) / (Math.PI / 4)) % 8;
+        
+        return switch (octant) {
+            case 0, 7 -> Direction.EAST;
+            case 1, 2 -> Direction.SOUTH;
+            case 3, 4 -> Direction.WEST;
+            case 5, 6 -> Direction.NORTH;
+            default -> Direction.NORTH;
+        };
+    }
+    
+    /**
+     * Clean up stale cooldowns and counts
+     */
+    public static void cleanupStaleData(ServerWorld world) {
+        if (world.getTime() % 12000 == 0) { // Every 10 minutes
+            long currentTime = world.getTime();
+            
+            // Clean up spread cooldowns
+            spreadCooldowns.entrySet().removeIf(entry -> 
+                currentTime - entry.getValue() > SPREAD_COOLDOWN * 2);
+                
+            // Clean up death burst cooldowns
+            deathBurstCooldowns.entrySet().removeIf(entry -> 
+                currentTime - entry.getValue() > DEATH_BURST_COOLDOWN * 2);
+                
+            // Clear spread cache periodically to handle block changes
+            spreadableBlockCache.clear();
         }
-        
-        // Check if position is protected by a salt circle
-        if (CursedEarthManager.getInstance().isProtectedBySaltCircle(pos)) {
-            return false;
-        }
-        
-        ChunkPos chunkPos = new ChunkPos(pos);
-        int currentCount = chunkCurseCount.getOrDefault(chunkPos, 0);
-        return currentCount < MAX_CURSED_PER_CHUNK;
     }
     
     /**
-     * Gets the current curse count for a chunk
+     * Clears the spreadable block cache
+     * Should be called when blocks are added/removed by mods
      */
-    public static int getChunkCurseCount(ChunkPos chunkPos) {
-        return chunkCurseCount.getOrDefault(chunkPos, 0);
+    public static void clearSpreadableCache() {
+        spreadableBlockCache.clear();
     }
     
     /**
-     * Clears curse count for a chunk (for admin commands)
-     */
-    public static void clearChunkCurseCount(ChunkPos chunkPos) {
-        chunkCurseCount.remove(chunkPos);
-    }
-    
-    /**
-     * Gets total cursed blocks across all chunks
+     * Gets the total number of cursed blocks across all chunks
      */
     public static int getTotalCursedBlocks() {
-        return chunkCurseCount.values().stream().mapToInt(Integer::intValue).sum();
+        return chunkCounts.values().stream().mapToInt(Integer::intValue).sum();
+    }
+    
+    /**
+     * Clears the curse count for a specific chunk
+     */
+    public static void clearChunkCurseCount(ChunkPos chunkPos) {
+        chunkCounts.remove(chunkPos);
+    }
+    
+    /**
+     * Decrements the curse count for a chunk when a block is cleansed
+     */
+    public static void decrementChunkCurseCount(BlockPos pos) {
+        ChunkPos chunkPos = new ChunkPos(pos);
+        int currentCount = chunkCounts.getOrDefault(chunkPos, 0);
+        if (currentCount > 0) {
+            chunkCounts.put(chunkPos, currentCount - 1);
+        }
     }
 }
