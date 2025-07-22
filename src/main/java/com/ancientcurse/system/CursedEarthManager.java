@@ -144,9 +144,7 @@ public class CursedEarthManager {
                 BlockState originalState = world.getBlockState(request.toPos);
                 
                 // Debug logging
-                if (processedSpreads % 50 == 0) {
-                    AncientCurse.LOGGER.debug("Tracking original block at {}: {}", request.toPos, originalState.getBlock());
-                }
+                AncientCurse.LOGGER.debug("Tracking original block at {}: {}", request.toPos, originalState.getBlock());
                 
                 OriginalBlockTracker blockTracker = OriginalBlockTracker.get(world);
                 blockTracker.trackOriginalBlock(request.toPos, originalState);
