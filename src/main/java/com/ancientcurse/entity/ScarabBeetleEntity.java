@@ -360,51 +360,28 @@ public class ScarabBeetleEntity extends SpiderEntity implements GeoEntity {
     }
     
     private <T extends GeoAnimatable> PlayState predicate(AnimationState<T> state) {
-        // Check if entity is dead first
+        // Clean, simple animation controller
+        
         if (this.isDead()) {
             state.getController().setAnimation(RawAnimation.begin()
                 .then("animation.scarab_beetle.death", Animation.LoopType.HOLD_ON_LAST_FRAME));
             return PlayState.CONTINUE;
         }
         
-        // Handle burrowing animations
-        if (isBurrowing) {
-            state.getController().setAnimation(RawAnimation.begin()
-                .then("animation.scarab_beetle.burrow", Animation.LoopType.PLAY_ONCE));
-            return PlayState.CONTINUE;
-        }
-        
-        // Handle emerging animations
-        if (isEmerging) {
-            state.getController().setAnimation(RawAnimation.begin()
-                .then("animation.scarab_beetle.emerge", Animation.LoopType.PLAY_ONCE));
-            return PlayState.CONTINUE;
-        }
-        
-        // Handle attack animation
         if (isAttacking) {
             state.getController().setAnimation(RawAnimation.begin()
                 .then("animation.scarab_beetle.attack", Animation.LoopType.PLAY_ONCE));
             return PlayState.CONTINUE;
-        } 
+        }
         
-        // Handle defensive mode
-        if (isDefensive) {
-            state.getController().setAnimation(RawAnimation.begin()
-                .then("animation.scarab_beetle.defensive", Animation.LoopType.LOOP));
-            return PlayState.CONTINUE;
-        } 
-        
-        // Handle walking animation
-        if (this.isMoving()) {
-            // Use standard animation speed
-            state.getController().setAnimationSpeed(1.0f);
+        // Check for movement - use simple velocity check
+        if (this.getVelocity().horizontalLengthSquared() > 0.01D) {
             state.getController().setAnimation(RawAnimation.begin()
                 .then("animation.scarab_beetle.walk", Animation.LoopType.LOOP));
             return PlayState.CONTINUE;
-        } 
+        }
         
-        // Default to idle animation
+        // Default to idle
         state.getController().setAnimation(RawAnimation.begin()
             .then("animation.scarab_beetle.idle", Animation.LoopType.LOOP));
         return PlayState.CONTINUE;
@@ -489,9 +466,11 @@ public class ScarabBeetleEntity extends SpiderEntity implements GeoEntity {
     
     /**
      * Used by the model to determine if walking animation should play
+     * Uses same threshold as animation controller
      */
     public boolean isMoving() {
-        return this.getVelocity().horizontalLengthSquared() > 0.0025D;
+        // Match animation controller threshold
+        return this.getVelocity().horizontalLengthSquared() > 0.01D;
     }
     
     /**
