@@ -5,8 +5,10 @@ import net.minecraft.block.Blocks;
 import net.minecraft.block.PlantBlock;
 import net.minecraft.block.ShapeContext;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.world.BlockView;
+import net.minecraft.world.WorldAccess;
 import net.minecraft.world.WorldView;
 
 /**
@@ -48,5 +50,15 @@ public class EgyptianPlantBlock extends PlantBlock {
                blockState.isOf(Blocks.RED_SAND) || 
                blockState.isOf(Blocks.DIRT) || 
                blockState.isOf(Blocks.GRASS_BLOCK);
+    }
+    
+    @Override
+    public BlockState getStateForNeighborUpdate(BlockState state, Direction direction, BlockState neighborState, 
+                                               WorldAccess world, BlockPos pos, BlockPos neighborPos) {
+        // If the block below is removed, the plant should break immediately
+        if (!state.canPlaceAt(world, pos)) {
+            return Blocks.AIR.getDefaultState();
+        }
+        return super.getStateForNeighborUpdate(state, direction, neighborState, world, pos, neighborPos);
     }
 }
