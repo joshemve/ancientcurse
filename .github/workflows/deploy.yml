@@ -38,3 +38,14 @@ jobs:
           # Optional: restart the server after uploading the jar
           # ssh -i key.pem -o StrictHostKeyChecking=no "$SSH_USER@$SSH_HOST" \
           #   "powershell -Command \"Stop-Process -Name java -Force; Start-Process 'D:\ancient_curse_server\start.bat'\""
+
+      - name: Notify Discord
+        if: ${{ success() }}
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        run: |
+          JAR_NAME=$(ls build/libs | grep '.jar$' | head -n1)
+          curl -H "Content-Type: application/json" \
+               -X POST \
+               -d "{\"content\": \" New AncientCurse build uploaded: \\\\`$JAR_NAME\\\\`\"}" \
+               $DISCORD_WEBHOOK
