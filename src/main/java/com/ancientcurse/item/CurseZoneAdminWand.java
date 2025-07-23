@@ -1,26 +1,18 @@
 package com.ancientcurse.item;
 
 import com.ancientcurse.AncientCurse;
-import com.ancientcurse.gui.CurseZoneEditorScreen;
-import com.ancientcurse.gui.CurseZoneManagerScreen;
-import com.ancientcurse.gui.CurseZoneMenuScreen;
-import com.ancientcurse.network.CurseZonePackets;
-import com.ancientcurse.util.CurseZoneManager;
-import com.ancientcurse.util.WandSelectionManager;
-import net.minecraft.client.MinecraftClient;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUsageContext;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
-import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;
 
 public class CurseZoneAdminWand extends Item {
@@ -41,7 +33,8 @@ public class CurseZoneAdminWand extends Item {
         if (player.isSneaking()) {
             // Shift + right click in air = clear selection
             if (world.isClient) {
-                WandSelectionManager.clearSelection(player);
+                // Call client-side code through reflection to avoid direct class references
+                callClientClearSelection(player);
             }
             clearSelection(stack);
             player.sendMessage(Text.literal("§eSelection cleared"), true);
@@ -61,11 +54,12 @@ public class CurseZoneAdminWand extends Item {
                 pos2 = BlockPos.fromLong(nbt.getLong("pos2"));
             }
             
-            // Pass the wand and player for clearing selection
-            MinecraftClient.getInstance().setScreen(new CurseZoneMenuScreen(pos1, pos2, () -> {
-                clearSelection(stack);
-                WandSelectionManager.clearSelection(player);
-            }));
+            // Call client-side code through reflection to avoid direct class references
+            final BlockPos finalPos1 = pos1;
+            final BlockPos finalPos2 = pos2;
+            final ItemStack finalStack = stack;
+            
+            callClientOpenMenu(finalPos1, finalPos2, finalStack, player);
         }
         
         return TypedActionResult.pass(stack);
@@ -93,7 +87,7 @@ public class CurseZoneAdminWand extends Item {
             }
             
             if (world.isClient) {
-                WandSelectionManager.setFirstPosition(player, pos);
+                callClientSetFirstPosition(player, pos);
             }
             
             player.sendMessage(Text.literal("§aFirst position set to " + pos.toShortString()), true);
@@ -102,7 +96,7 @@ public class CurseZoneAdminWand extends Item {
             nbt.putLong("pos2", pos.asLong());
             
             if (world.isClient) {
-                WandSelectionManager.setSecondPosition(player, pos);
+                callClientSetSecondPosition(player, pos);
             }
             
             BlockPos pos1 = BlockPos.fromLong(nbt.getLong("pos1"));
@@ -115,8 +109,8 @@ public class CurseZoneAdminWand extends Item {
             nbt.putLong("pos1", pos.asLong());
             
             if (world.isClient) {
-                WandSelectionManager.clearSelection(player);
-                WandSelectionManager.setFirstPosition(player, pos);
+                callClientClearSelection(player);
+                callClientSetFirstPosition(player, pos);
             }
             
             player.sendMessage(Text.literal("§aNew selection started. First position set to " + pos.toShortString()), true);
@@ -143,13 +137,78 @@ public class CurseZoneAdminWand extends Item {
             NbtCompound nbt = stack.getOrCreateNbt();
             if (nbt.contains("pos1")) {
                 BlockPos pos1 = BlockPos.fromLong(nbt.getLong("pos1"));
-                WandSelectionManager.setFirstPosition(player, pos1);
+                callClientSetFirstPosition(player, pos1);
                 
                 if (nbt.contains("pos2")) {
                     BlockPos pos2 = BlockPos.fromLong(nbt.getLong("pos2"));
-                    WandSelectionManager.setSecondPosition(player, pos2);
+                    callClientSetSecondPosition(player, pos2);
                 }
             }
+        }
+    }
+    
+    /**
+     * Safely calls the client-side method to open the menu screen
+     */
+    @Environment(EnvType.CLIENT)
+    private void callClientOpenMenu(BlockPos pos1, BlockPos pos2, ItemStack stack, PlayerEntity player) {
+        // This code only runs on the client side
+        try {
+            // Use reflection to avoid direct class references at class loading time
+            Class<?> clientClass = Class.forName("com.ancientcurse.client.CurseZoneWandClient");
+            java.lang.reflect.Method openMenuMethod = clientClass.getMethod("openCurseZoneMenu", BlockPos.class, BlockPos.class, Runnable.class);
+            
+            openMenuMethod.invoke(null, pos1, pos2, (Runnable)() -> {
+                clearSelection(stack);
+                callClientClearSelection(player);
+            });
+        } catch (Exception e) {
+            AncientCurse.LOGGER.error("Failed to open curse zone menu", e);
+        }
+    }
+    
+    /**
+     * Safely calls the client-side method to clear selection
+     */
+    @Environment(EnvType.CLIENT)
+    private void callClientClearSelection(PlayerEntity player) {
+        // This code only runs on the client side
+        try {
+            Class<?> clientClass = Class.forName("com.ancientcurse.client.CurseZoneWandClient");
+            java.lang.reflect.Method clearMethod = clientClass.getMethod("clearSelection", PlayerEntity.class);
+            clearMethod.invoke(null, player);
+        } catch (Exception e) {
+            AncientCurse.LOGGER.error("Failed to clear selection", e);
+        }
+    }
+    
+    /**
+     * Safely calls the client-side method to set first position
+     */
+    @Environment(EnvType.CLIENT)
+    private void callClientSetFirstPosition(PlayerEntity player, BlockPos pos) {
+        // This code only runs on the client side
+        try {
+            Class<?> clientClass = Class.forName("com.ancientcurse.client.CurseZoneWandClient");
+            java.lang.reflect.Method setFirstMethod = clientClass.getMethod("setFirstPosition", PlayerEntity.class, BlockPos.class);
+            setFirstMethod.invoke(null, player, pos);
+        } catch (Exception e) {
+            AncientCurse.LOGGER.error("Failed to set first position", e);
+        }
+    }
+    
+    /**
+     * Safely calls the client-side method to set second position
+     */
+    @Environment(EnvType.CLIENT)
+    private void callClientSetSecondPosition(PlayerEntity player, BlockPos pos) {
+        // This code only runs on the client side
+        try {
+            Class<?> clientClass = Class.forName("com.ancientcurse.client.CurseZoneWandClient");
+            java.lang.reflect.Method setSecondMethod = clientClass.getMethod("setSecondPosition", PlayerEntity.class, BlockPos.class);
+            setSecondMethod.invoke(null, player, pos);
+        } catch (Exception e) {
+            AncientCurse.LOGGER.error("Failed to set second position", e);
         }
     }
 }
