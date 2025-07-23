@@ -3,7 +3,7 @@ package com.ancientcurse.client;
 import com.ancientcurse.AncientCurse;
 import com.ancientcurse.ModEntities;
 import com.ancientcurse.ModItems;
-import com.ancientcurse.block.ModBlocks;
+import com.ancientcurse.ModBlocks;
 import com.ancientcurse.block.registry.PotteryBlocks;
 import com.ancientcurse.client.model.*;
 import com.ancientcurse.client.render.entity.*;
