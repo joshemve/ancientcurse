@@ -368,22 +368,18 @@ public class ScarabBeetleEntity extends SpiderEntity implements GeoEntity {
             return PlayState.CONTINUE;
         }
         
-        if (isAttacking) {
-            state.getController().setAnimation(RawAnimation.begin()
-                .then("animation.scarab_beetle.attack", Animation.LoopType.PLAY_ONCE));
-            return PlayState.CONTINUE;
-        }
+        // Note: Scarab beetles deal damage on contact, no separate attack animation needed
         
         // Check for movement - use simple velocity check
         if (this.getVelocity().horizontalLengthSquared() > 0.01D) {
             state.getController().setAnimation(RawAnimation.begin()
-                .then("animation.scarab_beetle.walk", Animation.LoopType.LOOP));
+                .then("animation.scarab_beetle.walking", Animation.LoopType.LOOP));
             return PlayState.CONTINUE;
         }
         
         // Default to idle
         state.getController().setAnimation(RawAnimation.begin()
-            .then("animation.scarab_beetle.idle", Animation.LoopType.LOOP));
+            .then("animation.scarab_beetle_idle", Animation.LoopType.LOOP));
         return PlayState.CONTINUE;
     }
     
