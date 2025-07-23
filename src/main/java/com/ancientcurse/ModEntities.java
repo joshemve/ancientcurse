@@ -99,11 +99,11 @@ public class ModEntities {
             .build()
     );
 
-    // Register the Scarab Beetle entity (ground-based beetle with climbing)
+    // Register the Scarab Beetle entity (tameable beetle companion)
     public static final EntityType<ScarabBeetleEntity> SCARAB_BEETLE = Registry.register(
         Registries.ENTITY_TYPE,
         new Identifier(AncientCurse.MOD_ID, "scarab_beetle"),
-        FabricEntityTypeBuilder.create(SpawnGroup.MONSTER, ScarabBeetleEntity::new)
+        FabricEntityTypeBuilder.create(SpawnGroup.CREATURE, ScarabBeetleEntity::new)
             .dimensions(EntityDimensions.fixed(1.0f, 0.8f)) // Wide but low for beetle
             .trackRangeBlocks(48)
             .trackedUpdateRate(3)
