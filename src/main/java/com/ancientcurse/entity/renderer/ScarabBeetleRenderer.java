@@ -65,8 +65,8 @@ public class ScarabBeetleRenderer extends GeoEntityRenderer<ScarabBeetleEntity> 
         /* --- 3. COLOUR MANIPULATION --- */
         float r = red, g = green, b = blue, a = alpha;
 
-        // hurt flash: lastDamageTime set in entity onDamage
-        if (beetle.age - beetle.lastDamageTime < 10) {
+        // hurt flash: use hurtTime which is public and counts down from 10 when hurt
+        if (beetle.hurtTime > 0) {
             r = 1f; g = 0.3f; b = 0.3f;
         }
 
