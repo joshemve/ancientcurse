@@ -37,7 +37,12 @@ public class ThothRenderer extends GeoEntityRenderer<ThothEntity> {
     
     // Cached RenderLayers to avoid map lookups each frame
     private static final RenderLayer RENDER_LAYER_GREEN = RenderLayer.getEntityTranslucent(TEXTURE_GREEN);
-    private static final RenderLayer RENDER_LAYER_EYES = RenderLayer.getEyes(EYES_TEXTURE);
+    // Do NOT cache the eyes RenderLayer statically because the underlying shader may not be loaded yet at
+    // class-init time (causes NPE inside RenderPhase.startDrawing). Generate it lazily whenever it is needed.
+    // private static final RenderLayer getEyesLayer() = RenderLayer.getEyes(EYES_TEXTURE);
+    private static RenderLayer getEyesLayer() {
+        return RenderLayer.getEyes(EYES_TEXTURE);
+    }
     
     // Attack state constants (matching ThothEntity)
     private static final int ATTACK_NONE = 0;
@@ -208,11 +213,11 @@ public class ThothRenderer extends GeoEntityRenderer<ThothEntity> {
             }
             
             // Render multiple layers for soft glow effect
-            VertexConsumer eyesBuffer = bufferSource.getBuffer(RENDER_LAYER_EYES);
+            VertexConsumer eyesBuffer = bufferSource.getBuffer(getEyesLayer());
             
             // Layer 1: Core eye glow (brightest)
             this.getRenderer().reRender(
-                bakedModel, poseStack, bufferSource, animatable, RENDER_LAYER_EYES,
+                bakedModel, poseStack, bufferSource, animatable, getEyesLayer(),
                 eyesBuffer, partialTick, 0xF000F0, packedOverlay,
                 r, g, b, finalGlow
             );
@@ -221,7 +226,7 @@ public class ThothRenderer extends GeoEntityRenderer<ThothEntity> {
             poseStack.push();
             poseStack.scale(1.05f, 1.05f, 1.05f);
             this.getRenderer().reRender(
-                bakedModel, poseStack, bufferSource, animatable, RENDER_LAYER_EYES,
+                bakedModel, poseStack, bufferSource, animatable, getEyesLayer(),
                 eyesBuffer, partialTick, 0xF000F0, packedOverlay,
                 r, g, b, finalGlow * 0.6f
             );
@@ -231,7 +236,7 @@ public class ThothRenderer extends GeoEntityRenderer<ThothEntity> {
             poseStack.push();
             poseStack.scale(1.1f, 1.1f, 1.1f);
             this.getRenderer().reRender(
-                bakedModel, poseStack, bufferSource, animatable, RENDER_LAYER_EYES,
+                bakedModel, poseStack, bufferSource, animatable, getEyesLayer(),
                 eyesBuffer, partialTick, 0xF000F0, packedOverlay,
                 r, g, b, finalGlow * 0.3f
             );

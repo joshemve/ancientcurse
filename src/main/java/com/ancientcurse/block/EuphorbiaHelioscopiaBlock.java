@@ -44,6 +44,6 @@ public class EuphorbiaHelioscopiaBlock extends Block {
 
     @Override
     public BlockState getStateForNeighborUpdate(BlockState state, Direction direction, BlockState neighborState, WorldAccess world, BlockPos pos, BlockPos neighborPos) {
-        return !state.canPlaceAt(world, pos) ? null : super.getStateForNeighborUpdate(state, direction, neighborState, world, pos, neighborPos);
+        return !state.canPlaceAt(world, pos) ? Blocks.AIR.getDefaultState() : super.getStateForNeighborUpdate(state, direction, neighborState, world, pos, neighborPos);
     }
 } 
