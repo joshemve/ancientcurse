@@ -54,11 +54,9 @@ public class ScarabBeetleRenderer extends GeoEntityRenderer<ScarabBeetleEntity> 
         /* --- 2. COLOUR MANIPULATION --- */
         float r = red, g = green, b = blue, a = alpha;
 
-        // hurt flash: use hurtTime which is public and counts down from 10 when hurt
-        if (beetle.hurtTime > 0) {
-            r = 1f; g = 0.3f; b = 0.3f;
-        }
-
+        // Remove hurt color tint - let Minecraft handle it with overlay
+        // The overlay parameter already handles the red flash when hurt
+        
         // Tamed beetles have a slight golden tint
         if (beetle.isTamed()) {
             r = clamp(r + 0.1f);

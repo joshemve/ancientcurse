@@ -1,6 +1,7 @@
 package com.ancientcurse.item;
 
 import com.ancientcurse.AncientCurse;
+import com.ancientcurse.network.CurseZonePackets;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.entity.player.PlayerEntity;
@@ -8,6 +9,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUsageContext;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
@@ -37,6 +39,12 @@ public class CurseZoneAdminWand extends Item {
                 callClientClearSelection(player);
             }
             clearSelection(stack);
+            
+            // Send packet to sync selection clear
+            if (!world.isClient && world instanceof ServerWorld serverWorld) {
+                CurseZonePackets.sendWandSelectionClear(serverWorld, player);
+            }
+            
             player.sendMessage(Text.literal("§eSelection cleared"), true);
             return TypedActionResult.success(stack);
         }
@@ -90,6 +98,11 @@ public class CurseZoneAdminWand extends Item {
                 callClientSetFirstPosition(player, pos);
             }
             
+            // Send packet to sync selection
+            if (!world.isClient && world instanceof ServerWorld serverWorld) {
+                CurseZonePackets.sendWandSelectionSync(serverWorld, player, pos, null);
+            }
+            
             player.sendMessage(Text.literal("§aFirst position set to " + pos.toShortString()), true);
         } else if (!nbt.contains("pos2")) {
             // Set second position
@@ -100,6 +113,12 @@ public class CurseZoneAdminWand extends Item {
             }
             
             BlockPos pos1 = BlockPos.fromLong(nbt.getLong("pos1"));
+            
+            // Send packet to sync selection
+            if (!world.isClient && world instanceof ServerWorld serverWorld) {
+                CurseZonePackets.sendWandSelectionSync(serverWorld, player, pos1, pos);
+            }
+            
             player.sendMessage(Text.literal("§aSecond position set to " + pos.toShortString()), true);
             player.sendMessage(Text.literal("§eArea selected from " + pos1.toShortString() + " to " + pos.toShortString()), true);
             player.sendMessage(Text.literal("§eRight-click in air to configure the zone"), true);
@@ -111,6 +130,11 @@ public class CurseZoneAdminWand extends Item {
             if (world.isClient) {
                 callClientClearSelection(player);
                 callClientSetFirstPosition(player, pos);
+            }
+            
+            // Send packet to sync selection
+            if (!world.isClient && world instanceof ServerWorld serverWorld) {
+                CurseZonePackets.sendWandSelectionSync(serverWorld, player, pos, null);
             }
             
             player.sendMessage(Text.literal("§aNew selection started. First position set to " + pos.toShortString()), true);

@@ -168,6 +168,9 @@ public class ModItemGroup {
                 safeAdd(entries, ModBlocks.POLISHED_DESHRET_STONE);
                 safeAdd(entries, ModBlocks.SPOTTED_DESHRET);
                 
+                // Construction blocks (decorative building materials)
+                safeAdd(entries, com.ancientcurse.block.registry.ConstructionBlocks.SANDSTONE_BRICK_TILES);
+                
                 // Rock blocks
                 safeAdd(entries, ModBlocks.SMALL_ROCK);
                 safeAdd(entries, ModBlocks.MEDIUM_ROCK);

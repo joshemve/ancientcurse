@@ -2,7 +2,7 @@ package com.ancientcurse.gui;
 
 import com.ancientcurse.client.CurseZoneClientCache;
 import com.ancientcurse.network.CurseZonePackets;
-import com.ancientcurse.util.CurseZoneArea;
+import com.ancientcurse.client.CurseZoneClientCache.ZoneAreaData;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
@@ -42,8 +42,8 @@ public class CurseZoneManagerScreen extends Screen {
         this.addDrawableChild(this.zoneList);
         
         // Populate the list
-        for (CurseZoneArea area : CurseZoneClientCache.getAllAreas()) {
-            this.zoneList.addEntry(new ZoneListEntry(area));
+        for (var entry : CurseZoneClientCache.getAllAreas().entrySet()) {
+            this.zoneList.addEntry(new ZoneListEntry(entry.getKey(), entry.getValue()));
         }
         
         // Edit button
@@ -123,15 +123,15 @@ public class CurseZoneManagerScreen extends Screen {
     private void editSelectedZone() {
         ZoneListEntry selected = this.zoneList.getSelectedOrNull();
         if (selected != null) {
-            CurseZoneArea area = selected.getArea();
+            ZoneAreaData area = selected.getArea();
             this.client.setScreen(new CurseZoneEditorScreen(
-                area.getId(), 
-                area.getMin(), 
-                area.getMax(),
-                area.getZoneName(),
-                area.getKhamsinLevel(),
-                area.getAnkhDrainRate(),
-                area.isEffectsEnabled()
+                selected.getId(), 
+                area.min, 
+                area.max,
+                area.zoneName,
+                area.khamsinLevel,
+                area.ankhDrainRate,
+                area.effectsEnabled
             ));
         }
     }
@@ -140,13 +140,13 @@ public class CurseZoneManagerScreen extends Screen {
         ZoneListEntry selected = this.zoneList.getSelectedOrNull();
         if (selected != null) {
             // Send delete request to server
-            CurseZonePackets.sendDeleteZoneRequest(selected.getArea().getId());
+            CurseZonePackets.sendDeleteZoneRequest(selected.getId());
             
             // Remove from list by recreating it
             this.zoneList.clear();
-            for (CurseZoneArea area : CurseZoneClientCache.getAllAreas()) {
-                if (!area.getId().equals(selected.getArea().getId())) {
-                    this.zoneList.addEntry(new ZoneListEntry(area));
+            for (var entry : CurseZoneClientCache.getAllAreas().entrySet()) {
+                if (!entry.getKey().equals(selected.getId())) {
+                    this.zoneList.addEntry(new ZoneListEntry(entry.getKey(), entry.getValue()));
                 }
             }
             updateButtonStates();
@@ -156,11 +156,11 @@ public class CurseZoneManagerScreen extends Screen {
     private void teleportToSelectedZone() {
         ZoneListEntry selected = this.zoneList.getSelectedOrNull();
         if (selected != null && this.client.player != null) {
-            CurseZoneArea area = selected.getArea();
+            ZoneAreaData area = selected.getArea();
             BlockPos center = new BlockPos(
-                (area.getMin().getX() + area.getMax().getX()) / 2,
-                area.getMin().getY(),
-                (area.getMin().getZ() + area.getMax().getZ()) / 2
+                (area.min.getX() + area.max.getX()) / 2,
+                area.min.getY(),
+                (area.min.getZ() + area.max.getZ()) / 2
             );
             
             // Send teleport command
@@ -215,13 +215,19 @@ public class CurseZoneManagerScreen extends Screen {
     
     // Zone list entry
     private class ZoneListEntry extends AlwaysSelectedEntryListWidget.Entry<ZoneListEntry> {
-        private final CurseZoneArea area;
+        private final String id;
+        private final ZoneAreaData area;
         
-        public ZoneListEntry(CurseZoneArea area) {
+        public ZoneListEntry(String id, ZoneAreaData area) {
+            this.id = id;
             this.area = area;
         }
         
-        public CurseZoneArea getArea() {
+        public String getId() {
+            return id;
+        }
+        
+        public ZoneAreaData getArea() {
             return area;
         }
         
@@ -234,12 +240,12 @@ public class CurseZoneManagerScreen extends Screen {
             }
             
             // Zone name
-            String displayName = area.getZoneName().isEmpty() ? Text.translatable("gui.ancientcurse.curse_zone_manager.unnamed").getString() : area.getZoneName();
+            String displayName = area.zoneName.isEmpty() ? Text.translatable("gui.ancientcurse.curse_zone_manager.unnamed").getString() : area.zoneName;
             context.drawTextWithShadow(textRenderer, displayName, x + 5, y + 2, 0xFFFFFF);
             
             // Zone info on second line
             String info = String.format("Khamsin: %d, Ankh: %d/min", 
-                area.getKhamsinLevel(), area.getAnkhDrainRate());
+                area.khamsinLevel, area.ankhDrainRate);
             context.drawTextWithShadow(textRenderer, info, x + 5, y + 12, 0xAAAAAA);
             
             // Don't draw bounds if they would overlap with the info text
@@ -247,7 +253,7 @@ public class CurseZoneManagerScreen extends Screen {
             if (x + 10 + infoWidth < x + entryWidth - 140) {
                 // Zone bounds on the right
                 String bounds = String.format("%s to %s", 
-                    area.getMin().toShortString(), area.getMax().toShortString());
+                    area.min.toShortString(), area.max.toShortString());
                 int boundsWidth = textRenderer.getWidth(bounds);
                 context.drawTextWithShadow(textRenderer, bounds, x + entryWidth - boundsWidth - 5, y + 12, 0x888888);
             }
@@ -255,7 +261,7 @@ public class CurseZoneManagerScreen extends Screen {
         
         @Override
         public Text getNarration() {
-            return Text.literal(area.getZoneName());
+            return Text.literal(area.zoneName);
         }
         
         @Override

@@ -1,5 +1,6 @@
 package com.ancientcurse.entity;
 
+import com.ancientcurse.AncientCurse;
 import com.ancientcurse.ModItems;
 import net.minecraft.entity.EntityData;
 import net.minecraft.entity.EntityType;
@@ -41,6 +42,7 @@ import software.bernie.geckolib.animatable.GeoEntity;
 import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
 import software.bernie.geckolib.core.animatable.GeoAnimatable;
 import software.bernie.geckolib.core.animation.*;
+import software.bernie.geckolib.core.animation.AnimatableManager;
 import software.bernie.geckolib.core.object.PlayState;
 import software.bernie.geckolib.util.GeckoLibUtil;
 
@@ -277,7 +279,8 @@ public class ScarabBeetleEntity extends TameableEntity implements GeoEntity {
     /* ---------- GECKOLIB ANIMATION - UPDATED WITH NEW ANIMATIONS ---------- */
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
-        controllers.add(new AnimationController<>(this, "main_controller", 2, this::predicate));
+        // Use 5 tick transition time for smoother animation changes
+        controllers.add(new AnimationController<>(this, "main_controller", 5, this::predicate));
     }
     
     private <T extends GeoAnimatable> PlayState predicate(AnimationState<T> state) {
@@ -304,20 +307,31 @@ public class ScarabBeetleEntity extends TameableEntity implements GeoEntity {
         }
         
         // Attack animations
-        if (isAttacking && attackCooldown > 20) {
-            // Use attack2 for alternate attacks
-            if (this.getRandom().nextBoolean()) {
-                state.getController().setAnimation(RawAnimation.begin()
-                    .then("animation.scarab_beetle.attack2", Animation.LoopType.PLAY_ONCE));
+        if (isAttacking) {
+            // Play attack animation only at the beginning of the attack
+            if (attackCooldown > 20) {
+                // Use attack2 for alternate attacks
+                if (this.getRandom().nextBoolean()) {
+                    state.getController().setAnimation(RawAnimation.begin()
+                        .then("animation.scarab_beetle.attack2", Animation.LoopType.PLAY_ONCE));
+                } else {
+                    state.getController().setAnimation(RawAnimation.begin()
+                        .then("animation.scarab_beetle.attack", Animation.LoopType.PLAY_ONCE));
+                }
             } else {
+                // After attack animation, return to idle while still in attack cooldown
                 state.getController().setAnimation(RawAnimation.begin()
-                    .then("animation.scarab_beetle.attack", Animation.LoopType.PLAY_ONCE));
+                    .then("animation.scarab_beetle.idle", Animation.LoopType.LOOP));
             }
             return PlayState.CONTINUE;
         }
         
-        // Check for movement
-        if (this.getVelocity().horizontalLengthSquared() > 0.01D) {
+        // Check for movement - use state.isMoving() which is more reliable
+        if (state.isMoving()) {
+            // Debug: log when walking animation should play
+            if (this.age % 20 == 0 && !this.getWorld().isClient) {
+                AncientCurse.LOGGER.debug("Scarab beetle walking - velocity: " + this.getVelocity().horizontalLengthSquared());
+            }
             state.getController().setAnimation(RawAnimation.begin()
                 .then("animation.scarab_beetle.walking", Animation.LoopType.LOOP));
             return PlayState.CONTINUE;
@@ -513,6 +527,7 @@ public class ScarabBeetleEntity extends TameableEntity implements GeoEntity {
     public AnimatableInstanceCache getAnimatableInstanceCache() {
         return this.cache;
     }
+    
     
     /* ---------- SOUNDS ---------- */
     @Override

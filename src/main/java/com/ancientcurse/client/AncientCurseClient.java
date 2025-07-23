@@ -6,8 +6,10 @@ import com.ancientcurse.ModItems;
 import com.ancientcurse.ModBlocks;
 import com.ancientcurse.block.registry.PotteryBlocks;
 import com.ancientcurse.client.model.*;
+import com.ancientcurse.client.render.*;
 import com.ancientcurse.client.render.entity.*;
 import com.ancientcurse.client.render.item.SerpentStaffRenderer;
+import com.ancientcurse.client.color.RockColorProvider;
 import com.ancientcurse.entity.model.*;
 import com.ancientcurse.entity.renderer.*;
 import com.ancientcurse.network.CurseZonePackets;
@@ -55,6 +57,9 @@ public class AncientCurseClient implements ClientModInitializer {
     public void onInitializeClient() {
         AncientCurse.LOGGER.info("Initializing Ancient Curse Client");
         
+        // Register entity renderers FIRST before anything else
+        registerEntityRenderers();
+        
         // Register render layers for transparent blocks
         registerRenderLayers();
         
@@ -83,9 +88,6 @@ public class AncientCurseClient implements ClientModInitializer {
             // Return -1 for no tinting (allows transparency to work correctly)
             return -1;
         }, ModItems.PHARAOHS_BLOOD);
-        
-        // Register entity renderers
-        registerEntityRenderers();
         
         // Register tooltip callback to add "Ancient Curse" to all mod items
         // TooltipHelper.registerTooltipCallback(); - Removed, Minecraft already shows mod ID
@@ -196,8 +198,8 @@ public class AncientCurseClient implements ClientModInitializer {
      * Register color providers for blocks and items
      */
     private void registerColorProviders() {
-        // Rock color providers are registered in RockColorProvider
-        RockColorProvider.register();
+        // Rock color providers are not currently used
+        // TODO: If rock blocks need color providers in the future, register them here
         
         AncientCurse.LOGGER.info("Registered color providers");
     }

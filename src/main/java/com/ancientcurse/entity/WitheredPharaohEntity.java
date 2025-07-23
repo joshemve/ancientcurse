@@ -1,4 +1,5 @@
 package com.ancientcurse.entity;
+import com.ancientcurse.AncientCurse;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
@@ -283,13 +284,13 @@ public class WitheredPharaohEntity extends HostileEntity implements GeoEntity {
             
             // Log every second during death animation (for debugging)
             if (!this.getWorld().isClient && this.deathTime % 20 == 0) {
-                System.out.println("Death animation progress: " + this.deathTime + "/193 ticks");
+                AncientCurse.LOGGER.debug("Death animation progress: " + this.deathTime + "/193 ticks");
             }
             
             // After death animation finishes (9.625 seconds = ~193 ticks), actually remove entity
             if (this.deathTime >= 193) {
                 if (!this.getWorld().isClient) {
-                    System.out.println("Death animation complete, removing entity");
+                    AncientCurse.LOGGER.debug("Death animation complete, removing entity");
                     
                     // Final explosion of particles
                     if (this.getWorld() instanceof ServerWorld) {
@@ -337,6 +338,10 @@ public class WitheredPharaohEntity extends HostileEntity implements GeoEntity {
                     double staffTipZ = this.getZ() + lookVec.z * staffLength;
                     
                     // Create wither skull projectile
+                    if (this.magicAttackTarget == null || !this.magicAttackTarget.isAlive()) {
+                        this.magicAttackTarget = null;
+                        return;
+                    }
                     double d = this.magicAttackTarget.getX() - this.getX();
                     double e = this.magicAttackTarget.getBodyY(0.5D) - this.getBodyY(0.5D);
                     double f = this.magicAttackTarget.getZ() - this.getZ();
