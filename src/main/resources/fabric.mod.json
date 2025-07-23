@@ -22,7 +22,7 @@
       "com.ancientcurse.AncientCurse"
     ],
     "client": [
-      "com.ancientcurse.AncientCurseClient"
+      "com.ancientcurse.client.AncientCurseClient"
     ],
     "preLaunch": [
       "com.ancientcurse.core.AncientCursePrelaunch"
