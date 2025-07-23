@@ -25,20 +25,21 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew build
 
-      - name: Upload to server
-        env:
-          SSH_HOST:   ${{ secrets.SSH_HOST }}
-          SSH_USER:   ${{ secrets.SSH_USER }}
-          SSH_KEY:    ${{ secrets.SSH_KEY }}
-          TARGET_DIR: ${{ secrets.TARGET_DIR }}
-        run: |
-          echo "$SSH_KEY" > key.pem
-          chmod 600 key.pem
-          JAR=$(ls build/libs | grep '.jar$' | head -n1)
-          scp -i key.pem -o StrictHostKeyChecking=no "build/libs/$JAR" "$SSH_USER@$SSH_HOST:$TARGET_DIR/ancientcurse.jar"
-          # Optional: restart the server after uploading the jar
-          # ssh -i key.pem -o StrictHostKeyChecking=no "$SSH_USER@$SSH_HOST" \
-          #   "powershell -Command \"Stop-Process -Name java -Force; Start-Process 'D:\ancient_curse_server\start.bat'\""
+      # Temporarily disabled due to SSH connection timeout
+      # - name: Upload to server
+      #   env:
+      #     SSH_HOST:   ${{ secrets.SSH_HOST }}
+      #     SSH_USER:   ${{ secrets.SSH_USER }}
+      #     SSH_KEY:    ${{ secrets.SSH_KEY }}
+      #     TARGET_DIR: ${{ secrets.TARGET_DIR }}
+      #   run: |
+      #     echo "$SSH_KEY" > key.pem
+      #     chmod 600 key.pem
+      #     JAR=$(ls build/libs | grep '.jar$' | head -n1)
+      #     scp -i key.pem -o StrictHostKeyChecking=no "build/libs/$JAR" "$SSH_USER@$SSH_HOST:$TARGET_DIR/ancientcurse.jar"
+      #     # Optional: restart the server after uploading the jar
+      #     # ssh -i key.pem -o StrictHostKeyChecking=no "$SSH_USER@$SSH_HOST" \
+      #     #   "powershell -Command \"Stop-Process -Name java -Force; Start-Process 'D:\ancient_curse_server\start.bat'\""
 
       - name: Notify Discord
         if: ${{ success() }}
