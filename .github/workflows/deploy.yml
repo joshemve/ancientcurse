@@ -46,13 +46,15 @@ jobs:
         run: |
           echo "Available JAR files:"
           ls -la build/libs/
-          echo "Filtering for main JAR..."
-          JAR_NAME=$(ls build/libs | grep '.jar$' | grep -v sources | grep -v javadoc | sort | tail -n1)
+          echo "Looking for main JAR (excluding sources and javadoc)..."
+          # First try to find the main JAR by excluding sources/javadoc
+          JAR_NAME=$(ls build/libs/ | grep '\.jar$' | grep -v '\-sources\.' | grep -v '\-javadoc\.' | head -n1)
           if [ -z "$JAR_NAME" ]; then
-            echo "No main JAR found, using first available JAR"
-            JAR_NAME=$(ls build/libs | grep '.jar$' | head -n1)
+            echo "No main JAR found, falling back to any JAR"
+            JAR_NAME=$(ls build/libs/ | grep '\.jar$' | head -n1)
           fi
           echo "Selected JAR: $JAR_NAME"
+          echo "Full path: build/libs/$JAR_NAME"
           curl -F "content=🚀 New AncientCurse build ready! File: $JAR_NAME" \
                -F "file=@build/libs/$JAR_NAME" \
                "$DISCORD_WEBHOOK"
