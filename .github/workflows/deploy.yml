@@ -25,29 +25,27 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew build
 
-      # Temporarily disabled due to SSH connection timeout
-      # - name: Upload to server
+      # Server upload disabled due to router/ISP blocking TCP protocols
+      # - name: Upload to server via FTP
       #   env:
-      #     SSH_HOST:   ${{ secrets.SSH_HOST }}
-      #     SSH_USER:   ${{ secrets.SSH_USER }}
-      #     SSH_KEY:    ${{ secrets.SSH_KEY }}
+      #     FTP_HOST: ${{ secrets.SSH_HOST }}
+      #     FTP_USER: ${{ secrets.SSH_USER }}
+      #     FTP_PASS: ${{ secrets.FTP_PASS }}
       #     TARGET_DIR: ${{ secrets.TARGET_DIR }}
       #   run: |
-      #     echo "$SSH_KEY" > key.pem
-      #     chmod 600 key.pem
       #     JAR=$(ls build/libs | grep '.jar$' | head -n1)
-      #     scp -i key.pem -o StrictHostKeyChecking=no "build/libs/$JAR" "$SSH_USER@$SSH_HOST:$TARGET_DIR/ancientcurse.jar"
-      #     # Optional: restart the server after uploading the jar
-      #     # ssh -i key.pem -o StrictHostKeyChecking=no "$SSH_USER@$SSH_HOST" \
-      #     #   "powershell -Command \"Stop-Process -Name java -Force; Start-Process 'D:\ancient_curse_server\start.bat'\""
+      #     echo "Uploading $JAR via FTP to $FTP_HOST"
+      #     curl -T "build/libs/$JAR" \
+      #          --user "$FTP_USER:$FTP_PASS" \
+      #          "ftp://$FTP_HOST/$TARGET_DIR/ancientcurse.jar"
 
-      - name: Notify Discord
+      - name: Upload JAR to Discord
         if: ${{ success() }}
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
         run: |
           JAR_NAME=$(ls build/libs | grep '.jar$' | head -n1)
-          curl -H "Content-Type: application/json" \
-               -X POST \
-               -d "{\"content\": \" New AncientCurse build uploaded: \\\\`$JAR_NAME\\\\`\"}" \
-               $DISCORD_WEBHOOK
+          echo "Uploading $JAR_NAME to Discord..."
+          curl -F "content=🚀 New AncientCurse build ready!" \
+               -F "file=@build/libs/$JAR_NAME" \
+               "$DISCORD_WEBHOOK"
