@@ -6,6 +6,7 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.SpawnReason;
 import net.minecraft.entity.passive.TameableEntity;
 import net.minecraft.entity.passive.AnimalEntity;
+import net.minecraft.entity.passive.PassiveEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.data.DataTracker;
 import net.minecraft.entity.data.TrackedData;
@@ -487,7 +488,7 @@ public class ScarabBeetleEntity extends TameableEntity implements GeoEntity {
     public boolean isAttacking() { return isAttacking; }
     
     @Override
-    public AnimalEntity createChild(ServerWorld world, AnimalEntity mate) {
+    public ScarabBeetleEntity createChild(ServerWorld world, PassiveEntity mate) {
         return null; // Scarab beetles don't breed for now
     }
     
@@ -498,11 +499,6 @@ public class ScarabBeetleEntity extends TameableEntity implements GeoEntity {
     public boolean isMoving() {
         // Match animation controller threshold
         return this.getVelocity().horizontalLengthSquared() > 0.01D;
-    }
-    
-    @Override
-    public boolean isClimbing() {
-        return this.getDataTracker().get(CLIMBING);
     }
     
     @Override

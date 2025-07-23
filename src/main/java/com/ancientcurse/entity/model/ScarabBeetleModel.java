@@ -21,7 +21,7 @@ public class ScarabBeetleModel extends GeoModel<ScarabBeetleEntity> {
     // All animations handled by GeckoLib from JSON files
 
     @Override public Identifier getModelResource(ScarabBeetleEntity e) { return MODEL; }
-    @Override public Identifier getTextureResource(ScarabBeetleEntity e) { return e.isGolden() ? TEXTURE_GOLD : TEXTURE_NORMAL; }
+    @Override public Identifier getTextureResource(ScarabBeetleEntity e) { return e.isTamed() ? TEXTURE_GOLD : TEXTURE_NORMAL; }
     @Override public Identifier getAnimationResource(ScarabBeetleEntity e) { return ANIM; }
 
     @Override
