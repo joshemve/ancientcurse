@@ -14,14 +14,13 @@ public class ScarabBeetleModel extends GeoModel<ScarabBeetleEntity> {
 
     /* ------------------ RESOURCES ------------------ */
     private static final Identifier MODEL = new Identifier(AncientCurse.MOD_ID, "geo/scarab_beetle.geo.json");
-    private static final Identifier TEXTURE_NORMAL = new Identifier(AncientCurse.MOD_ID, "textures/entity/scarab_beetle.png");
-    private static final Identifier TEXTURE_GOLD = new Identifier(AncientCurse.MOD_ID, "textures/entity/scarab_beetle_golden.png");
+    private static final Identifier TEXTURE = new Identifier(AncientCurse.MOD_ID, "textures/entity/scarab_beetle.png");
     private static final Identifier ANIM = new Identifier(AncientCurse.MOD_ID, "animations/scarab_beetle.animation.json");
 
     // All animations handled by GeckoLib from JSON files
 
     @Override public Identifier getModelResource(ScarabBeetleEntity e) { return MODEL; }
-    @Override public Identifier getTextureResource(ScarabBeetleEntity e) { return e.isGolden() ? TEXTURE_GOLD : TEXTURE_NORMAL; }
+    @Override public Identifier getTextureResource(ScarabBeetleEntity e) { return TEXTURE; }
     @Override public Identifier getAnimationResource(ScarabBeetleEntity e) { return ANIM; }
 
     @Override

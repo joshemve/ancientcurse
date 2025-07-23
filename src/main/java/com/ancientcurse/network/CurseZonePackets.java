@@ -6,6 +6,7 @@ import com.ancientcurse.util.CurseZoneData;
 import com.ancientcurse.util.CurseZoneManager;
 import com.ancientcurse.util.CurseZoneAreaManager;
 import com.ancientcurse.util.CurseZoneArea;
+import com.ancientcurse.util.WandSelectionManager;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
@@ -19,8 +20,10 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
+import java.util.UUID;
 
 public class CurseZonePackets {
     public static final Identifier UPDATE_ZONE = new Identifier(AncientCurse.MOD_ID, "update_curse_zone");
@@ -30,6 +33,8 @@ public class CurseZonePackets {
     public static final Identifier REMOVE_ZONE_AREA = new Identifier(AncientCurse.MOD_ID, "remove_curse_zone_area");
     public static final Identifier DELETE_ZONE_REQUEST = new Identifier(AncientCurse.MOD_ID, "delete_zone_request");
     public static final Identifier UPDATE_ZONE_REQUEST = new Identifier(AncientCurse.MOD_ID, "update_zone_request");
+    public static final Identifier SYNC_WAND_SELECTION = new Identifier(AncientCurse.MOD_ID, "sync_wand_selection");
+    public static final Identifier CLEAR_WAND_SELECTION = new Identifier(AncientCurse.MOD_ID, "clear_wand_selection");
     
     public static void registerServerPackets() {
         ServerPlayNetworking.registerGlobalReceiver(UPDATE_ZONE, CurseZonePackets::handleUpdateZone);
@@ -42,6 +47,8 @@ public class CurseZonePackets {
         ClientPlayNetworking.registerGlobalReceiver(SYNC_ZONES, CurseZonePackets::handleSyncZones);
         ClientPlayNetworking.registerGlobalReceiver(SYNC_ZONE_AREA, CurseZonePackets::handleSyncZoneArea);
         ClientPlayNetworking.registerGlobalReceiver(REMOVE_ZONE_AREA, CurseZonePackets::handleRemoveZoneArea);
+        ClientPlayNetworking.registerGlobalReceiver(SYNC_WAND_SELECTION, CurseZonePackets::handleSyncWandSelection);
+        ClientPlayNetworking.registerGlobalReceiver(CLEAR_WAND_SELECTION, CurseZonePackets::handleClearWandSelection);
     }
     
     // Client -> Server: Update zone data
@@ -313,6 +320,88 @@ public class CurseZonePackets {
                 
                 // Sync update to all players
                 sendZoneAreaSync(world, areaId, area.getMin(), area.getMax(), zoneName, khamsinLevel, ankhDrain, effectsEnabled);
+            }
+        });
+    }
+    
+    // Server -> Client: Sync wand selection to other players
+    public static void sendWandSelectionSync(ServerWorld world, PlayerEntity player, BlockPos pos1, BlockPos pos2) {
+        PacketByteBuf buf = PacketByteBufs.create();
+        buf.writeUuid(player.getUuid());
+        buf.writeBoolean(pos1 != null);
+        if (pos1 != null) {
+            buf.writeBlockPos(pos1);
+        }
+        buf.writeBoolean(pos2 != null);
+        if (pos2 != null) {
+            buf.writeBlockPos(pos2);
+        }
+        
+        // Send to all players in the world
+        for (ServerPlayerEntity otherPlayer : world.getPlayers()) {
+            ServerPlayNetworking.send(otherPlayer, SYNC_WAND_SELECTION, buf);
+        }
+    }
+    
+    // Server -> Client: Clear wand selection for a player
+    public static void sendWandSelectionClear(ServerWorld world, PlayerEntity player) {
+        PacketByteBuf buf = PacketByteBufs.create();
+        buf.writeUuid(player.getUuid());
+        
+        // Send to all players in the world
+        for (ServerPlayerEntity otherPlayer : world.getPlayers()) {
+            ServerPlayNetworking.send(otherPlayer, CLEAR_WAND_SELECTION, buf);
+        }
+    }
+    
+    // Client packet handler for wand selection sync
+    private static void handleSyncWandSelection(MinecraftClient client, ClientPlayNetworkHandler handler,
+                                               PacketByteBuf buf, PacketSender responseSender) {
+        UUID playerUuid = buf.readUuid();
+        BlockPos pos1 = null;
+        BlockPos pos2 = null;
+        
+        if (buf.readBoolean()) {
+            pos1 = buf.readBlockPos();
+        }
+        if (buf.readBoolean()) {
+            pos2 = buf.readBlockPos();
+        }
+        
+        final BlockPos finalPos1 = pos1;
+        final BlockPos finalPos2 = pos2;
+        
+        // Execute on client thread
+        client.execute(() -> {
+            // Update the visual selection for the specified player
+            if (client.world != null) {
+                PlayerEntity player = client.world.getPlayerByUuid(playerUuid);
+                if (player != null) {
+                    WandSelectionManager.clearSelection(player);
+                    if (finalPos1 != null) {
+                        WandSelectionManager.setFirstPosition(player, finalPos1);
+                    }
+                    if (finalPos2 != null) {
+                        WandSelectionManager.setSecondPosition(player, finalPos2);
+                    }
+                }
+            }
+        });
+    }
+    
+    // Client packet handler for clearing wand selection
+    private static void handleClearWandSelection(MinecraftClient client, ClientPlayNetworkHandler handler,
+                                                PacketByteBuf buf, PacketSender responseSender) {
+        UUID playerUuid = buf.readUuid();
+        
+        // Execute on client thread
+        client.execute(() -> {
+            // Clear the visual selection for the specified player
+            if (client.world != null) {
+                PlayerEntity player = client.world.getPlayerByUuid(playerUuid);
+                if (player != null) {
+                    WandSelectionManager.clearSelection(player);
+                }
             }
         });
     }

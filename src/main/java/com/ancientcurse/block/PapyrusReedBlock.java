@@ -74,12 +74,17 @@ public class PapyrusReedBlock extends Block {
     public BlockState getStateForNeighborUpdate(BlockState state, Direction direction, BlockState neighborState, 
                                                WorldAccess world, BlockPos pos, BlockPos neighborPos) {
         if (!state.canPlaceAt(world, pos)) {
-            world.scheduleBlockTick(pos, this, 1);
+            // Return AIR state to break the block immediately
+            return Blocks.AIR.getDefaultState();
         }
         
         // Update TOP property based on block above
-        boolean isTop = !neighborState.isOf(this) || direction != Direction.UP;
-        return state.with(TOP, isTop);
+        if (direction == Direction.UP) {
+            boolean isTop = !neighborState.isOf(this);
+            return state.with(TOP, isTop);
+        }
+        
+        return state;
     }
     
     @Override

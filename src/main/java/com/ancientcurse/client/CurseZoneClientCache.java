@@ -11,18 +11,35 @@ import java.util.Collection;
  * Client-side cache of curse zone areas for rendering
  */
 public class CurseZoneClientCache {
-    private static final Map<String, CurseZoneArea> cachedAreas = new HashMap<>();
+    private static final Map<String, ZoneAreaData> cachedAreas = new HashMap<>();
+    
+    /**
+     * Simple data class for zone area information
+     */
+    public static class ZoneAreaData {
+        public final BlockPos min;
+        public final BlockPos max;
+        public String zoneName;
+        public int khamsinLevel;
+        public int ankhDrainRate;
+        public boolean effectsEnabled;
+        
+        public ZoneAreaData(BlockPos min, BlockPos max) {
+            this.min = min;
+            this.max = max;
+        }
+    }
     
     /**
      * Update or add a zone area to the cache
      */
     public static void updateArea(String id, BlockPos min, BlockPos max, String zoneName, 
                                  int khamsinLevel, int ankhDrainRate, boolean effectsEnabled) {
-        CurseZoneArea area = new CurseZoneArea(id, min, max);
-        area.setZoneName(zoneName);
-        area.setKhamsinLevel(khamsinLevel);
-        area.setAnkhDrainRate(ankhDrainRate);
-        area.setEffectsEnabled(effectsEnabled);
+        ZoneAreaData area = new ZoneAreaData(min, max);
+        area.zoneName = zoneName;
+        area.khamsinLevel = khamsinLevel;
+        area.ankhDrainRate = ankhDrainRate;
+        area.effectsEnabled = effectsEnabled;
         
         cachedAreas.put(id, area);
     }
@@ -44,14 +61,14 @@ public class CurseZoneClientCache {
     /**
      * Get all cached areas
      */
-    public static Collection<CurseZoneArea> getAllAreas() {
-        return cachedAreas.values();
+    public static Map<String, ZoneAreaData> getAllAreas() {
+        return cachedAreas;
     }
     
     /**
      * Get a specific area by ID
      */
-    public static CurseZoneArea getArea(String id) {
+    public static ZoneAreaData getArea(String id) {
         return cachedAreas.get(id);
     }
     

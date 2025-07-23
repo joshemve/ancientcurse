@@ -1,4 +1,4 @@
-package com.ancientcurse.client.render;
+package com.ancientcurse.client.render.entity;
 
 import com.ancientcurse.AncientCurse;
 import com.ancientcurse.entity.WitheredPharaohEntity;

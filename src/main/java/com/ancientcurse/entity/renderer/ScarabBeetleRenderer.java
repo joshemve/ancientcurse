@@ -42,46 +42,25 @@ public class ScarabBeetleRenderer extends GeoEntityRenderer<ScarabBeetleEntity> 
                           boolean reRender, float tickDelta, int light, int overlay,
                           float red, float green, float blue, float alpha) {
 
-        /* --- 1. SCALE / TRANSLATE BASED ON STATE --- */
-        int aggro = beetle.getAggressionLevel();
-        float scale = 1f + aggro * 0.02f;          // linear 0‑>0.20
-        if (scale > MAX_AGGRO_SCALE) scale = MAX_AGGRO_SCALE;
+        /* --- 1. SCALE BASED ON TAMED STATE --- */
+        float scale = beetle.isTamed() ? 1.1f : 1.0f; // Slightly larger when tamed
         pose.scale(scale, scale, scale);
 
-        if (beetle.isDefensive()) {
+        if (beetle.isSitting()) {
             pose.translate(0, -0.10, 0);
-            pose.scale(1f, 0.9f, 1f);              // crouch effect
+            pose.scale(1f, 0.9f, 1f);              // crouch effect when sitting
         }
 
-        /* --- 2. MICRO SHAKE WHEN VERY AGGRESSIVE --- */
-        if (beetle.isHighlyAggressive() && (beetle.age & (SHAKE_INTERVAL_TICKS-1)) == 0) {
-            float amp = MAX_SHAKE_AMPLITUDE;
-            pose.translate(
-                    (beetle.getRandom().nextFloat() - 0.5f) * amp,
-                    0,
-                    (beetle.getRandom().nextFloat() - 0.5f) * amp);
-        }
-
-        /* --- 3. COLOUR MANIPULATION --- */
+        /* --- 2. COLOUR MANIPULATION --- */
         float r = red, g = green, b = blue, a = alpha;
 
-        // hurt flash: use hurtTime which is public and counts down from 10 when hurt
-        if (beetle.hurtTime > 0) {
-            r = 1f; g = 0.3f; b = 0.3f;
-        }
-
-        // aggression tint
-        if (aggro > 0) {
-            float f = aggro / 10f;                   // 0‑>1
-            r = clamp(r + f * 0.4f);
-            g = clamp(g - f * 0.2f);
-            b = clamp(b - f * 0.2f);
-        }
-
-        // defensive blue‑shift & slight transparency
-        if (beetle.isDefensive()) {
-            b = clamp(b + 0.2f);
-            a *= 0.9f;
+        // Remove hurt color tint - let Minecraft handle it with overlay
+        // The overlay parameter already handles the red flash when hurt
+        
+        // Tamed beetles have a slight golden tint
+        if (beetle.isTamed()) {
+            r = clamp(r + 0.1f);
+            g = clamp(g + 0.08f);
         }
 
         super.preRender(pose, beetle, model, buffers, buffer, reRender, tickDelta, light, overlay, r, g, b, a);

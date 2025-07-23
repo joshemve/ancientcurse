@@ -15,6 +15,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import org.joml.Matrix4f;
+import java.util.Map;
 
 /**
  * Renders selection boxes for the admin wand
@@ -49,14 +50,18 @@ public class WandSelectionRenderer {
         
         // Render existing curse zones if enabled
         if (CurseZoneClientSettings.shouldShowAllZoneBorders()) {
-            for (CurseZoneArea area : CurseZoneClientCache.getAllAreas()) {
-                float severity = area.getSeverity();
+            for (Map.Entry<String, CurseZoneClientCache.ZoneAreaData> entry : CurseZoneClientCache.getAllAreas().entrySet()) {
+                CurseZoneClientCache.ZoneAreaData area = entry.getValue();
+                // Calculate severity based on khamsin level (0-100 mapped to 0-1)
+                float severity = area.khamsinLevel / 100.0f;
                 // Color based on severity: green (low) -> yellow (medium) -> red (high)
                 float r = severity;
                 float g = 1.0f - severity * 0.5f;
                 float b = 0.0f;
                 
-                renderBox(matrices, buffer, tessellator, area.getBoundingBox(), r, g, b, 0.5f);
+                Box box = new Box(area.min.getX(), area.min.getY(), area.min.getZ(),
+                                 area.max.getX() + 1, area.max.getY() + 1, area.max.getZ() + 1);
+                renderBox(matrices, buffer, tessellator, box, r, g, b, 0.5f);
             }
         }
         

@@ -30,7 +30,7 @@ public class BlockRegistry {
         // Register blocks from each registry class
         // Note: These registry classes will be implemented in future updates
         // NatureBlocks.registerBlocks();
-        // ConstructionBlocks.registerBlocks();
+        ConstructionBlocks.registerBlocks();
         // TerrainBlocks.registerBlocks();
         // MetalBlocks.registerBlocks();
         // DecorationBlocks.registerBlocks();
@@ -57,7 +57,7 @@ public class BlockRegistry {
         // Register block items from each registry class
         // Note: These registry classes will be implemented in future updates
         // NatureBlocks.registerBlockItems();
-        // ConstructionBlocks.registerBlockItems();
+        ConstructionBlocks.registerBlockItems();
         // TerrainBlocks.registerBlockItems();
         // MetalBlocks.registerBlockItems();
         // DecorationBlocks.registerBlockItems();
