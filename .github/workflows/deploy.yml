@@ -44,8 +44,15 @@ jobs:
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
         run: |
-          JAR_NAME=$(ls build/libs | grep '.jar$' | head -n1)
-          echo "Uploading $JAR_NAME to Discord..."
-          curl -F "content=🚀 New AncientCurse build ready!" \
+          echo "Available JAR files:"
+          ls -la build/libs/
+          echo "Filtering for main JAR..."
+          JAR_NAME=$(ls build/libs | grep '.jar$' | grep -v sources | grep -v javadoc | sort | tail -n1)
+          if [ -z "$JAR_NAME" ]; then
+            echo "No main JAR found, using first available JAR"
+            JAR_NAME=$(ls build/libs | grep '.jar$' | head -n1)
+          fi
+          echo "Selected JAR: $JAR_NAME"
+          curl -F "content=🚀 New AncientCurse build ready! File: $JAR_NAME" \
                -F "file=@build/libs/$JAR_NAME" \
                "$DISCORD_WEBHOOK"
