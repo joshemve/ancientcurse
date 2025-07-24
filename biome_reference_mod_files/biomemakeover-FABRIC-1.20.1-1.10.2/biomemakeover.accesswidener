@@ -1,0 +1,11 @@
+accessWidener	v2	intermediary
+accessible	method	net/minecraft/class_2400	<init>	(Z)V
+accessible	method	net/minecraft/class_4648	<init>	(Lcom/mojang/serialization/Codec;)V
+accessible	method	net/minecraft/class_4663	<init>	(Lcom/mojang/serialization/Codec;)V
+accessible	class	net/minecraft/class_3962$class_3963
+accessible	class	net/minecraft/class_1564$class_1567
+accessible	class	net/minecraft/class_3218$class_5526
+accessible	method	net/minecraft/class_5142	<init>	(Lcom/mojang/serialization/Codec;)V
+accessible	method	net/minecraft/class_1538	method_34707	(Lnet/minecraft/class_1937;Lnet/minecraft/class_2338;)V
+accessible	method	net/minecraft/class_173	method_759	(Ljava/lang/String;Ljava/util/function/Consumer;)Lnet/minecraft/class_176;
+accessible	method	net/minecraft/class_2309	method_9983	(Lnet/minecraft/class_2680;Lnet/minecraft/class_1937;Lnet/minecraft/class_2338;)V

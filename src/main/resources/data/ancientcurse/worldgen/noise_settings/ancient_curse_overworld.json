@@ -24,9 +24,9 @@
       "xz_scale": 1.0,
       "y_scale": 0.5
     },
-    "continents": "minecraft:overworld/continents",
-    "depth": "minecraft:overworld/depth",
-    "erosion": "minecraft:overworld/erosion",
+    "continents": 0.1,
+    "depth": 0.0,
+    "erosion": 0.5,
     "final_density": {
       "type": "minecraft:min",
       "argument1": {

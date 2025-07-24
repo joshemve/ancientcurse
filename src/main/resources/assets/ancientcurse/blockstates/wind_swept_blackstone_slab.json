@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "ancientcurse:block/wind_swept_blackstone_slab"
+    },
+    "type=top": {
+      "model": "ancientcurse:block/wind_swept_blackstone_slab_top"
+    },
+    "type=double": {
+      "model": "ancientcurse:block/wind_swept_blackstone"
+    }
+  }
+}

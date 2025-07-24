@@ -1,0 +1,27 @@
+modLoader="lowcodefml"
+loaderVersion="[1,)"
+license="Stardust Labs License"
+issueTrackerURL="https://github.com/Stardust-Labs-MC/Terralith/issues"
+
+[[mods]]
+    modId="terralith"
+    version="2.5.4"
+    displayName="Terralith"
+    displayURL="https://www.stardustlabs.net/"
+    logoFile="pack.png"
+    authors="Stardust Labs"
+    credits="Starmute: Owner. catter1: Maintainer. TheKingWhale: Builder. Apollounknowndev: Maintainer"
+    description="Explore almost 100 new biomes consisting of both realism and light fantasy, using just Vanilla blocks. Complete with several immersive structures to compliment the overhauled terrain."
+
+[[dependencies.terralith]]
+    modId="neoforge"
+    mandatory=false
+    versionRange="[20.2,)"
+    ordering="NONE"
+    side="BOTH"
+[[dependencies.terralith]]
+    modId="minecraft"
+    mandatory=true
+    versionRange="[1.20,1.21)"
+    ordering="NONE"
+    side="BOTH"

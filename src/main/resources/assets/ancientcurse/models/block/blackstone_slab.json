@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/slab",
+  "textures": {
+    "bottom": "ancientcurse:block/blackstone_brick",
+    "top": "ancientcurse:block/blackstone_brick",
+    "side": "ancientcurse:block/blackstone_brick"
+  }
+}

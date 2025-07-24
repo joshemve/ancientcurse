@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "ancientcurse:block/blackstone_slab"
+    },
+    "type=top": {
+      "model": "ancientcurse:block/blackstone_slab_top"
+    },
+    "type=double": {
+      "model": "ancientcurse:block/blackstone_brick"
+    }
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "type": "biomemakeover:sunken_ruin",
+  "biomes": "#biomemakeover:has_structure/sunken_ruin",
+  "cluster_probability": 0.8,
+  "large_probability": 0.6,
+  "spawn_overrides": {},
+  "step": "surface_structures"
+}

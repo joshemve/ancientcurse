@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/slab_top",
+  "textures": {
+    "bottom": "ancientcurse:block/wind_swept_blackstone",
+    "top": "ancientcurse:block/wind_swept_blackstone",
+    "side": "ancientcurse:block/wind_swept_blackstone"
+  }
+}

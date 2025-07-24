@@ -1,0 +1,40 @@
+accessWidener	v1	intermediary
+mutable	field	net/minecraft/class_1966	field_20643	Ljava/util/function/Supplier;
+accessible	class	net/minecraft/class_7923$class_6889
+accessible	class	net/minecraft/class_6544$class_6548
+accessible	class	net/minecraft/class_6544$class_6548$class_6550
+accessible	method	net/minecraft/class_6544$class_6548$class_6550	method_38159	([J)J
+accessible	class	net/minecraft/class_6544$class_6545
+accessible	method	net/minecraft/class_4766	method_49506	()Lnet/minecraft/class_6544$class_6547;
+accessible	class	net/minecraft/class_6554
+extendable	class	net/minecraft/class_6554
+accessible	field	net/minecraft/class_6554	field_34518	[[Lnet/minecraft/class_5321;
+accessible	field	net/minecraft/class_6554	field_34519	[[Lnet/minecraft/class_5321;
+accessible	field	net/minecraft/class_6554	field_34520	[[Lnet/minecraft/class_5321;
+accessible	field	net/minecraft/class_6554	field_34521	[[Lnet/minecraft/class_5321;
+accessible	field	net/minecraft/class_6554	field_34522	[[Lnet/minecraft/class_5321;
+accessible	field	net/minecraft/class_6554	field_36339	[[Lnet/minecraft/class_5321;
+accessible	field	net/minecraft/class_6554	field_34505	[Lnet/minecraft/class_6544$class_6546;
+accessible	field	net/minecraft/class_6554	field_34506	[Lnet/minecraft/class_6544$class_6546;
+mutable	field	net/minecraft/class_6554	field_34518	[[Lnet/minecraft/class_5321;
+mutable	field	net/minecraft/class_6554	field_34519	[[Lnet/minecraft/class_5321;
+mutable	field	net/minecraft/class_6554	field_34520	[[Lnet/minecraft/class_5321;
+mutable	field	net/minecraft/class_6554	field_34521	[[Lnet/minecraft/class_5321;
+mutable	field	net/minecraft/class_6554	field_34522	[[Lnet/minecraft/class_5321;
+mutable	field	net/minecraft/class_6554	field_36339	[[Lnet/minecraft/class_5321;
+accessible	field	net/minecraft/class_6554	field_34504	Lnet/minecraft/class_6544$class_6546;
+accessible	method	net/minecraft/class_6554	method_38185	(Ljava/util/function/Consumer;)V
+accessible	method	net/minecraft/class_6554	method_38181	(II)Lnet/minecraft/class_5321;
+accessible	method	net/minecraft/class_6554	method_38204	(IILnet/minecraft/class_6544$class_6546;)Lnet/minecraft/class_5321;
+accessible	method	net/minecraft/class_6554	method_38205	(IILnet/minecraft/class_6544$class_6546;)Lnet/minecraft/class_5321;
+extendable	method	net/minecraft/class_6554	method_38181	(II)Lnet/minecraft/class_5321;
+extendable	method	net/minecraft/class_6554	method_38204	(IILnet/minecraft/class_6544$class_6546;)Lnet/minecraft/class_5321;
+extendable	method	net/minecraft/class_6554	method_38205	(IILnet/minecraft/class_6544$class_6546;)Lnet/minecraft/class_5321;
+accessible	method	net/minecraft/class_6554	method_38199	(Ljava/util/function/Consumer;)V
+extendable	method	net/minecraft/class_6554	method_38199	(Ljava/util/function/Consumer;)V
+accessible	method	net/minecraft/class_6554	method_38192	(Ljava/util/function/Consumer;Lnet/minecraft/class_6544$class_6546;Lnet/minecraft/class_6544$class_6546;Lnet/minecraft/class_6544$class_6546;Lnet/minecraft/class_6544$class_6546;Lnet/minecraft/class_6544$class_6546;FLnet/minecraft/class_5321;)V
+accessible	method	net/minecraft/class_6554	method_41419	(Ljava/util/function/Consumer;Lnet/minecraft/class_6544$class_6546;Lnet/minecraft/class_6544$class_6546;Lnet/minecraft/class_6544$class_6546;Lnet/minecraft/class_6544$class_6546;Lnet/minecraft/class_6544$class_6546;FLnet/minecraft/class_5321;)V
+accessible	class	net/minecraft/class_6686$class_6694
+accessible	class	net/minecraft/class_6686$class_6715
+accessible	field	net/minecraft/class_6686$class_6694	field_35606	Ljava/util/function/Function;
+accessible	field	net/minecraft/class_6686$class_6694	field_35614	Ljava/util/function/Supplier;

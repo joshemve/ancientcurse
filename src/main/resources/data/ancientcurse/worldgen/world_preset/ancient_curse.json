@@ -4,18 +4,30 @@
       "type": "minecraft:overworld",
       "generator": {
         "type": "minecraft:noise",
-        "settings": "ancientcurse:ancient_curse_overworld",
+        "settings": "ancientcurse:ancient_desert_flat",
         "biome_source": {
           "type": "minecraft:multi_noise",
           "biomes": [
             {
               "biome": "ancientcurse:ancient_desert",
               "parameters": {
-                "temperature": [-1.0, 1.0],
-                "humidity": [-1.0, 1.0],
-                "continentalness": [-1.0, 1.0],
-                "erosion": [-1.0, 1.0],
-                "weirdness": [-1.0, 1.0],
+                "temperature": [0.8, 1.0],
+                "humidity": [-1.0, 0.2],
+                "continentalness": [-0.2, 0.6],
+                "erosion": [0.2, 1.0],
+                "weirdness": [-0.3, 0.3],
+                "depth": 0.0,
+                "offset": 0.0
+              }
+            },
+            {
+              "biome": "ancientcurse:deshret_desert",
+              "parameters": {
+                "temperature": [0.9, 1.0],
+                "humidity": [-1.0, 0.1],
+                "continentalness": [0.0, 1.0],
+                "erosion": [0.3, 1.0],
+                "weirdness": [-0.2, 0.2],
                 "depth": 0.0,
                 "offset": 0.0
               }

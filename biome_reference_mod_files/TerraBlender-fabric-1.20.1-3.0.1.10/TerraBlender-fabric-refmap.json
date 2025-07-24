@@ -1,0 +1,44 @@
+{
+  "mappings": {
+    "terrablender/mixin/MixinBuiltInRegistries": {
+      "registerSimple(Lnet/minecraft/resources/ResourceKey;Lnet/minecraft/core/registries/BuiltInRegistries$RegistryBootstrap;)Lnet/minecraft/core/Registry;": "Lnet/minecraft/class_7923;method_47479(Lnet/minecraft/class_5321;Lnet/minecraft/class_7923$class_6889;)Lnet/minecraft/class_2378;"
+    },
+    "terrablender/mixin/MixinMinecraftServer": {
+      "<init>": "Lnet/minecraft/server/MinecraftServer;<init>(Ljava/lang/Thread;Lnet/minecraft/class_32$class_5143;Lnet/minecraft/class_3283;Lnet/minecraft/class_6904;Ljava/net/Proxy;Lcom/mojang/datafixers/DataFixer;Lnet/minecraft/class_7497;Lnet/minecraft/class_3950;)V"
+    },
+    "terrablender/mixin/MixinMultiNoiseBiomeSource": {
+      "getNoiseBiome(IIILnet/minecraft/world/level/biome/Climate$Sampler;)Lnet/minecraft/core/Holder;": "Lnet/minecraft/class_4766;method_38109(IIILnet/minecraft/class_6544$class_6552;)Lnet/minecraft/class_6880;"
+    },
+    "terrablender/mixin/MixinNoiseGeneratorSettings": {
+      "surfaceRule": "Lnet/minecraft/class_5284;comp_478()Lnet/minecraft/class_6686$class_6708;"
+    },
+    "terrablender/mixin/MixinPrimaryLevelData": {
+      "worldGenSettingsLifecycle": "Lnet/minecraft/class_31;method_29588()Lcom/mojang/serialization/Lifecycle;"
+    },
+    "terrablender/mixin/MixinWorldOpenFlows": {
+      "confirmWorldCreation": "Lnet/minecraft/class_7196;method_41892(Lnet/minecraft/class_310;Lnet/minecraft/class_525;Lcom/mojang/serialization/Lifecycle;Ljava/lang/Runnable;Z)V"
+    }
+  },
+  "data": {
+    "named:intermediary": {
+      "terrablender/mixin/MixinBuiltInRegistries": {
+        "registerSimple(Lnet/minecraft/resources/ResourceKey;Lnet/minecraft/core/registries/BuiltInRegistries$RegistryBootstrap;)Lnet/minecraft/core/Registry;": "Lnet/minecraft/class_7923;method_47479(Lnet/minecraft/class_5321;Lnet/minecraft/class_7923$class_6889;)Lnet/minecraft/class_2378;"
+      },
+      "terrablender/mixin/MixinMinecraftServer": {
+        "<init>": "Lnet/minecraft/server/MinecraftServer;<init>(Ljava/lang/Thread;Lnet/minecraft/class_32$class_5143;Lnet/minecraft/class_3283;Lnet/minecraft/class_6904;Ljava/net/Proxy;Lcom/mojang/datafixers/DataFixer;Lnet/minecraft/class_7497;Lnet/minecraft/class_3950;)V"
+      },
+      "terrablender/mixin/MixinMultiNoiseBiomeSource": {
+        "getNoiseBiome(IIILnet/minecraft/world/level/biome/Climate$Sampler;)Lnet/minecraft/core/Holder;": "Lnet/minecraft/class_4766;method_38109(IIILnet/minecraft/class_6544$class_6552;)Lnet/minecraft/class_6880;"
+      },
+      "terrablender/mixin/MixinNoiseGeneratorSettings": {
+        "surfaceRule": "Lnet/minecraft/class_5284;comp_478()Lnet/minecraft/class_6686$class_6708;"
+      },
+      "terrablender/mixin/MixinPrimaryLevelData": {
+        "worldGenSettingsLifecycle": "Lnet/minecraft/class_31;method_29588()Lcom/mojang/serialization/Lifecycle;"
+      },
+      "terrablender/mixin/MixinWorldOpenFlows": {
+        "confirmWorldCreation": "Lnet/minecraft/class_7196;method_41892(Lnet/minecraft/class_310;Lnet/minecraft/class_525;Lcom/mojang/serialization/Lifecycle;Ljava/lang/Runnable;Z)V"
+      }
+    }
+  }
+}

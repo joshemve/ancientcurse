@@ -1,0 +1,262 @@
+{
+  "mappings": {
+    "party/lemons/biomemakeover/mixin/AgeableMobMixin_Stuntable": {
+      "addAdditionalSaveData": "Lnet/minecraft/class_1296;method_5652(Lnet/minecraft/class_2487;)V",
+      "getAge": "Lnet/minecraft/class_1296;method_5618()I",
+      "isBaby": "Lnet/minecraft/class_1296;method_6109()Z",
+      "readAdditionalSaveData": "Lnet/minecraft/class_1296;method_5749(Lnet/minecraft/class_2487;)V",
+      "setAge": "Lnet/minecraft/class_1296;method_5614(I)V"
+    },
+    "party/lemons/biomemakeover/mixin/BeardifierMixin_Mansion": {
+      "method_42694(Lnet/minecraft/world/level/ChunkPos;Lit/unimi/dsi/fastutil/objects/ObjectList;IILit/unimi/dsi/fastutil/objects/ObjectList;Lnet/minecraft/world/level/levelgen/structure/StructureStart;)V": "Lnet/minecraft/class_5817;method_42694(Lnet/minecraft/class_1923;Lit/unimi/dsi/fastutil/objects/ObjectList;IILit/unimi/dsi/fastutil/objects/ObjectList;Lnet/minecraft/class_3449;)V"
+    },
+    "party/lemons/biomemakeover/mixin/CamelMixin": {
+      "isFood": "Lnet/minecraft/class_7689;method_6481(Lnet/minecraft/class_1799;)Z"
+    },
+    "party/lemons/biomemakeover/mixin/DarkOakTreeGrowerMixin_SingleTree": {
+      "getConfiguredFeature": "Lnet/minecraft/class_2657;method_11430(Lnet/minecraft/class_5819;Z)Lnet/minecraft/class_5321;"
+    },
+    "party/lemons/biomemakeover/mixin/EnchantmentHelperMixin": {
+      "Lnet/minecraft/world/item/enchantment/EnchantmentHelper;runIterationOnInventory(Lnet/minecraft/world/item/enchantment/EnchantmentHelper$EnchantmentVisitor;Ljava/lang/Iterable;)V": "Lnet/minecraft/class_1890;method_8209(Lnet/minecraft/class_1890$class_1891;Ljava/lang/Iterable;)V",
+      "getDamageProtection": "Lnet/minecraft/class_1890;method_8219(Ljava/lang/Iterable;Lnet/minecraft/class_1282;)I"
+    },
+    "party/lemons/biomemakeover/mixin/InputContainerMixin_EctoCompost": {
+      "canPlaceItemThroughFace": "Lnet/minecraft/class_3962$class_3963;method_5492(ILnet/minecraft/class_1799;Lnet/minecraft/class_2350;)Z",
+      "setChanged": "Lnet/minecraft/class_3962$class_3963;method_5431()V"
+    },
+    "party/lemons/biomemakeover/mixin/LivingEntityMixin": {
+      "hurt": "Lnet/minecraft/class_1309;method_5643(Lnet/minecraft/class_1282;F)Z"
+    },
+    "party/lemons/biomemakeover/mixin/LivingEntityMixin_Lootblock": {
+      "addAdditionalSaveData": "Lnet/minecraft/class_1309;method_5652(Lnet/minecraft/class_2487;)V",
+      "readAdditionalSaveData": "Lnet/minecraft/class_1309;method_5749(Lnet/minecraft/class_2487;)V",
+      "shouldDropLoot": "Lnet/minecraft/class_1309;method_27071()Z"
+    },
+    "party/lemons/biomemakeover/mixin/MobAccess": {
+      "goalSelector": "field_6201:Lnet/minecraft/class_1355;",
+      "targetSelector": "field_6185:Lnet/minecraft/class_1355;"
+    },
+    "party/lemons/biomemakeover/mixin/MonsterMixin_Lootblock": {
+      "shouldDropLoot": "Lnet/minecraft/class_1588;method_27071()Z"
+    },
+    "party/lemons/biomemakeover/mixin/PatrolSpawnerInvoker": {
+      "spawnPatrolMember": "method_16575(Lnet/minecraft/class_3218;Lnet/minecraft/class_2338;Lnet/minecraft/class_5819;Z)Z"
+    },
+    "party/lemons/biomemakeover/mixin/PatrolSpawnerMixin_Cowboy": {
+      "spawnPatrolMember": "Lnet/minecraft/class_3769;method_16575(Lnet/minecraft/class_3218;Lnet/minecraft/class_2338;Lnet/minecraft/class_5819;Z)Z"
+    },
+    "party/lemons/biomemakeover/mixin/PlayerMixin": {
+      "hurt": "Lnet/minecraft/class_1657;method_5643(Lnet/minecraft/class_1282;F)Z"
+    },
+    "party/lemons/biomemakeover/mixin/TadpoleMixin": {
+      "addAdditionalSaveData": "Lnet/minecraft/class_7110;method_5652(Lnet/minecraft/class_2487;)V",
+      "getAge": "Lnet/minecraft/class_7110;method_41396()I",
+      "readAdditionalSaveData": "Lnet/minecraft/class_7110;method_5749(Lnet/minecraft/class_2487;)V",
+      "setAge": "Lnet/minecraft/class_7110;method_41394(I)V"
+    },
+    "party/lemons/biomemakeover/mixin/TemplateStructurePieceMixin_DirectionalData": {
+      "Lnet/minecraft/world/level/levelgen/structure/templatesystem/StructureTemplate;filterBlocks(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/levelgen/structure/templatesystem/StructurePlaceSettings;Lnet/minecraft/world/level/block/Block;)Ljava/util/List;": "Lnet/minecraft/class_3499;method_16445(Lnet/minecraft/class_2338;Lnet/minecraft/class_3492;Lnet/minecraft/class_2248;)Ljava/util/List;",
+      "postProcess": "Lnet/minecraft/class_3470;method_14931(Lnet/minecraft/class_5281;Lnet/minecraft/class_5138;Lnet/minecraft/class_2794;Lnet/minecraft/class_5819;Lnet/minecraft/class_3341;Lnet/minecraft/class_1923;Lnet/minecraft/class_2338;)V"
+    },
+    "party/lemons/biomemakeover/mixin/WitchMixin_Antidote": {
+      "Lnet/minecraft/world/entity/monster/Witch;setItemSlot(Lnet/minecraft/world/entity/EquipmentSlot;Lnet/minecraft/world/item/ItemStack;)V": "Lnet/minecraft/class_1640;method_5673(Lnet/minecraft/class_1304;Lnet/minecraft/class_1799;)V",
+      "aiStep": "Lnet/minecraft/class_1640;method_6007()V"
+    },
+    "party/lemons/biomemakeover/mixin/WitchMixin_Quests": {
+      "<init>": "Lnet/minecraft/class_1640;<init>(Lnet/minecraft/class_1299;Lnet/minecraft/class_1937;)V",
+      "registerGoals": "Lnet/minecraft/class_1640;method_5959()V"
+    },
+    "party/lemons/biomemakeover/mixin/badlands/HorseMixin": {
+      "addAdditionalSaveData": "Lnet/minecraft/class_1498;method_5652(Lnet/minecraft/class_2487;)V",
+      "defineSynchedData": "Lnet/minecraft/class_1498;method_5693()V",
+      "readAdditionalSaveData": "Lnet/minecraft/class_1498;method_5749(Lnet/minecraft/class_2487;)V"
+    },
+    "party/lemons/biomemakeover/mixin/badlands/HorseRendererMixin": {
+      "<init>": "Lnet/minecraft/class_910;<init>(Lnet/minecraft/class_5617$class_5618;)V"
+    },
+    "party/lemons/biomemakeover/mixin/client/ArmorStandRendererMixin": {
+      "<init>": "Lnet/minecraft/class_877;<init>(Lnet/minecraft/class_5617$class_5618;)V"
+    },
+    "party/lemons/biomemakeover/mixin/client/BlockEntityWithoutLevelRendererMixin": {
+      "renderByItem": "Lnet/minecraft/class_756;method_3166(Lnet/minecraft/class_1799;Lnet/minecraft/class_811;Lnet/minecraft/class_4587;Lnet/minecraft/class_4597;II)V"
+    },
+    "party/lemons/biomemakeover/mixin/client/PlayerRendererMixin_Hat": {
+      "<init>": "Lnet/minecraft/class_1007;<init>(Lnet/minecraft/class_5617$class_5618;Z)V"
+    },
+    "party/lemons/biomemakeover/mixin/enchantment/BowItemMixin": {
+      "Lnet/minecraft/world/item/ItemStack;hurtAndBreak(ILnet/minecraft/world/entity/LivingEntity;Ljava/util/function/Consumer;)V": "Lnet/minecraft/class_1799;method_7956(ILnet/minecraft/class_1309;Ljava/util/function/Consumer;)V",
+      "releaseUsing": "Lnet/minecraft/class_1753;method_7840(Lnet/minecraft/class_1799;Lnet/minecraft/class_1937;Lnet/minecraft/class_1309;I)V"
+    },
+    "party/lemons/biomemakeover/mixin/enchantment/EntityMixin": {
+      "getMaxAirSupply": "Lnet/minecraft/class_1297;method_5748()I",
+      "setRemainingFireTicks": "Lnet/minecraft/class_1297;method_20803(I)V",
+      "updateSwimming": "Lnet/minecraft/class_1297;method_5790()V"
+    },
+    "party/lemons/biomemakeover/mixin/enchantment/ItemStackMixin": {
+      "hurtAndBreak": "Lnet/minecraft/class_1799;method_7956(ILnet/minecraft/class_1309;Ljava/util/function/Consumer;)V"
+    },
+    "party/lemons/biomemakeover/mixin/enchantment/LivingEntityMixin": {
+      "Lnet/minecraft/world/entity/LivingEntity;calculateFallDamage(FF)I": "Lnet/minecraft/class_1309;method_23329(FF)I",
+      "causeFallDamage": "Lnet/minecraft/class_1309;method_5747(FFLnet/minecraft/class_1282;)Z",
+      "tick": "Lnet/minecraft/class_1309;method_5773()V"
+    },
+    "party/lemons/biomemakeover/mixin/level/BoneMealItemMixin": {
+      "growWaterPlant": "Lnet/minecraft/class_1752;method_7719(Lnet/minecraft/class_1799;Lnet/minecraft/class_1937;Lnet/minecraft/class_2338;Lnet/minecraft/class_2350;)Z"
+    },
+    "party/lemons/biomemakeover/mixin/multipart/ClientPacketListenerMixin": {
+      "handleAddEntity": "Lnet/minecraft/class_634;method_11112(Lnet/minecraft/class_2604;)V",
+      "net/minecraft/world/entity/Entity.recreateFromPacket(Lnet/minecraft/network/protocol/game/ClientboundAddEntityPacket;)V": "Lnet/minecraft/class_1297;method_31471(Lnet/minecraft/class_2604;)V"
+    },
+    "party/lemons/biomemakeover/mixin/multipart/EntityCallbacksMixin": {
+      "onTrackingEnd": "Lnet/minecraft/class_3218$class_5526;method_31437(Lnet/minecraft/class_1297;)V",
+      "onTrackingStart": "Lnet/minecraft/class_3218$class_5526;method_31436(Lnet/minecraft/class_1297;)V"
+    },
+    "party/lemons/biomemakeover/mixin/multipart/LevelMixin": {
+      "getEntities(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/phys/AABB;Ljava/util/function/Predicate;)Ljava/util/List;": "Lnet/minecraft/class_1937;method_8333(Lnet/minecraft/class_1297;Lnet/minecraft/class_238;Ljava/util/function/Predicate;)Ljava/util/List;",
+      "getEntities(Lnet/minecraft/world/level/entity/EntityTypeTest;Lnet/minecraft/world/phys/AABB;Ljava/util/function/Predicate;)Ljava/util/List;": "Lnet/minecraft/class_1937;method_18023(Lnet/minecraft/class_5575;Lnet/minecraft/class_238;Ljava/util/function/Predicate;)Ljava/util/List;"
+    },
+    "party/lemons/biomemakeover/mixin/multipart/ProjectileUtilMixin": {
+      "Lnet/minecraft/world/entity/Entity;getBoundingBox()Lnet/minecraft/world/phys/AABB;": "Lnet/minecraft/class_1297;method_5829()Lnet/minecraft/class_238;",
+      "getEntityHitResult(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/phys/Vec3;Lnet/minecraft/world/phys/Vec3;Lnet/minecraft/world/phys/AABB;Ljava/util/function/Predicate;F)Lnet/minecraft/world/phys/EntityHitResult;": "Lnet/minecraft/class_1675;method_37226(Lnet/minecraft/class_1937;Lnet/minecraft/class_1297;Lnet/minecraft/class_243;Lnet/minecraft/class_243;Lnet/minecraft/class_238;Ljava/util/function/Predicate;F)Lnet/minecraft/class_3966;"
+    },
+    "party/lemons/biomemakeover/mixin/multipart/ServerLevelMixin": {
+      "getEntityOrPart": "Lnet/minecraft/class_3218;method_31424(I)Lnet/minecraft/class_1297;"
+    },
+    "party/lemons/biomemakeover/mixin/multipart/client/EntityRenderDispatcherMixin": {
+      "Lnet/minecraft/client/renderer/LevelRenderer;renderLineBox(Lcom/mojang/blaze3d/vertex/PoseStack;Lcom/mojang/blaze3d/vertex/VertexConsumer;Lnet/minecraft/world/phys/AABB;FFFF)V": "Lnet/minecraft/class_761;method_22982(Lnet/minecraft/class_4587;Lnet/minecraft/class_4588;Lnet/minecraft/class_238;FFFF)V",
+      "renderHitbox": "Lnet/minecraft/class_898;method_3956(Lnet/minecraft/class_4587;Lnet/minecraft/class_4588;Lnet/minecraft/class_1297;F)V",
+      "shouldRender": "Lnet/minecraft/class_898;method_3950(Lnet/minecraft/class_1297;Lnet/minecraft/class_4604;DDD)Z"
+    }
+  },
+  "data": {
+    "named:intermediary": {
+      "party/lemons/biomemakeover/mixin/AgeableMobMixin_Stuntable": {
+        "addAdditionalSaveData": "Lnet/minecraft/class_1296;method_5652(Lnet/minecraft/class_2487;)V",
+        "getAge": "Lnet/minecraft/class_1296;method_5618()I",
+        "isBaby": "Lnet/minecraft/class_1296;method_6109()Z",
+        "readAdditionalSaveData": "Lnet/minecraft/class_1296;method_5749(Lnet/minecraft/class_2487;)V",
+        "setAge": "Lnet/minecraft/class_1296;method_5614(I)V"
+      },
+      "party/lemons/biomemakeover/mixin/BeardifierMixin_Mansion": {
+        "method_42694(Lnet/minecraft/world/level/ChunkPos;Lit/unimi/dsi/fastutil/objects/ObjectList;IILit/unimi/dsi/fastutil/objects/ObjectList;Lnet/minecraft/world/level/levelgen/structure/StructureStart;)V": "Lnet/minecraft/class_5817;method_42694(Lnet/minecraft/class_1923;Lit/unimi/dsi/fastutil/objects/ObjectList;IILit/unimi/dsi/fastutil/objects/ObjectList;Lnet/minecraft/class_3449;)V"
+      },
+      "party/lemons/biomemakeover/mixin/CamelMixin": {
+        "isFood": "Lnet/minecraft/class_7689;method_6481(Lnet/minecraft/class_1799;)Z"
+      },
+      "party/lemons/biomemakeover/mixin/DarkOakTreeGrowerMixin_SingleTree": {
+        "getConfiguredFeature": "Lnet/minecraft/class_2657;method_11430(Lnet/minecraft/class_5819;Z)Lnet/minecraft/class_5321;"
+      },
+      "party/lemons/biomemakeover/mixin/EnchantmentHelperMixin": {
+        "Lnet/minecraft/world/item/enchantment/EnchantmentHelper;runIterationOnInventory(Lnet/minecraft/world/item/enchantment/EnchantmentHelper$EnchantmentVisitor;Ljava/lang/Iterable;)V": "Lnet/minecraft/class_1890;method_8209(Lnet/minecraft/class_1890$class_1891;Ljava/lang/Iterable;)V",
+        "getDamageProtection": "Lnet/minecraft/class_1890;method_8219(Ljava/lang/Iterable;Lnet/minecraft/class_1282;)I"
+      },
+      "party/lemons/biomemakeover/mixin/InputContainerMixin_EctoCompost": {
+        "canPlaceItemThroughFace": "Lnet/minecraft/class_3962$class_3963;method_5492(ILnet/minecraft/class_1799;Lnet/minecraft/class_2350;)Z",
+        "setChanged": "Lnet/minecraft/class_3962$class_3963;method_5431()V"
+      },
+      "party/lemons/biomemakeover/mixin/LivingEntityMixin": {
+        "hurt": "Lnet/minecraft/class_1309;method_5643(Lnet/minecraft/class_1282;F)Z"
+      },
+      "party/lemons/biomemakeover/mixin/LivingEntityMixin_Lootblock": {
+        "addAdditionalSaveData": "Lnet/minecraft/class_1309;method_5652(Lnet/minecraft/class_2487;)V",
+        "readAdditionalSaveData": "Lnet/minecraft/class_1309;method_5749(Lnet/minecraft/class_2487;)V",
+        "shouldDropLoot": "Lnet/minecraft/class_1309;method_27071()Z"
+      },
+      "party/lemons/biomemakeover/mixin/MobAccess": {
+        "goalSelector": "field_6201:Lnet/minecraft/class_1355;",
+        "targetSelector": "field_6185:Lnet/minecraft/class_1355;"
+      },
+      "party/lemons/biomemakeover/mixin/MonsterMixin_Lootblock": {
+        "shouldDropLoot": "Lnet/minecraft/class_1588;method_27071()Z"
+      },
+      "party/lemons/biomemakeover/mixin/PatrolSpawnerInvoker": {
+        "spawnPatrolMember": "method_16575(Lnet/minecraft/class_3218;Lnet/minecraft/class_2338;Lnet/minecraft/class_5819;Z)Z"
+      },
+      "party/lemons/biomemakeover/mixin/PatrolSpawnerMixin_Cowboy": {
+        "spawnPatrolMember": "Lnet/minecraft/class_3769;method_16575(Lnet/minecraft/class_3218;Lnet/minecraft/class_2338;Lnet/minecraft/class_5819;Z)Z"
+      },
+      "party/lemons/biomemakeover/mixin/PlayerMixin": {
+        "hurt": "Lnet/minecraft/class_1657;method_5643(Lnet/minecraft/class_1282;F)Z"
+      },
+      "party/lemons/biomemakeover/mixin/TadpoleMixin": {
+        "addAdditionalSaveData": "Lnet/minecraft/class_7110;method_5652(Lnet/minecraft/class_2487;)V",
+        "getAge": "Lnet/minecraft/class_7110;method_41396()I",
+        "readAdditionalSaveData": "Lnet/minecraft/class_7110;method_5749(Lnet/minecraft/class_2487;)V",
+        "setAge": "Lnet/minecraft/class_7110;method_41394(I)V"
+      },
+      "party/lemons/biomemakeover/mixin/TemplateStructurePieceMixin_DirectionalData": {
+        "Lnet/minecraft/world/level/levelgen/structure/templatesystem/StructureTemplate;filterBlocks(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/levelgen/structure/templatesystem/StructurePlaceSettings;Lnet/minecraft/world/level/block/Block;)Ljava/util/List;": "Lnet/minecraft/class_3499;method_16445(Lnet/minecraft/class_2338;Lnet/minecraft/class_3492;Lnet/minecraft/class_2248;)Ljava/util/List;",
+        "postProcess": "Lnet/minecraft/class_3470;method_14931(Lnet/minecraft/class_5281;Lnet/minecraft/class_5138;Lnet/minecraft/class_2794;Lnet/minecraft/class_5819;Lnet/minecraft/class_3341;Lnet/minecraft/class_1923;Lnet/minecraft/class_2338;)V"
+      },
+      "party/lemons/biomemakeover/mixin/WitchMixin_Antidote": {
+        "Lnet/minecraft/world/entity/monster/Witch;setItemSlot(Lnet/minecraft/world/entity/EquipmentSlot;Lnet/minecraft/world/item/ItemStack;)V": "Lnet/minecraft/class_1640;method_5673(Lnet/minecraft/class_1304;Lnet/minecraft/class_1799;)V",
+        "aiStep": "Lnet/minecraft/class_1640;method_6007()V"
+      },
+      "party/lemons/biomemakeover/mixin/WitchMixin_Quests": {
+        "<init>": "Lnet/minecraft/class_1640;<init>(Lnet/minecraft/class_1299;Lnet/minecraft/class_1937;)V",
+        "registerGoals": "Lnet/minecraft/class_1640;method_5959()V"
+      },
+      "party/lemons/biomemakeover/mixin/badlands/HorseMixin": {
+        "addAdditionalSaveData": "Lnet/minecraft/class_1498;method_5652(Lnet/minecraft/class_2487;)V",
+        "defineSynchedData": "Lnet/minecraft/class_1498;method_5693()V",
+        "readAdditionalSaveData": "Lnet/minecraft/class_1498;method_5749(Lnet/minecraft/class_2487;)V"
+      },
+      "party/lemons/biomemakeover/mixin/badlands/HorseRendererMixin": {
+        "<init>": "Lnet/minecraft/class_910;<init>(Lnet/minecraft/class_5617$class_5618;)V"
+      },
+      "party/lemons/biomemakeover/mixin/client/ArmorStandRendererMixin": {
+        "<init>": "Lnet/minecraft/class_877;<init>(Lnet/minecraft/class_5617$class_5618;)V"
+      },
+      "party/lemons/biomemakeover/mixin/client/BlockEntityWithoutLevelRendererMixin": {
+        "renderByItem": "Lnet/minecraft/class_756;method_3166(Lnet/minecraft/class_1799;Lnet/minecraft/class_811;Lnet/minecraft/class_4587;Lnet/minecraft/class_4597;II)V"
+      },
+      "party/lemons/biomemakeover/mixin/client/PlayerRendererMixin_Hat": {
+        "<init>": "Lnet/minecraft/class_1007;<init>(Lnet/minecraft/class_5617$class_5618;Z)V"
+      },
+      "party/lemons/biomemakeover/mixin/enchantment/BowItemMixin": {
+        "Lnet/minecraft/world/item/ItemStack;hurtAndBreak(ILnet/minecraft/world/entity/LivingEntity;Ljava/util/function/Consumer;)V": "Lnet/minecraft/class_1799;method_7956(ILnet/minecraft/class_1309;Ljava/util/function/Consumer;)V",
+        "releaseUsing": "Lnet/minecraft/class_1753;method_7840(Lnet/minecraft/class_1799;Lnet/minecraft/class_1937;Lnet/minecraft/class_1309;I)V"
+      },
+      "party/lemons/biomemakeover/mixin/enchantment/EntityMixin": {
+        "getMaxAirSupply": "Lnet/minecraft/class_1297;method_5748()I",
+        "setRemainingFireTicks": "Lnet/minecraft/class_1297;method_20803(I)V",
+        "updateSwimming": "Lnet/minecraft/class_1297;method_5790()V"
+      },
+      "party/lemons/biomemakeover/mixin/enchantment/ItemStackMixin": {
+        "hurtAndBreak": "Lnet/minecraft/class_1799;method_7956(ILnet/minecraft/class_1309;Ljava/util/function/Consumer;)V"
+      },
+      "party/lemons/biomemakeover/mixin/enchantment/LivingEntityMixin": {
+        "Lnet/minecraft/world/entity/LivingEntity;calculateFallDamage(FF)I": "Lnet/minecraft/class_1309;method_23329(FF)I",
+        "causeFallDamage": "Lnet/minecraft/class_1309;method_5747(FFLnet/minecraft/class_1282;)Z",
+        "tick": "Lnet/minecraft/class_1309;method_5773()V"
+      },
+      "party/lemons/biomemakeover/mixin/level/BoneMealItemMixin": {
+        "growWaterPlant": "Lnet/minecraft/class_1752;method_7719(Lnet/minecraft/class_1799;Lnet/minecraft/class_1937;Lnet/minecraft/class_2338;Lnet/minecraft/class_2350;)Z"
+      },
+      "party/lemons/biomemakeover/mixin/multipart/ClientPacketListenerMixin": {
+        "handleAddEntity": "Lnet/minecraft/class_634;method_11112(Lnet/minecraft/class_2604;)V",
+        "net/minecraft/world/entity/Entity.recreateFromPacket(Lnet/minecraft/network/protocol/game/ClientboundAddEntityPacket;)V": "Lnet/minecraft/class_1297;method_31471(Lnet/minecraft/class_2604;)V"
+      },
+      "party/lemons/biomemakeover/mixin/multipart/EntityCallbacksMixin": {
+        "onTrackingEnd": "Lnet/minecraft/class_3218$class_5526;method_31437(Lnet/minecraft/class_1297;)V",
+        "onTrackingStart": "Lnet/minecraft/class_3218$class_5526;method_31436(Lnet/minecraft/class_1297;)V"
+      },
+      "party/lemons/biomemakeover/mixin/multipart/LevelMixin": {
+        "getEntities(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/phys/AABB;Ljava/util/function/Predicate;)Ljava/util/List;": "Lnet/minecraft/class_1937;method_8333(Lnet/minecraft/class_1297;Lnet/minecraft/class_238;Ljava/util/function/Predicate;)Ljava/util/List;",
+        "getEntities(Lnet/minecraft/world/level/entity/EntityTypeTest;Lnet/minecraft/world/phys/AABB;Ljava/util/function/Predicate;)Ljava/util/List;": "Lnet/minecraft/class_1937;method_18023(Lnet/minecraft/class_5575;Lnet/minecraft/class_238;Ljava/util/function/Predicate;)Ljava/util/List;"
+      },
+      "party/lemons/biomemakeover/mixin/multipart/ProjectileUtilMixin": {
+        "Lnet/minecraft/world/entity/Entity;getBoundingBox()Lnet/minecraft/world/phys/AABB;": "Lnet/minecraft/class_1297;method_5829()Lnet/minecraft/class_238;",
+        "getEntityHitResult(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/phys/Vec3;Lnet/minecraft/world/phys/Vec3;Lnet/minecraft/world/phys/AABB;Ljava/util/function/Predicate;F)Lnet/minecraft/world/phys/EntityHitResult;": "Lnet/minecraft/class_1675;method_37226(Lnet/minecraft/class_1937;Lnet/minecraft/class_1297;Lnet/minecraft/class_243;Lnet/minecraft/class_243;Lnet/minecraft/class_238;Ljava/util/function/Predicate;F)Lnet/minecraft/class_3966;"
+      },
+      "party/lemons/biomemakeover/mixin/multipart/ServerLevelMixin": {
+        "getEntityOrPart": "Lnet/minecraft/class_3218;method_31424(I)Lnet/minecraft/class_1297;"
+      },
+      "party/lemons/biomemakeover/mixin/multipart/client/EntityRenderDispatcherMixin": {
+        "Lnet/minecraft/client/renderer/LevelRenderer;renderLineBox(Lcom/mojang/blaze3d/vertex/PoseStack;Lcom/mojang/blaze3d/vertex/VertexConsumer;Lnet/minecraft/world/phys/AABB;FFFF)V": "Lnet/minecraft/class_761;method_22982(Lnet/minecraft/class_4587;Lnet/minecraft/class_4588;Lnet/minecraft/class_238;FFFF)V",
+        "renderHitbox": "Lnet/minecraft/class_898;method_3956(Lnet/minecraft/class_4587;Lnet/minecraft/class_4588;Lnet/minecraft/class_1297;F)V",
+        "shouldRender": "Lnet/minecraft/class_898;method_3950(Lnet/minecraft/class_1297;Lnet/minecraft/class_4604;DDD)Z"
+      }
+    }
+  }
+}

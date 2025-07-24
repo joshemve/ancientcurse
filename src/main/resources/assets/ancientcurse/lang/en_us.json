@@ -322,8 +322,12 @@
   "block.ancientcurse.black_sand": "Black Sand",
   "block.ancientcurse.black_stone": "Black Stone",
   "block.ancientcurse.blackstone_brick": "Blackstone Brick",
+  "block.ancientcurse.blackstone_stairs": "Blackstone Stairs",
+  "block.ancientcurse.blackstone_slab": "Blackstone Slab",
   "block.ancientcurse.hardened_black_stone": "Hardened Black Stone",
   "block.ancientcurse.wind_swept_blackstone": "Wind-Swept Blackstone",
+  "block.ancientcurse.wind_swept_blackstone_stairs": "Wind-Swept Blackstone Stairs",
+  "block.ancientcurse.wind_swept_blackstone_slab": "Wind-Swept Blackstone Slab",
 
   "block.ancientcurse.necrostone_brick": "Necrostone Brick",
   "block.ancientcurse.necrostone_cracked": "Cracked Necrostone",

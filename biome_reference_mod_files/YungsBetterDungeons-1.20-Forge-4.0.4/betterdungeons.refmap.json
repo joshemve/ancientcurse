@@ -1,0 +1,66 @@
+{
+  "mappings": {
+    "com/yungnickyoung/minecraft/betterdungeons/mixin/DungeonContextMixin": {
+      "placeInWorld": "Lnet/minecraft/world/level/levelgen/structure/templatesystem/StructureTemplate;m_230328_(Lnet/minecraft/world/level/ServerLevelAccessor;Lnet/minecraft/core/BlockPos;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/levelgen/structure/templatesystem/StructurePlaceSettings;Lnet/minecraft/util/RandomSource;I)Z"
+    },
+    "com/yungnickyoung/minecraft/betterdungeons/mixin/LocateSmallNetherDungeonCommandMixin": {
+      "locateStructure": "Lnet/minecraft/server/commands/LocateCommand;m_214471_(Lnet/minecraft/commands/CommandSourceStack;Lnet/minecraft/commands/arguments/ResourceOrTagKeyArgument$Result;)I"
+    },
+    "com/yungnickyoung/minecraft/betterdungeons/mixin/NoDeltasInStructuresMixin": {
+      "place(Lnet/minecraft/world/level/levelgen/feature/FeaturePlaceContext;)Z": "Lnet/minecraft/world/level/levelgen/feature/DeltaFeature;m_142674_(Lnet/minecraft/world/level/levelgen/feature/FeaturePlaceContext;)Z"
+    },
+    "com/yungnickyoung/minecraft/betterdungeons/mixin/accessor/StructureProcessorAccessor": {
+      "getType": "m_6953_()Lnet/minecraft/world/level/levelgen/structure/templatesystem/StructureProcessorType;"
+    },
+    "com/yungnickyoung/minecraft/betterdungeons/mixin/accessor/BoundingBoxAccessor": {
+      "minY": "f_162357_:I",
+      "minX": "f_162356_:I",
+      "maxZ": "f_162361_:I",
+      "maxY": "f_162360_:I",
+      "maxX": "f_162359_:I",
+      "minZ": "f_162358_:I"
+    },
+    "com/yungnickyoung/minecraft/betterdungeons/mixin/NoBasaltColumnsInStructuresMixin": {
+      "canPlaceAt(Lnet/minecraft/world/level/LevelAccessor;ILnet/minecraft/core/BlockPos$MutableBlockPos;)Z": "Lnet/minecraft/world/level/levelgen/feature/BasaltColumnsFeature;m_65154_(Lnet/minecraft/world/level/LevelAccessor;ILnet/minecraft/core/BlockPos$MutableBlockPos;)Z"
+    },
+    "com/yungnickyoung/minecraft/betterdungeons/mixin/StructureTemplateMixin": {
+      "placeInWorld": "Lnet/minecraft/world/level/levelgen/structure/templatesystem/StructureTemplate;m_230328_(Lnet/minecraft/world/level/ServerLevelAccessor;Lnet/minecraft/core/BlockPos;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/levelgen/structure/templatesystem/StructurePlaceSettings;Lnet/minecraft/util/RandomSource;I)Z"
+    },
+    "com/yungnickyoung/minecraft/betterdungeons/mixin/accessor/WorldGenRegionAccessor": {
+      "structureManager": "f_215157_:Lnet/minecraft/world/level/StructureManager;"
+    }
+  },
+  "data": {
+    "searge": {
+      "com/yungnickyoung/minecraft/betterdungeons/mixin/DungeonContextMixin": {
+        "placeInWorld": "Lnet/minecraft/world/level/levelgen/structure/templatesystem/StructureTemplate;m_230328_(Lnet/minecraft/world/level/ServerLevelAccessor;Lnet/minecraft/core/BlockPos;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/levelgen/structure/templatesystem/StructurePlaceSettings;Lnet/minecraft/util/RandomSource;I)Z"
+      },
+      "com/yungnickyoung/minecraft/betterdungeons/mixin/LocateSmallNetherDungeonCommandMixin": {
+        "locateStructure": "Lnet/minecraft/server/commands/LocateCommand;m_214471_(Lnet/minecraft/commands/CommandSourceStack;Lnet/minecraft/commands/arguments/ResourceOrTagKeyArgument$Result;)I"
+      },
+      "com/yungnickyoung/minecraft/betterdungeons/mixin/NoDeltasInStructuresMixin": {
+        "place(Lnet/minecraft/world/level/levelgen/feature/FeaturePlaceContext;)Z": "Lnet/minecraft/world/level/levelgen/feature/DeltaFeature;m_142674_(Lnet/minecraft/world/level/levelgen/feature/FeaturePlaceContext;)Z"
+      },
+      "com/yungnickyoung/minecraft/betterdungeons/mixin/accessor/StructureProcessorAccessor": {
+        "getType": "m_6953_()Lnet/minecraft/world/level/levelgen/structure/templatesystem/StructureProcessorType;"
+      },
+      "com/yungnickyoung/minecraft/betterdungeons/mixin/accessor/BoundingBoxAccessor": {
+        "minY": "f_162357_:I",
+        "minX": "f_162356_:I",
+        "maxZ": "f_162361_:I",
+        "maxY": "f_162360_:I",
+        "maxX": "f_162359_:I",
+        "minZ": "f_162358_:I"
+      },
+      "com/yungnickyoung/minecraft/betterdungeons/mixin/NoBasaltColumnsInStructuresMixin": {
+        "canPlaceAt(Lnet/minecraft/world/level/LevelAccessor;ILnet/minecraft/core/BlockPos$MutableBlockPos;)Z": "Lnet/minecraft/world/level/levelgen/feature/BasaltColumnsFeature;m_65154_(Lnet/minecraft/world/level/LevelAccessor;ILnet/minecraft/core/BlockPos$MutableBlockPos;)Z"
+      },
+      "com/yungnickyoung/minecraft/betterdungeons/mixin/StructureTemplateMixin": {
+        "placeInWorld": "Lnet/minecraft/world/level/levelgen/structure/templatesystem/StructureTemplate;m_230328_(Lnet/minecraft/world/level/ServerLevelAccessor;Lnet/minecraft/core/BlockPos;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/levelgen/structure/templatesystem/StructurePlaceSettings;Lnet/minecraft/util/RandomSource;I)Z"
+      },
+      "com/yungnickyoung/minecraft/betterdungeons/mixin/accessor/WorldGenRegionAccessor": {
+        "structureManager": "f_215157_:Lnet/minecraft/world/level/StructureManager;"
+      }
+    }
+  }
+}

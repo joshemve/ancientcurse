@@ -1,0 +1,8 @@
+Manifest-Version: 1.0
+Specification-Title: terralith
+Specification-Vendor: Stardust Labs
+Specification-Version: 2.5.4
+Implementation-Title: terralith
+Implementation-Version: 2.5.4
+Implementation-Vendor: Stardust Labs
+Implementation-Timestamp: 2024-07-06T15:24:33+0200

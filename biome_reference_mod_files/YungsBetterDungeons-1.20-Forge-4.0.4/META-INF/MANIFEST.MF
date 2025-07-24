@@ -1,0 +1,14 @@
+Manifest-Version: 1.0
+Specification-Title: YungsBetterDungeons
+Specification-Vendor: YUNGNICKYOUNG
+Specification-Version: 1.20-Forge-4.0.4
+Implementation-Title: Forge
+Implementation-Version: 1.20-Forge-4.0.4
+Implementation-Vendor: YUNGNICKYOUNG
+Implementation-Timestamp: 2024-04-18T01:09:50-0400
+Timestampe: 1713416990973
+Built-On-Java: 17.0.2+8-LTS-86 (Oracle Corporation)
+Built-On-Minecraft: 1.20
+MixinConfigs: betterdungeons.mixins.json,betterdungeons_forge.mixins.jso
+ n
+

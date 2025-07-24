@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "id": "biomemakeover",
+  "version": "1.20.1-1.10.2",
+  "name": "Biome Makeover",
+  "description": "Biome Makeover is a mod designed to update vanilla\u0027s biomes.",
+  "authors": [
+    "LASER KNIGHTS"
+  ],
+  "contact": {
+    "issues": "https://github.com/Lemonszz/Biome-Makeover/issues",
+    "sources": "https://github.com/Lemonszz/Biome-Makeover/",
+    "homepage": "https://biomemakeover.laserknights.com"
+  },
+  "license": "CUSTOM",
+  "icon": "bm-logo.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "party.lemons.biomemakeover.fabric.BMFabric"
+    ]
+  },
+  "mixins": [
+    "biomemakeover.mixins.json",
+    "biomemakeover-common.mixins.json"
+  ],
+  "depends": {
+    "fabric-api": "*",
+    "minecraft": "\u003e\u003d1.20-beta.1",
+    "architectury": "\u003e\u003d9.0.0"
+  },
+  "accessWidener": "biomemakeover.accesswidener",
+  "jars": [
+    {
+      "file": "META-INF/jars/taniwha-fabric-1.20.0-5.1.1.jar"
+    }
+  ]
+}

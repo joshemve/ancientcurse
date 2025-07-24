@@ -616,6 +616,17 @@ public class ModBlocks {
             .sounds(BlockSoundGroup.STONE)
     );
     
+    // Blackstone Brick Stairs
+    public static final Block BLACKSTONE_STAIRS = new StairsBlock(
+        BLACKSTONE_BRICK.getDefaultState(),
+        FabricBlockSettings.copyOf(BLACKSTONE_BRICK)
+    );
+    
+    // Blackstone Brick Slab
+    public static final Block BLACKSTONE_SLAB = new SlabBlock(
+        FabricBlockSettings.copyOf(BLACKSTONE_BRICK)
+    );
+    
     public static final Block CURSED_EARTH = new CursedEarthBlock(
         FabricBlockSettings.create()
             .mapColor(MapColor.TERRACOTTA_PURPLE)
@@ -650,6 +661,17 @@ public class ModBlocks {
             .strength(1.5f, 6.0f)
             .requiresTool()
             .sounds(BlockSoundGroup.STONE)
+    );
+    
+    // Wind Swept Blackstone Stairs
+    public static final Block WIND_SWEPT_BLACKSTONE_STAIRS = new StairsBlock(
+        WIND_SWEPT_BLACKSTONE.getDefaultState(),
+        FabricBlockSettings.copyOf(WIND_SWEPT_BLACKSTONE)
+    );
+    
+    // Wind Swept Blackstone Slab
+    public static final Block WIND_SWEPT_BLACKSTONE_SLAB = new SlabBlock(
+        FabricBlockSettings.copyOf(WIND_SWEPT_BLACKSTONE)
     );
     
     // Bronze Blocks
@@ -1128,6 +1150,20 @@ public class ModBlocks {
             BLACKSTONE_BRICK
         );
         
+        // Register Blackstone Stairs
+        Registry.register(
+            Registries.BLOCK,
+            new Identifier(AncientCurse.MOD_ID, "blackstone_stairs"),
+            BLACKSTONE_STAIRS
+        );
+        
+        // Register Blackstone Slab
+        Registry.register(
+            Registries.BLOCK,
+            new Identifier(AncientCurse.MOD_ID, "blackstone_slab"),
+            BLACKSTONE_SLAB
+        );
+        
         // Register Hardened Black Stone
         Registry.register(
             Registries.BLOCK,
@@ -1140,6 +1176,20 @@ public class ModBlocks {
             Registries.BLOCK,
             new Identifier(AncientCurse.MOD_ID, "wind_swept_blackstone"),
             WIND_SWEPT_BLACKSTONE
+        );
+        
+        // Register Wind Swept Blackstone Stairs
+        Registry.register(
+            Registries.BLOCK,
+            new Identifier(AncientCurse.MOD_ID, "wind_swept_blackstone_stairs"),
+            WIND_SWEPT_BLACKSTONE_STAIRS
+        );
+        
+        // Register Wind Swept Blackstone Slab
+        Registry.register(
+            Registries.BLOCK,
+            new Identifier(AncientCurse.MOD_ID, "wind_swept_blackstone_slab"),
+            WIND_SWEPT_BLACKSTONE_SLAB
         );
         
         // Register Cursed Earth
@@ -1277,8 +1327,12 @@ public class ModBlocks {
         registerBlockItem(BLACK_SAND, ModItemGroup.ANCIENT_CURSE);
         registerBlockItem(BLACK_STONE, ModItemGroup.ANCIENT_CURSE);
         registerBlockItem(BLACKSTONE_BRICK, ModItemGroup.ANCIENT_CURSE);
+        registerBlockItem(BLACKSTONE_STAIRS, ModItemGroup.ANCIENT_CURSE);
+        registerBlockItem(BLACKSTONE_SLAB, ModItemGroup.ANCIENT_CURSE);
         registerBlockItem(HARDENED_BLACK_STONE, ModItemGroup.ANCIENT_CURSE);
         registerBlockItem(WIND_SWEPT_BLACKSTONE, ModItemGroup.ANCIENT_CURSE);
+        registerBlockItem(WIND_SWEPT_BLACKSTONE_STAIRS, ModItemGroup.ANCIENT_CURSE);
+        registerBlockItem(WIND_SWEPT_BLACKSTONE_SLAB, ModItemGroup.ANCIENT_CURSE);
         registerBlockItem(CURSED_EARTH, ModItemGroup.ANCIENT_CURSE);
         registerBlockItem(CLEANSING_STATION, ModItemGroup.ANCIENT_CURSE);
         

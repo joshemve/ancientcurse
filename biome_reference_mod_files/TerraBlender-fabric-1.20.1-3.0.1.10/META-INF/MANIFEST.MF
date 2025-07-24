@@ -1,0 +1,22 @@
+Manifest-Version: 1.0
+Specification-Title: TerraBlender
+Specification-Vendor: Adubbz
+Specification-Version: 3.0.1.10
+Implementation-Title: Fabric
+Implementation-Version: 3.0.1.10
+Implementation-Vendor: Adubbz
+Implementation-Timestamp: 2025-03-10T23:40:24+0000
+Timestamp: 1741650024865
+Built-On-Java: 17+35-LTS-2724 (Oracle Corporation)
+Build-On-Minecraft: 1.20.1
+Fabric-Jar-Type: classes
+Fabric-Gradle-Version: 8.5
+Fabric-Loom-Version: 1.4.6
+Fabric-Mixin-Compile-Extensions-Version: 0.6.0
+Fabric-Minecraft-Version: 1.20.1
+Fabric-Tiny-Remapper-Version: 0.8.9
+Fabric-Loader-Version: 0.14.21
+Fabric-Mixin-Version: 0.12.5+mixin.0.8.5
+Fabric-Mixin-Group: net.fabricmc
+Fabric-Mapping-Namespace: intermediary
+

@@ -3,30 +3,42 @@
   "generator": {
     "type": "minecraft:noise",
     "seed": 0,
-    "settings": "minecraft:overworld",
+    "settings": "ancientcurse:ancient_desert_flat",
     "biome_source": {
       "type": "minecraft:multi_noise",
       "biomes": [
         {
-          "biome": "minecraft:desert",
+          "biome": "ancientcurse:ancient_desert",
           "parameters": {
-            "temperature": 1.5,
-            "humidity": 0.0,
-            "continentalness": 0.5,
-            "erosion": 0.5,
-            "weirdness": 0.0,
+            "temperature": [0.8, 1.0],
+            "humidity": [-1.0, 0.2],
+            "continentalness": [-0.2, 0.6],
+            "erosion": [0.2, 1.0],
+            "weirdness": [-0.3, 0.3],
             "depth": 0.0,
             "offset": 0.0
           }
         },
         {
-          "biome": "minecraft:desert",
+          "biome": "ancientcurse:deshret_desert",
           "parameters": {
-            "temperature": 2.0,
-            "humidity": 0.0,
-            "continentalness": 0.8,
-            "erosion": 0.5,
-            "weirdness": 0.0,
+            "temperature": [0.9, 1.0],
+            "humidity": [-1.0, 0.1],
+            "continentalness": [0.0, 1.0],
+            "erosion": [0.3, 1.0],
+            "weirdness": [-0.2, 0.2],
+            "depth": 0.0,
+            "offset": 0.0
+          }
+        },
+        {
+          "biome": "ancientcurse:nile_river",
+          "parameters": {
+            "temperature": [0.7, 0.9],
+            "humidity": [0.3, 1.0],
+            "continentalness": [-1.0, 0.3],
+            "erosion": [-1.0, 0.4],
+            "weirdness": [-0.1, 0.1],
             "depth": 0.0,
             "offset": 0.0
           }
