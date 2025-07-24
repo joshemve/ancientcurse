@@ -162,7 +162,7 @@ public class AncientCurse implements ModInitializer {
         LOGGER.info("World presets registered - Ancient Curse world type available");
         
         com.ancientcurse.world.biome.ModBiomes.registerBiomes();
-        com.ancientcurse.world.ModChunkGenerators.register();
+        // TEMPORARILY DISABLED: com.ancientcurse.world.ModChunkGenerators.register();
     }
 
     /**
