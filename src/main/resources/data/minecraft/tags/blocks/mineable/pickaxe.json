@@ -1,6 +1,7 @@
 {
   "replace": false,
   "values": [
-    "ancientcurse:sandstone_brick_tiles"
+    "ancientcurse:sandstone_brick_tiles",
+    "ancientcurse:polished_bronze"
   ]
 }

@@ -20,6 +20,7 @@ import net.minecraft.sound.SoundEvent;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
 import net.minecraft.world.World;
+import net.minecraft.entity.Entity.RemovalReason;
 import software.bernie.geckolib.animatable.GeoEntity;
 
 import software.bernie.geckolib.core.animatable.GeoAnimatable;
@@ -637,6 +638,16 @@ public class AnubisEntity extends HostileEntity implements GeoEntity {
         // Remove boss bar when dead
         bossBar.clearPlayers();
         setBossPhase(BossPhase.DEAD);
+    }
+    
+    @Override
+    public void remove(RemovalReason reason) {
+        super.remove(reason);
+        
+        // Ensure boss bar is cleared when entity is removed for any reason
+        if (!this.getWorld().isClient && this.bossBar != null) {
+            this.bossBar.clearPlayers();
+        }
     }
 
     /* -------------------------------------------------------------------- */

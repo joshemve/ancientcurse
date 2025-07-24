@@ -9,6 +9,8 @@ import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.MapColor;
 import net.minecraft.block.SandBlock;
+import net.minecraft.block.SlabBlock;
+import net.minecraft.block.StairsBlock;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.registry.Registries;
@@ -29,6 +31,14 @@ public class ModBlocks {
             .ticksRandomly() // Enable random ticks for growth
     );
     
+    // Sycamore Planks - wooden planks made from sycamore logs
+    public static final Block SYCAMORE_PLANKS = new Block(
+        FabricBlockSettings.create()
+            .mapColor(MapColor.OAK_TAN)
+            .strength(2.0f, 3.0f)
+            .sounds(BlockSoundGroup.WOOD)
+    );
+    
     public static final Block SYCAMORE_LEAVES = new SycamoreLeafBlock(
         FabricBlockSettings.create()
             .mapColor(MapColor.DARK_GREEN)
@@ -42,6 +52,14 @@ public class ModBlocks {
         FabricBlockSettings.create()
             .mapColor(MapColor.TERRACOTTA_GRAY)
             .strength(2.0f)
+            .sounds(BlockSoundGroup.WOOD)
+    );
+    
+    // Date Palm Planks - wooden planks made from date palm logs
+    public static final Block DATE_PALM_PLANKS = new Block(
+        FabricBlockSettings.create()
+            .mapColor(MapColor.SPRUCE_BROWN)
+            .strength(2.0f, 3.0f)
             .sounds(BlockSoundGroup.WOOD)
     );
     
@@ -231,6 +249,23 @@ public class ModBlocks {
 
     // Mud Brick - dried mud formed into bricks
     public static final Block MUD_BRICK = new Block(
+        FabricBlockSettings.create()
+            .mapColor(MapColor.TERRACOTTA_BROWN)
+            .strength(1.0f)
+            .sounds(BlockSoundGroup.MUD_BRICKS)
+    );
+    
+    // Mud Brick Stairs
+    public static final Block MUD_BRICK_STAIRS = new StairsBlock(
+        MUD_BRICK.getDefaultState(),
+        FabricBlockSettings.create()
+            .mapColor(MapColor.TERRACOTTA_BROWN)
+            .strength(1.0f)
+            .sounds(BlockSoundGroup.MUD_BRICKS)
+    );
+    
+    // Mud Brick Slab
+    public static final Block MUD_BRICK_SLAB = new SlabBlock(
         FabricBlockSettings.create()
             .mapColor(MapColor.TERRACOTTA_BROWN)
             .strength(1.0f)
@@ -650,6 +685,12 @@ public class ModBlocks {
             SYCAMORE_FIG_LOG
         );
 
+        // Register the sycamore planks block
+        Registry.register(
+            Registries.BLOCK,
+            new Identifier(AncientCurse.MOD_ID, "sycamore_planks"),
+            SYCAMORE_PLANKS
+        );
 
         // Register the sycamore leaves block
         Registry.register(
@@ -668,6 +709,13 @@ public class ModBlocks {
             Registries.BLOCK,
             new Identifier(AncientCurse.MOD_ID, "date_palm_log"),
             DATE_PALM_LOG
+        );
+        
+        // Register the date palm planks block
+        Registry.register(
+            Registries.BLOCK,
+            new Identifier(AncientCurse.MOD_ID, "date_palm_planks"),
+            DATE_PALM_PLANKS
         );
         
         // Register Date Palm Leaves
@@ -822,6 +870,20 @@ public class ModBlocks {
             Registries.BLOCK,
             new Identifier(AncientCurse.MOD_ID, "mud_brick"),
             MUD_BRICK
+        );
+        
+        // Register Mud Brick Stairs
+        Registry.register(
+            Registries.BLOCK,
+            new Identifier(AncientCurse.MOD_ID, "mud_brick_stairs"),
+            MUD_BRICK_STAIRS
+        );
+        
+        // Register Mud Brick Slab
+        Registry.register(
+            Registries.BLOCK,
+            new Identifier(AncientCurse.MOD_ID, "mud_brick_slab"),
+            MUD_BRICK_SLAB
         );
         
         // Register Light Nile Marsh
@@ -1154,8 +1216,10 @@ public class ModBlocks {
         
         // Register normal blocks
         registerBlockItem(SYCAMORE_FIG_LOG, ModItemGroup.ANCIENT_CURSE);
+        registerBlockItem(SYCAMORE_PLANKS, ModItemGroup.ANCIENT_CURSE);
         registerBlockItem(SYCAMORE_LEAVES, ModItemGroup.ANCIENT_CURSE);
         registerBlockItem(DATE_PALM_LOG, ModItemGroup.ANCIENT_CURSE);
+        registerBlockItem(DATE_PALM_PLANKS, ModItemGroup.ANCIENT_CURSE);
         registerBlockItem(DATE_PALM_LEAVES, ModItemGroup.ANCIENT_CURSE);
         registerBlockItem(SMOOTH_SAND, ModItemGroup.ANCIENT_CURSE);
         registerBlockItem(NILE_RIVER_SAND, ModItemGroup.ANCIENT_CURSE);
@@ -1176,6 +1240,8 @@ public class ModBlocks {
         registerBlockItem(RIVERBED_CLAY, ModItemGroup.ANCIENT_CURSE);
         registerBlockItem(OBELISK_STONE, ModItemGroup.ANCIENT_CURSE);
         registerBlockItem(MUD_BRICK, ModItemGroup.ANCIENT_CURSE);
+        registerBlockItem(MUD_BRICK_STAIRS, ModItemGroup.ANCIENT_CURSE);
+        registerBlockItem(MUD_BRICK_SLAB, ModItemGroup.ANCIENT_CURSE);
         registerBlockItem(LIGHT_NILE_MARSH, ModItemGroup.ANCIENT_CURSE);
         registerBlockItem(REED_MAT, ModItemGroup.ANCIENT_CURSE);
         registerBlockItem(SUNBAKED_CLAY, ModItemGroup.ANCIENT_CURSE);

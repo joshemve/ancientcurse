@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "ancientcurse:sycamore_fig_log"
+    }
+  ],
+  "result": {
+    "item": "ancientcurse:sycamore_planks",
+    "count": 4
+  }
+}

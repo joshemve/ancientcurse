@@ -27,6 +27,14 @@ public class ConstructionBlocks {
             .requiresTool()
     );
     
+    // Metal variants
+    public static final Block POLISHED_BRONZE = new Block(
+        FabricBlockSettings.copyOf(Blocks.IRON_BLOCK)
+            .strength(5.0f, 6.0f)
+            .sounds(BlockSoundGroup.METAL)
+            .requiresTool()
+    );
+    
     /**
      * Registers all construction blocks to the game registry
      */
@@ -39,6 +47,13 @@ public class ConstructionBlocks {
             new Identifier(AncientCurse.MOD_ID, "sandstone_brick_tiles"),
             SANDSTONE_BRICK_TILES
         );
+        
+        // Register metal variants
+        Registry.register(
+            Registries.BLOCK,
+            new Identifier(AncientCurse.MOD_ID, "polished_bronze"),
+            POLISHED_BRONZE
+        );
     }
     
     /**
@@ -49,6 +64,9 @@ public class ConstructionBlocks {
         
         // Register sandstone variant items
         registerBlockItem(SANDSTONE_BRICK_TILES, "sandstone_brick_tiles", ModItemGroup.ANCIENT_CURSE);
+        
+        // Register metal variant items
+        registerBlockItem(POLISHED_BRONZE, "polished_bronze", ModItemGroup.ANCIENT_CURSE);
     }
     
     /**

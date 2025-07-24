@@ -3,6 +3,7 @@ package com.ancientcurse.entity;
 import com.ancientcurse.AncientCurse;
 import com.ancientcurse.ModEntities;
 import com.ancientcurse.ModSounds;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.goal.*;
@@ -30,6 +31,7 @@ import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.Heightmap;
 import net.minecraft.world.World;
+import net.minecraft.entity.Entity.RemovalReason;
 import software.bernie.geckolib.animatable.GeoEntity;
 import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
 import software.bernie.geckolib.core.animation.*;
@@ -1190,6 +1192,17 @@ public class ThothEntity extends HostileEntity implements GeoEntity {
         
         if (this.bossBar != null) {
             this.bossBar.clearPlayers();
+        }
+    }
+    
+    @Override
+    public void remove(RemovalReason reason) {
+        super.remove(reason);
+        
+        // Ensure boss bar is cleared when entity is removed for any reason
+        if (!this.getWorld().isClient && this.bossBar != null) {
+            this.bossBar.clearPlayers();
+            this.bossBar = null;
         }
     }
     

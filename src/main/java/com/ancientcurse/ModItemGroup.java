@@ -57,8 +57,10 @@ public class ModItemGroup {
                 
                 // Tree blocks
                 safeAdd(entries, ModBlocks.SYCAMORE_FIG_LOG);
+                safeAdd(entries, ModBlocks.SYCAMORE_PLANKS);
                 safeAdd(entries, ModBlocks.SYCAMORE_LEAVES);
                 safeAdd(entries, ModBlocks.DATE_PALM_LOG);
+                safeAdd(entries, ModBlocks.DATE_PALM_PLANKS);
                 safeAdd(entries, ModBlocks.DATE_PALM_LEAVES);
                 
                 // Terrain blocks
@@ -82,6 +84,8 @@ public class ModItemGroup {
                 safeAdd(entries, ModBlocks.RIVERBED_CLAY);
                 safeAdd(entries, ModBlocks.OBELISK_STONE);
                 safeAdd(entries, ModBlocks.MUD_BRICK);
+                safeAdd(entries, ModBlocks.MUD_BRICK_STAIRS);
+                safeAdd(entries, ModBlocks.MUD_BRICK_SLAB);
                 safeAdd(entries, ModBlocks.SUNBAKED_CLAY);
                 
                 // Pottery and vessel blocks
@@ -170,6 +174,7 @@ public class ModItemGroup {
                 
                 // Construction blocks (decorative building materials)
                 safeAdd(entries, com.ancientcurse.block.registry.ConstructionBlocks.SANDSTONE_BRICK_TILES);
+                safeAdd(entries, com.ancientcurse.block.registry.ConstructionBlocks.POLISHED_BRONZE);
                 
                 // Rock blocks
                 safeAdd(entries, ModBlocks.SMALL_ROCK);

@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": {
+    "item": "ancientcurse:mud_brick"
+  },
+  "result": "ancientcurse:mud_brick_stairs",
+  "count": 1
+}
