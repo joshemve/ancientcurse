@@ -157,12 +157,12 @@ public class AncientCurse implements ModInitializer {
      */
     private void registerWorldgenComponents() {
         // Enable world presets only - this will show the button
-        // com.ancientcurse.world.ModWorldPresets.register();
+        com.ancientcurse.world.ModWorldPresets.register();
         
         LOGGER.info("World presets registered - Ancient Curse world type available");
         
         com.ancientcurse.world.biome.ModBiomes.registerBiomes();
-        // TEMPORARILY DISABLED: com.ancientcurse.world.ModChunkGenerators.register();
+        com.ancientcurse.world.ModChunkGenerators.register();
     }
 
     /**
