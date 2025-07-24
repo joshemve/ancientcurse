@@ -1,8 +1,0 @@
-{
-  "parent": "minecraft:block/outer_stairs",
-  "textures": {
-    "bottom": "ancientcurse:block/mud_brick",
-    "side": "ancientcurse:block/mud_brick",
-    "top": "ancientcurse:block/mud_brick"
-  }
-}

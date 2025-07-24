@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "#  ",
+    "## ",
+    "###"
+  ],
+  "key": {
+    "#": {
+      "item": "ancientcurse:sycamore_planks"
+    }
+  },
+  "result": {
+    "item": "ancientcurse:sycamore_stairs",
+    "count": 4
+  }
+}

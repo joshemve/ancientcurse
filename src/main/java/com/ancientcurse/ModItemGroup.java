@@ -83,9 +83,10 @@ public class ModItemGroup {
                 safeAdd(entries, ModBlocks.DRIED_REED_THATCH);
                 safeAdd(entries, ModBlocks.RIVERBED_CLAY);
                 safeAdd(entries, ModBlocks.OBELISK_STONE);
-                safeAdd(entries, ModBlocks.MUD_BRICK);
-                safeAdd(entries, ModBlocks.MUD_BRICK_STAIRS);
-                safeAdd(entries, ModBlocks.MUD_BRICK_SLAB);
+                safeAdd(entries, ModBlocks.NILE_MUD_BRICK);
+                safeAdd(entries, ModBlocks.NILE_MUD_BRICK_STAIRS);
+                safeAdd(entries, ModBlocks.NILE_MUD_BRICK_SLAB);
+                safeAdd(entries, ModBlocks.NILE_MUD_BRICK_WALL);
                 safeAdd(entries, ModBlocks.SUNBAKED_CLAY);
                 
                 // Pottery and vessel blocks
@@ -154,6 +155,9 @@ public class ModItemGroup {
                 safeAdd(entries, ModItems.BRONZE_CHESTPLATE);
                 safeAdd(entries, ModItems.BRONZE_LEGGINGS);
                 safeAdd(entries, ModItems.BRONZE_BOOTS);
+                
+                // Ancient Egyptian Armor
+                safeAdd(entries, ModItems.VEIL_OF_ANUBIS);
                 
                 // Crops (Blocks themselves, for placing if needed)
                 safeAdd(entries, ModBlocks.FLAX);

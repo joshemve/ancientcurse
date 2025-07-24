@@ -11,6 +11,7 @@ import net.minecraft.block.MapColor;
 import net.minecraft.block.SandBlock;
 import net.minecraft.block.SlabBlock;
 import net.minecraft.block.StairsBlock;
+import net.minecraft.block.WallBlock;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.registry.Registries;
@@ -247,25 +248,33 @@ public class ModBlocks {
             .sounds(BlockSoundGroup.STONE)
     );
 
-    // Mud Brick - dried mud formed into bricks
-    public static final Block MUD_BRICK = new Block(
+    // Nile Mud Brick - dried mud from the Nile formed into bricks
+    public static final Block NILE_MUD_BRICK = new Block(
         FabricBlockSettings.create()
             .mapColor(MapColor.TERRACOTTA_BROWN)
             .strength(1.0f)
             .sounds(BlockSoundGroup.MUD_BRICKS)
     );
     
-    // Mud Brick Stairs
-    public static final Block MUD_BRICK_STAIRS = new StairsBlock(
-        MUD_BRICK.getDefaultState(),
+    // Nile Mud Brick Stairs
+    public static final Block NILE_MUD_BRICK_STAIRS = new StairsBlock(
+        NILE_MUD_BRICK.getDefaultState(),
         FabricBlockSettings.create()
             .mapColor(MapColor.TERRACOTTA_BROWN)
             .strength(1.0f)
             .sounds(BlockSoundGroup.MUD_BRICKS)
     );
     
-    // Mud Brick Slab
-    public static final Block MUD_BRICK_SLAB = new SlabBlock(
+    // Nile Mud Brick Slab
+    public static final Block NILE_MUD_BRICK_SLAB = new SlabBlock(
+        FabricBlockSettings.create()
+            .mapColor(MapColor.TERRACOTTA_BROWN)
+            .strength(1.0f)
+            .sounds(BlockSoundGroup.MUD_BRICKS)
+    );
+    
+    // Nile Mud Brick Wall
+    public static final Block NILE_MUD_BRICK_WALL = new WallBlock(
         FabricBlockSettings.create()
             .mapColor(MapColor.TERRACOTTA_BROWN)
             .strength(1.0f)
@@ -887,25 +896,32 @@ public class ModBlocks {
             OBELISK_STONE
         );
         
-        // Register Mud Brick
+        // Register Nile Mud Brick
         Registry.register(
             Registries.BLOCK,
-            new Identifier(AncientCurse.MOD_ID, "mud_brick"),
-            MUD_BRICK
+            new Identifier(AncientCurse.MOD_ID, "nile_mud_brick"),
+            NILE_MUD_BRICK
         );
         
-        // Register Mud Brick Stairs
+        // Register Nile Mud Brick Stairs
         Registry.register(
             Registries.BLOCK,
-            new Identifier(AncientCurse.MOD_ID, "mud_brick_stairs"),
-            MUD_BRICK_STAIRS
+            new Identifier(AncientCurse.MOD_ID, "nile_mud_brick_stairs"),
+            NILE_MUD_BRICK_STAIRS
         );
         
-        // Register Mud Brick Slab
+        // Register Nile Mud Brick Slab
         Registry.register(
             Registries.BLOCK,
-            new Identifier(AncientCurse.MOD_ID, "mud_brick_slab"),
-            MUD_BRICK_SLAB
+            new Identifier(AncientCurse.MOD_ID, "nile_mud_brick_slab"),
+            NILE_MUD_BRICK_SLAB
+        );
+        
+        // Register Nile Mud Brick Wall
+        Registry.register(
+            Registries.BLOCK,
+            new Identifier(AncientCurse.MOD_ID, "nile_mud_brick_wall"),
+            NILE_MUD_BRICK_WALL
         );
         
         // Register Light Nile Marsh
@@ -1289,9 +1305,10 @@ public class ModBlocks {
         registerBlockItem(DRIED_REED_THATCH, ModItemGroup.ANCIENT_CURSE);
         registerBlockItem(RIVERBED_CLAY, ModItemGroup.ANCIENT_CURSE);
         registerBlockItem(OBELISK_STONE, ModItemGroup.ANCIENT_CURSE);
-        registerBlockItem(MUD_BRICK, ModItemGroup.ANCIENT_CURSE);
-        registerBlockItem(MUD_BRICK_STAIRS, ModItemGroup.ANCIENT_CURSE);
-        registerBlockItem(MUD_BRICK_SLAB, ModItemGroup.ANCIENT_CURSE);
+        registerBlockItem(NILE_MUD_BRICK, ModItemGroup.ANCIENT_CURSE);
+        registerBlockItem(NILE_MUD_BRICK_STAIRS, ModItemGroup.ANCIENT_CURSE);
+        registerBlockItem(NILE_MUD_BRICK_SLAB, ModItemGroup.ANCIENT_CURSE);
+        registerBlockItem(NILE_MUD_BRICK_WALL, ModItemGroup.ANCIENT_CURSE);
         registerBlockItem(LIGHT_NILE_MARSH, ModItemGroup.ANCIENT_CURSE);
         registerBlockItem(REED_MAT, ModItemGroup.ANCIENT_CURSE);
         registerBlockItem(SUNBAKED_CLAY, ModItemGroup.ANCIENT_CURSE);

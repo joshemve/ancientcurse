@@ -3,7 +3,7 @@
   "generator": {
     "type": "minecraft:noise",
     "seed": 0,
-    "settings": "ancientcurse:ancient_desert_flat",
+    "settings": "ancientcurse:simple_flat_desert",
     "biome_source": {
       "type": "minecraft:multi_noise",
       "biomes": [

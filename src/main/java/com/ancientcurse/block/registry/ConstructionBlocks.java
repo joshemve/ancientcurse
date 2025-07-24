@@ -1,11 +1,14 @@
 package com.ancientcurse.block.registry;
 
 import com.ancientcurse.AncientCurse;
+import com.ancientcurse.ModBlocks;
 import com.ancientcurse.ModItemGroup;
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
 import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
+import net.minecraft.block.SlabBlock;
+import net.minecraft.block.StairsBlock;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.registry.Registries;
@@ -35,6 +38,26 @@ public class ConstructionBlocks {
             .requiresTool()
     );
     
+    // Wood stairs
+    public static final Block SYCAMORE_STAIRS = new StairsBlock(
+        ModBlocks.SYCAMORE_PLANKS.getDefaultState(),
+        FabricBlockSettings.copyOf(ModBlocks.SYCAMORE_PLANKS)
+    );
+    
+    public static final Block DATE_PALM_STAIRS = new StairsBlock(
+        ModBlocks.DATE_PALM_PLANKS.getDefaultState(),
+        FabricBlockSettings.copyOf(ModBlocks.DATE_PALM_PLANKS)
+    );
+    
+    // Wood slabs
+    public static final Block SYCAMORE_SLAB = new SlabBlock(
+        FabricBlockSettings.copyOf(ModBlocks.SYCAMORE_PLANKS)
+    );
+    
+    public static final Block DATE_PALM_SLAB = new SlabBlock(
+        FabricBlockSettings.copyOf(ModBlocks.DATE_PALM_PLANKS)
+    );
+    
     /**
      * Registers all construction blocks to the game registry
      */
@@ -54,6 +77,30 @@ public class ConstructionBlocks {
             new Identifier(AncientCurse.MOD_ID, "polished_bronze"),
             POLISHED_BRONZE
         );
+        
+        // Register wood stairs
+        Registry.register(
+            Registries.BLOCK,
+            new Identifier(AncientCurse.MOD_ID, "sycamore_stairs"),
+            SYCAMORE_STAIRS
+        );
+        Registry.register(
+            Registries.BLOCK,
+            new Identifier(AncientCurse.MOD_ID, "date_palm_stairs"),
+            DATE_PALM_STAIRS
+        );
+        
+        // Register wood slabs
+        Registry.register(
+            Registries.BLOCK,
+            new Identifier(AncientCurse.MOD_ID, "sycamore_slab"),
+            SYCAMORE_SLAB
+        );
+        Registry.register(
+            Registries.BLOCK,
+            new Identifier(AncientCurse.MOD_ID, "date_palm_slab"),
+            DATE_PALM_SLAB
+        );
     }
     
     /**
@@ -67,6 +114,14 @@ public class ConstructionBlocks {
         
         // Register metal variant items
         registerBlockItem(POLISHED_BRONZE, "polished_bronze", ModItemGroup.ANCIENT_CURSE);
+        
+        // Register wood stair items
+        registerBlockItem(SYCAMORE_STAIRS, "sycamore_stairs", ModItemGroup.ANCIENT_CURSE);
+        registerBlockItem(DATE_PALM_STAIRS, "date_palm_stairs", ModItemGroup.ANCIENT_CURSE);
+        
+        // Register wood slab items
+        registerBlockItem(SYCAMORE_SLAB, "sycamore_slab", ModItemGroup.ANCIENT_CURSE);
+        registerBlockItem(DATE_PALM_SLAB, "date_palm_slab", ModItemGroup.ANCIENT_CURSE);
     }
     
     /**

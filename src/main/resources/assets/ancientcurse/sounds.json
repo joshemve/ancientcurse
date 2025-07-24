@@ -1,2 +1,52 @@
 {
+  "thoth_ambient": {
+    "subtitle": "subtitles.ancientcurse.thoth_ambient",
+    "sounds": [
+      "ancientcurse:thoth/ambient"
+    ]
+  },
+  "thoth_attack_magic_ball": {
+    "subtitle": "subtitles.ancientcurse.thoth_attack_magic_ball",
+    "sounds": [
+      "ancientcurse:thoth/attack_magic_ball"
+    ]
+  },
+  "thoth_attack_scroll_blast": {
+    "subtitle": "subtitles.ancientcurse.thoth_attack_scroll_blast",
+    "sounds": [
+      "ancientcurse:thoth/attack_scroll_blast"
+    ]
+  },
+  "thoth_attack_time_bend": {
+    "subtitle": "subtitles.ancientcurse.thoth_attack_time_bend",
+    "sounds": [
+      "ancientcurse:thoth/attack_time_bend"
+    ]
+  },
+  "thoth_spawn": {
+    "subtitle": "subtitles.ancientcurse.thoth_spawn",
+    "sounds": [
+      "ancientcurse:thoth/spawn"
+    ]
+  },
+  "thoth_death": {
+    "subtitle": "subtitles.ancientcurse.thoth_death",
+    "sounds": [
+      "ancientcurse:thoth/death"
+    ]
+  },
+  "thoth_hurt": {
+    "subtitle": "subtitles.ancientcurse.thoth_hurt",
+    "sounds": [
+      "ancientcurse:thoth/hurt1",
+      "ancientcurse:thoth/hurt2",
+      "ancientcurse:thoth/hurt3"
+    ]
+  },
+  "thoth_summon": {
+    "subtitle": "subtitles.ancientcurse.thoth_summon",
+    "sounds": [
+      "ancientcurse:thoth/summon"
+    ]
+  }
 }

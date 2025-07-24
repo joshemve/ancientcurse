@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "ancientcurse:block/sycamore_slab"
+    },
+    "type=double": {
+      "model": "ancientcurse:block/sycamore_planks"
+    },
+    "type=top": {
+      "model": "ancientcurse:block/sycamore_slab_top"
+    }
+  }
+}

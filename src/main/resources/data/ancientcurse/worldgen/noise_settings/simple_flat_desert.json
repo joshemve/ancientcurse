@@ -4,10 +4,7 @@
     "Name": "minecraft:stone"
   },
   "default_fluid": {
-    "Name": "minecraft:water",
-    "Properties": {
-      "level": "0"
-    }
+    "Name": "minecraft:air"
   },
   "disable_mob_generation": false,
   "legacy_random_source": false,
@@ -39,7 +36,7 @@
       "from_value": 1.0,
       "from_y": -64,
       "to_value": -1.0,
-      "to_y": 65
+      "to_y": 80
     },
     "fluid_level_floodedness": {
       "type": "minecraft:constant",
@@ -54,7 +51,7 @@
       "from_value": 1.0,
       "from_y": -64,
       "to_value": -1.0,
-      "to_y": 65
+      "to_y": 80
     },
     "lava": {
       "type": "minecraft:constant",

@@ -244,6 +244,9 @@ public class ModItems {
     public static final Item BRONZE_CHESTPLATE = new Item(new FabricItemSettings());
     public static final Item BRONZE_LEGGINGS = new Item(new FabricItemSettings());
     public static final Item BRONZE_BOOTS = new Item(new FabricItemSettings());
+    
+    // Ancient Egyptian armor
+    public static final Item VEIL_OF_ANUBIS = new com.ancientcurse.item.armor.VeilOfAnubisItem();
 
     /**
      * Registers all mod items
@@ -458,6 +461,13 @@ public class ModItems {
             Registries.ITEM,
             new Identifier(AncientCurse.MOD_ID, "bronze_boots"),
             BRONZE_BOOTS
+        );
+        
+        // Register Veil of Anubis
+        Registry.register(
+            Registries.ITEM,
+            new Identifier(AncientCurse.MOD_ID, "veil_of_anubis"),
+            VEIL_OF_ANUBIS
         );
         
         // Register Scarab Talisman

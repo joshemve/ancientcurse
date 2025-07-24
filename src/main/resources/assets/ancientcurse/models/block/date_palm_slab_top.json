@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/slab_top",
+  "textures": {
+    "bottom": "ancientcurse:block/date_palm_planks",
+    "top": "ancientcurse:block/date_palm_planks",
+    "side": "ancientcurse:block/date_palm_planks"
+  }
+}

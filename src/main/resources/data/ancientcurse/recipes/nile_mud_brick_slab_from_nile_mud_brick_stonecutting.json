@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": {
+    "item": "ancientcurse:nile_mud_brick"
+  },
+  "result": "ancientcurse:nile_mud_brick_slab",
+  "count": 2
+}
