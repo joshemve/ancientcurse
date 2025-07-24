@@ -187,8 +187,12 @@ public class ModItemGroup {
                 safeAdd(entries, ModBlocks.BLACK_SAND);
                 safeAdd(entries, ModBlocks.BLACK_STONE);
                 safeAdd(entries, ModBlocks.BLACKSTONE_BRICK);
+                safeAdd(entries, ModBlocks.BLACKSTONE_STAIRS);
+                safeAdd(entries, ModBlocks.BLACKSTONE_SLAB);
                 safeAdd(entries, ModBlocks.HARDENED_BLACK_STONE);
                 safeAdd(entries, ModBlocks.WIND_SWEPT_BLACKSTONE);
+                safeAdd(entries, ModBlocks.WIND_SWEPT_BLACKSTONE_STAIRS);
+                safeAdd(entries, ModBlocks.WIND_SWEPT_BLACKSTONE_SLAB);
                 safeAdd(entries, ModBlocks.CURSED_EARTH);
                 safeAdd(entries, ModBlocks.CLEANSING_STATION);
 
