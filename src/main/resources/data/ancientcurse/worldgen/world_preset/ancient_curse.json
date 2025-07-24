@@ -4,7 +4,7 @@
       "type": "minecraft:overworld",
       "generator": {
         "type": "minecraft:noise",
-        "settings": "ancientcurse:ancient_egyptian_desert",
+        "settings": "ancientcurse:simple_flat_desert",
         "biome_source": {
           "type": "minecraft:multi_noise",
           "biomes": [
