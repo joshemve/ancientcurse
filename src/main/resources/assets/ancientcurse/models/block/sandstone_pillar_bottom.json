@@ -2,7 +2,7 @@
   "parent": "minecraft:block/cube_bottom_top",
   "textures": {
     "top": "ancientcurse:block/sandstone_pillar_middle",
-    "bottom": "ancientcurse:block/sandstone_pillar_flat",
-    "side": "ancientcurse:block/sandstone_pillar_flat"
+    "bottom": "ancientcurse:block/sandstone_pillar_middle",
+    "side": "ancientcurse:block/sandstone_pillar_flat_bottom"
   }
 }

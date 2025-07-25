@@ -27,9 +27,9 @@ public class SolarSpireRenderer extends GeoBlockRenderer<SolarSpireBlockEntity> 
         if (animatable.hasEye()) {
             poseStack.push();
             
-            // Find the locator anchor in the model (assuming it's named "locator_anchor")
-            // Position above the spire (adjust these values based on your model)
-            poseStack.translate(0.5, 2.5, 0.5); // Center and above the spire
+            // Use the locator anchor from the model - "top_particle_locator_anchor" at [0, 47, 0]
+            // The model coordinates are in pixels, so we need to convert to blocks (divide by 16)
+            poseStack.translate(0.5, 47.0 / 16.0, 0.5); // Center X/Z, and use the Y from locator
             
             // Apply bobbing effect
             float bobOffset = animatable.getEyeBobOffset();
