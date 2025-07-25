@@ -134,7 +134,7 @@ public class CursedEarthManager {
             }
             
             // ALSO check if we're in an active cleansing zone
-            if (com.ancientcurse.block.CleansingStationBlock.isInActiveCleansingZone(request.toPos)) {
+            if (com.ancientcurse.block.SolarSpireBlock.isInActiveCleansingZone(request.toPos)) {
                 return false; // Don't spread into active cleansing zones
             }
             

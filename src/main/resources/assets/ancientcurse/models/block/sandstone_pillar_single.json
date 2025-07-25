@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_column",
+  "textures": {
+    "end": "ancientcurse:block/sandstone_pillar_flat_top",
+    "side": "ancientcurse:block/sandstone_pillar_flat"
+  }
+}

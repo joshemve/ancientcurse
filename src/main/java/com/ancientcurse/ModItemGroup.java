@@ -95,6 +95,8 @@ public class ModItemGroup {
                 safeAdd(entries, ModBlocks.NILE_MUD_BRICK_STAIRS);
                 safeAdd(entries, ModBlocks.NILE_MUD_BRICK_SLAB);
                 safeAdd(entries, ModBlocks.NILE_MUD_BRICK_WALL);
+                safeAdd(entries, ModBlocks.SANDSTONE_BRICKS);
+                safeAdd(entries, ModBlocks.SANDSTONE_PILLAR);
                 safeAdd(entries, ModBlocks.SUNBAKED_CLAY);
                 
                 // Pottery and vessel blocks
@@ -170,6 +172,7 @@ public class ModItemGroup {
                 
                 // Ancient Egyptian Armor
                 safeAdd(entries, ModItems.VEIL_OF_ANUBIS);
+                safeAdd(entries, ModItems.CEREMONIAL_CHESTWRAP);
                 
                 // Crops (Blocks themselves, for placing if needed)
                 safeAdd(entries, ModBlocks.FLAX);
@@ -210,7 +213,7 @@ public class ModItemGroup {
                 safeAdd(entries, ModBlocks.WIND_SWEPT_BLACKSTONE_STAIRS);
                 safeAdd(entries, ModBlocks.WIND_SWEPT_BLACKSTONE_SLAB);
                 safeAdd(entries, ModBlocks.CURSED_EARTH);
-                safeAdd(entries, ModBlocks.CLEANSING_STATION);
+                safeAdd(entries, ModBlocks.SOLAR_SPIRE);
 
                 // Necrostone blocks
                 safeAdd(entries, com.ancientcurse.block.registry.NecrostoneBlocks.NECROSTONE_BRICK);

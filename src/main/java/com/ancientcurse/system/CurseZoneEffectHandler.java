@@ -1,8 +1,12 @@
 package com.ancientcurse.system;
 
+import com.ancientcurse.effect.KhamsinCurseEffect;
+import com.ancientcurse.effect.ModStatusEffects;
 import com.ancientcurse.util.AnkhManager;
 import com.ancientcurse.util.CurseZoneArea;
 import com.ancientcurse.util.CurseZoneAreaManager;
+import net.minecraft.entity.effect.StatusEffect;
+import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.math.BlockPos;
@@ -54,13 +58,100 @@ public class CurseZoneEffectHandler {
                     
                     // Apply Khamsin curse if configured
                     if (zone.getKhamsinLevel() > 0 && zone.isEffectsEnabled()) {
-                        // TODO: Apply Khamsin curse effect based on level
-                        // This would integrate with the existing curse system
+                        applyKhamsinCurse(player, zone.getKhamsinLevel());
                     }
                     
                     // Only process the first zone the player is in
                     break;
                 }
+            }
+        }
+    }
+    
+    /**
+     * Applies Khamsin curse effect to a player based on the zone's level
+     */
+    private static void applyKhamsinCurse(ServerPlayerEntity player, int level) {
+        // Clamp level to valid range
+        level = Math.max(1, Math.min(5, level));
+        
+        // Get the appropriate status effect based on the level
+        StatusEffect effect = switch (level) {
+            case 1 -> ModStatusEffects.KHAMSIN_CURSE_STAGE_1;
+            case 2 -> ModStatusEffects.KHAMSIN_CURSE_STAGE_2;
+            case 3 -> ModStatusEffects.KHAMSIN_CURSE_STAGE_3;
+            case 4 -> ModStatusEffects.KHAMSIN_CURSE_STAGE_4;
+            case 5 -> ModStatusEffects.KHAMSIN_CURSE_STAGE_5;
+            default -> ModStatusEffects.KHAMSIN_CURSE_STAGE_1;
+        };
+        
+        // Check if player already has a khamsin curse
+        boolean hasAnyCurse = player.hasStatusEffect(ModStatusEffects.KHAMSIN_CURSE_STAGE_1) ||
+                              player.hasStatusEffect(ModStatusEffects.KHAMSIN_CURSE_STAGE_2) ||
+                              player.hasStatusEffect(ModStatusEffects.KHAMSIN_CURSE_STAGE_3) ||
+                              player.hasStatusEffect(ModStatusEffects.KHAMSIN_CURSE_STAGE_4) ||
+                              player.hasStatusEffect(ModStatusEffects.KHAMSIN_CURSE_STAGE_5);
+        
+        // Only apply if player doesn't already have a curse or if the zone level is higher
+        if (!hasAnyCurse) {
+            // Apply the new effect with a short duration that refreshes while in the zone
+            player.addStatusEffect(new StatusEffectInstance(
+                effect,
+                200, // 10 seconds, will refresh every 3 seconds while in zone
+                0, // Amplifier
+                false, // Ambient
+                true, // Show particles
+                true  // Show icon
+            ));
+        } else {
+            // Check if we need to upgrade the curse level
+            StatusEffectInstance existingCurse = null;
+            int currentLevel = 0;
+            
+            for (int i = 1; i <= 5; i++) {
+                StatusEffect checkEffect = switch (i) {
+                    case 1 -> ModStatusEffects.KHAMSIN_CURSE_STAGE_1;
+                    case 2 -> ModStatusEffects.KHAMSIN_CURSE_STAGE_2;
+                    case 3 -> ModStatusEffects.KHAMSIN_CURSE_STAGE_3;
+                    case 4 -> ModStatusEffects.KHAMSIN_CURSE_STAGE_4;
+                    case 5 -> ModStatusEffects.KHAMSIN_CURSE_STAGE_5;
+                    default -> null;
+                };
+                
+                if (checkEffect != null && player.hasStatusEffect(checkEffect)) {
+                    existingCurse = player.getStatusEffect(checkEffect);
+                    currentLevel = i;
+                    break;
+                }
+            }
+            
+            // If zone level is higher than current curse level, upgrade it
+            if (level > currentLevel) {
+                // Remove current curse
+                if (existingCurse != null) {
+                    player.removeStatusEffectInternal(existingCurse.getEffectType());
+                }
+                
+                // Apply new curse
+                player.addStatusEffect(new StatusEffectInstance(
+                    effect,
+                    200, // 10 seconds
+                    0,
+                    false,
+                    true,
+                    true
+                ));
+            } else if (existingCurse != null && existingCurse.getDuration() < 100) {
+                // Refresh the existing curse duration if it's about to expire
+                player.removeStatusEffectInternal(existingCurse.getEffectType());
+                player.addStatusEffect(new StatusEffectInstance(
+                    existingCurse.getEffectType(),
+                    200, // Refresh to 10 seconds
+                    0,
+                    false,
+                    true,
+                    true
+                ));
             }
         }
     }

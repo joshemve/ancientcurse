@@ -173,6 +173,9 @@ public class CurseZonePackets {
             
             // Sync to all players
             sendZoneAreaSync(world, areaId, pos1, pos2, zoneName, khamsinLevel, ankhDrain, effectsEnabled);
+            
+            // Clear the wand selection for this player after zone creation
+            sendWandSelectionClear(world, player);
         });
     }
     

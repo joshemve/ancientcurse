@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "activated=false": {
+      "model": "ancientcurse:block/solar_spire"
+    },
+    "activated=true": {
+      "model": "ancientcurse:block/solar_spire"
+    }
+  }
+}

@@ -82,7 +82,7 @@ public class ModEntities {
         Registries.ENTITY_TYPE,
         new Identifier(AncientCurse.MOD_ID, "locus"),
         FabricEntityTypeBuilder.create(SpawnGroup.MONSTER, LocusEntity::new)
-            .dimensions(EntityDimensions.fixed(1.0f, 1.5f))
+            .dimensions(EntityDimensions.fixed(0.7f, 0.5f)) // Smaller, more accurate to flying insect
             .trackRangeBlocks(64)
             .trackedUpdateRate(3)
             .build()
@@ -93,7 +93,7 @@ public class ModEntities {
         Registries.ENTITY_TYPE,
         new Identifier(AncientCurse.MOD_ID, "baby_locus"),
         FabricEntityTypeBuilder.create(SpawnGroup.MONSTER, BabyLocusEntity::new)
-            .dimensions(EntityDimensions.fixed(0.5f, 0.75f)) // Half the size of adult
+            .dimensions(EntityDimensions.fixed(0.35f, 0.25f)) // Half the size of adult
             .trackRangeBlocks(32)
             .trackedUpdateRate(3)
             .build()
@@ -104,7 +104,7 @@ public class ModEntities {
         Registries.ENTITY_TYPE,
         new Identifier(AncientCurse.MOD_ID, "scarab_beetle"),
         FabricEntityTypeBuilder.create(SpawnGroup.CREATURE, ScarabBeetleEntity::new)
-            .dimensions(EntityDimensions.fixed(1.0f, 0.8f)) // Wide but low for beetle
+            .dimensions(EntityDimensions.fixed(1.4f, 0.6f)) // Wider to match model proportions
             .trackRangeBlocks(48)
             .trackedUpdateRate(3)
             .build()

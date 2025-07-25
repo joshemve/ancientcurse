@@ -4,10 +4,12 @@ import com.ancientcurse.AncientCurse;
 import com.ancientcurse.ModEntities;
 import com.ancientcurse.ModItems;
 import com.ancientcurse.ModBlocks;
+import com.ancientcurse.ModBlockEntities;
 import com.ancientcurse.block.registry.PotteryBlocks;
 import com.ancientcurse.client.model.*;
 import com.ancientcurse.client.render.*;
 import com.ancientcurse.client.render.entity.*;
+import com.ancientcurse.client.renderer.block.SolarSpireRenderer;
 import com.ancientcurse.client.render.item.SerpentStaffRenderer;
 import com.ancientcurse.client.color.RockColorProvider;
 import com.ancientcurse.entity.model.*;
@@ -20,6 +22,7 @@ import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
+import net.fabricmc.fabric.api.client.rendering.v1.BlockEntityRendererRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.minecraft.client.item.ModelPredicateProviderRegistry;
 import net.minecraft.client.render.RenderLayer;
@@ -59,6 +62,9 @@ public class AncientCurseClient implements ClientModInitializer {
         
         // Register entity renderers FIRST before anything else
         registerEntityRenderers();
+        
+        // Register block entity renderers
+        registerBlockEntityRenderers();
         
         // Register render layers for transparent blocks
         registerRenderLayers();
@@ -160,6 +166,16 @@ public class AncientCurseClient implements ClientModInitializer {
         
         // Register the Thoth Magic Ball projectile renderer
         EntityRendererRegistry.register(ModEntities.THOTH_MAGIC_BALL, FlyingItemEntityRenderer::new);
+    }
+    
+    /**
+     * Register block entity renderers for the mod
+     */
+    private void registerBlockEntityRenderers() {
+        AncientCurse.LOGGER.info("Registering block entity renderers for " + AncientCurse.MOD_ID);
+        
+        // Register the Solar Spire renderer
+        BlockEntityRendererRegistry.register(ModBlockEntities.SOLAR_SPIRE, SolarSpireRenderer::new);
     }
     
     /**

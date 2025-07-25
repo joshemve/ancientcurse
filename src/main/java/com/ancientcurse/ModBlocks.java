@@ -682,14 +682,30 @@ public class ModBlocks {
             .luminance(state -> 2) // Slight glow effect
     );
     
-    // Cleansing Station - Used with Eternal Sigil to cleanse ALL connected cursed earth
-    public static final Block CLEANSING_STATION = new CleansingStationBlock(
+    // Solar Spire - Used with Eye of Apophis to cleanse ALL connected cursed earth
+    public static final Block SOLAR_SPIRE = new SolarSpireBlock(
         FabricBlockSettings.create()
-            .mapColor(MapColor.WHITE)
+            .mapColor(MapColor.GOLD)
             .strength(3.5f, 1200.0f) // Strong like enchantment table
             .requiresTool()
             .sounds(BlockSoundGroup.STONE)
-            .luminance(state -> state.get(CleansingStationBlock.ACTIVATED) ? 15 : 7)
+            .luminance(state -> state.get(SolarSpireBlock.ACTIVATED) ? 15 : 7) // Bright when active
+    );
+    
+    public static final Block SANDSTONE_BRICKS = new Block(
+        FabricBlockSettings.create()
+            .mapColor(MapColor.PALE_YELLOW)
+            .strength(1.5f, 6.0f)
+            .requiresTool()
+            .sounds(BlockSoundGroup.STONE)
+    );
+    
+    public static final Block SANDSTONE_PILLAR = new SandstonePillarBlock(
+        FabricBlockSettings.create()
+            .mapColor(MapColor.PALE_YELLOW)
+            .strength(1.5f, 6.0f)
+            .requiresTool()
+            .sounds(BlockSoundGroup.STONE)
     );
     
     public static final Block HARDENED_BLACK_STONE = new Block(
@@ -1318,11 +1334,11 @@ public class ModBlocks {
             CURSED_EARTH
         );
         
-        // Register Cleansing Station
+        // Register Solar Spire
         Registry.register(
             Registries.BLOCK,
-            new Identifier(AncientCurse.MOD_ID, "cleansing_station"),
-            CLEANSING_STATION
+            new Identifier(AncientCurse.MOD_ID, "solar_spire"),
+            SOLAR_SPIRE
         );
         
         // Register Bronze Blocks
@@ -1330,6 +1346,20 @@ public class ModBlocks {
             Registries.BLOCK,
             new Identifier(AncientCurse.MOD_ID, "bronze_block"),
             BRONZE_BLOCK
+        );
+        
+        // Register Sandstone Bricks
+        Registry.register(
+            Registries.BLOCK,
+            new Identifier(AncientCurse.MOD_ID, "sandstone_bricks"),
+            SANDSTONE_BRICKS
+        );
+        
+        // Register Sandstone Pillar
+        Registry.register(
+            Registries.BLOCK,
+            new Identifier(AncientCurse.MOD_ID, "sandstone_pillar"),
+            SANDSTONE_PILLAR
         );
         
         // Register sandstone torches
@@ -1484,7 +1514,7 @@ public class ModBlocks {
         registerBlockItem(WIND_SWEPT_BLACKSTONE_STAIRS, ModItemGroup.ANCIENT_CURSE);
         registerBlockItem(WIND_SWEPT_BLACKSTONE_SLAB, ModItemGroup.ANCIENT_CURSE);
         registerBlockItem(CURSED_EARTH, ModItemGroup.ANCIENT_CURSE);
-        registerBlockItem(CLEANSING_STATION, ModItemGroup.ANCIENT_CURSE);
+        registerBlockItem(SOLAR_SPIRE, ModItemGroup.ANCIENT_CURSE);
         
         // Register Bronze Blocks
         registerBlockItem(BRONZE_BLOCK, ModItemGroup.ANCIENT_CURSE);
@@ -1492,6 +1522,12 @@ public class ModBlocks {
         // Register Sandstone Torch
         registerBlockItem(SANDSTONE_TORCH, ModItemGroup.ANCIENT_CURSE);
         // Note: Wall torch doesn't need a block item as it's placed by the main torch
+        
+        // Register Sandstone Bricks
+        registerBlockItem(SANDSTONE_BRICKS, ModItemGroup.ANCIENT_CURSE);
+        
+        // Register Sandstone Pillar
+        registerBlockItem(SANDSTONE_PILLAR, ModItemGroup.ANCIENT_CURSE);
         
         // Register Black Stone Torch
         registerBlockItem(BLACK_STONE_TORCH, ModItemGroup.ANCIENT_CURSE);

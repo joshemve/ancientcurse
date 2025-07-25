@@ -101,6 +101,9 @@
 
   "item.ancientcurse.veil_of_anubis": "Veil of Anubis",
   "item.ancientcurse.veil_of_anubis.tooltip": "Sacred headpiece of the death god",
+  
+  "item.ancientcurse.ceremonial_chestwrap": "Ceremonial Chestwrap",
+  "item.ancientcurse.ceremonial_chestwrap.tooltip": "Ancient Egyptian ceremonial armor",
 
   "item.ancientcurse.the_broken_crook": "The Broken Crook",
   "item.ancientcurse.the_broken_crook.tooltip": "Fragment of a pharaoh's ceremonial staff",
@@ -209,6 +212,8 @@
   
   "block.ancientcurse.salt_dust": "Salt Dust",
   "block.ancientcurse.sandstone_torch": "Sandstone Torch",
+  "block.ancientcurse.sandstone_bricks": "Sandstone Bricks",
+  "block.ancientcurse.sandstone_pillar": "Sandstone Pillar",
 
   "block.ancientcurse.anubus__glyph": "Anubus Glyph",
   "block.ancientcurse.anubus__glyph.tooltip": "Sacred hieroglyphic block",
@@ -283,12 +288,12 @@
   "block.ancientcurse.hardened_deshret_stone": "Hardened Deshret Stone",
   "block.ancientcurse.polished_deshret_stone": "Polished Deshret Stone",
   "block.ancientcurse.cursed_earth": "Cursed Earth",
-  "block.ancientcurse.cleansing_station": "Cleansing Station",
-  "block.ancientcurse.cleansing_station.already_active": "The station is already cleansing!",
-  "block.ancientcurse.cleansing_station.no_corruption": "No corruption detected nearby",
-  "block.ancientcurse.cleansing_station.activated": "Cleansing process initiated!",
-  "block.ancientcurse.cleansing_station.complete": "Cleansing complete! %s blocks restored",
-  "block.ancientcurse.cleansing_station.protection_active": "Area protected from cursed earth for 10 days",
+  "block.ancientcurse.solar_spire": "Solar Spire",
+  "block.ancientcurse.solar_spire.already_active": "The spire is already channeling solar energy!",
+  "block.ancientcurse.solar_spire.no_corruption": "No corruption detected nearby",
+  "block.ancientcurse.solar_spire.activating": "Solar cleansing initiated!",
+  "block.ancientcurse.solar_spire.complete": "Solar cleansing complete! %s blocks purified, %s restored to original state",
+  "block.ancientcurse.solar_spire.protection_active": "Area protected by solar blessing for 10 days",
   "block.ancientcurse.bloodshade_thicket": "Bloodshade Thicket",
   "block.ancientcurse.cursed_sprig": "Cursed Sprig",
   "block.ancientcurse.cursed_sprout": "Cursed Sprout",

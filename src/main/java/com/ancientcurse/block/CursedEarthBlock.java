@@ -7,7 +7,7 @@ import com.ancientcurse.command.CursedEarthCommand;
 import com.ancientcurse.system.CursedEarthManager;
 import com.ancientcurse.block.registry.CursedPlantBlocks;
 import com.ancientcurse.block.CursedPlantBlock;
-import com.ancientcurse.block.CleansingStationBlock;
+import com.ancientcurse.block.SolarSpireBlock;
 import com.ancientcurse.effect.ModStatusEffects;
 import com.ancientcurse.util.CurseZoneManager;
 import com.ancientcurse.util.AnkhManager;
@@ -93,7 +93,7 @@ public class CursedEarthBlock extends BaseAncientCurseBlock {
     @Override
     public void randomTick(BlockState state, ServerWorld world, BlockPos pos, Random random) {
         // FIRST check if we're in an active cleansing zone - if so, do NOTHING
-        if (CleansingStationBlock.isInActiveCleansingZone(pos)) {
+        if (SolarSpireBlock.isInActiveCleansingZone(pos)) {
             return; // No spreading, no effects, nothing while cleansing is active
         }
         
@@ -279,7 +279,7 @@ public class CursedEarthBlock extends BaseAncientCurseBlock {
             float selectionChance = candidate.weight * (1.0f - (i * 0.15f));
             if (random.nextFloat() < selectionChance) {
                 // FINAL CHECK: Don't queue spread if target is in active cleansing zone
-                if (CleansingStationBlock.isInActiveCleansingZone(candidate.pos)) {
+                if (SolarSpireBlock.isInActiveCleansingZone(candidate.pos)) {
                     continue; // Skip this candidate
                 }
                 

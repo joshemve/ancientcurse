@@ -34,6 +34,11 @@ public class CurseZoneRenderer {
             return;
         }
         
+        // Check if zone borders should be shown
+        if (!CurseZoneClientSettings.shouldShowAllZoneBorders()) {
+            return;
+        }
+        
         // Get immediate vertex consumer provider
         VertexConsumerProvider.Immediate vertexConsumers = client.getBufferBuilders().getEntityVertexConsumers();
         

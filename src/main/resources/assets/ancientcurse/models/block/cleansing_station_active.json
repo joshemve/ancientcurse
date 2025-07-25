@@ -1,9 +1,0 @@
-{
-  "parent": "ancientcurse:block/cleansing_station",
-  "textures": {
-    "particle": "ancientcurse:block/cleansing_station_side",
-    "bottom": "ancientcurse:block/cleansing_station_bottom",
-    "top": "ancientcurse:block/cleansing_station_top_active",
-    "side": "ancientcurse:block/cleansing_station_side_active"
-  }
-}

@@ -23,7 +23,7 @@ import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 // import com.ancientcurse.worldgen.ModWorldPresets;
 import com.ancientcurse.effect.ModStatusEffects;
 // import com.ancientcurse.block.ModBlocks;
-// import com.ancientcurse.block.entity.ModBlockEntities;
+import com.ancientcurse.ModBlockEntities;
 
 /**
  * Main mod class for Ancient Curse.
@@ -124,7 +124,7 @@ public class AncientCurse implements ModInitializer {
         ModEntities.registerEntities();
         
         // Register mod block entities
-        // ModBlockEntities.registerBlockEntities();
+        ModBlockEntities.registerBlockEntities();
         
         // Register mod screen handlers
         // ModScreenHandlers.registerScreenHandlers();

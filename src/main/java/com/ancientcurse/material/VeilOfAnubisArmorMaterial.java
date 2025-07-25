@@ -8,11 +8,11 @@ import net.minecraft.sound.SoundEvents;
 
 public class VeilOfAnubisArmorMaterial implements ArmorMaterial {
     private static final int[] BASE_DURABILITY = new int[] {13, 15, 16, 11};
-    private static final int[] PROTECTION_VALUES = new int[] {3, 6, 8, 3};
+    private static final int[] PROTECTION_VALUES = new int[] {2, 6, 8, 2}; // Updated helmet to 2
     
     @Override
     public int getDurability(ArmorItem.Type type) {
-        return BASE_DURABILITY[type.getEquipmentSlot().getEntitySlotId()] * 33;
+        return BASE_DURABILITY[type.getEquipmentSlot().getEntitySlotId()] * 15; // Reduced for medium-high tier
     }
     
     @Override
@@ -42,11 +42,11 @@ public class VeilOfAnubisArmorMaterial implements ArmorMaterial {
     
     @Override
     public float getToughness() {
-        return 2.0F;
+        return 0.0F; // No toughness as requested
     }
     
     @Override
     public float getKnockbackResistance() {
-        return 0.1F;
+        return 0.0F; // No knockback resistance as requested
     }
 }

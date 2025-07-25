@@ -1,5 +1,6 @@
 package com.ancientcurse;
 
+import com.ancientcurse.command.AnkhCommand;
 import com.ancientcurse.command.CursedEarthCommand;
 import com.ancientcurse.command.KhamsinCurseCommand;
 import com.mojang.brigadier.CommandDispatcher;
@@ -42,6 +43,9 @@ public class ModCommands {
         
         // Register the Khamsin Curse command
         KhamsinCurseCommand.register(dispatcher, registryAccess, environment);
+        
+        // Register the Ankh command
+        AnkhCommand.register(dispatcher, registryAccess, environment);
         
         // Register /ancientcurse (alias /ac) command - this includes all cursed earth controls
         registerAncientCurseCommand(dispatcher);
@@ -133,5 +137,9 @@ public class ModCommands {
             Text.literal("§e/ac prevention clear [radius] §7- Clear protection (default 50, max 250)"), false);
         source.sendFeedback(() -> 
             Text.literal("§e/khamsin <player> <stage> §7- Apply Khamsin curse"), false);
+        source.sendFeedback(() -> 
+            Text.literal("§e/ankh heal <player> §7- Fully heal player's ankh"), false);
+        source.sendFeedback(() -> 
+            Text.literal("§e/ankh <1-100> <player> §7- Set player's ankh value"), false);
     }
 } 

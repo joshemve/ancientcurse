@@ -247,6 +247,7 @@ public class ModItems {
     
     // Ancient Egyptian armor
     public static final Item VEIL_OF_ANUBIS = new com.ancientcurse.item.armor.VeilOfAnubisItem();
+    public static final Item CEREMONIAL_CHESTWRAP = new com.ancientcurse.item.CeremonialChestwrapItem(new FabricItemSettings());
 
     /**
      * Registers all mod items
@@ -468,6 +469,13 @@ public class ModItems {
             Registries.ITEM,
             new Identifier(AncientCurse.MOD_ID, "veil_of_anubis"),
             VEIL_OF_ANUBIS
+        );
+        
+        // Register Ceremonial Chestwrap
+        Registry.register(
+            Registries.ITEM,
+            new Identifier(AncientCurse.MOD_ID, "ceremonial_chestwrap"),
+            CEREMONIAL_CHESTWRAP
         );
         
         // Register Scarab Talisman
