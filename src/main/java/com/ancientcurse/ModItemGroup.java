@@ -58,9 +58,17 @@ public class ModItemGroup {
                 // Tree blocks
                 safeAdd(entries, ModBlocks.SYCAMORE_FIG_LOG);
                 safeAdd(entries, ModBlocks.SYCAMORE_PLANKS);
+                safeAdd(entries, com.ancientcurse.block.registry.ConstructionBlocks.SYCAMORE_STAIRS);
+                safeAdd(entries, com.ancientcurse.block.registry.ConstructionBlocks.SYCAMORE_SLAB);
+                safeAdd(entries, ModBlocks.SYCAMORE_FENCE);
+                safeAdd(entries, ModBlocks.SYCAMORE_FENCE_GATE);
                 safeAdd(entries, ModBlocks.SYCAMORE_LEAVES);
                 safeAdd(entries, ModBlocks.DATE_PALM_LOG);
                 safeAdd(entries, ModBlocks.DATE_PALM_PLANKS);
+                safeAdd(entries, com.ancientcurse.block.registry.ConstructionBlocks.DATE_PALM_STAIRS);
+                safeAdd(entries, com.ancientcurse.block.registry.ConstructionBlocks.DATE_PALM_SLAB);
+                safeAdd(entries, ModBlocks.DATE_PALM_FENCE);
+                safeAdd(entries, ModBlocks.DATE_PALM_FENCE_GATE);
                 safeAdd(entries, ModBlocks.DATE_PALM_LEAVES);
                 
                 // Terrain blocks
@@ -139,6 +147,10 @@ public class ModItemGroup {
                 // Bronze Blocks
                 safeAdd(entries, ModBlocks.BRONZE_BLOCK);
                 safeAdd(entries, ModItems.BRONZE_PLATE);
+                
+                // Torch blocks
+                safeAdd(entries, ModBlocks.SANDSTONE_TORCH);
+                safeAdd(entries, ModBlocks.BLACK_STONE_TORCH);
                 
                 // Bronze tools
                 safeAdd(entries, ModItems.BRONZE_SWORD);

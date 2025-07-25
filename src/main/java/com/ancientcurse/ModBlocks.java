@@ -12,6 +12,9 @@ import net.minecraft.block.SandBlock;
 import net.minecraft.block.SlabBlock;
 import net.minecraft.block.StairsBlock;
 import net.minecraft.block.WallBlock;
+import net.minecraft.block.FenceBlock;
+import net.minecraft.block.FenceGateBlock;
+import net.minecraft.block.WoodType;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.registry.Registries;
@@ -40,6 +43,23 @@ public class ModBlocks {
             .sounds(BlockSoundGroup.WOOD)
     );
     
+    // Sycamore Fence
+    public static final Block SYCAMORE_FENCE = new SycamoreFenceBlock(
+        FabricBlockSettings.create()
+            .mapColor(MapColor.OAK_TAN)
+            .strength(2.0f, 3.0f)
+            .sounds(BlockSoundGroup.WOOD)
+    );
+    
+    // Sycamore Fence Gate
+    public static final Block SYCAMORE_FENCE_GATE = new FenceGateBlock(
+        FabricBlockSettings.create()
+            .mapColor(MapColor.OAK_TAN)
+            .strength(2.0f, 3.0f)
+            .sounds(BlockSoundGroup.WOOD),
+        WoodType.OAK
+    );
+    
     public static final Block SYCAMORE_LEAVES = new SycamoreLeafBlock(
         FabricBlockSettings.create()
             .mapColor(MapColor.DARK_GREEN)
@@ -62,6 +82,23 @@ public class ModBlocks {
             .mapColor(MapColor.SPRUCE_BROWN)
             .strength(2.0f, 3.0f)
             .sounds(BlockSoundGroup.WOOD)
+    );
+    
+    // Date Palm Fence
+    public static final Block DATE_PALM_FENCE = new DatePalmFenceBlock(
+        FabricBlockSettings.create()
+            .mapColor(MapColor.SPRUCE_BROWN)
+            .strength(2.0f, 3.0f)
+            .sounds(BlockSoundGroup.WOOD)
+    );
+    
+    // Date Palm Fence Gate
+    public static final Block DATE_PALM_FENCE_GATE = new FenceGateBlock(
+        FabricBlockSettings.create()
+            .mapColor(MapColor.SPRUCE_BROWN)
+            .strength(2.0f, 3.0f)
+            .sounds(BlockSoundGroup.WOOD),
+        WoodType.OAK
     );
     
     public static final Block DATE_PALM_LEAVES = new DatePalmLeafBlock(
@@ -224,7 +261,7 @@ public class ModBlocks {
     );
 
     // Dried Reed Thatch - bundled dried reeds for construction
-    public static final Block DRIED_REED_THATCH = new Block(
+    public static final Block DRIED_REED_THATCH = new DriedReedThatchBlock(
         FabricBlockSettings.create()
             .mapColor(MapColor.PALE_YELLOW)
             .strength(0.5f) 
@@ -274,7 +311,7 @@ public class ModBlocks {
     );
     
     // Nile Mud Brick Wall
-    public static final Block NILE_MUD_BRICK_WALL = new WallBlock(
+    public static final Block NILE_MUD_BRICK_WALL = new NileMudBrickWallBlock(
         FabricBlockSettings.create()
             .mapColor(MapColor.TERRACOTTA_BROWN)
             .strength(1.0f)
@@ -692,6 +729,44 @@ public class ModBlocks {
             .sounds(BlockSoundGroup.METAL)
     );
     
+    // Sandstone Torch - Egyptian-themed torch
+    public static final Block SANDSTONE_TORCH = new SandstoneTorchBlock(
+        FabricBlockSettings.create()
+            .noCollision()
+            .breakInstantly()
+            .luminance((state) -> 14)
+            .sounds(BlockSoundGroup.WOOD)
+    );
+    
+    // Wall Sandstone Torch - for wall placement
+    public static final Block WALL_SANDSTONE_TORCH = new WallSandstoneTorchBlock(
+        FabricBlockSettings.create()
+            .dropsLike(SANDSTONE_TORCH)
+            .noCollision()
+            .breakInstantly()
+            .luminance((state) -> 14)
+            .sounds(BlockSoundGroup.WOOD)
+    );
+    
+    // Black Stone Torch - Dark themed torch
+    public static final Block BLACK_STONE_TORCH = new BlackStoneTorchBlock(
+        FabricBlockSettings.create()
+            .noCollision()
+            .breakInstantly()
+            .luminance((state) -> 14)
+            .sounds(BlockSoundGroup.WOOD)
+    );
+    
+    // Wall Black Stone Torch - for wall placement
+    public static final Block WALL_BLACK_STONE_TORCH = new WallBlackStoneTorchBlock(
+        FabricBlockSettings.create()
+            .dropsLike(BLACK_STONE_TORCH)
+            .noCollision()
+            .breakInstantly()
+            .luminance((state) -> 14)
+            .sounds(BlockSoundGroup.WOOD)
+    );
+    
     // NOTE: All cursed plant blocks and Egyptian plant blocks have been moved to their respective registry classes:
     // - Cursed plant blocks: com.ancientcurse.block.registry.CursedPlantBlocks
     // - Egyptian plant blocks: com.ancientcurse.block.registry.EgyptianPlantBlocks
@@ -722,6 +797,20 @@ public class ModBlocks {
             new Identifier(AncientCurse.MOD_ID, "sycamore_planks"),
             SYCAMORE_PLANKS
         );
+        
+        // Register sycamore fence
+        Registry.register(
+            Registries.BLOCK,
+            new Identifier(AncientCurse.MOD_ID, "sycamore_fence"),
+            SYCAMORE_FENCE
+        );
+        
+        // Register sycamore fence gate
+        Registry.register(
+            Registries.BLOCK,
+            new Identifier(AncientCurse.MOD_ID, "sycamore_fence_gate"),
+            SYCAMORE_FENCE_GATE
+        );
 
         // Register the sycamore leaves block
         Registry.register(
@@ -747,6 +836,20 @@ public class ModBlocks {
             Registries.BLOCK,
             new Identifier(AncientCurse.MOD_ID, "date_palm_planks"),
             DATE_PALM_PLANKS
+        );
+        
+        // Register date palm fence
+        Registry.register(
+            Registries.BLOCK,
+            new Identifier(AncientCurse.MOD_ID, "date_palm_fence"),
+            DATE_PALM_FENCE
+        );
+        
+        // Register date palm fence gate
+        Registry.register(
+            Registries.BLOCK,
+            new Identifier(AncientCurse.MOD_ID, "date_palm_fence_gate"),
+            DATE_PALM_FENCE_GATE
         );
         
         // Register Date Palm Leaves
@@ -1229,6 +1332,32 @@ public class ModBlocks {
             BRONZE_BLOCK
         );
         
+        // Register sandstone torches
+        Registry.register(
+            Registries.BLOCK,
+            new Identifier(AncientCurse.MOD_ID, "sandstone_torch"),
+            SANDSTONE_TORCH
+        );
+        
+        Registry.register(
+            Registries.BLOCK,
+            new Identifier(AncientCurse.MOD_ID, "wall_sandstone_torch"),
+            WALL_SANDSTONE_TORCH
+        );
+        
+        // Register black stone torches
+        Registry.register(
+            Registries.BLOCK,
+            new Identifier(AncientCurse.MOD_ID, "black_stone_torch"),
+            BLACK_STONE_TORCH
+        );
+        
+        Registry.register(
+            Registries.BLOCK,
+            new Identifier(AncientCurse.MOD_ID, "wall_black_stone_torch"),
+            WALL_BLACK_STONE_TORCH
+        );
+        
         // Egyptian-themed plant blocks are now registered in EgyptianPlantBlocks registry class
         
         // Register all block items
@@ -1283,9 +1412,13 @@ public class ModBlocks {
         // Register normal blocks
         registerBlockItem(SYCAMORE_FIG_LOG, ModItemGroup.ANCIENT_CURSE);
         registerBlockItem(SYCAMORE_PLANKS, ModItemGroup.ANCIENT_CURSE);
+        registerBlockItem(SYCAMORE_FENCE, ModItemGroup.ANCIENT_CURSE);
+        registerBlockItem(SYCAMORE_FENCE_GATE, ModItemGroup.ANCIENT_CURSE);
         registerBlockItem(SYCAMORE_LEAVES, ModItemGroup.ANCIENT_CURSE);
         registerBlockItem(DATE_PALM_LOG, ModItemGroup.ANCIENT_CURSE);
         registerBlockItem(DATE_PALM_PLANKS, ModItemGroup.ANCIENT_CURSE);
+        registerBlockItem(DATE_PALM_FENCE, ModItemGroup.ANCIENT_CURSE);
+        registerBlockItem(DATE_PALM_FENCE_GATE, ModItemGroup.ANCIENT_CURSE);
         registerBlockItem(DATE_PALM_LEAVES, ModItemGroup.ANCIENT_CURSE);
         registerBlockItem(SMOOTH_SAND, ModItemGroup.ANCIENT_CURSE);
         registerBlockItem(NILE_RIVER_SAND, ModItemGroup.ANCIENT_CURSE);
@@ -1356,6 +1489,14 @@ public class ModBlocks {
         // Register Bronze Blocks
         registerBlockItem(BRONZE_BLOCK, ModItemGroup.ANCIENT_CURSE);
         
+        // Register Sandstone Torch
+        registerBlockItem(SANDSTONE_TORCH, ModItemGroup.ANCIENT_CURSE);
+        // Note: Wall torch doesn't need a block item as it's placed by the main torch
+        
+        // Register Black Stone Torch
+        registerBlockItem(BLACK_STONE_TORCH, ModItemGroup.ANCIENT_CURSE);
+        // Note: Wall torch doesn't need a block item as it's placed by the main torch
+        
         // Egyptian-themed plant blocks and cursed plant blocks are now registered in their respective registry classes
         
         // We don't register a BlockItem for DATE_BLOCK since it should only drop the Sekhem Date item
@@ -1369,7 +1510,8 @@ public class ModBlocks {
         }
         
         // First, ensure the block itself is properly registered
-        validateBlockRegistration(block);
+        // Commented out to avoid duplicate registration issues with blocks from other registries
+        // validateBlockRegistration(block);
         
         // Now get the block ID (which should be valid after validation)
         Identifier blockId = Registries.BLOCK.getId(block);

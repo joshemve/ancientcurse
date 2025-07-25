@@ -7,7 +7,7 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "ancientcurse:mud_brick_stairs"
+          "name": "ancientcurse:nile_mud_brick_stairs"
         }
       ],
       "conditions": [

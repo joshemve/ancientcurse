@@ -208,6 +208,7 @@
   "item.ancientcurse.purification_staff.wave_started": "Cleansing wave initiated!",
   
   "block.ancientcurse.salt_dust": "Salt Dust",
+  "block.ancientcurse.sandstone_torch": "Sandstone Torch",
 
   "block.ancientcurse.anubus__glyph": "Anubus Glyph",
   "block.ancientcurse.anubus__glyph.tooltip": "Sacred hieroglyphic block",
@@ -218,6 +219,8 @@
   "block.ancientcurse.sycamore_fig_log": "Sycamore Fig Log",
   "block.ancientcurse.sycamore_fig_log.tooltip": "Wood from the sacred sycamore tree",
   "block.ancientcurse.sycamore_planks": "Sycamore Planks",
+  "block.ancientcurse.sycamore_fence": "Sycamore Fence",
+  "block.ancientcurse.sycamore_fence_gate": "Sycamore Fence Gate",
   "block.ancientcurse.sycamore_stairs": "Sycamore Stairs",
   "block.ancientcurse.sycamore_slab": "Sycamore Slab",
   "block.ancientcurse.sycamore_leaves": "Sycamore Leaves",
@@ -225,6 +228,8 @@
   "block.ancientcurse.date_palm_log": "Date Palm Log",
   "block.ancientcurse.date_palm_log.tooltip": "Sturdy wood from desert palms",
   "block.ancientcurse.date_palm_planks": "Date Palm Planks",
+  "block.ancientcurse.date_palm_fence": "Date Palm Fence",
+  "block.ancientcurse.date_palm_fence_gate": "Date Palm Fence Gate",
   "block.ancientcurse.date_palm_stairs": "Date Palm Stairs",
   "block.ancientcurse.date_palm_slab": "Date Palm Slab",
   "block.ancientcurse.date_palm_leaves": "Date Palm Leaves",
@@ -300,6 +305,7 @@
   
   "block.ancientcurse.bronze_block": "Bronze Block",
   "block.ancientcurse.bronze_block.tooltip": "Solid block of ancient bronze alloy",
+  "block.ancientcurse.black_stone_torch": "Black Stone Torch",
   "block.ancientcurse.bronze_plate": "Bronze Plate",
   "block.ancientcurse.bronze_plate.tooltip": "Decorative bronze plating",
   

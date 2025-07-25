@@ -1,21 +1,19 @@
 {
   "variants": {
-    "": [
-      {
-        "model": "ancientcurse:block/dried_reed_thatch"
-      },
-      {
-        "model": "ancientcurse:block/dried_reed_thatch",
-        "y": 90
-      },
-      {
-        "model": "ancientcurse:block/dried_reed_thatch",
-        "y": 180
-      },
-      {
-        "model": "ancientcurse:block/dried_reed_thatch",
-        "y": 270
-      }
-    ]
+    "facing=north": {
+      "model": "ancientcurse:block/dried_reed_thatch"
+    },
+    "facing=east": {
+      "model": "ancientcurse:block/dried_reed_thatch",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "ancientcurse:block/dried_reed_thatch",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "ancientcurse:block/dried_reed_thatch",
+      "y": 270
+    }
   }
 }

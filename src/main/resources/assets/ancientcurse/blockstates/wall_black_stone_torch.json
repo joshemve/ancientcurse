@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=east": {
+      "model": "ancientcurse:block/wall_black_stone_torch"
+    },
+    "facing=north": {
+      "model": "ancientcurse:block/wall_black_stone_torch",
+      "y": 270
+    },
+    "facing=south": {
+      "model": "ancientcurse:block/wall_black_stone_torch",
+      "y": 90
+    },
+    "facing=west": {
+      "model": "ancientcurse:block/wall_black_stone_torch",
+      "y": 180
+    }
+  }
+}

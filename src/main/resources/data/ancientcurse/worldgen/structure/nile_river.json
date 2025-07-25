@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:jigsaw",
+  "start_pool": "ancientcurse:nile_river/start_pool",
+  "size": 7,
+  "max_distance_from_center": 80,
+  "biomes": [
+    "ancientcurse:ancient_desert",
+    "ancientcurse:deshret_desert",
+    "ancientcurse:nile_river"
+  ],
+  "step": "surface_structures",
+  "start_height": {
+    "absolute": 50
+  },
+  "project_start_to_heightmap": "WORLD_SURFACE_WG",
+  "use_expansion_hack": false,
+  "spawn_overrides": {}
+}

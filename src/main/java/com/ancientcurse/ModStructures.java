@@ -1,5 +1,7 @@
 package com.ancientcurse;
 
+import com.ancientcurse.world.structure.ModStructurePieceTypes;
+import com.ancientcurse.world.structure.NileRiverStructureType;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.util.Identifier;
@@ -10,6 +12,11 @@ public class ModStructures {
         RegistryKeys.STRUCTURE, 
         new Identifier("ancientcurse", "pyramid")
     );
+    
+    public static final RegistryKey<net.minecraft.world.gen.structure.Structure> NILE_RIVER_KEY = RegistryKey.of(
+        RegistryKeys.STRUCTURE, 
+        new Identifier("ancientcurse", "nile_river")
+    );
 
     public static void registerStructures() {
         
@@ -18,10 +25,13 @@ public class ModStructures {
         // The structure set is defined in data/ancientcurse/worldgen/structure_set/pyramid.json
         // The template pool is defined in data/ancientcurse/worldgen/template_pool/pyramid/start_pool.json
         
-        // Register the structure type
+        // Register custom structure types and pieces
         registerStructureTypes();
+        ModStructurePieceTypes.registerStructurePieceTypes();
+        NileRiverStructureType.registerStructureTypes();
         
         AncientCurse.LOGGER.info("Ancient Egypt structures registered successfully");
+        AncientCurse.LOGGER.info("Nile River structure system initialized");
     }
     
     private static void registerStructureTypes() {
@@ -30,5 +40,7 @@ public class ModStructures {
         AncientCurse.LOGGER.info("Structure types are registered through JSON in Minecraft 1.20.1");
         AncientCurse.LOGGER.info("Pyramid structure is defined in data/ancientcurse/worldgen/structure/pyramid.json");
         AncientCurse.LOGGER.info("Pyramid structure set is defined in data/ancientcurse/worldgen/structure_set/pyramid.json");
+        AncientCurse.LOGGER.info("Nile River structure is defined in data/ancientcurse/worldgen/structure/nile_river.json");
+        AncientCurse.LOGGER.info("Nile River structure set is defined in data/ancientcurse/worldgen/structure_set/nile_river.json");
     }
 }

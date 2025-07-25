@@ -32,7 +32,7 @@ public class NecrostoneBlocks {
         .sounds(BlockSoundGroup.STONE)
         .requiresTool());
     
-    public static final Block NECROSTONE_WALL = new Block(FabricBlockSettings.copyOf(Blocks.STONE)
+    public static final Block NECROSTONE_WALL = new net.minecraft.block.WallBlock(FabricBlockSettings.copyOf(Blocks.STONE)
         .strength(2.0f, 6.0f)
         .sounds(BlockSoundGroup.STONE)
         .requiresTool());

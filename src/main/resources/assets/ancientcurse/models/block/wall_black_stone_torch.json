@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/template_torch_wall",
+  "textures": {
+    "torch": "ancientcurse:block/black_stone_torch"
+  }
+}

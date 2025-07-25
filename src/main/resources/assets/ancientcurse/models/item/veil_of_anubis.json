@@ -1,40 +1,93 @@
 {
-  "parent": "item/generated",
   "credit": "Made with Blockbench",
-  "texture_size": [64, 64],
-  "textures": {
-    "layer0": "ancientcurse:item/veil_of_anubis",
-    "particle": "ancientcurse:item/veil_of_anubis"
-  },
+  "texture_size": [
+    64,
+    64
+  ],
   "display": {
     "thirdperson_righthand": {
-      "translation": [0, -1.25, 0],
-      "scale": [0.57, 0.57, 0.57]
+      "translation": [
+        0,
+        -1.25,
+        0
+      ],
+      "scale": [
+        0.57,
+        0.57,
+        0.57
+      ]
     },
     "thirdperson_lefthand": {
-      "translation": [0, -1.25, 0],
-      "scale": [0.57, 0.57, 0.57]
+      "translation": [
+        0,
+        -1.25,
+        0
+      ],
+      "scale": [
+        0.57,
+        0.57,
+        0.57
+      ]
     },
     "firstperson_righthand": {
-      "scale": [0.56, 0.56, 0.56]
+      "scale": [
+        0.56,
+        0.56,
+        0.56
+      ]
     },
     "firstperson_lefthand": {
-      "scale": [0.56, 0.56, 0.56]
+      "scale": [
+        0.56,
+        0.56,
+        0.56
+      ]
     },
     "ground": {
-      "scale": [0.91, 0.91, 0.91]
+      "scale": [
+        0.91,
+        0.91,
+        0.91
+      ]
     },
     "gui": {
-      "rotation": [0, 156, 0],
-      "translation": [-0.5, -4.5, 0],
-      "scale": [0.91, 0.91, 0.91]
+      "rotation": [
+        0,
+        156,
+        0
+      ],
+      "translation": [
+        -0.5,
+        -4.5,
+        0
+      ],
+      "scale": [
+        0.91,
+        0.91,
+        0.91
+      ]
     },
     "head": {
-      "translation": [0, -5.25, -2.5],
-      "scale": [1.5546875, 1.5546875, 1.712890625]
+      "translation": [
+        0,
+        4.75,
+        0
+      ],
+      "scale": [
+        1.601,
+        1.601,
+        1.601
+      ]
     },
     "fixed": {
-      "translation": [0, -4.25, 0]
+      "translation": [
+        0,
+        -4.25,
+        0
+      ]
     }
+  },
+  "textures": {
+    "particle": "ancientcurse:item/veil_of_anubis"
   }
 }
