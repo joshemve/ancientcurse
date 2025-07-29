@@ -52,8 +52,8 @@ public class CurseZoneEffectHandler {
                         
                         int newAnkh = AnkhManager.decreaseAnkhValue(player, drainAmount);
                         
-                        // TODO: Send update packet to client to update HUD
-                        // For now, the client will poll the value
+                        // Send update packet to client to update HUD
+                        com.ancientcurse.network.CurseZonePackets.sendAnkhValueToClient(player, newAnkh);
                     }
                     
                     // Apply Khamsin curse if configured

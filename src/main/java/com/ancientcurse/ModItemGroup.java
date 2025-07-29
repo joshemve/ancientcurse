@@ -96,6 +96,9 @@ public class ModItemGroup {
                 safeAdd(entries, ModBlocks.NILE_MUD_BRICK_SLAB);
                 safeAdd(entries, ModBlocks.NILE_MUD_BRICK_WALL);
                 safeAdd(entries, ModBlocks.SANDSTONE_BRICKS);
+                safeAdd(entries, com.ancientcurse.block.registry.ConstructionBlocks.SANDSTONE_BRICKS_SLAB);
+                safeAdd(entries, com.ancientcurse.block.registry.ConstructionBlocks.SANDSTONE_BRICKS_STAIRS);
+                safeAdd(entries, com.ancientcurse.block.registry.ConstructionBlocks.SANDSTONE_BRICKS_WALL);
                 safeAdd(entries, ModBlocks.SANDSTONE_PILLAR);
                 safeAdd(entries, ModBlocks.SUNBAKED_CLAY);
                 
@@ -163,6 +166,7 @@ public class ModItemGroup {
                 safeAdd(entries, ModItems.BRONZE_HOE);
                 safeAdd(entries, ModItems.BRONZE_KHOPESH);
                 safeAdd(entries, ModItems.HORUS_MACE);
+                safeAdd(entries, ModItems.WAR_AXE_OF_ABYDOS);
                 
                 // Bronze Armor
                 safeAdd(entries, ModItems.BRONZE_HELMET);
@@ -173,6 +177,7 @@ public class ModItemGroup {
                 // Ancient Egyptian Armor
                 safeAdd(entries, ModItems.VEIL_OF_ANUBIS);
                 safeAdd(entries, ModItems.CEREMONIAL_CHESTWRAP);
+                safeAdd(entries, ModItems.SCARAB_MASK);
                 
                 // Crops (Blocks themselves, for placing if needed)
                 safeAdd(entries, ModBlocks.FLAX);
@@ -193,6 +198,9 @@ public class ModItemGroup {
                 
                 // Construction blocks (decorative building materials)
                 safeAdd(entries, com.ancientcurse.block.registry.ConstructionBlocks.SANDSTONE_BRICK_TILES);
+                safeAdd(entries, com.ancientcurse.block.registry.ConstructionBlocks.SANDSTONE_BRICK_TILES_SLAB);
+                safeAdd(entries, com.ancientcurse.block.registry.ConstructionBlocks.SANDSTONE_BRICK_TILES_STAIRS);
+                safeAdd(entries, com.ancientcurse.block.registry.ConstructionBlocks.SANDSTONE_BRICK_TILES_WALL);
                 safeAdd(entries, com.ancientcurse.block.registry.ConstructionBlocks.POLISHED_BRONZE);
                 
                 // Rock blocks

@@ -17,6 +17,7 @@ import com.ancientcurse.item.ScrollOfUnbindingItem;
 import com.ancientcurse.item.SekhemDateItem;
 import com.ancientcurse.item.SerpentStaffItem;
 import com.ancientcurse.item.StaffOfRaItem;
+import com.ancientcurse.item.WarAxeOfAbydosItem;
 import com.ancientcurse.item.WitheredStaffItem;
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
 import net.minecraft.entity.effect.StatusEffectInstance;
@@ -248,6 +249,15 @@ public class ModItems {
     // Ancient Egyptian armor
     public static final Item VEIL_OF_ANUBIS = new com.ancientcurse.item.armor.VeilOfAnubisItem();
     public static final Item CEREMONIAL_CHESTWRAP = new com.ancientcurse.item.CeremonialChestwrapItem(new FabricItemSettings());
+    public static final Item SCARAB_MASK = new com.ancientcurse.item.armor.ScarabMaskItem();
+    
+    // Ancient Egyptian weapons
+    public static final WarAxeOfAbydosItem WAR_AXE_OF_ABYDOS = new WarAxeOfAbydosItem(
+        BronzeToolMaterial.INSTANCE,
+        9.0F, // Very high base damage
+        -3.2F, // Slow attack speed
+        new FabricItemSettings().maxCount(1).maxDamage(2500) // More durable than bronze
+    );
 
     /**
      * Registers all mod items
@@ -478,6 +488,13 @@ public class ModItems {
             CEREMONIAL_CHESTWRAP
         );
         
+        // Register Scarab Mask
+        Registry.register(
+            Registries.ITEM,
+            new Identifier(AncientCurse.MOD_ID, "scarab_mask"),
+            SCARAB_MASK
+        );
+        
         // Register Scarab Talisman
         Registry.register(
             Registries.ITEM,
@@ -588,6 +605,13 @@ public class ModItems {
             Registries.ITEM,
             new Identifier(AncientCurse.MOD_ID, "bronze_khopesh"),
             BRONZE_KHOPESH
+        );
+        
+        // Register War Axe of Abydos
+        Registry.register(
+            Registries.ITEM,
+            new Identifier(AncientCurse.MOD_ID, "waraxe_of_abydos"),
+            WAR_AXE_OF_ABYDOS
         );
         
         // Register the Withered Pharaoh spawn egg

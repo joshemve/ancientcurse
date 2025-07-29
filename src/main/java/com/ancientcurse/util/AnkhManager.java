@@ -23,6 +23,9 @@ public class AnkhManager {
     // Cache for ankh values (UUID -> ankh value)
     private static final Map<UUID, Integer> ankhValues = new HashMap<>();
     
+    // Client-side ankh value for the local player
+    private static int clientAnkhValue = DEFAULT_ANKH_VALUE;
+    
     /**
      * Get the current ankh value for a player.
      * 
@@ -132,5 +135,24 @@ public class AnkhManager {
      */
     public static void clearCachedValue(UUID playerUuid) {
         ankhValues.remove(playerUuid);
+    }
+    
+    /**
+     * Set the client-side ankh value for display in the HUD.
+     * This is called when the server sends an ankh update packet.
+     * 
+     * @param value The new ankh value
+     */
+    public static void setClientAnkhValue(int value) {
+        clientAnkhValue = Math.max(MIN_ANKH_VALUE, Math.min(MAX_ANKH_VALUE, value));
+    }
+    
+    /**
+     * Get the client-side ankh value for HUD display.
+     * 
+     * @return The client ankh value
+     */
+    public static int getClientAnkhValue() {
+        return clientAnkhValue;
     }
 }

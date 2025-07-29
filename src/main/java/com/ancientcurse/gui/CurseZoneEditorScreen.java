@@ -81,7 +81,7 @@ public class CurseZoneEditorScreen extends Screen {
         this.zoneNameField.setText(zoneName);
         this.addDrawableChild(this.zoneNameField);
         
-        // Khamsin level slider (0-10)
+        // Khamsin level slider (0-5)
         this.khamsinSlider = new KhamsinSlider(
             startX + 10,
             startY + 75,
@@ -91,7 +91,7 @@ public class CurseZoneEditorScreen extends Screen {
         );
         this.addDrawableChild(this.khamsinSlider);
         
-        // Ankh drain rate slider (0-10)
+        // Ankh drain rate slider (0-100)
         this.ankhDrainSlider = new AnkhDrainSlider(
             startX + 10,
             startY + 115,
@@ -237,14 +237,14 @@ public class CurseZoneEditorScreen extends Screen {
         private final int initialValue;
         
         public KhamsinSlider(int x, int y, int width, int height, int initialValue) {
-            super(x, y, width, height, Text.literal("Khamsin Level: " + initialValue), initialValue / 10.0);
+            super(x, y, width, height, Text.literal("Khamsin Level: " + initialValue), initialValue / 5.0);
             this.initialValue = initialValue;
             this.updateMessage();
         }
         
         @Override
         protected void updateMessage() {
-            int level = (int) (this.value * 10);
+            int level = (int) (this.value * 5);
             this.setMessage(Text.literal("Khamsin Level: " + level));
         }
         
@@ -254,23 +254,24 @@ public class CurseZoneEditorScreen extends Screen {
         }
         
         public int getValue() {
-            return (int) (this.value * 10);
+            return (int) (this.value * 5);
         }
     }
     
     // Custom slider for Ankh Drain Rate
     private static class AnkhDrainSlider extends SliderWidget {
         private final int initialValue;
+        private static final int MAX_ANKH_DRAIN = 100; // Maximum ankh drain per minute
         
         public AnkhDrainSlider(int x, int y, int width, int height, int initialValue) {
-            super(x, y, width, height, Text.literal("Ankh Drain Rate: " + initialValue), initialValue / 10.0);
+            super(x, y, width, height, Text.literal("Ankh Drain Rate: " + initialValue), initialValue / (double) MAX_ANKH_DRAIN);
             this.initialValue = initialValue;
             this.updateMessage();
         }
         
         @Override
         protected void updateMessage() {
-            int rate = (int) (this.value * 10);
+            int rate = (int) (this.value * MAX_ANKH_DRAIN);
             this.setMessage(Text.literal("Ankh Drain Rate: " + rate + "/min"));
         }
         
@@ -280,7 +281,7 @@ public class CurseZoneEditorScreen extends Screen {
         }
         
         public int getValue() {
-            return (int) (this.value * 10);
+            return (int) (this.value * MAX_ANKH_DRAIN);
         }
     }
 }

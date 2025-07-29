@@ -2,6 +2,12 @@
   "replace": false,
   "values": [
     "ancientcurse:sandstone_brick_tiles",
+    "ancientcurse:sandstone_bricks_slab",
+    "ancientcurse:sandstone_bricks_stairs",
+    "ancientcurse:sandstone_bricks_wall",
+    "ancientcurse:sandstone_brick_tiles_slab",
+    "ancientcurse:sandstone_brick_tiles_stairs",
+    "ancientcurse:sandstone_brick_tiles_wall",
     "ancientcurse:polished_bronze"
   ]
 }

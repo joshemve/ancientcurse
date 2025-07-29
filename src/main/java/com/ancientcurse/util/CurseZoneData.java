@@ -35,13 +35,16 @@ public class CurseZoneData {
     
     // Setters
     public void setZoneName(String zoneName) { this.zoneName = zoneName; }
-    public void setKhamsinLevel(int level) { this.khamsinLevel = Math.max(0, Math.min(10, level)); }
-    public void setAnkhDrainRate(int rate) { this.ankhDrainRate = Math.max(0, Math.min(10, rate)); }
+    public void setKhamsinLevel(int level) { this.khamsinLevel = Math.max(0, Math.min(5, level)); }
+    public void setAnkhDrainRate(int rate) { this.ankhDrainRate = Math.max(0, Math.min(100, rate)); }
     public void setEffectsEnabled(boolean enabled) { this.effectsEnabled = enabled; }
     
     // Get severity for color coding (0.0 to 1.0)
     public float getSeverity() {
-        return Math.max(khamsinLevel, ankhDrainRate) / 10.0f;
+        // Normalize khamsin (0-5 range) and ankh drain (0-100 range) to 0-1
+        float normalizedKhamsin = khamsinLevel / 5.0f;
+        float normalizedAnkh = ankhDrainRate / 100.0f;
+        return Math.max(normalizedKhamsin, normalizedAnkh);
     }
     
     // Serialization

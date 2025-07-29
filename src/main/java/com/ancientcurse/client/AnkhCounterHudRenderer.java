@@ -50,8 +50,8 @@ public class AnkhCounterHudRenderer {
         MinecraftClient client = MinecraftClient.getInstance();
         TextRenderer textRenderer = client.textRenderer;
         
-        // Get the ankh value from the manager (placeholder for now)
-        int ankhValue = AnkhManager.getAnkhValue(player);
+        // Get the client-side ankh value for display
+        int ankhValue = AnkhManager.getClientAnkhValue();
         
         // Format the text to display (smaller size, no bold formatting)
         String displayText = String.format("%d", ankhValue);

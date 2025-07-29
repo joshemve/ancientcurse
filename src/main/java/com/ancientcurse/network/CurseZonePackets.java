@@ -35,6 +35,7 @@ public class CurseZonePackets {
     public static final Identifier UPDATE_ZONE_REQUEST = new Identifier(AncientCurse.MOD_ID, "update_zone_request");
     public static final Identifier SYNC_WAND_SELECTION = new Identifier(AncientCurse.MOD_ID, "sync_wand_selection");
     public static final Identifier CLEAR_WAND_SELECTION = new Identifier(AncientCurse.MOD_ID, "clear_wand_selection");
+    public static final Identifier SYNC_ANKH_VALUE = new Identifier(AncientCurse.MOD_ID, "sync_ankh_value");
     
     public static void registerServerPackets() {
         ServerPlayNetworking.registerGlobalReceiver(UPDATE_ZONE, CurseZonePackets::handleUpdateZone);
@@ -49,6 +50,7 @@ public class CurseZonePackets {
         ClientPlayNetworking.registerGlobalReceiver(REMOVE_ZONE_AREA, CurseZonePackets::handleRemoveZoneArea);
         ClientPlayNetworking.registerGlobalReceiver(SYNC_WAND_SELECTION, CurseZonePackets::handleSyncWandSelection);
         ClientPlayNetworking.registerGlobalReceiver(CLEAR_WAND_SELECTION, CurseZonePackets::handleClearWandSelection);
+        ClientPlayNetworking.registerGlobalReceiver(SYNC_ANKH_VALUE, CurseZonePackets::handleSyncAnkhValue);
     }
     
     // Client -> Server: Update zone data
@@ -405,6 +407,27 @@ public class CurseZonePackets {
                 if (player != null) {
                     WandSelectionManager.clearSelection(player);
                 }
+            }
+        });
+    }
+    
+    // Server -> Client: Sync ankh value to a player
+    public static void sendAnkhValueToClient(ServerPlayerEntity player, int ankhValue) {
+        PacketByteBuf buf = PacketByteBufs.create();
+        buf.writeInt(ankhValue);
+        ServerPlayNetworking.send(player, SYNC_ANKH_VALUE, buf);
+    }
+    
+    // Client packet handler for ankh value sync
+    private static void handleSyncAnkhValue(MinecraftClient client, ClientPlayNetworkHandler handler,
+                                           PacketByteBuf buf, PacketSender responseSender) {
+        int ankhValue = buf.readInt();
+        
+        // Execute on client thread
+        client.execute(() -> {
+            if (client.player != null) {
+                // Update the client-side ankh value for HUD display
+                com.ancientcurse.util.AnkhManager.setClientAnkhValue(ankhValue);
             }
         });
     }

@@ -90,6 +90,7 @@
   "item.ancientcurse.horus_mace.tooltip2": "Falcon's Sight: Grants night vision when held",
   "item.ancientcurse.horus_mace.tooltip3": "Divine Protection: May blind your attackers",
   "item.ancientcurse.horus_mace.tooltip4": "Aerial Supremacy: +50% damage to airborne foes",
+  "item.ancientcurse.waraxe_of_abydos": "War Axe of Abydos",
   
   "item.ancientcurse.bronze_helmet": "Bronze Helmet",
 
@@ -104,6 +105,9 @@
   
   "item.ancientcurse.ceremonial_chestwrap": "Ceremonial Chestwrap",
   "item.ancientcurse.ceremonial_chestwrap.tooltip": "Ancient Egyptian ceremonial armor",
+  
+  "item.ancientcurse.scarab_mask": "Scarab Mask",
+  "item.ancientcurse.scarab_mask.tooltip": "Sacred mask of the divine scarab",
 
   "item.ancientcurse.the_broken_crook": "The Broken Crook",
   "item.ancientcurse.the_broken_crook.tooltip": "Fragment of a pharaoh's ceremonial staff",
@@ -213,6 +217,9 @@
   "block.ancientcurse.salt_dust": "Salt Dust",
   "block.ancientcurse.sandstone_torch": "Sandstone Torch",
   "block.ancientcurse.sandstone_bricks": "Sandstone Bricks",
+  "block.ancientcurse.sandstone_bricks_slab": "Sandstone Bricks Slab",
+  "block.ancientcurse.sandstone_bricks_stairs": "Sandstone Bricks Stairs",
+  "block.ancientcurse.sandstone_bricks_wall": "Sandstone Bricks Wall",
   "block.ancientcurse.sandstone_pillar": "Sandstone Pillar",
 
   "block.ancientcurse.anubus__glyph": "Anubus Glyph",
@@ -283,6 +290,9 @@
   "block.ancientcurse.deshret_sand": "Deshret Sand",
   "block.ancientcurse.deshret_sandstone": "Deshret Sandstone",
   "block.ancientcurse.sandstone_brick_tiles": "Sandstone Brick Tiles",
+  "block.ancientcurse.sandstone_brick_tiles_slab": "Sandstone Brick Tiles Slab",
+  "block.ancientcurse.sandstone_brick_tiles_stairs": "Sandstone Brick Tiles Stairs",
+  "block.ancientcurse.sandstone_brick_tiles_wall": "Sandstone Brick Tiles Wall",
   "block.ancientcurse.polished_bronze": "Polished Bronze",
   "block.ancientcurse.deshret_wavy_sand": "Deshret Wavy Sand",
   "block.ancientcurse.hardened_deshret_stone": "Hardened Deshret Stone",

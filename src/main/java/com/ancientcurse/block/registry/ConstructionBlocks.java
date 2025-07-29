@@ -9,6 +9,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.SlabBlock;
 import net.minecraft.block.StairsBlock;
+import net.minecraft.block.WallBlock;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.registry.Registries;
@@ -28,6 +29,34 @@ public class ConstructionBlocks {
             .strength(0.8f, 0.8f)
             .sounds(BlockSoundGroup.STONE)
             .requiresTool()
+    );
+    
+    // Sandstone Bricks variants (from ModBlocks.SANDSTONE_BRICKS)
+    public static final Block SANDSTONE_BRICKS_SLAB = new SlabBlock(
+        FabricBlockSettings.copyOf(ModBlocks.SANDSTONE_BRICKS)
+    );
+    
+    public static final Block SANDSTONE_BRICKS_STAIRS = new StairsBlock(
+        ModBlocks.SANDSTONE_BRICKS.getDefaultState(),
+        FabricBlockSettings.copyOf(ModBlocks.SANDSTONE_BRICKS)
+    );
+    
+    public static final Block SANDSTONE_BRICKS_WALL = new WallBlock(
+        FabricBlockSettings.copyOf(ModBlocks.SANDSTONE_BRICKS)
+    );
+    
+    // Sandstone Brick Tiles variants
+    public static final Block SANDSTONE_BRICK_TILES_SLAB = new SlabBlock(
+        FabricBlockSettings.copyOf(SANDSTONE_BRICK_TILES)
+    );
+    
+    public static final Block SANDSTONE_BRICK_TILES_STAIRS = new StairsBlock(
+        SANDSTONE_BRICK_TILES.getDefaultState(),
+        FabricBlockSettings.copyOf(SANDSTONE_BRICK_TILES)
+    );
+    
+    public static final Block SANDSTONE_BRICK_TILES_WALL = new WallBlock(
+        FabricBlockSettings.copyOf(SANDSTONE_BRICK_TILES)
     );
     
     // Metal variants
@@ -71,6 +100,40 @@ public class ConstructionBlocks {
             SANDSTONE_BRICK_TILES
         );
         
+        // Register sandstone bricks variants
+        Registry.register(
+            Registries.BLOCK,
+            new Identifier(AncientCurse.MOD_ID, "sandstone_bricks_slab"),
+            SANDSTONE_BRICKS_SLAB
+        );
+        Registry.register(
+            Registries.BLOCK,
+            new Identifier(AncientCurse.MOD_ID, "sandstone_bricks_stairs"),
+            SANDSTONE_BRICKS_STAIRS
+        );
+        Registry.register(
+            Registries.BLOCK,
+            new Identifier(AncientCurse.MOD_ID, "sandstone_bricks_wall"),
+            SANDSTONE_BRICKS_WALL
+        );
+        
+        // Register sandstone brick tiles variants
+        Registry.register(
+            Registries.BLOCK,
+            new Identifier(AncientCurse.MOD_ID, "sandstone_brick_tiles_slab"),
+            SANDSTONE_BRICK_TILES_SLAB
+        );
+        Registry.register(
+            Registries.BLOCK,
+            new Identifier(AncientCurse.MOD_ID, "sandstone_brick_tiles_stairs"),
+            SANDSTONE_BRICK_TILES_STAIRS
+        );
+        Registry.register(
+            Registries.BLOCK,
+            new Identifier(AncientCurse.MOD_ID, "sandstone_brick_tiles_wall"),
+            SANDSTONE_BRICK_TILES_WALL
+        );
+        
         // Register metal variants
         Registry.register(
             Registries.BLOCK,
@@ -111,6 +174,16 @@ public class ConstructionBlocks {
         
         // Register sandstone variant items
         registerBlockItem(SANDSTONE_BRICK_TILES, "sandstone_brick_tiles", ModItemGroup.ANCIENT_CURSE);
+        
+        // Register sandstone bricks variant items
+        registerBlockItem(SANDSTONE_BRICKS_SLAB, "sandstone_bricks_slab", ModItemGroup.ANCIENT_CURSE);
+        registerBlockItem(SANDSTONE_BRICKS_STAIRS, "sandstone_bricks_stairs", ModItemGroup.ANCIENT_CURSE);
+        registerBlockItem(SANDSTONE_BRICKS_WALL, "sandstone_bricks_wall", ModItemGroup.ANCIENT_CURSE);
+        
+        // Register sandstone brick tiles variant items
+        registerBlockItem(SANDSTONE_BRICK_TILES_SLAB, "sandstone_brick_tiles_slab", ModItemGroup.ANCIENT_CURSE);
+        registerBlockItem(SANDSTONE_BRICK_TILES_STAIRS, "sandstone_brick_tiles_stairs", ModItemGroup.ANCIENT_CURSE);
+        registerBlockItem(SANDSTONE_BRICK_TILES_WALL, "sandstone_brick_tiles_wall", ModItemGroup.ANCIENT_CURSE);
         
         // Register metal variant items
         registerBlockItem(POLISHED_BRONZE, "polished_bronze", ModItemGroup.ANCIENT_CURSE);

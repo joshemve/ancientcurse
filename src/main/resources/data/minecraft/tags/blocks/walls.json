@@ -2,6 +2,8 @@
   "replace": false,
   "values": [
     "ancientcurse:nile_mud_brick_wall",
-    "ancientcurse:necrostone_wall"
+    "ancientcurse:necrostone_wall",
+    "ancientcurse:sandstone_bricks_wall",
+    "ancientcurse:sandstone_brick_tiles_wall"
   ]
 }
