@@ -1,27 +1,20 @@
-package com.ancientcurse.util;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+package com.ancientcurse.player;
 
 import com.ancientcurse.AncientCurse;
+import com.ancientcurse.network.CurseZonePackets;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.server.network.ServerPlayerEntity;
 
 /**
- * Manager for the Ankh counter system.
- * Handles storing and retrieving ankh values for players.
+ * Manages ankh values for players using proper persistent storage.
+ * Replaces the old AnkhManager with proper NBT data persistence.
  */
-public class AnkhManager {
-    
-    private static final String ANKH_KEY = "ancientcurse.ankh_value";
+public class AnkhDataManager {
+    private static final String ANKH_KEY = "AnkhValue";
     private static final int DEFAULT_ANKH_VALUE = 100;
     private static final int MIN_ANKH_VALUE = 0;
     private static final int MAX_ANKH_VALUE = 100;
-    
-    // Cache for ankh values (UUID -> ankh value)
-    private static final Map<UUID, Integer> ankhValues = new HashMap<>();
     
     // Client-side ankh value for the local player
     private static int clientAnkhValue = DEFAULT_ANKH_VALUE;
@@ -37,32 +30,16 @@ public class AnkhManager {
             return DEFAULT_ANKH_VALUE;
         }
         
-        UUID playerUuid = player.getUuid();
+        // Get persistent data from player
+        PlayerDataStorage storage = (PlayerDataStorage) player;
+        NbtCompound data = storage.ancientcurse$getPersistentData();
         
-        // Check cache first
-        if (ankhValues.containsKey(playerUuid)) {
-            return ankhValues.get(playerUuid);
+        // Return stored value or default
+        if (data.contains(ANKH_KEY)) {
+            return data.getInt(ANKH_KEY);
         }
         
-        // For now, return default value
-        // In a real implementation, we would load from persistent storage
-        // This is a placeholder until we implement proper data storage
-        int ankhValue = DEFAULT_ANKH_VALUE;
-        
-        // If this is a server player, we could load from server data
-        if (player instanceof ServerPlayerEntity serverPlayer) {
-            // In the future, implement loading from server data
-            // For example:
-            // PlayerData data = ((ServerPlayerEntity) player).getServer().getPlayerManager().loadPlayerData(player);
-            // if (data != null && data.contains(ANKH_KEY)) {
-            //     ankhValue = data.getInt(ANKH_KEY);
-            // }
-        }
-        
-        // Cache the value
-        ankhValues.put(playerUuid, ankhValue);
-        
-        return ankhValue;
+        return DEFAULT_ANKH_VALUE;
     }
     
     /**
@@ -79,13 +56,14 @@ public class AnkhManager {
         // Clamp value to valid range
         int clampedValue = Math.max(MIN_ANKH_VALUE, Math.min(MAX_ANKH_VALUE, value));
         
-        // Update cache
-        ankhValues.put(player.getUuid(), clampedValue);
+        // Store in persistent data
+        PlayerDataStorage storage = (PlayerDataStorage) player;
+        NbtCompound data = storage.ancientcurse$getPersistentData();
+        data.putInt(ANKH_KEY, clampedValue);
         
         // Sync to client if on server
         if (player instanceof ServerPlayerEntity serverPlayer) {
-            // In the future, we'll implement proper syncing and saving here
-            // For now, just log the change
+            CurseZonePackets.sendAnkhValueToClient(serverPlayer, clampedValue);
             AncientCurse.LOGGER.info("Ankh value for player " + player.getName().getString() + " set to " + clampedValue);
         }
     }
@@ -128,13 +106,24 @@ public class AnkhManager {
     }
     
     /**
-     * Clear the cached ankh value for a player.
-     * This should be called when a player disconnects.
+     * Initialize ankh data for a player joining the server.
      * 
-     * @param playerUuid The player's UUID
+     * @param player The player
      */
-    public static void clearCachedValue(UUID playerUuid) {
-        ankhValues.remove(playerUuid);
+    public static void initializePlayer(ServerPlayerEntity player) {
+        // Check if player already has ankh data
+        PlayerDataStorage storage = (PlayerDataStorage) player;
+        NbtCompound data = storage.ancientcurse$getPersistentData();
+        
+        if (!data.contains(ANKH_KEY)) {
+            // New player, set default value
+            data.putInt(ANKH_KEY, DEFAULT_ANKH_VALUE);
+            AncientCurse.LOGGER.info("Initialized ankh value for new player " + player.getName().getString());
+        }
+        
+        // Sync current value to client
+        int ankhValue = data.getInt(ANKH_KEY);
+        CurseZonePackets.sendAnkhValueToClient(player, ankhValue);
     }
     
     /**

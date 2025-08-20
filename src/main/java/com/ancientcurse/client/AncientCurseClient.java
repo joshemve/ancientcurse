@@ -220,8 +220,22 @@ public class AncientCurseClient implements ClientModInitializer {
      * Register color providers for blocks and items
      */
     private void registerColorProviders() {
-        // Rock color providers are not currently used
-        // TODO: If rock blocks need color providers in the future, register them here
+        // Register rock color providers for dynamic coloring based on block below
+        RockColorProvider rockColorProvider = new RockColorProvider();
+        
+        // Register for blocks
+        ColorProviderRegistry.BLOCK.register(rockColorProvider, 
+            ModBlocks.SMALL_ROCK,
+            ModBlocks.MEDIUM_ROCK,
+            ModBlocks.LARGE_ROCK
+        );
+        
+        // Register for items (shows gray in inventory)
+        ColorProviderRegistry.ITEM.register(rockColorProvider,
+            ModBlocks.SMALL_ROCK,
+            ModBlocks.MEDIUM_ROCK,
+            ModBlocks.LARGE_ROCK
+        );
         
         AncientCurse.LOGGER.info("Registered color providers");
     }

@@ -495,7 +495,8 @@ public class ModBlocks {
     );
     
     // Deshret Wavy Sand - Red desert sand with a wavy, wind-blown pattern
-    public static final Block DESHRET_WAVY_SAND = new Block(
+    public static final Block DESHRET_WAVY_SAND = new SandBlock(
+        14378728, // Same reddish color as DESHRET_SAND
         FabricBlockSettings.create()
             .mapColor(MapColor.TERRACOTTA_RED)
             .strength(0.5f)

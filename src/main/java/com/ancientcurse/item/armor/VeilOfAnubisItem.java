@@ -53,15 +53,15 @@ public class VeilOfAnubisItem extends ArmorItem implements GeoItem {
     @Override
     public void createRenderer(Consumer<Object> consumer) {
         consumer.accept(new RenderProvider() {
-            private VeilOfAnubisRenderer renderer;
+            private VeilOfAnubisRenderer armorRenderer;
             
             @Override
             public BipedEntityModel<LivingEntity> getHumanoidArmorModel(LivingEntity livingEntity, ItemStack itemStack, EquipmentSlot equipmentSlot, BipedEntityModel<LivingEntity> original) {
-                if (this.renderer == null)
-                    this.renderer = new VeilOfAnubisRenderer();
+                if (this.armorRenderer == null)
+                    this.armorRenderer = new VeilOfAnubisRenderer();
                 
-                this.renderer.prepForRender(livingEntity, itemStack, equipmentSlot, original);
-                return this.renderer;
+                this.armorRenderer.prepForRender(livingEntity, itemStack, equipmentSlot, original);
+                return this.armorRenderer;
             }
         });
     }

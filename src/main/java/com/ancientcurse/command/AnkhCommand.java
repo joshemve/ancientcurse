@@ -1,6 +1,6 @@
 package com.ancientcurse.command;
 
-import com.ancientcurse.util.AnkhManager;
+import com.ancientcurse.player.AnkhDataManager;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.context.CommandContext;
@@ -52,7 +52,7 @@ public class AnkhCommand {
         int count = 0;
         
         for (ServerPlayerEntity player : targets) {
-            AnkhManager.setAnkhValue(player, 100);
+            AnkhDataManager.setAnkhValue(player, 100);
             count++;
             
             // Send feedback to the player being healed
@@ -87,8 +87,8 @@ public class AnkhCommand {
         int count = 0;
         
         for (ServerPlayerEntity player : targets) {
-            int previousValue = AnkhManager.getAnkhValue(player);
-            AnkhManager.setAnkhValue(player, value);
+            int previousValue = AnkhDataManager.getAnkhValue(player);
+            AnkhDataManager.setAnkhValue(player, value);
             count++;
             
             // Send feedback to the player whose ankh was changed

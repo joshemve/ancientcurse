@@ -4,7 +4,8 @@
   "package": "com.ancientcurse.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
-    "SingleBiomePresetMixin"
+    "SingleBiomePresetMixin",
+    "PlayerEntityMixin"
   ],
   "client": [
     "client.EntityRenderDispatcherMixin",

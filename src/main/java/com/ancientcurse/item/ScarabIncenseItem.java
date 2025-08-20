@@ -19,7 +19,7 @@ import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.UseAction;
 import net.minecraft.world.World;
 import net.minecraft.client.item.TooltipContext;
-import com.ancientcurse.util.AnkhManager;
+import com.ancientcurse.player.AnkhDataManager;
 
 import java.util.List;
 
@@ -47,10 +47,10 @@ public class ScarabIncenseItem extends Item {
             
             if (!world.isClient) {
                 // Restore Ankh points
-                int currentAnkh = AnkhManager.getAnkhValue(player);
+                int currentAnkh = AnkhDataManager.getAnkhValue(player);
                 int restored = 0;
                 if (currentAnkh < 100) {
-                    int newAnkh = AnkhManager.increaseAnkhValue(player, 30);
+                    int newAnkh = AnkhDataManager.increaseAnkhValue(player, 30);
                     restored = newAnkh - currentAnkh;
                     player.sendMessage(Text.literal(String.format("§bAnkh restored by %d points! §a(Now at %d/100)§r", restored, newAnkh)).formatted(Formatting.AQUA), false);
                 } else {

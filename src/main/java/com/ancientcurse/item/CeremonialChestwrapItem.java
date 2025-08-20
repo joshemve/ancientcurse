@@ -7,8 +7,6 @@ import net.minecraft.item.ArmorMaterial;
 import net.minecraft.recipe.Ingredient;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.sound.SoundEvents;
-import net.minecraft.client.render.entity.model.BipedEntityModel;
-import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.effect.StatusEffectInstance;
@@ -24,22 +22,24 @@ import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.client.render.entity.model.BipedEntityModel;
 import software.bernie.geckolib.animatable.GeoItem;
 import software.bernie.geckolib.animatable.client.RenderProvider;
 import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
-import software.bernie.geckolib.core.animation.AnimatableManager;
-import software.bernie.geckolib.util.GeckoLibUtil;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
+import software.bernie.geckolib.core.animatable.instance.SingletonAnimatableInstanceCache;
+import software.bernie.geckolib.core.animation.*;
+import software.bernie.geckolib.core.object.PlayState;
+import software.bernie.geckolib.util.RenderUtils;
 import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
 public class CeremonialChestwrapItem extends ArmorItem implements GeoItem {
+    private AnimatableInstanceCache cache = new SingletonAnimatableInstanceCache(this);
+    private final java.util.function.Supplier<Object> renderProvider = GeoItem.makeRenderer(this);
     private static final CeremonialChestwrapMaterial MATERIAL = new CeremonialChestwrapMaterial();
-    private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
-    private final Supplier<Object> renderProvider = GeoItem.makeRenderer(this);
     private static final Map<UUID, Long> cooldowns = new HashMap<>();
     private static final int COOLDOWN_TICKS = 1200; // 60 seconds
     
@@ -89,37 +89,6 @@ public class CeremonialChestwrapItem extends ArmorItem implements GeoItem {
         }
     }
     
-    // GeckoLib implementation
-    @Override
-    public void createRenderer(Consumer<Object> consumer) {
-        consumer.accept(new RenderProvider() {
-            private CeremonialChestwrapRenderer renderer;
-            
-            @Override
-            public BipedEntityModel<LivingEntity> getHumanoidArmorModel(LivingEntity livingEntity, ItemStack itemStack, EquipmentSlot equipmentSlot, BipedEntityModel<LivingEntity> original) {
-                if (this.renderer == null)
-                    this.renderer = new CeremonialChestwrapRenderer();
-                
-                this.renderer.prepForRender(livingEntity, itemStack, equipmentSlot, original);
-                return this.renderer;
-            }
-        });
-    }
-    
-    @Override
-    public Supplier<Object> getRenderProvider() {
-        return this.renderProvider;
-    }
-    
-    @Override
-    public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
-        // No animations for now
-    }
-    
-    @Override
-    public AnimatableInstanceCache getAnimatableInstanceCache() {
-        return this.cache;
-    }
     
     @Override
     public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
@@ -223,5 +192,46 @@ public class CeremonialChestwrapItem extends ArmorItem implements GeoItem {
             .append(Text.literal("Crouch + Right-click for Pulse of Harmony").formatted(Formatting.LIGHT_PURPLE)));
         tooltip.add(Text.literal("         ").append(Text.literal("60 second cooldown").formatted(Formatting.GRAY)));
         super.appendTooltip(stack, world, tooltip, context);
+    }
+    
+    // GeckoLib implementation
+    @Override
+    public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
+        controllers.add(new AnimationController<>(this, "controller", 0, this::predicate));
+    }
+    
+    private PlayState predicate(AnimationState<CeremonialChestwrapItem> animationState) {
+        return PlayState.STOP;
+    }
+    
+    @Override
+    public AnimatableInstanceCache getAnimatableInstanceCache() {
+        return cache;
+    }
+    
+    @Override
+    public double getTick(Object itemStack) {
+        return RenderUtils.getCurrentTick();
+    }
+    
+    @Override
+    public void createRenderer(java.util.function.Consumer<Object> consumer) {
+        consumer.accept(new RenderProvider() {
+            private CeremonialChestwrapRenderer renderer;
+            
+            @Override
+            public BipedEntityModel<LivingEntity> getHumanoidArmorModel(LivingEntity livingEntity, ItemStack itemStack, EquipmentSlot equipmentSlot, BipedEntityModel<LivingEntity> original) {
+                if (this.renderer == null)
+                    this.renderer = new CeremonialChestwrapRenderer();
+                
+                this.renderer.prepForRender(livingEntity, itemStack, equipmentSlot, original);
+                return this.renderer;
+            }
+        });
+    }
+    
+    @Override
+    public java.util.function.Supplier<Object> getRenderProvider() {
+        return this.renderProvider;
     }
 }

@@ -10,7 +10,7 @@ import com.ancientcurse.block.CursedPlantBlock;
 import com.ancientcurse.block.SolarSpireBlock;
 import com.ancientcurse.effect.ModStatusEffects;
 import com.ancientcurse.util.CurseZoneManager;
-import com.ancientcurse.util.AnkhManager;
+import com.ancientcurse.player.AnkhDataManager;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -734,7 +734,7 @@ public class CursedEarthBlock extends BaseAncientCurseBlock {
             
             // Decrease ankh value when standing on cursed earth
             if (currentTime % 100 == 0) { // Every 5 seconds
-                AnkhManager.decreaseAnkhValue(player, 1);
+                AnkhDataManager.decreaseAnkhValue(player, 1);
             }
             
             // Apply additional effects based on exposure time

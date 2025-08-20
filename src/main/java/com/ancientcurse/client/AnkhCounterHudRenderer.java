@@ -1,7 +1,7 @@
 package com.ancientcurse.client;
 
 import com.ancientcurse.AncientCurse;
-import com.ancientcurse.util.AnkhManager;
+import com.ancientcurse.player.AnkhDataManager;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
@@ -51,7 +51,7 @@ public class AnkhCounterHudRenderer {
         TextRenderer textRenderer = client.textRenderer;
         
         // Get the client-side ankh value for display
-        int ankhValue = AnkhManager.getClientAnkhValue();
+        int ankhValue = AnkhDataManager.getClientAnkhValue();
         
         // Format the text to display (smaller size, no bold formatting)
         String displayText = String.format("%d", ankhValue);

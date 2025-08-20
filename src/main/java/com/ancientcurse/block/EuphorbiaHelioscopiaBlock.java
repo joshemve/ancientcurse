@@ -1,5 +1,6 @@
 package com.ancientcurse.block;
 
+import com.ancientcurse.ModBlocks;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -39,7 +40,11 @@ public class EuphorbiaHelioscopiaBlock extends Block {
         return floor.isOf(Blocks.SAND) || 
                floor.isOf(Blocks.RED_SAND) || 
                floor.isOf(Blocks.DIRT) || 
-               floor.isOf(Blocks.GRASS_BLOCK);
+               floor.isOf(Blocks.GRASS_BLOCK) ||
+               floor.isOf(ModBlocks.SMOOTH_SAND) ||
+               floor.isOf(ModBlocks.NILE_RIVER_SAND) ||
+               floor.isOf(ModBlocks.DESHRET_SAND) ||
+               floor.isOf(ModBlocks.DESHRET_WAVY_SAND);
     }
 
     @Override

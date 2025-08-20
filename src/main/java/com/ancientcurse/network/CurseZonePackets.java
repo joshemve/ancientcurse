@@ -427,7 +427,7 @@ public class CurseZonePackets {
         client.execute(() -> {
             if (client.player != null) {
                 // Update the client-side ankh value for HUD display
-                com.ancientcurse.util.AnkhManager.setClientAnkhValue(ankhValue);
+                com.ancientcurse.player.AnkhDataManager.setClientAnkhValue(ankhValue);
             }
         });
     }

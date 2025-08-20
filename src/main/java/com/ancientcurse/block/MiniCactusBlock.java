@@ -56,8 +56,10 @@ public class MiniCactusBlock extends PlantBlock {
     protected boolean canPlantOnTop(BlockState floor, BlockView world, BlockPos pos) {
         return floor.isOf(Blocks.SAND) || 
                floor.isOf(Blocks.RED_SAND) || 
+               floor.isOf(ModBlocks.SMOOTH_SAND) ||
                floor.isOf(ModBlocks.NILE_RIVER_SAND) ||
-               floor.isOf(ModBlocks.SMOOTH_SAND);
+               floor.isOf(ModBlocks.DESHRET_SAND) ||
+               floor.isOf(ModBlocks.DESHRET_WAVY_SAND);
     }
 
 } 

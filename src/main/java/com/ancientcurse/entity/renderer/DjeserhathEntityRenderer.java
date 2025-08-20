@@ -34,6 +34,19 @@ public class DjeserhathEntityRenderer extends GeoEntityRenderer<DjeserhathEntity
         super.preRender(poseStack, animatable, model, bufferSource, buffer, isReRender, 
                        partialTick, packedLight, packedOverlay, red, green, blue, alpha);
         
+        // Keep only the plant base static by counter-rotating it
+        GeoBone bottomPlant = model.getBone("bottom_plant").orElse(null);
+        if (bottomPlant != null) {
+            // Get the interpolated body yaw for smooth rotation
+            float bodyYaw = animatable.getBodyYaw();
+            float rotationRadians = bodyYaw * ((float)Math.PI / 180F);
+            
+            // Counter-rotate the plant to keep it static in world space
+            bottomPlant.setRotY(-rotationRadians);
+        }
+        
+        // Do NOT manually set rotation on djeserhath bone - let it rotate naturally with the entity
+        
         // Handle jaw rotation based on JAW_OPENNESS
         float jawOpenness = animatable.getJawOpenness();
         

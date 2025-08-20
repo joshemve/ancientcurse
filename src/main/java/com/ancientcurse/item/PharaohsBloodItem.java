@@ -1,6 +1,6 @@
 package com.ancientcurse.item;
 
-import com.ancientcurse.util.AnkhManager;
+import com.ancientcurse.player.AnkhDataManager;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
@@ -32,7 +32,7 @@ public class PharaohsBloodItem extends Item {
         ItemStack itemStack = user.getStackInHand(hand);
         
         // Check if player needs restoration
-        int currentAnkh = AnkhManager.getAnkhValue(user);
+        int currentAnkh = AnkhDataManager.getAnkhValue(user);
         if (currentAnkh >= 100) {
             if (!world.isClient) {
                 user.sendMessage(Text.translatable("item.ancientcurse.pharaohs_blood.full"), true);
@@ -48,8 +48,8 @@ public class PharaohsBloodItem extends Item {
         if (user instanceof PlayerEntity player) {
             if (!world.isClient) {
                 // Fully restore Ankh
-                int oldAnkh = AnkhManager.getAnkhValue(player);
-                AnkhManager.setAnkhValue(player, 100);
+                int oldAnkh = AnkhDataManager.getAnkhValue(player);
+                AnkhDataManager.setAnkhValue(player, 100);
                 
                 // Send feedback
                 player.sendMessage(Text.translatable("item.ancientcurse.pharaohs_blood.used", 

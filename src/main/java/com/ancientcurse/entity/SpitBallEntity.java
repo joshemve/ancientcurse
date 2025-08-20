@@ -11,6 +11,9 @@ import net.minecraft.entity.projectile.ProjectileEntity;
 import net.minecraft.entity.projectile.ProjectileUtil;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.particle.ParticleTypes;
+import net.minecraft.particle.DustParticleEffect;
+import net.minecraft.particle.BlockStateParticleEffect;
+import net.minecraft.block.Blocks;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
@@ -87,27 +90,27 @@ public class SpitBallEntity extends ProjectileEntity implements GeoEntity {
         this.setPosition(pos.x + velocity.x, pos.y + velocity.y, pos.z + velocity.z);
         ProjectileUtil.setRotationFromVelocity(this, 0.5f);
         
-        // Spawn trail particles
+        // Spawn trail particles - minimal ball-like effect
         if (this.getWorld() instanceof ServerWorld) {
             ServerWorld serverWorld = (ServerWorld) this.getWorld();
             
-            // Purple particle trail
+            // Core of the spit ball - dense particle
             serverWorld.spawnParticles(
-                ParticleTypes.WITCH, 
+                ParticleTypes.ITEM_SLIME, 
                 pos.x, pos.y, pos.z,
-                1, // count
-                0.05, 0.05, 0.05, // spread
-                0.0 // speed
+                1, // single particle
+                0.05, 0.05, 0.05, // very small spread to keep it ball-like
+                0.0 // no extra speed
             );
             
-            // Dripping effect
-            if (this.random.nextFloat() < 0.3f) {
+            // Occasional trailing effect
+            if (this.age % 3 == 0) {
                 serverWorld.spawnParticles(
-                    ParticleTypes.DRIPPING_OBSIDIAN_TEAR,
-                    pos.x, pos.y - 0.1, pos.z,
-                    1, // count
-                    0.05, 0, 0.05, // spread
-                    0.01 // speed
+                    ParticleTypes.SPIT,
+                    pos.x - velocity.x * 0.5, pos.y - velocity.y * 0.5, pos.z - velocity.z * 0.5,
+                    1, // minimal particles
+                    0.02, 0.02, 0.02, // tight spread
+                    0.0
                 );
             }
         }
@@ -186,31 +189,31 @@ public class SpitBallEntity extends ProjectileEntity implements GeoEntity {
         double centerY = targetPos.y + 0.5;
         double centerZ = targetPos.z;
         
-        // Main impact burst - particles spread outward
+        // Main splash effect - slime particles
         world.spawnParticles(
-            ParticleTypes.WITCH,
+            ParticleTypes.ITEM_SLIME,
             centerX, centerY, centerZ,
-            20, // particle count
-            0.3, 0.3, 0.3, // spread x, y, z
-            0.1 // extra velocity
+            8, // reduced particle count
+            0.3, 0.2, 0.3, // moderate spread
+            0.1 // slight velocity
         );
         
-        // Acid splash effect
+        // Small poison cloud
         world.spawnParticles(
-            ParticleTypes.SPLASH,
+            ParticleTypes.SNEEZE,
             centerX, centerY, centerZ,
-            15,
-            0.4, 0.2, 0.4,
-            0.0
-        );
-        
-        // Some smoke for effect
-        world.spawnParticles(
-            ParticleTypes.SMOKE,
-            centerX, centerY + 0.2, centerZ,
             5,
             0.2, 0.2, 0.2,
             0.02
+        );
+        
+        // A few splash particles for impact
+        world.spawnParticles(
+            ParticleTypes.SPIT,
+            centerX, centerY, centerZ,
+            6,
+            0.4, 0.1, 0.4,
+            0.05
         );
     }
     

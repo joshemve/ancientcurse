@@ -2,7 +2,7 @@ package com.ancientcurse.system;
 
 import com.ancientcurse.effect.KhamsinCurseEffect;
 import com.ancientcurse.effect.ModStatusEffects;
-import com.ancientcurse.util.AnkhManager;
+import com.ancientcurse.player.AnkhDataManager;
 import com.ancientcurse.util.CurseZoneArea;
 import com.ancientcurse.util.CurseZoneAreaManager;
 import net.minecraft.entity.effect.StatusEffect;
@@ -50,7 +50,7 @@ public class CurseZoneEffectHandler {
                         float drainPerInterval = (drainRate / 60.0f) * DRAIN_INTERVAL_SECONDS;
                         int drainAmount = Math.max(1, Math.round(drainPerInterval));
                         
-                        int newAnkh = AnkhManager.decreaseAnkhValue(player, drainAmount);
+                        int newAnkh = AnkhDataManager.decreaseAnkhValue(player, drainAmount);
                         
                         // Send update packet to client to update HUD
                         com.ancientcurse.network.CurseZonePackets.sendAnkhValueToClient(player, newAnkh);

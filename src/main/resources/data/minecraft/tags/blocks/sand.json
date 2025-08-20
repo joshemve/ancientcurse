@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    "ancientcurse:smooth_sand",
+    "ancientcurse:nile_river_sand",
+    "ancientcurse:deshret_sand",
+    "ancientcurse:deshret_wavy_sand"
+  ]
+}
