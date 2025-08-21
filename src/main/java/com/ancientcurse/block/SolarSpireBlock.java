@@ -12,6 +12,7 @@ import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityTicker;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.registry.Registries;
 import net.minecraft.item.ItemStack;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.world.ServerWorld;
@@ -34,6 +35,7 @@ import net.minecraft.world.tick.TickPriority;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.UUID;
 
 /**
  * Solar Spire that purifies ALL connected cursed earth when activated with an Eye of Apophis
@@ -41,13 +43,14 @@ import java.util.*;
 public class SolarSpireBlock extends BlockWithEntity {
     
     public static final BooleanProperty ACTIVATED = BooleanProperty.of("activated");
-    private static final VoxelShape SHAPE = Block.createCuboidShape(2, 0, 2, 14, 24, 14);
+    private static final VoxelShape SHAPE = Block.createCuboidShape(3, 0, 3, 13, 48, 13);
     private static final int BLOCKS_PER_TICK = 10000; // Process massive amounts for near-instant cleansing
     private static final int WAVE_TICK_DELAY = 1; // Process every single tick for rapid expansion
     private static final boolean REDUCED_PARTICLES = true; // Reduce particles to prevent lag
     
     // Track active cleansing operations
     private static final Map<BlockPos, CleansingOperation> activeOperations = new HashMap<>();
+    private static final Map<BlockPos, UUID> poweringUpSpires = new HashMap<>(); // Track spires that are powering up
     private static final int CLEANSING_ZONE_RADIUS = 250; // Disable spreading in this radius
     
     public SolarSpireBlock(Settings settings) {
@@ -102,14 +105,15 @@ public class SolarSpireBlock extends BlockWithEntity {
     }
     
     private boolean hasNearbyCursedEarth(World world, BlockPos center) {
-        // Check in a small radius for any cursed earth
+        // Check in a small radius for any cursed earth or cursed stone
         int checkRadius = 10;
         for (int x = -checkRadius; x <= checkRadius; x++) {
             for (int y = -3; y <= 3; y++) {
                 for (int z = -checkRadius; z <= checkRadius; z++) {
                     BlockPos checkPos = center.add(x, y, z);
                     BlockState state = world.getBlockState(checkPos);
-                    if (state.getBlock() == ModBlocks.CURSED_EARTH) {
+                    if (state.getBlock() == ModBlocks.CURSED_EARTH || 
+                        state.getBlock() == ModBlocks.CURSED_STONE) {
                         return true;
                     }
                 }
@@ -127,15 +131,15 @@ public class SolarSpireBlock extends BlockWithEntity {
             blockEntity.activate(eyeStack);
         }
         
-        // Create cleansing operation
-        CleansingOperation operation = new CleansingOperation(pos, player.getUuid());
-        activeOperations.put(pos, operation);
+        // Store the player UUID for later use but DON'T start cleansing yet
+        // We'll wait for the power-up animation to complete
+        poweringUpSpires.put(pos, player.getUuid());
         
         // Create protection zone around the station (10 days = 10 * 24000 ticks)
         CursedEarthManager.getInstance().createCleansingProtection((ServerWorld)world, pos, 10 * 24000);
         
-        // Start the cleansing process
-        ((ServerWorld)world).scheduleBlockTick(pos, this, WAVE_TICK_DELAY, TickPriority.HIGH);
+        // Schedule a check for power-up completion (will check every second)
+        ((ServerWorld)world).scheduleBlockTick(pos, this, 20, TickPriority.HIGH);
         
         // Play activation sound
         world.playSound(null, pos, SoundEvents.BLOCK_BEACON_ACTIVATE, SoundCategory.BLOCKS, 1.0F, 1.0F);
@@ -161,6 +165,38 @@ public class SolarSpireBlock extends BlockWithEntity {
             return;
         }
         
+        // Check if this spire is still powering up
+        if (poweringUpSpires.containsKey(pos)) {
+            // Check if power-up is complete
+            if (world.getBlockEntity(pos) instanceof SolarSpireBlockEntity blockEntity) {
+                if (blockEntity.isPowerUpComplete()) {
+                    // Power-up is complete! Start the cleansing
+                    UUID playerUuid = poweringUpSpires.remove(pos);
+                    
+                    // Create cleansing operation
+                    CleansingOperation operation = new CleansingOperation(pos, playerUuid);
+                    activeOperations.put(pos, operation);
+                    
+                    // Play a special sound when cleansing begins
+                    world.playSound(null, pos, SoundEvents.BLOCK_BEACON_POWER_SELECT, SoundCategory.BLOCKS, 1.0F, 1.0F);
+                    
+                    // Send message to player
+                    PlayerEntity player = world.getPlayerByUuid(playerUuid);
+                    if (player != null) {
+                        player.sendMessage(Text.literal("§6The Eye of Apophis manifests! Solar cleansing begins!"), true);
+                    }
+                    
+                    // Start the actual cleansing process
+                    world.scheduleBlockTick(pos, this, WAVE_TICK_DELAY, TickPriority.HIGH);
+                } else {
+                    // Still powering up, check again in 1 second
+                    world.scheduleBlockTick(pos, this, 20, TickPriority.HIGH);
+                }
+            }
+            return;
+        }
+        
+        // Normal cleansing operation
         CleansingOperation operation = activeOperations.get(pos);
         if (operation == null) {
             // Operation was removed, deactivate
@@ -192,6 +228,12 @@ public class SolarSpireBlock extends BlockWithEntity {
         // Log the cleansing
         AncientCurse.LOGGER.info("Solar Spire at {} completed cleansing: {} blocks cleansed, {} blocks restored",
             pos, operation.totalCleansed, operation.blocksRestored);
+        
+        // Log tracker stats for debugging
+        OriginalBlockTracker tracker = OriginalBlockTracker.get(world);
+        OriginalBlockTracker.TrackerStats stats = tracker.getStats();
+        AncientCurse.LOGGER.info("Tracker stats: {} blocks tracked in {} chunks, {} unique block types",
+            stats.blocksTracked, stats.chunksTracked, stats.uniqueBlockTypes);
         
         // Play completion sound
         world.playSound(null, pos, SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, SoundCategory.BLOCKS, 1.0F, 1.0F);
@@ -228,8 +270,9 @@ public class SolarSpireBlock extends BlockWithEntity {
     @Override
     public void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved) {
         if (!state.isOf(newState.getBlock())) {
-            // Clean up active operations if block is broken
+            // Clean up active operations and powering up tracking if block is broken
             activeOperations.remove(pos);
+            poweringUpSpires.remove(pos);
             
             // Return Eye of Apophis if it was active
             if (state.get(ACTIVATED) && world.getBlockEntity(pos) instanceof SolarSpireBlockEntity blockEntity) {
@@ -265,6 +308,7 @@ public class SolarSpireBlock extends BlockWithEntity {
         private final UUID playerUuid;
         private int totalCleansed = 0;
         private int blocksRestored = 0;
+        private static final int JUMP_RADIUS = 25; // Radius to search when reaching end of connected blocks
         
         public CleansingOperation(BlockPos start, UUID playerUuid) {
             this.playerUuid = playerUuid;
@@ -281,6 +325,7 @@ public class SolarSpireBlock extends BlockWithEntity {
             
             Set<BlockPos> nextWave = new HashSet<>();
             int processedThisTick = 0;
+            boolean foundAnyCorruption = false;
             
             // Process current wave
             Iterator<BlockPos> iterator = toProcess.iterator();
@@ -296,10 +341,13 @@ public class SolarSpireBlock extends BlockWithEntity {
                 processedThisTick++;
                 
                 BlockState state = world.getBlockState(pos);
-                if (state.getBlock() == ModBlocks.CURSED_EARTH) {
+                
+                // Check if it's any corrupted block (cursed earth, cursed stone, or cursed plants)
+                if (isCorruptedBlock(state)) {
                     // Cleanse this block
                     cleanseBlock(world, pos);
                     totalCleansed++;
+                    foundAnyCorruption = true;
                     
                     // Add adjacent blocks to next wave
                     for (Direction dir : Direction.values()) {
@@ -311,6 +359,15 @@ public class SolarSpireBlock extends BlockWithEntity {
                 }
             }
             
+            // If we didn't find any corruption in this wave, search in a radius for more
+            if (!foundAnyCorruption && toProcess.isEmpty() && !nextWave.isEmpty()) {
+                // Get the last processed positions and search around them
+                Set<BlockPos> searchCenters = new HashSet<>(nextWave);
+                for (BlockPos center : searchCenters) {
+                    searchForCorruptionInRadius(world, center, nextWave);
+                }
+            }
+            
             // Add remaining blocks from current wave to next wave
             nextWave.addAll(toProcess);
             toProcess.clear();
@@ -319,22 +376,110 @@ public class SolarSpireBlock extends BlockWithEntity {
             return !toProcess.isEmpty();
         }
         
+        private void searchForCorruptionInRadius(ServerWorld world, BlockPos center, Set<BlockPos> nextWave) {
+            // Search in a 25-block radius for any corrupted blocks
+            for (int x = -JUMP_RADIUS; x <= JUMP_RADIUS; x++) {
+                for (int y = -10; y <= 10; y++) { // Limit Y range for performance
+                    for (int z = -JUMP_RADIUS; z <= JUMP_RADIUS; z++) {
+                        BlockPos checkPos = center.add(x, y, z);
+                        
+                        // Skip if already processed
+                        if (processed.contains(checkPos)) {
+                            continue;
+                        }
+                        
+                        // Check if it's within the radius
+                        if (checkPos.isWithinDistance(center, JUMP_RADIUS)) {
+                            BlockState state = world.getBlockState(checkPos);
+                            if (isCorruptedBlock(state)) {
+                                // Found corruption! Add it to be processed
+                                nextWave.add(checkPos);
+                                // Only add a few to prevent massive expansion
+                                if (nextWave.size() > 100) {
+                                    return;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        private boolean isCorruptedBlock(BlockState state) {
+            Block block = state.getBlock();
+            
+            // Check for cursed earth and cursed stone
+            if (block == ModBlocks.CURSED_EARTH || block == ModBlocks.CURSED_STONE) {
+                return true;
+            }
+            
+            // Check if it's from the CursedPlantBlocks registry
+            String blockName = Registries.BLOCK.getId(block).getPath();
+            if (blockName.contains("cursed") || blockName.contains("withered") || 
+                blockName.contains("isfet") || blockName.contains("duat") ||
+                blockName.contains("khemnu") || blockName.contains("kheru") ||
+                blockName.contains("menfet") || blockName.contains("sutekh") ||
+                blockName.contains("bloodshade") || blockName.contains("duamutef")) {
+                return true;
+            }
+            
+            return false;
+        }
+        
         private void cleanseBlock(ServerWorld world, BlockPos pos) {
+            BlockState currentState = world.getBlockState(pos);
+            Block currentBlock = currentState.getBlock();
+            
             // Get the original block tracker instance
             OriginalBlockTracker tracker = OriginalBlockTracker.get(world);
             
-            // Get the original block to restore
-            BlockState originalState = tracker.getOriginalBlock(pos);
+            // Check if it's a corrupted plant (these should just be removed, not restored)
+            String blockName = Registries.BLOCK.getId(currentBlock).getPath();
+            boolean isCorruptedPlant = blockName.contains("cursed") || blockName.contains("withered") || 
+                blockName.contains("isfet") || blockName.contains("duat") ||
+                blockName.contains("khemnu") || blockName.contains("kheru") ||
+                blockName.contains("menfet") || blockName.contains("sutekh") ||
+                blockName.contains("bloodshade") || blockName.contains("duamutef");
             
-            if (originalState != null && originalState.getBlock() != ModBlocks.CURSED_EARTH) {
-                // Restore to original state
-                world.setBlockState(pos, originalState);
-                tracker.clearTracking(pos);
-                blocksRestored++;
+            if (isCorruptedPlant) {
+                // Corrupted plants are just removed (replaced with air)
+                AncientCurse.LOGGER.debug("Removing corrupted plant at {}: {}", pos, blockName);
+                world.setBlockState(pos, Blocks.AIR.getDefaultState());
             } else {
-                // Default to grass block
-                world.setBlockState(pos, Blocks.GRASS_BLOCK.getDefaultState());
+                // For cursed earth/stone, try to restore original
+                BlockState originalState = tracker.getOriginalBlock(pos);
+                
+                AncientCurse.LOGGER.debug("Cleansing {} at {} - Original tracked: {}", 
+                    currentBlock.getTranslationKey(), pos, 
+                    originalState != null ? originalState.getBlock().getTranslationKey() : "null");
+                
+                if (originalState != null && originalState.getBlock() != ModBlocks.CURSED_EARTH && 
+                    originalState.getBlock() != ModBlocks.CURSED_STONE) {
+                    // Restore to original state
+                    AncientCurse.LOGGER.info("Restoring {} to original {} at {}", 
+                        currentBlock.getTranslationKey(), originalState.getBlock().getTranslationKey(), pos);
+                    world.setBlockState(pos, originalState);
+                    tracker.clearTracking(pos);
+                    blocksRestored++;
+                } else if (currentBlock == ModBlocks.CURSED_EARTH) {
+                    // No tracked original - default cursed earth to grass block
+                    AncientCurse.LOGGER.debug("No original tracked for cursed earth at {}, defaulting to grass", pos);
+                    world.setBlockState(pos, Blocks.GRASS_BLOCK.getDefaultState());
+                    tracker.clearTracking(pos); // Clear any stale tracking
+                } else if (currentBlock == ModBlocks.CURSED_STONE) {
+                    // No tracked original - default cursed stone to regular stone
+                    AncientCurse.LOGGER.debug("No original tracked for cursed stone at {}, defaulting to stone", pos);
+                    world.setBlockState(pos, Blocks.STONE.getDefaultState());
+                    tracker.clearTracking(pos); // Clear any stale tracking
+                } else {
+                    // Some other corrupted block with no original tracked - remove it
+                    AncientCurse.LOGGER.debug("No original tracked for {} at {}, removing", blockName, pos);
+                    world.setBlockState(pos, Blocks.AIR.getDefaultState());
+                }
             }
+            
+            // Notify CursedEarthManager that a cursed block was removed
+            CursedEarthManager.getInstance().onCursedBlockRemoved(world, pos);
             
             // Visual effect (reduced)
             if (!REDUCED_PARTICLES || world.random.nextFloat() < 0.05f) {

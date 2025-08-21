@@ -241,12 +241,18 @@ public class OriginalBlockTracker extends PersistentState {
     public static OriginalBlockTracker fromNbt(NbtCompound nbt) {
         OriginalBlockTracker tracker = new OriginalBlockTracker();
         
-        // Clear and reload block mappings (they're static so we need to be careful)
-        blockToId.clear();
-        idToBlock.clear();
+        // Note: Static maps are shared across all worlds/dimensions
+        // We need to be careful about clearing them
         
-        // Re-initialize common blocks
-        tracker.initializeCommonBlocks();
+        // Only clear if we're loading fresh data
+        if (nbt.contains("blockMappings")) {
+            blockToId.clear();
+            idToBlock.clear();
+            nextBlockId = 0;
+            
+            // Re-initialize common blocks
+            tracker.initializeCommonBlocks();
+        }
         
         // Load block mappings
         NbtCompound blockMappings = nbt.getCompound("blockMappings");

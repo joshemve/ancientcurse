@@ -152,11 +152,12 @@ public class CursedEarthCommand {
         
         int totalCursedBlocks = CursedEarthBlock.getTotalCursedBlocks();
         boolean enabled = cursedEarthEnabled;
+        CursedEarthManager manager = CursedEarthManager.getInstance();
         
         source.sendMessage(Text.literal("§6=== Cursed Earth Statistics ==="));
         source.sendMessage(Text.literal("§eStatus: " + (enabled ? "§aEnabled" : "§cDisabled")));
         source.sendMessage(Text.literal("§eTotal Cursed Blocks: §f" + totalCursedBlocks));
-        source.sendMessage(Text.literal("§eChunks with Cursed Earth: §f" + getChunkCount()));
+        source.sendMessage(Text.literal("§eChunks with Cursed Earth: §f" + manager.getChunksWithCursedEarth()));
         
         // Show original block tracking stats
         OriginalBlockTracker tracker = OriginalBlockTracker.get(world);
@@ -239,7 +240,7 @@ public class CursedEarthCommand {
             for (int y = -10; y <= 10; y++) { // Reasonable Y range
                 for (int z = -searchRadius; z <= searchRadius; z++) {
                     BlockPos pos = playerPos.add(x, y, z);
-                    if (manager.isProtectedByCleansingStation(pos)) {
+                    if (manager.isProtectedByCleansingStation(world, pos)) {
                         protectedBlocks.add(pos);
                         protectedBlocksFound++;
                     }
@@ -259,7 +260,7 @@ public class CursedEarthCommand {
         // Clear ALL found protections
         int clearedCount = 0;
         for (BlockPos pos : protectedBlocks) {
-            if (manager.clearProtectionAt(pos)) {
+            if (manager.clearProtectionAt(world, pos)) {
                 clearedCount++;
             }
         }
@@ -302,7 +303,7 @@ public class CursedEarthCommand {
             for (int y = -Math.min(radius, 20); y <= Math.min(radius, 20); y++) { // Cap Y to reasonable range
                 for (int z = -radius; z <= radius; z++) {
                     BlockPos pos = playerPos.add(x, y, z);
-                    if (pos.isWithinDistance(playerPos, radius) && manager.isProtectedByCleansingStation(pos)) {
+                    if (pos.isWithinDistance(playerPos, radius) && manager.isProtectedByCleansingStation(world, pos)) {
                         protectedBlocks.add(pos);
                     }
                 }
@@ -320,7 +321,7 @@ public class CursedEarthCommand {
         // Clear ALL found protections
         int clearedCount = 0;
         for (BlockPos pos : protectedBlocks) {
-            if (manager.clearProtectionAt(pos)) {
+            if (manager.clearProtectionAt(world, pos)) {
                 clearedCount++;
             }
         }

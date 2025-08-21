@@ -5,6 +5,7 @@ import com.ancientcurse.block.BloodLotusBlock;
 // PotteryBlocks is referenced in comments only, no import needed
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
 import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
+import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.MapColor;
@@ -419,10 +420,8 @@ public class ModBlocks {
             .strength(0.0f, 0.0f)
             .sounds(BlockSoundGroup.LILY_PAD)
             .nonOpaque()
-            .noCollision()
             .ticksRandomly() // For day/night cycle updates
             .breakInstantly()
-            .notSolid()
     );
     
     // Blood Lotus - rare crimson lotus used in Pharaoh's Blood crafting
@@ -438,13 +437,15 @@ public class ModBlocks {
     );
     
     // Nile River Grass - lush grass that grows along the Nile riverbanks
-    public static final Block NILE_RIVER_GRASS = new Block(
+    public static final Block NILE_RIVER_GRASS = new NileRiverGrassBlock(
         FabricBlockSettings.create()
             .mapColor(MapColor.DARK_GREEN)
             .strength(0.6f)
             .sounds(BlockSoundGroup.GRASS)
             .nonOpaque()
             .notSolid()
+            .offset(AbstractBlock.OffsetType.XZ)
+            .dynamicBounds()
     );
     
     // Nile River Tall Grass - taller variant of grass for the Nile riverbanks
@@ -599,6 +600,19 @@ public class ModBlocks {
             .breakInstantly()
             .notSolid()
     );
+    
+    // Cyperus - Ancient Egyptian water plant (papyrus sedge)
+    public static final Block CYPERUS = new CyperusBlock(
+        FabricBlockSettings.create()
+            .mapColor(MapColor.DARK_GREEN)
+            .strength(0.2f)
+            .sounds(BlockSoundGroup.WET_GRASS)
+            .nonOpaque()
+            .noCollision()
+            .notSolid()
+            .breakInstantly()
+            .offset(AbstractBlock.OffsetType.XZ)
+    );
 
     // OFFERING_POT moved to com.ancientcurse.block.registry.PotteryBlocks
     // Access it via PotteryBlocks.OFFERING_POT
@@ -621,6 +635,17 @@ public class ModBlocks {
     // Access it via PotteryBlocks.SERPENT_VESSEL_OF_WADJET
     
     // ALL POTTERY BLOCKS MOVED TO com.ancientcurse.block.registry.PotteryBlocks
+    
+    // Cursed Stone - Stone variant that spreads like cursed earth
+    public static final Block CURSED_STONE = new CursedStoneBlock(
+        FabricBlockSettings.create()
+            .mapColor(MapColor.PURPLE)
+            .strength(1.5f, 6.0f)
+            .requiresTool()
+            .sounds(BlockSoundGroup.STONE)
+            .ticksRandomly()
+            .luminance(state -> 2) // Slight glow
+    );
     
     // Black stone variants
     public static final Block BLACK_COBBLESTONE = new Block(
@@ -681,6 +706,34 @@ public class ModBlocks {
             .sounds(BlockSoundGroup.GRAVEL)
             .ticksRandomly() // Enable random ticks for effects
             .luminance(state -> 2) // Slight glow effect
+    );
+    
+    // Solar Spire Components - Three blocks that combine to form a Solar Spire
+    public static final Block SOLAR_SPIRE_PLINTH = new SolarSpirePlinthBlock(
+        FabricBlockSettings.create()
+            .mapColor(MapColor.GOLD)
+            .strength(2.0f, 6.0f)
+            .requiresTool()
+            .sounds(BlockSoundGroup.STONE)
+            .luminance(state -> 5)
+    );
+    
+    public static final Block SOLAR_SPIRE_CRUCIBLE = new SolarSpireCrucibleBlock(
+        FabricBlockSettings.create()
+            .mapColor(MapColor.GOLD)
+            .strength(2.0f, 6.0f)
+            .requiresTool()
+            .sounds(BlockSoundGroup.STONE)
+            .luminance(state -> 7)
+    );
+    
+    public static final Block SOLAR_SPIRE_PYRAMIDION = new SolarSpirePyramidionBlock(
+        FabricBlockSettings.create()
+            .mapColor(MapColor.GOLD)
+            .strength(2.0f, 6.0f)
+            .requiresTool()
+            .sounds(BlockSoundGroup.STONE)
+            .luminance(state -> 10)
     );
     
     // Solar Spire - Used with Eye of Apophis to cleanse ALL connected cursed earth
@@ -1240,6 +1293,13 @@ public class ModBlocks {
             PISTIA_STRATIOTES
         );
         
+        // Register Cyperus
+        Registry.register(
+            Registries.BLOCK,
+            new Identifier(AncientCurse.MOD_ID, "cyperus"),
+            CYPERUS
+        );
+        
         // OFFERING_POT registration moved to com.ancientcurse.block.registry.PotteryBlocks
         
         // Register Clay Crucible
@@ -1250,6 +1310,13 @@ public class ModBlocks {
         );
         
         // POTTERY BLOCKS REGISTRATION MOVED TO com.ancientcurse.block.registry.PotteryBlocks
+        
+        // Register Cursed Stone
+        Registry.register(
+            Registries.BLOCK,
+            new Identifier(AncientCurse.MOD_ID, "cursed_stone"),
+            CURSED_STONE
+        );
         
         // Register Black Cobblestone
         Registry.register(
@@ -1333,6 +1400,25 @@ public class ModBlocks {
             Registries.BLOCK,
             new Identifier(AncientCurse.MOD_ID, "cursed_earth"),
             CURSED_EARTH
+        );
+        
+        // Register Solar Spire Components
+        Registry.register(
+            Registries.BLOCK,
+            new Identifier(AncientCurse.MOD_ID, "solar_spire_plinth"),
+            SOLAR_SPIRE_PLINTH
+        );
+        
+        Registry.register(
+            Registries.BLOCK,
+            new Identifier(AncientCurse.MOD_ID, "solar_spire_crucible"),
+            SOLAR_SPIRE_CRUCIBLE
+        );
+        
+        Registry.register(
+            Registries.BLOCK,
+            new Identifier(AncientCurse.MOD_ID, "solar_spire_pyramidion"),
+            SOLAR_SPIRE_PYRAMIDION
         );
         
         // Register Solar Spire
@@ -1479,7 +1565,8 @@ public class ModBlocks {
         registerBlockItem(SPOTTED_MARSH, ModItemGroup.ANCIENT_CURSE);
         registerBlockItem(PAPYRUS_REED, ModItemGroup.ANCIENT_CURSE);
         registerBlockItem(FLAX, ModItemGroup.ANCIENT_CURSE);
-        registerBlockItem(LOTUS_FLOWER_PAD, ModItemGroup.ANCIENT_CURSE);
+        // Register Lotus Flower Pad with custom item for water placement
+        registerLotusFlowerPadItem();
         registerBlockItem(NILE_RIVER_GRASS, ModItemGroup.ANCIENT_CURSE);
         registerBlockItem(NILE_RIVER_TALL_GRASS, ModItemGroup.ANCIENT_CURSE);
         registerBlockItem(DESHRET_BRICK, ModItemGroup.ANCIENT_CURSE);
@@ -1499,10 +1586,12 @@ public class ModBlocks {
         registerBlockItem(LIGHT_DEAD_FERN, ModItemGroup.ANCIENT_CURSE);
         registerBlockItem(MINI_CACTUS, ModItemGroup.ANCIENT_CURSE);
         registerBlockItem(PISTIA_STRATIOTES, ModItemGroup.ANCIENT_CURSE);
+        registerBlockItem(CYPERUS, ModItemGroup.ANCIENT_CURSE);
         // OFFERING_POT moved to PotteryBlocks
         registerBlockItem(CLAY_CRUCIBLE, ModItemGroup.ANCIENT_CURSE);
         
         // POTTERY BLOCK ITEMS REGISTRATION MOVED TO com.ancientcurse.block.registry.PotteryBlocks
+        registerBlockItem(CURSED_STONE, ModItemGroup.ANCIENT_CURSE);
         registerBlockItem(BLACK_COBBLESTONE, ModItemGroup.ANCIENT_CURSE);
         registerBlockItem(BLACK_DUST, ModItemGroup.ANCIENT_CURSE);
         registerBlockItem(BLACK_SAND, ModItemGroup.ANCIENT_CURSE);
@@ -1515,6 +1604,9 @@ public class ModBlocks {
         registerBlockItem(WIND_SWEPT_BLACKSTONE_STAIRS, ModItemGroup.ANCIENT_CURSE);
         registerBlockItem(WIND_SWEPT_BLACKSTONE_SLAB, ModItemGroup.ANCIENT_CURSE);
         registerBlockItem(CURSED_EARTH, ModItemGroup.ANCIENT_CURSE);
+        registerBlockItem(SOLAR_SPIRE_PLINTH, ModItemGroup.ANCIENT_CURSE);
+        registerBlockItem(SOLAR_SPIRE_CRUCIBLE, ModItemGroup.ANCIENT_CURSE);
+        registerBlockItem(SOLAR_SPIRE_PYRAMIDION, ModItemGroup.ANCIENT_CURSE);
         registerBlockItem(SOLAR_SPIRE, ModItemGroup.ANCIENT_CURSE);
         
         // Register Bronze Blocks
@@ -1570,5 +1662,19 @@ public class ModBlocks {
         // Register the item
         Registry.register(Registries.ITEM, itemId, new BlockItem(block, new FabricItemSettings()));
         AncientCurse.LOGGER.info("Registered item for block: " + blockId);
+    }
+    
+    private static void registerLotusFlowerPadItem() {
+        // Register the custom Lotus Flower Pad item that allows water placement
+        Identifier itemId = new Identifier(AncientCurse.MOD_ID, "lotus_flower_pad");
+        
+        if (Registries.ITEM.containsId(itemId)) {
+            System.out.println("Skipping duplicate item registration for: " + itemId);
+            return;
+        }
+        
+        Registry.register(Registries.ITEM, itemId, 
+            new com.ancientcurse.item.LotusFlowerPadItem(LOTUS_FLOWER_PAD, new FabricItemSettings()));
+        AncientCurse.LOGGER.info("Registered custom item for Lotus Flower Pad with water placement");
     }
 }

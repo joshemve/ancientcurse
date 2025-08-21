@@ -2,7 +2,7 @@
 	"format_version": "1.8.0",
 	"animations": {
 		"animation.solarspire.spawn": {
-			"loop": true,
+			"loop": false,
 			"animation_length": 0.75,
 			"bones": {
 				"prism": {

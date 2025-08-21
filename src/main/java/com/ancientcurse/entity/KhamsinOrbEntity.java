@@ -5,6 +5,7 @@ import com.ancientcurse.ModEntities;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.projectile.ProjectileEntity;
 import net.minecraft.entity.projectile.ProjectileUtil;
@@ -57,6 +58,11 @@ public class KhamsinOrbEntity extends ProjectileEntity implements GeoEntity {
             return;
         }
 
+        // Check if target became creative/spectator and stop tracking if so
+        if (target instanceof PlayerEntity player && (player.isCreative() || player.isSpectator())) {
+            target = null;
+        }
+
         // Homing behavior towards target
         if (target != null && target.isAlive()) {
             Vec3d direction = target.getEyePos().subtract(this.getPos()).normalize();
@@ -97,7 +103,10 @@ public class KhamsinOrbEntity extends ProjectileEntity implements GeoEntity {
 
     @Override
     protected boolean canHit(Entity entity) {
-        // Prevent hitting the owner and other projectiles
+        // Prevent hitting the owner, other projectiles, and creative mode players
+        if (entity instanceof PlayerEntity player && player.isCreative()) {
+            return false;
+        }
         return !entity.isSpectator() && entity.isAlive() && entity.canBeHitByProjectile() && entity != this.owner && !(entity instanceof ProjectileEntity);
     }
 

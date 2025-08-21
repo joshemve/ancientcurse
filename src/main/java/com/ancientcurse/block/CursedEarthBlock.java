@@ -91,6 +91,16 @@ public class CursedEarthBlock extends BaseAncientCurseBlock {
     }
     
     @Override
+    public void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved) {
+        // Only handle removal if the block is actually being replaced with a different type
+        if (!state.isOf(newState.getBlock()) && !world.isClient) {
+            // Notify CursedEarthManager that a cursed block was removed
+            CursedEarthManager.getInstance().onCursedBlockRemoved((ServerWorld) world, pos);
+        }
+        super.onStateReplaced(state, world, pos, newState, moved);
+    }
+    
+    @Override
     public void randomTick(BlockState state, ServerWorld world, BlockPos pos, Random random) {
         // FIRST check if we're in an active cleansing zone - if so, do NOTHING
         if (SolarSpireBlock.isInActiveCleansingZone(pos)) {
@@ -283,7 +293,16 @@ public class CursedEarthBlock extends BaseAncientCurseBlock {
                     continue; // Skip this candidate
                 }
                 
-                BlockState targetState = ModBlocks.CURSED_EARTH.getDefaultState();
+                // Determine which cursed block type to spread based on target
+                BlockState targetBlockState = world.getBlockState(candidate.pos);
+                BlockState targetState;
+                
+                // Check if target is a stone-type block
+                if (isStoneType(targetBlockState.getBlock())) {
+                    targetState = ModBlocks.CURSED_STONE.getDefaultState();
+                } else {
+                    targetState = ModBlocks.CURSED_EARTH.getDefaultState();
+                }
                 
                 // Queue the spread
                 CursedEarthManager.getInstance().queueSpread(world, pos, candidate.pos, targetState);
@@ -578,7 +597,7 @@ public class CursedEarthBlock extends BaseAncientCurseBlock {
      */
     private boolean canSpreadTo(ServerWorld world, BlockPos pos) {
         // Check for cleansing protection FIRST
-        if (CursedEarthManager.getInstance().isProtectedByCleansingStation(pos)) {
+        if (CursedEarthManager.getInstance().isProtectedByCleansingStation(world, pos)) {
             return false;
         }
         
@@ -617,14 +636,66 @@ public class CursedEarthBlock extends BaseAncientCurseBlock {
     }
     
     /**
+     * Determines if a block is a stone type that should become cursed stone
+     */
+    private boolean isStoneType(Block block) {
+        // Vanilla stone types
+        if (block == Blocks.STONE || block == Blocks.COBBLESTONE || 
+            block == Blocks.MOSSY_COBBLESTONE || block == Blocks.STONE_BRICKS ||
+            block == Blocks.MOSSY_STONE_BRICKS || block == Blocks.CRACKED_STONE_BRICKS ||
+            block == Blocks.CHISELED_STONE_BRICKS || block == Blocks.SMOOTH_STONE ||
+            block == Blocks.GRANITE || block == Blocks.POLISHED_GRANITE ||
+            block == Blocks.DIORITE || block == Blocks.POLISHED_DIORITE ||
+            block == Blocks.ANDESITE || block == Blocks.POLISHED_ANDESITE ||
+            block == Blocks.DEEPSLATE || block == Blocks.COBBLED_DEEPSLATE ||
+            block == Blocks.POLISHED_DEEPSLATE || block == Blocks.DEEPSLATE_BRICKS ||
+            block == Blocks.DEEPSLATE_TILES || block == Blocks.CHISELED_DEEPSLATE ||
+            block == Blocks.CRACKED_DEEPSLATE_BRICKS || block == Blocks.CRACKED_DEEPSLATE_TILES ||
+            block == Blocks.TUFF || block == Blocks.CALCITE || block == Blocks.DRIPSTONE_BLOCK) {
+            return true;
+        }
+        
+        // Check for modded stone blocks by name patterns
+        String blockName = block.getTranslationKey().toLowerCase();
+        
+        // Common stone-related keywords
+        String[] stoneKeywords = {
+            "stone", "cobble", "brick", "deepslate", "granite", "diorite", 
+            "andesite", "basalt", "limestone", "marble", "slate"
+        };
+        
+        // Don't count functional stone blocks or ores
+        String[] exclusions = {
+            "furnace", "chest", "spawner", "infested", "silverfish",
+            "command", "barrier", "bedrock", "ore", "cursed"
+        };
+        
+        // Check exclusions first
+        for (String excluded : exclusions) {
+            if (blockName.contains(excluded)) {
+                return false;
+            }
+        }
+        
+        // Check if it contains stone keywords
+        for (String keyword : stoneKeywords) {
+            if (blockName.contains(keyword)) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+    
+    /**
      * Smart block detection that works with any mod
      * Goal: Corrupt almost everything except functional/special blocks
      */
     private boolean isBlockSpreadable(BlockState state, Block block) {
         // BLACKLIST approach - explicitly exclude what we DON'T want to corrupt
         
-        // Never spread to cursed earth itself
-        if (block == ModBlocks.CURSED_EARTH) {
+        // Never spread to cursed blocks
+        if (block == ModBlocks.CURSED_EARTH || block == ModBlocks.CURSED_STONE) {
             return false;
         }
         
@@ -700,9 +771,22 @@ public class CursedEarthBlock extends BaseAncientCurseBlock {
      * Static version of canSpreadTo for death burst
      */
     public static boolean canSpreadToStatic(ServerWorld world, BlockPos pos) {
+        // Check for cleansing protection FIRST
+        if (CursedEarthManager.getInstance().isProtectedByCleansingStation(world, pos)) {
+            return false;
+        }
+        
         // Create a temporary instance to use the smart detection
         CursedEarthBlock temp = (CursedEarthBlock) ModBlocks.CURSED_EARTH;
         return temp.canSpreadTo(world, pos);
+    }
+    
+    /**
+     * Static version of isStoneType for death burst
+     */
+    private static boolean isStoneTypeStatic(Block block) {
+        CursedEarthBlock temp = (CursedEarthBlock) ModBlocks.CURSED_EARTH;
+        return temp.isStoneType(block);
     }
     
     /**
@@ -960,9 +1044,14 @@ public class CursedEarthBlock extends BaseAncientCurseBlock {
             
             // Try to convert current position
             if (canSpreadToStatic(world, surfacePos)) {
+                // Determine which cursed block type based on target
+                BlockState targetBlockState = world.getBlockState(surfacePos);
+                BlockState newState = isStoneTypeStatic(targetBlockState.getBlock()) ? 
+                    ModBlocks.CURSED_STONE.getDefaultState() : 
+                    ModBlocks.CURSED_EARTH.getDefaultState();
+                
                 CursedEarthManager.getInstance().queueSpread(
-                    world, start, surfacePos, 
-                    ModBlocks.CURSED_EARTH.getDefaultState());
+                    world, start, surfacePos, newState);
                 converted++;
                 
                 // Set spread direction for continued growth
@@ -978,9 +1067,13 @@ public class CursedEarthBlock extends BaseAncientCurseBlock {
                         BlockPos sideSurface = findSurfaceForTendril(world, sidePos);
                         
                         if (sideSurface != null && canSpreadToStatic(world, sideSurface) && random.nextFloat() < 0.6f) {
+                            BlockState sideBlockState = world.getBlockState(sideSurface);
+                            BlockState sideNewState = isStoneTypeStatic(sideBlockState.getBlock()) ? 
+                                ModBlocks.CURSED_STONE.getDefaultState() : 
+                                ModBlocks.CURSED_EARTH.getDefaultState();
+                            
                             CursedEarthManager.getInstance().queueSpread(
-                                world, surfacePos, sideSurface, 
-                                ModBlocks.CURSED_EARTH.getDefaultState());
+                                world, surfacePos, sideSurface, sideNewState);
                             converted++;
                         }
                     }
@@ -1028,9 +1121,13 @@ public class CursedEarthBlock extends BaseAncientCurseBlock {
                     BlockPos surfacePos = world.getTopPosition(net.minecraft.world.Heightmap.Type.WORLD_SURFACE, checkPos);
                     
                     if (canSpreadToStatic(world, surfacePos)) {
+                        BlockState centerBlockState = world.getBlockState(surfacePos);
+                        BlockState centerNewState = isStoneTypeStatic(centerBlockState.getBlock()) ? 
+                            ModBlocks.CURSED_STONE.getDefaultState() : 
+                            ModBlocks.CURSED_EARTH.getDefaultState();
+                        
                         CursedEarthManager.getInstance().queueSpread(
-                            world, center, surfacePos, 
-                            ModBlocks.CURSED_EARTH.getDefaultState());
+                            world, center, surfacePos, centerNewState);
                         converted++;
                     }
                 }

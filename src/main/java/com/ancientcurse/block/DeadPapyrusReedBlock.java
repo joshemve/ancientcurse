@@ -46,7 +46,15 @@ public class DeadPapyrusReedBlock extends PlantBlock {
                block == ModBlocks.DRY_NILE_SILT || 
                block == Blocks.DIRT || 
                block == Blocks.GRASS_BLOCK || 
-               block == ModBlocks.ARID_NILE_TURF;
+               block == ModBlocks.ARID_NILE_TURF ||
+               block == ModBlocks.SMOOTH_SAND ||
+               block == ModBlocks.NILE_RIVER_SAND ||
+               block == ModBlocks.DESHRET_SAND ||
+               block == ModBlocks.DESHRET_WAVY_SAND ||
+               block == ModBlocks.BLACK_SAND ||
+               block == ModBlocks.NILE_MUD ||
+               block == ModBlocks.RIVERBED ||
+               block == ModBlocks.RIVERBED_CLAY;
     }
     
     @Override

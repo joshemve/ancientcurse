@@ -29,7 +29,10 @@ import net.minecraft.world.WorldView;
  */
 public class LotusFlowerPadBlock extends Block {
     public static final BooleanProperty OPEN = BooleanProperty.of("open");
+    // Shape similar to vanilla lily pad but slightly thicker to be walkable
     protected static final VoxelShape SHAPE = Block.createCuboidShape(1.0, 0.0, 1.0, 15.0, 1.5, 15.0);
+    // Collision shape that allows entities to stand on it
+    protected static final VoxelShape COLLISION_SHAPE = Block.createCuboidShape(0.0, 0.0, 0.0, 16.0, 1.0, 16.0);
     
     public LotusFlowerPadBlock(Settings settings) {
         super(settings);
@@ -39,6 +42,12 @@ public class LotusFlowerPadBlock extends Block {
     @Override
     public VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
         return SHAPE;
+    }
+    
+    @Override
+    public VoxelShape getCollisionShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
+        // Return collision shape that entities can walk on
+        return COLLISION_SHAPE;
     }
     
     @Override
@@ -83,7 +92,8 @@ public class LotusFlowerPadBlock extends Block {
     
     @Override
     public boolean canPathfindThrough(BlockState state, BlockView world, BlockPos pos, NavigationType type) {
-        return type == NavigationType.AIR;
+        // Water mobs can swim through, but land mobs treat it as solid
+        return type == NavigationType.WATER;
     }
     
     @Override

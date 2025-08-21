@@ -178,9 +178,12 @@ public class KhamsinSpreadSmallEntity extends MobEntity implements GeoEntity {
     private void handlePlayerDetection() {
         if (this.getWorld().isClient) return;
         
-        // Check for nearby players
+        // Check for nearby players (excluding creative mode)
         Box detectionBox = new Box(this.getBlockPos()).expand(ACTIVATION_RANGE);
         List<PlayerEntity> nearbyPlayers = this.getWorld().getNonSpectatingEntities(PlayerEntity.class, detectionBox);
+        
+        // Filter out creative mode players
+        nearbyPlayers.removeIf(player -> player.isCreative() || player.isSpectator());
         
         boolean shouldBeActivated = !nearbyPlayers.isEmpty();
         boolean currentlyActivated = dataTracker.get(IS_ACTIVATED);
@@ -249,9 +252,12 @@ public class KhamsinSpreadSmallEntity extends MobEntity implements GeoEntity {
             return;
         }
         
-        // Find target player to shoot at
+        // Find target player to shoot at (excluding creative mode)
         Box targetBox = new Box(this.getBlockPos()).expand(ACTIVATION_RANGE);
         List<PlayerEntity> players = this.getWorld().getNonSpectatingEntities(PlayerEntity.class, targetBox);
+        
+        // Filter out creative mode and spectator players
+        players.removeIf(player -> player.isCreative() || player.isSpectator());
         
         if (!players.isEmpty()) {
             PlayerEntity target = players.get(this.random.nextInt(players.size()));

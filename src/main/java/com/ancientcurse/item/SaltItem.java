@@ -63,7 +63,7 @@ public class SaltItem extends BaseAncientCurseItem {
             }
             
             // Check if there's already a salt circle here
-            if (CursedEarthManager.getInstance().hasSaltCircle(playerPos)) {
+            if (CursedEarthManager.getInstance().hasSaltCircle((ServerWorld)world, playerPos)) {
                 user.sendMessage(Text.literal("There's already a salt circle protecting this area!")
                     .formatted(Formatting.YELLOW), false);
                 return TypedActionResult.fail(itemStack);

@@ -221,6 +221,12 @@ public class ModItemGroup {
                 safeAdd(entries, ModBlocks.WIND_SWEPT_BLACKSTONE_STAIRS);
                 safeAdd(entries, ModBlocks.WIND_SWEPT_BLACKSTONE_SLAB);
                 safeAdd(entries, ModBlocks.CURSED_EARTH);
+                safeAdd(entries, ModBlocks.CURSED_STONE);
+                
+                // Solar Spire blocks
+                safeAdd(entries, ModBlocks.SOLAR_SPIRE_PLINTH);
+                safeAdd(entries, ModBlocks.SOLAR_SPIRE_CRUCIBLE);
+                safeAdd(entries, ModBlocks.SOLAR_SPIRE_PYRAMIDION);
                 safeAdd(entries, ModBlocks.SOLAR_SPIRE);
 
                 // Necrostone blocks

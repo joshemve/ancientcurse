@@ -7,6 +7,7 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ProjectileEntity;
 import net.minecraft.entity.projectile.ProjectileUtil;
 import net.minecraft.nbt.NbtCompound;
@@ -119,6 +120,16 @@ public class SpitBallEntity extends ProjectileEntity implements GeoEntity {
         if (++this.age > this.maxAge) {
             this.discard();
         }
+    }
+    
+    @Override
+    protected boolean canHit(Entity entity) {
+        // Ignore creative/spectator players
+        if (entity instanceof PlayerEntity player && (player.isCreative() || player.isSpectator())) {
+            return false;
+        }
+        // Don't hit the owner or other projectiles
+        return super.canHit(entity) && entity != this.getOwner() && !(entity instanceof ProjectileEntity);
     }
     
     @Override

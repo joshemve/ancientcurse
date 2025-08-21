@@ -178,10 +178,16 @@ public class DjeserhathEntity extends HostileEntity implements GeoEntity {
 
         // Target selection
         targetSelector.add(1, new RevengeGoal(this));
-        targetSelector.add(2, new ActiveTargetGoal<>(this, PlayerEntity.class, true) {
+        targetSelector.add(2, new ActiveTargetGoal<>(this, PlayerEntity.class, true, 
+            livingEntity -> {
+                if (livingEntity instanceof PlayerEntity player) {
+                    return !player.isCreative() && !player.isSpectator();
+                }
+                return false;
+            }) {
             @Override
             public boolean canStart() {
-                // Only target players within activation range
+                // Only target non-creative players within activation range
                 return super.canStart() && DjeserhathEntity.this.isActivated();
             }
         });
@@ -420,7 +426,8 @@ public class DjeserhathEntity extends HostileEntity implements GeoEntity {
         // Enhanced activation logic
         if (!isActivated() && !this.getWorld().isClient) {
             PlayerEntity nearest = this.getWorld().getClosestPlayer(this, ACTIVATE_RADIUS);
-            if (nearest != null && canSee(nearest)) {
+            // Ignore creative/spectator players
+            if (nearest != null && !nearest.isCreative() && !nearest.isSpectator() && canSee(nearest)) {
                 setActivated(true);
                 this.targetAnim = "animation.djeserhath.idle_activated";
                 setTarget(nearest);
@@ -437,8 +444,23 @@ public class DjeserhathEntity extends HostileEntity implements GeoEntity {
             LivingEntity target = getTarget();
             boolean shouldRemainActive = false;
             
-            // Check if any player is within deactivation range
-            PlayerEntity nearestPlayer = this.getWorld().getClosestPlayer(this, DEACTIVATE_RADIUS);
+            // Check if any non-creative player is within deactivation range
+            List<PlayerEntity> nearbyPlayers = this.getWorld().getEntitiesByClass(
+                PlayerEntity.class, 
+                this.getBoundingBox().expand(DEACTIVATE_RADIUS),
+                player -> !player.isCreative() && !player.isSpectator()
+            );
+            
+            PlayerEntity nearestPlayer = null;
+            double nearestDist = Double.MAX_VALUE;
+            for (PlayerEntity player : nearbyPlayers) {
+                double dist = this.squaredDistanceTo(player);
+                if (dist < nearestDist) {
+                    nearestDist = dist;
+                    nearestPlayer = player;
+                }
+            }
+            
             if (nearestPlayer != null) {
                 double distance = this.squaredDistanceTo(nearestPlayer);
                 if (distance <= DEACTIVATE_RADIUS * DEACTIVATE_RADIUS) {

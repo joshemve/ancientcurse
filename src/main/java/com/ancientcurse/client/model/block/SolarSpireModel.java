@@ -14,6 +14,7 @@ public class SolarSpireModel extends GeoModel<SolarSpireBlockEntity> {
     
     @Override
     public Identifier getTextureResource(SolarSpireBlockEntity animatable) {
+        // Always return the base texture - overlays are rendered separately
         return new Identifier(AncientCurse.MOD_ID, "textures/block/solarspire.png");
     }
     

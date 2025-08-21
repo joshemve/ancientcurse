@@ -44,7 +44,10 @@ public class LightDeadFernBlock extends Block {
                floor.isOf(ModBlocks.SMOOTH_SAND) ||
                floor.isOf(ModBlocks.NILE_RIVER_SAND) ||
                floor.isOf(ModBlocks.DESHRET_SAND) ||
-               floor.isOf(ModBlocks.DESHRET_WAVY_SAND);
+               floor.isOf(ModBlocks.DESHRET_WAVY_SAND) ||
+               floor.isOf(ModBlocks.ARID_NILE_TURF) ||
+               floor.isOf(ModBlocks.FERTILE_NILE_SILT) ||
+               floor.isOf(ModBlocks.DRY_NILE_SILT);
     }
 
     @Override

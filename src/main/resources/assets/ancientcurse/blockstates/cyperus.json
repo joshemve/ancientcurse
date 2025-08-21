@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "waterlogged=false": {
+      "model": "ancientcurse:block/cyperus"
+    },
+    "waterlogged=true": {
+      "model": "ancientcurse:block/cyperus"
+    }
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "": [
+      { "model": "ancientcurse:block/cursed_stone_0", "weight": 25 },
+      { "model": "ancientcurse:block/cursed_stone_1", "weight": 25 },
+      { "model": "ancientcurse:block/cursed_stone_2", "weight": 25 },
+      { "model": "ancientcurse:block/cursed_stone_3", "weight": 25 }
+    ]
+  }
+}
