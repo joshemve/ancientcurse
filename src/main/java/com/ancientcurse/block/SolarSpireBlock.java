@@ -9,6 +9,11 @@ import com.ancientcurse.system.OriginalBlockTracker;
 import com.ancientcurse.system.CursedEarthManager;
 import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.entity.mob.HostileEntity;
+import net.minecraft.util.math.Box;
 import net.minecraft.block.entity.BlockEntityTicker;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.entity.player.PlayerEntity;
@@ -36,6 +41,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.UUID;
+import java.util.List;
 
 /**
  * Solar Spire that purifies ALL connected cursed earth when activated with an Eye of Apophis
@@ -44,9 +50,11 @@ public class SolarSpireBlock extends BlockWithEntity {
     
     public static final BooleanProperty ACTIVATED = BooleanProperty.of("activated");
     private static final VoxelShape SHAPE = Block.createCuboidShape(3, 0, 3, 13, 48, 13);
-    private static final int BLOCKS_PER_TICK = 10000; // Process massive amounts for near-instant cleansing
-    private static final int WAVE_TICK_DELAY = 1; // Process every single tick for rapid expansion
+    private static final int BLOCKS_PER_WAVE = 50; // Process 50 blocks per wave for gradual cleansing
+    private static final int WAVE_TICK_DELAY = 10; // Process every 0.5 seconds for visible progression
     private static final boolean REDUCED_PARTICLES = true; // Reduce particles to prevent lag
+    private static final float SPIKE_DAMAGE = 4.0F; // Damage dealt by energy spikes (2 hearts)
+    private static final int SPIKE_RADIUS = 3; // Radius of spike damage area
     
     // Track active cleansing operations
     private static final Map<BlockPos, CleansingOperation> activeOperations = new HashMap<>();
@@ -184,12 +192,19 @@ public class SolarSpireBlock extends BlockWithEntity {
                     PlayerEntity player = world.getPlayerByUuid(playerUuid);
                     if (player != null) {
                         player.sendMessage(Text.literal("§6The Eye of Apophis manifests! Solar cleansing begins!"), true);
+                        player.sendMessage(Text.literal("§cDefend the Solar Spire from cursed creatures!"), true);
                     }
+                    
+                    // Transition block entity to working state
+                    blockEntity.setWorking(true);
                     
                     // Start the actual cleansing process
                     world.scheduleBlockTick(pos, this, WAVE_TICK_DELAY, TickPriority.HIGH);
                 } else {
-                    // Still powering up, check again in 1 second
+                    // Still powering up, spawn hieroglyph particles
+                    spawnHieroglyphParticles(world, pos);
+                    
+                    // Check again in 1 second
                     world.scheduleBlockTick(pos, this, 20, TickPriority.HIGH);
                 }
             }
@@ -203,6 +218,9 @@ public class SolarSpireBlock extends BlockWithEntity {
             deactivateSpire(world, pos);
             return;
         }
+        
+        // Apply spike damage to nearby entities
+        applySpikesDamage(world, pos);
         
         // Process the wave
         boolean hasMore = operation.processWave(world, pos);
@@ -238,13 +256,13 @@ public class SolarSpireBlock extends BlockWithEntity {
         // Play completion sound
         world.playSound(null, pos, SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, SoundCategory.BLOCKS, 1.0F, 1.0F);
         
-        // Big particle burst
+        // Big particle burst - golden sun energy
         for (int i = 0; i < 50; i++) {
             double angle = (Math.PI * 2) * i / 50;
             double radius = 2.0;
             double x = pos.getX() + 0.5 + Math.cos(angle) * radius;
             double z = pos.getZ() + 0.5 + Math.sin(angle) * radius;
-            world.spawnParticles(ParticleTypes.END_ROD,
+            world.spawnParticles(ParticleTypes.FLAME,
                 x, pos.getY() + 1.0, z,
                 1, 0, 0.1, 0, 0.05);
         }
@@ -265,6 +283,48 @@ public class SolarSpireBlock extends BlockWithEntity {
         }
         
         world.playSound(null, pos, SoundEvents.BLOCK_BEACON_DEACTIVATE, SoundCategory.BLOCKS, 1.0F, 1.0F);
+    }
+    
+    /**
+     * Apply spike damage to hostile entities near the spire
+     */
+    private void applySpikesDamage(ServerWorld world, BlockPos pos) {
+        // Create damage box around the spire
+        Box damageBox = new Box(
+            pos.getX() - SPIKE_RADIUS, pos.getY() - 1, pos.getZ() - SPIKE_RADIUS,
+            pos.getX() + SPIKE_RADIUS + 1, pos.getY() + 3, pos.getZ() + SPIKE_RADIUS + 1
+        );
+        
+        // Find all entities in the damage zone
+        List<Entity> nearbyEntities = world.getOtherEntities(null, damageBox);
+        
+        for (Entity entity : nearbyEntities) {
+            if (entity instanceof HostileEntity || 
+                (entity instanceof LivingEntity && !(entity instanceof PlayerEntity))) {
+                // Check if entity is corrupted/cursed
+                String entityName = Registries.ENTITY_TYPE.getId(entity.getType()).getPath();
+                if (entityName.contains("cursed") || entityName.contains("withered") || 
+                    entityName.contains("scarab") || entityName.contains("locus") ||
+                    entityName.contains("djeserhath") || entityName.contains("pharaoh")) {
+                    
+                    // Deal damage and knock back
+                    entity.damage(world.getDamageSources().magic(), SPIKE_DAMAGE);
+                    
+                    // Knockback effect
+                    double dx = entity.getX() - (pos.getX() + 0.5);
+                    double dz = entity.getZ() - (pos.getZ() + 0.5);
+                    double distance = Math.sqrt(dx * dx + dz * dz);
+                    if (distance > 0) {
+                        entity.addVelocity(dx / distance * 0.5, 0.2, dz / distance * 0.5);
+                    }
+                    
+                    // Particle effect on hit
+                    world.spawnParticles(ParticleTypes.CRIT,
+                        entity.getX(), entity.getY() + 1, entity.getZ(),
+                        5, 0.2, 0.2, 0.2, 0.1);
+                }
+            }
+        }
     }
     
     @Override
@@ -329,7 +389,7 @@ public class SolarSpireBlock extends BlockWithEntity {
             
             // Process current wave
             Iterator<BlockPos> iterator = toProcess.iterator();
-            while (iterator.hasNext() && processedThisTick < BLOCKS_PER_TICK) {
+            while (iterator.hasNext() && processedThisTick < BLOCKS_PER_WAVE) {
                 BlockPos pos = iterator.next();
                 iterator.remove();
                 
@@ -481,9 +541,9 @@ public class SolarSpireBlock extends BlockWithEntity {
             // Notify CursedEarthManager that a cursed block was removed
             CursedEarthManager.getInstance().onCursedBlockRemoved(world, pos);
             
-            // Visual effect (reduced)
+            // Visual effect (reduced) - golden cleansing energy
             if (!REDUCED_PARTICLES || world.random.nextFloat() < 0.05f) {
-                world.spawnParticles(ParticleTypes.END_ROD,
+                world.spawnParticles(ParticleTypes.WAX_ON,
                     pos.getX() + 0.5, pos.getY() + 1.0, pos.getZ() + 0.5,
                     1, 0, 0, 0, 0.02);
             }
@@ -516,5 +576,56 @@ public class SolarSpireBlock extends BlockWithEntity {
             }
         }
         return false;
+    }
+    
+    /**
+     * Spawn mystical hieroglyph particles during power-up sequence
+     */
+    private void spawnHieroglyphParticles(ServerWorld world, BlockPos pos) {
+        // Create a spiral of enchantment glyphs around the spire
+        double time = world.getTime() * 0.05; // Slow rotation
+        int numGlyphs = 8; // Number of glyphs in the circle
+        double radius = 1.5; // Distance from spire center
+        
+        for (int i = 0; i < numGlyphs; i++) {
+            double angle = (Math.PI * 2 * i / numGlyphs) + time;
+            
+            // Calculate position in a circle
+            double x = pos.getX() + 0.5 + Math.cos(angle) * radius;
+            double z = pos.getZ() + 0.5 + Math.sin(angle) * radius;
+            
+            // Vary the height for a spiral effect
+            double y = pos.getY() + 1.0 + Math.sin(time + i * 0.5) * 0.5 + i * 0.2;
+            
+            // Spawn enchantment glyph particles (hieroglyphs)
+            world.spawnParticles(
+                ParticleTypes.ENCHANT,
+                x, y, z,
+                1, 0, 0, 0, 0.5
+            );
+        }
+        
+        // Add some golden dust particles for extra mysticism
+        for (int i = 0; i < 3; i++) {
+            double angle = time * 2 + i * (Math.PI * 2 / 3);
+            double x = pos.getX() + 0.5 + Math.cos(angle) * radius * 0.8;
+            double z = pos.getZ() + 0.5 + Math.sin(angle) * radius * 0.8;
+            double y = pos.getY() + 2.0;
+            
+            world.spawnParticles(
+                ParticleTypes.WAX_ON,
+                x, y, z,
+                1, 0.1, 0.1, 0.1, 0.02
+            );
+        }
+        
+        // Occasional mystical burst
+        if (world.random.nextFloat() < 0.1f) {
+            world.spawnParticles(
+                ParticleTypes.ENCHANTED_HIT,
+                pos.getX() + 0.5, pos.getY() + 3.0, pos.getZ() + 0.5,
+                5, 0.3, 0.3, 0.3, 0.1
+            );
+        }
     }
 }

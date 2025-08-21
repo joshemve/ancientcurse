@@ -120,8 +120,8 @@ public class CursedEarthBlock extends BaseAncientCurseBlock {
             attemptPlantSpawn(world, pos.up(), random);
         }
         
-        // Very rare chance to spawn cursed entities
-        if (random.nextFloat() < 0.001f) {
+        // Very rare chance to spawn cursed entities (reduced from 0.001f to 0.0002f - 80% reduction)
+        if (random.nextFloat() < 0.0002f) {
             attemptEntitySpawn(world, pos.up(), random);
         }
         
@@ -933,8 +933,8 @@ public class CursedEarthBlock extends BaseAncientCurseBlock {
         }
         
         // Select which entity to spawn
-        // 80% chance for Djeserhath, 20% for Khamsin Spread Small (reduced by 60%)
-        boolean spawnDjeserhath = random.nextFloat() < 0.8f;
+        // 50% chance for Djeserhath, 50% for Khamsin Spread Small (more balanced, less overall spawns)
+        boolean spawnDjeserhath = random.nextFloat() < 0.5f;
         
         if (spawnDjeserhath) {
             // Spawn Djeserhath (cactus eye entity)

@@ -121,6 +121,12 @@ public class SolarSpireBlockEntity extends BlockEntity implements GeoBlockEntity
         markDirty();
     }
     
+    public void setWorking(boolean working) {
+        // This triggers the working_state animation
+        this.isActivated = working;
+        markDirty();
+    }
+    
     public void dropStoredEye() {
         if (hasEye && world != null && !world.isClient) {
             ItemEntity itemEntity = new ItemEntity(world, 
