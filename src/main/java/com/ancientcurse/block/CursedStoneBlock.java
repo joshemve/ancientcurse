@@ -188,23 +188,57 @@ public class CursedStoneBlock extends BaseAncientCurseBlock {
         
         // Vein pattern bonus - check for nearby stone blocks
         int nearbyStone = 0;
+        int nearbyCursed = 0;
         for (Direction checkDir : Direction.values()) {
             BlockPos checkPos = to.offset(checkDir);
-            if (isStoneType(world.getBlockState(checkPos).getBlock())) {
+            Block checkBlock = world.getBlockState(checkPos).getBlock();
+            if (isStoneType(checkBlock)) {
                 nearbyStone++;
+            }
+            if (checkBlock == ModBlocks.CURSED_STONE) {
+                nearbyCursed++;
             }
         }
         weight += nearbyStone * 0.05f; // Bonus for being surrounded by stone
         
-        // Prefer horizontal spreading underground
-        if (dir.getAxis() != Direction.Axis.Y) {
-            weight += 0.1f;
+        // PENALTY for spreading to blocks already surrounded by cursed stone
+        // This prevents straight-line spreading
+        if (nearbyCursed >= 2) {
+            weight *= 0.3f; // Significant penalty if already surrounded
         }
         
-        // Add vein spreading pattern
-        if (nearbyStone >= 4) {
+        // Direction-based weights for more natural spreading
+        if (dir == Direction.DOWN) {
+            // Strong penalty for straight down spreading
+            weight *= 0.4f; // Reduce weight by 60% for downward spread
+            
+            // If there's already cursed stone directly above, penalize even more
+            BlockPos aboveFrom = from.up();
+            if (world.getBlockState(aboveFrom).getBlock() == ModBlocks.CURSED_STONE) {
+                weight *= 0.5f; // Additional 50% penalty for vertical lines
+            }
+        } else if (dir == Direction.UP) {
+            // Slight penalty for upward spreading
+            weight *= 0.7f;
+        } else {
+            // Horizontal spreading gets a bonus
+            weight += 0.2f;
+            
+            // Diagonal spreading bonus (when there's variation in height)
+            int heightDiff = Math.abs(to.getY() - from.getY());
+            if (heightDiff == 0) {
+                // Pure horizontal - add some random variation
+                weight += random.nextFloat() * 0.15f;
+            }
+        }
+        
+        // Add vein spreading pattern with more variation
+        if (nearbyStone >= 4 && nearbyCursed < 2) {
             weight += VEIN_SPREAD_BONUS;
         }
+        
+        // Add more randomness to prevent predictable patterns
+        weight *= (0.8f + random.nextFloat() * 0.4f);
         
         return Math.max(0.1f, Math.min(1.0f, weight));
     }
@@ -334,16 +368,24 @@ public class CursedStoneBlock extends BaseAncientCurseBlock {
      * Apply effects to nearby players
      */
     private void applyEffectsToNearbyPlayers(ServerWorld world, BlockPos pos) {
-        Box effectBox = new Box(pos).expand(1, 1, 1);
-        List<PlayerEntity> nearbyPlayers = world.getNonSpectatingEntities(PlayerEntity.class, effectBox);
+        // Check for players standing directly on this block
+        Box standingBox = new Box(pos.getX(), pos.getY() + 1, pos.getZ(), 
+                                  pos.getX() + 1, pos.getY() + 1.1, pos.getZ() + 1);
+        List<PlayerEntity> standingPlayers = world.getNonSpectatingEntities(PlayerEntity.class, standingBox);
         
-        for (PlayerEntity player : nearbyPlayers) {
+        for (PlayerEntity player : standingPlayers) {
             if (player.isCreative() || player.isSpectator()) {
                 continue;
             }
             
-            // Decrease ankh value when near cursed stone (less than cursed earth)
-            if (world.getTime() % 200 == 0) { // Every 10 seconds
+            // Check if player is actually standing on this block
+            BlockPos playerBlockPos = player.getBlockPos().down();
+            if (!playerBlockPos.equals(pos)) {
+                continue;
+            }
+            
+            // Decrease ankh value when standing on cursed stone (slower than cursed earth)
+            if (world.getTime() % 100 == 0) { // Every 5 seconds (twice as fast as before)
                 AnkhDataManager.decreaseAnkhValue(player, 1);
             }
         }

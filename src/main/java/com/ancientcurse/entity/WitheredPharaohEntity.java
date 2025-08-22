@@ -1,5 +1,6 @@
 package com.ancientcurse.entity;
 import com.ancientcurse.AncientCurse;
+import com.ancientcurse.entity.ai.AttackSolarSpireGoal;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
@@ -81,9 +82,10 @@ public class WitheredPharaohEntity extends HostileEntity implements GeoEntity {
         this.goalSelector.add(1, new SwimGoal(this));
         this.goalSelector.add(2, new PharaohMagicAttackGoal(this)); // Custom magic attack goal
         this.goalSelector.add(3, new MeleeAttackGoal(this, 1.2D, false)); // Faster attack speed
-        this.goalSelector.add(4, new WanderAroundFarGoal(this, 1.0D));
-        this.goalSelector.add(5, new PharaohLookAtTargetGoal(this)); // Custom aggressive look-at goal
-        this.goalSelector.add(6, new LookAroundGoal(this));
+        this.goalSelector.add(4, new AttackSolarSpireGoal(this, 1.2, 50, 8)); // Attack Solar Spire (50 range, 8 damage)
+        this.goalSelector.add(5, new WanderAroundFarGoal(this, 1.0D));
+        this.goalSelector.add(6, new PharaohLookAtTargetGoal(this)); // Custom aggressive look-at goal
+        this.goalSelector.add(7, new LookAroundGoal(this));
         
         // Add targeting goals - higher priority for revenge
         this.targetSelector.add(1, new RevengeGoal(this));

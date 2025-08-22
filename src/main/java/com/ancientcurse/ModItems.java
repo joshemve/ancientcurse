@@ -241,10 +241,10 @@ public class ModItems {
     );
     
     // Bronze armor
-    public static final Item BRONZE_HELMET = new Item(new FabricItemSettings());
-    public static final Item BRONZE_CHESTPLATE = new Item(new FabricItemSettings());
-    public static final Item BRONZE_LEGGINGS = new Item(new FabricItemSettings());
-    public static final Item BRONZE_BOOTS = new Item(new FabricItemSettings());
+    public static final Item BRONZE_HELMET = new com.ancientcurse.item.armor.BronzeHelmetItem();
+    public static final Item BRONZE_CHESTPLATE = new com.ancientcurse.item.armor.BronzeChestplateItem();
+    public static final Item BRONZE_LEGGINGS = new com.ancientcurse.item.armor.BronzeLeggingsItem();
+    public static final Item BRONZE_BOOTS = new com.ancientcurse.item.armor.BronzeBootsItem();
     
     // Ancient Egyptian armor
     public static final Item VEIL_OF_ANUBIS = new com.ancientcurse.item.armor.VeilOfAnubisItem();

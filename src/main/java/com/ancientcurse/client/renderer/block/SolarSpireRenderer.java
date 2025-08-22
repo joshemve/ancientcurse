@@ -16,6 +16,8 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.RotationAxis;
+import org.joml.Matrix3f;
+import org.joml.Matrix4f;
 import software.bernie.geckolib.cache.object.BakedGeoModel;
 import software.bernie.geckolib.renderer.GeoBlockRenderer;
 
@@ -47,8 +49,8 @@ public class SolarSpireRenderer extends GeoBlockRenderer<SolarSpireBlockEntity> 
         // Always render lava animation overlay
         renderLavaOverlay(poseStack, animatable, model, bufferSource, packedLight, packedOverlay, partialTick);
         
-        // Render power-up overlay if activating
-        if (animatable.isPoweringUp()) {
+        // Render power-up overlay if powering up OR at stage 7 (working state)
+        if (animatable.isPoweringUp() || animatable.getPowerUpStage() == 7) {
             renderPowerUpOverlay(poseStack, animatable, model, bufferSource, packedLight, packedOverlay, partialTick);
         }
     }
@@ -69,12 +71,17 @@ public class SolarSpireRenderer extends GeoBlockRenderer<SolarSpireBlockEntity> 
     
     private void renderPowerUpOverlay(MatrixStack poseStack, SolarSpireBlockEntity animatable, BakedGeoModel model, VertexConsumerProvider bufferSource, int packedLight, int packedOverlay, float partialTick) {
         int powerUpStage = animatable.getPowerUpStage();
-        if (powerUpStage < 1 || powerUpStage > 7) return;
         
-        Identifier powerUpTexture = POWER_UP_TEXTURES[powerUpStage - 1];
+        // Show overlay if we're in any power-up stage (1-7)
+        // Stage 7 stays active during working state until deactivated
+        if (powerUpStage < 1) return;
         
-        // Calculate glow intensity based on stage
-        float glowIntensity = (float)powerUpStage / 7f;
+        // Always use power_up_7 texture when at stage 7 (it stays at 7 during working state)
+        int textureIndex = Math.min(powerUpStage - 1, 6); // Clamp to max index 6 (power_up_7)
+        Identifier powerUpTexture = POWER_UP_TEXTURES[textureIndex];
+        
+        // Full intensity when at stage 7 (which includes working state)
+        float glowIntensity = (powerUpStage == 7) ? 1.0f : (float)powerUpStage / 7f;
         
         // Make it glow brighter by increasing light level
         int glowLight = 0xF000F0; // Full bright for glow effect
@@ -106,16 +113,24 @@ public class SolarSpireRenderer extends GeoBlockRenderer<SolarSpireBlockEntity> 
     
     @Override
     public void postRender(MatrixStack poseStack, SolarSpireBlockEntity animatable, BakedGeoModel model, VertexConsumerProvider bufferSource, VertexConsumer buffer, boolean isReRender, float partialTick, int packedLight, int packedOverlay, float red, float green, float blue, float alpha) {
+        // Render sun beacon during working state
+        if (animatable.isWorking() && animatable.hasEye()) {
+            renderSunBeacon(poseStack, bufferSource, animatable);
+        }
+        
         // Render the Eye of Apophis if the spire has one
         if (animatable.hasEye()) {
             poseStack.push();
             
-            // Use the locator anchor from the model - "top_particle_locator_anchor" at [0, 47, 0]
-            // The model coordinates are in pixels, so we need to convert to blocks (divide by 16)
-            // Set to 3.5 blocks height as requested
-            poseStack.translate(0, 56.0 / 16.0, 0); // 56 pixels = 3.5 blocks high
+            // Calculate the eye position with sliding animation
+            float appearProgress = animatable.getEyeAppearProgress();
+            float startY = (56.0f - 16.0f) / 16.0f; // Start 1 block lower (2.5 blocks high)
+            float endY = 56.0f / 16.0f; // End at 3.5 blocks high
+            float currentY = startY + (endY - startY) * appearProgress;
             
-            // Apply bobbing effect
+            poseStack.translate(0, currentY, 0);
+            
+            // Apply bobbing effect (only after fully appeared)
             float bobOffset = animatable.getEyeBobOffset();
             poseStack.translate(0, bobOffset, 0);
             
@@ -144,5 +159,82 @@ public class SolarSpireRenderer extends GeoBlockRenderer<SolarSpireBlockEntity> 
         }
         
         super.postRender(poseStack, animatable, model, bufferSource, buffer, isReRender, partialTick, packedLight, packedOverlay, red, green, blue, alpha);
+    }
+    
+    private void renderSunBeacon(MatrixStack poseStack, VertexConsumerProvider bufferSource, SolarSpireBlockEntity animatable) {
+        poseStack.push();
+        
+        // Position at 2 blocks high
+        poseStack.translate(0, 2.0, 0); // Start at 2 blocks high
+        
+        // Get the beacon texture
+        VertexConsumer beaconBuffer = bufferSource.getBuffer(RenderLayer.getBeaconBeam(
+            new Identifier("textures/entity/beacon_beam.png"), true));
+        
+        // Calculate animation values
+        long time = animatable.getWorld().getTime();
+        float pulseAlpha = 0.8f + (float)Math.sin(time * 0.1) * 0.2f; // Subtle pulsing
+        
+        // Render a vertical beam going upward only
+        float beamHeight = 256.0f; // Extend to build height
+        float beamRadius = 0.1f; // Thin beam
+        
+        // Orange-yellow sun energy color (more orange)
+        float red = 1.0f;
+        float green = 0.7f;  // Less green for more orange
+        float blue = 0.1f;   // Much less blue for warmer color
+        
+        // Draw single beam segment going up
+        renderBeamSegment(poseStack, beaconBuffer, red, green, blue, pulseAlpha, 
+                         0.0f, beamHeight,          // Start at 0, go up
+                         -beamRadius, -beamRadius,  // x1, z1
+                         beamRadius, -beamRadius,   // x2, z2
+                         beamRadius, beamRadius,    // x3, z3
+                         -beamRadius, beamRadius,   // x4, z4
+                         0.0f, 1.0f,               // u1, u2
+                         0.0f, 1.0f,               // v1, v2 - fixed texture coordinates
+                         beamHeight);
+        
+        poseStack.pop();
+    }
+    
+    private static void renderBeamSegment(MatrixStack matrices, VertexConsumer vertices, float red, float green,
+                                          float blue, float alpha, float yOffset, float height, float x1, float z1,
+                                          float x2, float z2, float x3, float z3, float x4, float z4, float u1,
+                                          float u2, float v1, float v2, float beamHeight) {
+        MatrixStack.Entry entry = matrices.peek();
+        Matrix4f positionMatrix = entry.getPositionMatrix();
+        Matrix3f normalMatrix = entry.getNormalMatrix();
+        
+        // Draw the four sides of the beam
+        renderBeamFace(positionMatrix, normalMatrix, vertices, red, green, blue, alpha, yOffset, height,
+                      x1, z1, x2, z2, u1, u2, v1, v2);
+        renderBeamFace(positionMatrix, normalMatrix, vertices, red, green, blue, alpha, yOffset, height,
+                      x4, z4, x3, z3, u1, u2, v1, v2);
+        renderBeamFace(positionMatrix, normalMatrix, vertices, red, green, blue, alpha, yOffset, height,
+                      x2, z2, x4, z4, u1, u2, v1, v2);
+        renderBeamFace(positionMatrix, normalMatrix, vertices, red, green, blue, alpha, yOffset, height,
+                      x3, z3, x1, z1, u1, u2, v1, v2);
+    }
+    
+    private static void renderBeamFace(Matrix4f positionMatrix, Matrix3f normalMatrix, VertexConsumer vertices,
+                                       float red, float green, float blue, float alpha, float yOffset, float height,
+                                       float x1, float z1, float x2, float z2, float u1, float u2, float v1, float v2) {
+        addBeamVertex(positionMatrix, normalMatrix, vertices, red, green, blue, alpha, x1, yOffset, z1, u2, v1);
+        addBeamVertex(positionMatrix, normalMatrix, vertices, red, green, blue, alpha, x1, yOffset + height, z1, u2, v2);
+        addBeamVertex(positionMatrix, normalMatrix, vertices, red, green, blue, alpha, x2, yOffset + height, z2, u1, v2);
+        addBeamVertex(positionMatrix, normalMatrix, vertices, red, green, blue, alpha, x2, yOffset, z2, u1, v1);
+    }
+    
+    private static void addBeamVertex(Matrix4f positionMatrix, Matrix3f normalMatrix, VertexConsumer vertices,
+                                      float red, float green, float blue, float alpha, float x, float y, float z,
+                                      float u, float v) {
+        vertices.vertex(positionMatrix, x, y, z)
+                .color(red, green, blue, alpha)
+                .texture(u, v)
+                .overlay(OverlayTexture.DEFAULT_UV)
+                .light(15728880) // Full bright
+                .normal(normalMatrix, 0.0F, 1.0F, 0.0F)
+                .next();
     }
 }

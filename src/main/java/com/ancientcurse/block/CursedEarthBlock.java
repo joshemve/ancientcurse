@@ -8,7 +8,6 @@ import com.ancientcurse.system.CursedEarthManager;
 import com.ancientcurse.block.registry.CursedPlantBlocks;
 import com.ancientcurse.block.CursedPlantBlock;
 import com.ancientcurse.block.SolarSpireBlock;
-import com.ancientcurse.effect.ModStatusEffects;
 import com.ancientcurse.util.CurseZoneManager;
 import com.ancientcurse.player.AnkhDataManager;
 import net.minecraft.block.Block;
@@ -18,7 +17,6 @@ import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.registry.tag.TagKey;
 import net.minecraft.registry.Registries;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.world.ServerWorld;
@@ -793,31 +791,27 @@ public class CursedEarthBlock extends BaseAncientCurseBlock {
      * Apply effects to nearby players
      */
     private void applyEffectsToNearbyPlayers(ServerWorld world, BlockPos pos) {
-        // Find players within range
-        Box effectBox = new Box(pos).expand(1.5, 1, 1.5);
-        List<PlayerEntity> nearbyPlayers = world.getNonSpectatingEntities(PlayerEntity.class, effectBox);
+        // Check for players standing directly on this block
+        BlockPos abovePos = pos.up();
+        Box standingBox = new Box(pos.getX(), pos.getY() + 1, pos.getZ(), 
+                                  pos.getX() + 1, pos.getY() + 1.1, pos.getZ() + 1);
+        List<PlayerEntity> standingPlayers = world.getNonSpectatingEntities(PlayerEntity.class, standingBox);
         
-        for (PlayerEntity player : nearbyPlayers) {
+        for (PlayerEntity player : standingPlayers) {
             // Skip creative/spectator players
             if (player.isCreative() || player.isSpectator()) {
                 continue;
             }
             
-            // Track exposure time
+            // Check if player is actually standing on this block
+            BlockPos playerBlockPos = player.getBlockPos().down();
+            if (!playerBlockPos.equals(pos)) {
+                continue;
+            }
+            
+            // Only decrease ankh value when standing on cursed earth (no negative status effects)
             long currentTime = world.getTime();
-            playerExposureTime.put(player, currentTime);
-            
-            // Apply curse effect
-            player.addStatusEffect(new StatusEffectInstance(
-                ModStatusEffects.KHAMSIN_CURSE_STAGE_1,
-                200, // 10 seconds
-                0,
-                false,
-                true
-            ));
-            
-            // Decrease ankh value when standing on cursed earth
-            if (currentTime % 100 == 0) { // Every 5 seconds
+            if (currentTime % 50 == 0) { // Every 2.5 seconds (twice as fast as before)
                 AnkhDataManager.decreaseAnkhValue(player, 1);
             }
             

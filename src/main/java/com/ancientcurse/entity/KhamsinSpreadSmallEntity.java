@@ -1,6 +1,7 @@
 package com.ancientcurse.entity;
 
 import com.ancientcurse.AncientCurse;
+import com.ancientcurse.entity.ai.AttackSolarSpireGoal;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.EquipmentSlot;
@@ -252,7 +253,27 @@ public class KhamsinSpreadSmallEntity extends MobEntity implements GeoEntity {
             return;
         }
         
-        // Find target player to shoot at (excluding creative mode)
+        // First check for active Solar Spire within range
+        BlockPos spirePos = com.ancientcurse.block.SolarSpireBlock.getNearestActiveSpire(
+            this.getWorld(), this.getBlockPos(), 50
+        );
+        
+        // Attack spire if it's within 50 blocks (not just activation range)
+        if (spirePos != null) {
+            // Create a temporary entity at spire position to shoot at
+            Vec3d spireCenter = Vec3d.ofCenter(spirePos);
+            
+            // Shoot orb at the spire
+            shootOrbAtPosition(spireCenter);
+            
+            // Deal direct damage to the spire (6 damage per orb)
+            com.ancientcurse.block.SolarSpireBlock.damageSpire(this.getWorld(), spirePos, 6);
+            
+            dataTracker.set(SHOOT_COOLDOWN, SHOOT_INTERVAL);
+            return;
+        }
+        
+        // If no spire, find target player to shoot at (excluding creative mode)
         Box targetBox = new Box(this.getBlockPos()).expand(ACTIVATION_RANGE);
         List<PlayerEntity> players = this.getWorld().getNonSpectatingEntities(PlayerEntity.class, targetBox);
         
@@ -274,6 +295,34 @@ public class KhamsinSpreadSmallEntity extends MobEntity implements GeoEntity {
         Vec3d direction = target.getPos().subtract(this.getPos()).normalize();
         Vec3d orbStart = this.getPos().add(direction.multiply(1.0)).add(0, 0.5, 0);
         orb.setPosition(orbStart);
+        
+        this.getWorld().spawnEntity(orb);
+        
+        // Play shooting sound
+        this.playSound(SoundEvents.ENTITY_SHULKER_SHOOT, 0.6f, 1.5f);
+        
+        // Create shooting particles
+        if (this.getWorld() instanceof ServerWorld serverWorld) {
+            serverWorld.spawnParticles(
+                ParticleTypes.WITCH,
+                orbStart.x, orbStart.y, orbStart.z,
+                8, 0.2, 0.2, 0.2, 0.05
+            );
+        }
+    }
+    
+    private void shootOrbAtPosition(Vec3d targetPos) {
+        // Create mystical orb projectile aimed at a position (for Solar Spire)
+        KhamsinOrbEntity orb = new KhamsinOrbEntity(this.getWorld(), this, null);
+        
+        // Position orb slightly in front of the entity
+        Vec3d direction = targetPos.subtract(this.getPos()).normalize();
+        Vec3d orbStart = this.getPos().add(direction.multiply(1.0)).add(0, 0.5, 0);
+        orb.setPosition(orbStart);
+        
+        // Set velocity towards target
+        Vec3d velocity = targetPos.subtract(orbStart).normalize().multiply(0.4);
+        orb.setVelocity(velocity);
         
         this.getWorld().spawnEntity(orb);
         

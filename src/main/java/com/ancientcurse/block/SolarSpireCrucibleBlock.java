@@ -24,7 +24,9 @@ public class SolarSpireCrucibleBlock extends BaseAncientCurseBlock {
     
     @Override
     public void appendTooltip(ItemStack stack, BlockView world, List<Text> tooltip, TooltipContext options) {
-        // Don't add the base Ancient Curse tooltip - Minecraft already shows the mod name
+        tooltip.add(Text.literal("§6Sacred vessel of the Solar Spire").formatted(net.minecraft.util.Formatting.GOLD));
+        tooltip.add(Text.literal("§7Place on plinth, then pyramidion above").formatted(net.minecraft.util.Formatting.GRAY));
+        super.appendTooltip(stack, world, tooltip, options);
     }
     
     // No custom shape - uses default full block (16x16x16)

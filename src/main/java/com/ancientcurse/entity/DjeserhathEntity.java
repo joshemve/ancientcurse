@@ -1,5 +1,6 @@
 package com.ancientcurse.entity;
 
+import com.ancientcurse.entity.ai.AttackSolarSpireGoal;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
@@ -173,6 +174,9 @@ public class DjeserhathEntity extends HostileEntity implements GeoEntity {
         goalSelector.add(1, new RootedBiteGoal(this));
         goalSelector.add(2, new DjeserhathSpitAttackGoal(this));
         goalSelector.add(3, new LuringGoal(this));
+        
+        // Attack Solar Spire if one is active (priority 4, lower than main attacks)
+        goalSelector.add(4, new AttackSolarSpireGoal(this, 0.0, 50, 10)); // 0 speed since rooted, 50 range, 10 damage
         
         // Removed look goals - rotation is handled in the renderer for upper body only
 
