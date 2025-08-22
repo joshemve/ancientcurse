@@ -213,6 +213,14 @@ public class CursedEarthManager {
     }
     
     /**
+     * Store original block state for restoration (e.g., grass replaced by Reed of Sekhem)
+     */
+    public void storeOriginalBlock(ServerWorld world, BlockPos pos, BlockState originalState) {
+        OriginalBlockTracker tracker = OriginalBlockTracker.get(world);
+        tracker.trackOriginalBlock(pos, originalState);
+    }
+    
+    /**
      * Cleans up old tracking data for blocks that no longer exist
      */
     private void cleanupOldTrackingData(MinecraftServer server) {

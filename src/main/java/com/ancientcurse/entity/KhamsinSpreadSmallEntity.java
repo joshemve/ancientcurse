@@ -197,7 +197,7 @@ public class KhamsinSpreadSmallEntity extends MobEntity implements GeoEntity {
             deactivationTimer = 0;
             
             // Play activation sound
-            this.playSound(SoundEvents.BLOCK_BEACON_ACTIVATE, 0.8f, 1.2f);
+            this.playSound(SoundEvents.BLOCK_BEACON_ACTIVATE, 0.3f, 1.2f); // Reduced volume from 0.8f
             
             // Create activation particles
             if (this.getWorld() instanceof ServerWorld serverWorld) {
@@ -299,7 +299,7 @@ public class KhamsinSpreadSmallEntity extends MobEntity implements GeoEntity {
         this.getWorld().spawnEntity(orb);
         
         // Play shooting sound
-        this.playSound(SoundEvents.ENTITY_SHULKER_SHOOT, 0.6f, 1.5f);
+        this.playSound(SoundEvents.ENTITY_SHULKER_SHOOT, 0.2f, 1.5f); // Reduced volume from 0.6f
         
         // Create shooting particles
         if (this.getWorld() instanceof ServerWorld serverWorld) {
@@ -327,7 +327,7 @@ public class KhamsinSpreadSmallEntity extends MobEntity implements GeoEntity {
         this.getWorld().spawnEntity(orb);
         
         // Play shooting sound
-        this.playSound(SoundEvents.ENTITY_SHULKER_SHOOT, 0.6f, 1.5f);
+        this.playSound(SoundEvents.ENTITY_SHULKER_SHOOT, 0.2f, 1.5f); // Reduced volume from 0.6f
         
         // Create shooting particles
         if (this.getWorld() instanceof ServerWorld serverWorld) {
@@ -349,7 +349,7 @@ public class KhamsinSpreadSmallEntity extends MobEntity implements GeoEntity {
             deactivationTimer = 0;
             
             // Play deactivation sound
-            this.playSound(SoundEvents.BLOCK_BEACON_DEACTIVATE, 0.6f, 0.8f);
+            this.playSound(SoundEvents.BLOCK_BEACON_DEACTIVATE, 0.25f, 0.8f); // Reduced volume from 0.6f
         }
     }
     
@@ -539,6 +539,11 @@ public class KhamsinSpreadSmallEntity extends MobEntity implements GeoEntity {
     
     /* ---------- SOUNDS ---------- */
     @Override
+    protected SoundEvent getAmbientSound() {
+        return null; // No idle sounds
+    }
+    
+    @Override
     protected SoundEvent getHurtSound(DamageSource damageSource) {
         return SoundEvents.BLOCK_STONE_HIT;
     }
@@ -546,6 +551,17 @@ public class KhamsinSpreadSmallEntity extends MobEntity implements GeoEntity {
     @Override
     protected SoundEvent getDeathSound() {
         return SoundEvents.BLOCK_STONE_BREAK;
+    }
+    
+    @Override
+    protected void playStepSound(BlockPos pos, BlockState state) {
+        // Override to prevent step sounds (no slime sounds)
+        // This entity floats and shouldn't make walking sounds
+    }
+    
+    @Override
+    public int getMinAmbientSoundDelay() {
+        return Integer.MAX_VALUE; // Never play ambient sounds
     }
     
     @Override

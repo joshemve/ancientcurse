@@ -185,18 +185,7 @@ public class SolarSpireBlock extends BlockWithEntity implements LandingBlock {
     }
     
     private void completeCleansingAtSpire(ServerWorld world, BlockPos pos, CleansingOperation operation) {
-        // Send completion message
-        PlayerEntity player = world.getPlayerByUuid(operation.playerUuid);
-        if (player != null) {
-            player.sendMessage(Text.translatable("block.ancientcurse.solar_spire.complete",
-                    operation.totalCleansed, operation.blocksRestored)
-                .formatted(Formatting.GREEN), false);
-            
-            // Send dramatic message about the spire's sacrifice
-            player.sendMessage(Text.literal("§6The Solar Spire has fulfilled its purpose. Ra's power returns to the heavens!"), false);
-        }
-        
-        // Log the cleansing
+        // Log the cleansing for debugging only
         AncientCurse.LOGGER.info("Solar Spire at {} completed cleansing: {} blocks cleansed, {} blocks restored",
             pos, operation.totalCleansed, operation.blocksRestored);
         
@@ -282,51 +271,58 @@ public class SolarSpireBlock extends BlockWithEntity implements LandingBlock {
                 world.spawnParticles(ParticleTypes.WAX_ON, x, pos.getY() + 2, z, 1, 0, 0.3, 0, 0.05);
             }
             
-            // Thunder sound at start of ascension
+            // Thunder sound AND block removal at tick 60
             if (tick == 60) {
+                // Play the dramatic sounds
                 world.playSound(null, pos, SoundEvents.ENTITY_LIGHTNING_BOLT_THUNDER, SoundCategory.BLOCKS, 2.0f, 1.5f);
                 world.playSound(null, pos, SoundEvents.BLOCK_END_PORTAL_SPAWN, SoundCategory.BLOCKS, 1.0f, 1.0f);
+                
+                // Remove the Solar Spire block RIGHT when the sound plays
+                world.removeBlock(pos, false);
+                
+                // Clean up
+                finalizingSpires.remove(pos);
+                activeSpires.remove(pos);
             }
         }
-        // Phase 3: Final explosion (80 ticks)
+        // Phase 3: Final particles and effects (80 ticks)
         else if (tick == 80) {
-            // MASSIVE explosion effect
-            world.playSound(null, pos, SoundEvents.ENTITY_GENERIC_EXPLODE, SoundCategory.BLOCKS, 2.0f, 0.5f);
-            world.playSound(null, pos, SoundEvents.ENTITY_FIREWORK_ROCKET_LARGE_BLAST, SoundCategory.BLOCKS, 2.0f, 1.0f);
+            // Just subtle completion sounds (block already gone)
+            world.playSound(null, pos, SoundEvents.BLOCK_AMETHYST_BLOCK_RESONATE, SoundCategory.BLOCKS, 1.5f, 1.2f);
+            world.playSound(null, pos, SoundEvents.BLOCK_BEACON_DEACTIVATE, SoundCategory.BLOCKS, 1.0f, 1.5f);
             
-            // Totem particles for divine effect
-            world.spawnParticles(ParticleTypes.TOTEM_OF_UNDYING,
+            // Golden ascension particles - more subtle and elegant
+            world.spawnParticles(ParticleTypes.WAX_ON,
                 pos.getX() + 0.5, pos.getY() + 2, pos.getZ() + 0.5,
-                100, 1, 1, 1, 0.5);
+                20, 0.5, 1, 0.5, 0.02); // Reduced from 50 to 20 particles
             
-            // Flash effect
+            // Single flash for transition
             world.spawnParticles(ParticleTypes.FLASH,
                 pos.getX() + 0.5, pos.getY() + 2, pos.getZ() + 0.5,
-                5, 0, 0, 0, 0);
+                1, 0, 0, 0, 0);
             
-            // Expanding shockwave of particles
-            for (int ring = 0; ring < 5; ring++) {
-                final int r = ring;
-                for (int i = 0; i < 64; i++) {
-                    double angle = Math.PI * 2 * i / 64;
-                    double radius = (r + 1) * 2;
-                    double x = pos.getX() + 0.5 + Math.cos(angle) * radius;
-                    double z = pos.getZ() + 0.5 + Math.sin(angle) * radius;
-                    double y = pos.getY() + 1 + (r * 0.5);
-                    
-                    world.spawnParticles(ParticleTypes.END_ROD, x, y, z, 1, 0, 0.1, 0, 0.2);
-                    world.spawnParticles(ParticleTypes.WAX_ON, x, y - 0.5, z, 1, 0, 0, 0, 0.1);
-                }
+            // Elegant ring of light dissipating outward
+            for (int i = 0; i < 24; i++) {
+                double angle = Math.PI * 2 * i / 24;
+                double radius = 3;
+                double x = pos.getX() + 0.5 + Math.cos(angle) * radius;
+                double z = pos.getZ() + 0.5 + Math.sin(angle) * radius;
+                
+                // Soft white particles floating upward
+                world.spawnParticles(ParticleTypes.END_ROD, x, pos.getY() + 1, z, 
+                    1, 0, 0.2, 0, 0.05);
             }
-        }
-        // Phase 4: Remove the block (85 ticks)
-        else if (tick >= 85) {
-            // Clean up
-            finalizingSpires.remove(pos);
-            activeSpires.remove(pos);
             
-            // Remove the Solar Spire block
-            world.removeBlock(pos, false);
+            // Mystical enchantment particles spiraling up
+            for (int h = 0; h < 10; h++) {
+                double spiralAngle = h * 0.5;
+                double spiralX = pos.getX() + 0.5 + Math.cos(spiralAngle) * 0.5;
+                double spiralZ = pos.getZ() + 0.5 + Math.sin(spiralAngle) * 0.5;
+                double spiralY = pos.getY() + h * 0.5;
+                
+                world.spawnParticles(ParticleTypes.ENCHANT, spiralX, spiralY, spiralZ, 
+                    2, 0.1, 0.1, 0.1, 0.5);
+            }
             
             // Final ascending particles
             for (int i = 0; i < 20; i++) {
@@ -340,11 +336,11 @@ public class SolarSpireBlock extends BlockWithEntity implements LandingBlock {
                 pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5,
                 50, 0.5, 0.5, 0.5, 0.02);
             
-            return; // Stop scheduling ticks
+            return; // Stop scheduling ticks - finale complete
         }
         
-        // Continue the finale animation
-        if (tick < 85) {
+        // Continue the finale animation until tick 80
+        if (tick < 80) {
             finalizingSpires.put(pos, tick + 1);
             world.scheduleBlockTick(pos, this, 1, TickPriority.HIGH);
         }
@@ -808,10 +804,10 @@ public class SolarSpireBlock extends BlockWithEntity implements LandingBlock {
             for (Entity entity : entities) {
                 String entityName = Registries.ENTITY_TYPE.getId(entity.getType()).getPath();
                 if (entityName.contains("khamsin") || entityName.contains("djeserhath")) {
-                    // Play cleansing effect
+                    // Play cleansing effect (reduced particles)
                     world.spawnParticles(ParticleTypes.WAX_ON,
                         entity.getX(), entity.getY() + 0.5, entity.getZ(),
-                        10, 0.2, 0.2, 0.2, 0.05);
+                        3, 0.2, 0.2, 0.2, 0.05); // Reduced from 10 to 3 particles
                     
                     // Play a cleansing sound (more dramatic for Djeserhath)
                     if (entityName.contains("djeserhath")) {
@@ -920,9 +916,25 @@ public class SolarSpireBlock extends BlockWithEntity implements LandingBlock {
             }
             
             if (isCorruptedPlant) {
-                // Corrupted plants are just removed (replaced with air)
-                AncientCurse.LOGGER.debug("Removing corrupted plant at {}: {}", pos, blockName);
-                world.setBlockState(pos, Blocks.AIR.getDefaultState());
+                // Check if Reed of Sekhem has a tracked original (was grass)
+                if (blockName.contains("reed_of_sekhem") || blockName.contains("sekhem")) {
+                    BlockState originalState = tracker.getOriginalBlock(pos);
+                    if (originalState != null) {
+                        // Restore to original grass/fern
+                        AncientCurse.LOGGER.debug("Restoring Reed of Sekhem to original {} at {}", 
+                            originalState.getBlock().getTranslationKey(), pos);
+                        world.setBlockState(pos, originalState);
+                        tracker.clearTracking(pos);
+                        blocksRestored++;
+                    } else {
+                        // No tracked original, just remove it
+                        world.setBlockState(pos, Blocks.AIR.getDefaultState());
+                    }
+                } else {
+                    // Other corrupted plants are just removed (replaced with air)
+                    AncientCurse.LOGGER.debug("Removing corrupted plant at {}: {}", pos, blockName);
+                    world.setBlockState(pos, Blocks.AIR.getDefaultState());
+                }
                 
                 // Also remove any Khamsin entities at this position
                 cleanseKhamsinEntities(world, pos);
@@ -962,8 +974,8 @@ public class SolarSpireBlock extends BlockWithEntity implements LandingBlock {
             // Notify CursedEarthManager that a cursed block was removed
             CursedEarthManager.getInstance().onCursedBlockRemoved(world, pos);
             
-            // Visual effect (reduced) - golden cleansing energy
-            if (!REDUCED_PARTICLES || world.random.nextFloat() < 0.05f) {
+            // Visual effect (greatly reduced) - golden cleansing energy
+            if (!REDUCED_PARTICLES || world.random.nextFloat() < 0.01f) { // Reduced from 0.05f to 0.01f
                 world.spawnParticles(ParticleTypes.WAX_ON,
                     pos.getX() + 0.5, pos.getY() + 1.0, pos.getZ() + 0.5,
                     1, 0, 0, 0, 0.02);
@@ -983,10 +995,10 @@ public class SolarSpireBlock extends BlockWithEntity implements LandingBlock {
             for (Entity entity : entities) {
                 String entityName = Registries.ENTITY_TYPE.getId(entity.getType()).getPath();
                 if (entityName.contains("khamsin") || entityName.contains("djeserhath")) {
-                    // Play cleansing effect
+                    // Play cleansing effect (reduced particles)
                     world.spawnParticles(ParticleTypes.WAX_ON,
                         entity.getX(), entity.getY() + 0.5, entity.getZ(),
-                        10, 0.2, 0.2, 0.2, 0.05);
+                        3, 0.2, 0.2, 0.2, 0.05); // Reduced from 10 to 3 particles
                     
                     // Play sound for Djeserhath removal (more dramatic)
                     if (entityName.contains("djeserhath")) {

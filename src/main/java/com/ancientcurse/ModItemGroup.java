@@ -222,6 +222,9 @@ public class ModItemGroup {
                 safeAdd(entries, ModBlocks.WIND_SWEPT_BLACKSTONE_SLAB);
                 safeAdd(entries, ModBlocks.CURSED_EARTH);
                 safeAdd(entries, ModBlocks.CURSED_STONE);
+                safeAdd(entries, ModBlocks.CURSED_LOG);
+                safeAdd(entries, ModBlocks.CURSED_WOOD_PLANK);
+                safeAdd(entries, ModBlocks.CURSED_SAND);
                 
                 // Solar Spire blocks
                 safeAdd(entries, ModBlocks.SOLAR_SPIRE_PLINTH);

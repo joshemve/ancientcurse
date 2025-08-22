@@ -13,6 +13,7 @@ import com.ancientcurse.player.AnkhDataManager;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.block.LeavesBlock;
 import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.registry.tag.TagKey;
 import net.minecraft.registry.Registries;
@@ -31,6 +32,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
 import net.minecraft.world.BlockView;
 import net.minecraft.particle.DustParticleEffect;
+import net.minecraft.particle.ParticleTypes;
 import org.joml.Vector3f;
 
 import java.util.ArrayList;
@@ -65,6 +67,11 @@ public class CursedEarthBlock extends BaseAncientCurseBlock {
     private static final float ROTATION_CHANCE = 0.35f; // Chance to rotate direction
     private static final Vector3f CURSED_PARTICLE_COLOR = new Vector3f(0.4f, 0.1f, 0.5f);
     
+    // Leaf decay constants
+    private static final int LEAF_WITHER_TIME = 400; // 20 seconds to fully wither (faster to reduce tracking)
+    private static final float LEAF_DECAY_CHANCE = 0.02f; // Even lower chance per tick
+    private static final int MAX_WITHERING_LEAVES = 10; // Limit concurrent withering to prevent lag
+    
     // Tracking maps
     private static final Map<ChunkPos, Integer> chunkCounts = new HashMap<>();
     private static final Map<Long, Integer> sectionCounts = new HashMap<>();
@@ -77,6 +84,8 @@ public class CursedEarthBlock extends BaseAncientCurseBlock {
     private static final Map<BlockPos, BlockPos> spreadOrigins = new HashMap<>();
     // Cache for block spreadability to optimize performance
     private static final Map<Block, Boolean> spreadableBlockCache = new HashMap<>();
+    // Tracking for leaf withering
+    private static final Map<BlockPos, Long> leafWitherStartTimes = new HashMap<>();
     
     public CursedEarthBlock(Settings settings) {
         super(settings);
@@ -121,6 +130,16 @@ public class CursedEarthBlock extends BaseAncientCurseBlock {
         // Very rare chance to spawn cursed entities (reduced from 0.001f to 0.0002f - 80% reduction)
         if (random.nextFloat() < 0.0002f) {
             attemptEntitySpawn(world, pos.up(), random);
+        }
+        
+        // Decay nearby leaves (much less frequently)
+        if (random.nextFloat() < LEAF_DECAY_CHANCE) {
+            decayNearbyLeaves(world, pos, random);
+        }
+        
+        // Replace nearby grass with Reed of Sekhem
+        if (random.nextFloat() < 0.05f) { // 5% chance per tick
+            replaceNearbyGrass(world, pos, random);
         }
         
         // Apply effects to nearby players
@@ -295,9 +314,23 @@ public class CursedEarthBlock extends BaseAncientCurseBlock {
                 BlockState targetBlockState = world.getBlockState(candidate.pos);
                 BlockState targetState;
                 
-                // Check if target is a stone-type block
+                // Check what type of block we're spreading to
                 if (isStoneType(targetBlockState.getBlock())) {
                     targetState = ModBlocks.CURSED_STONE.getDefaultState();
+                } else if (isLeafBlock(targetBlockState)) {
+                    // Skip leaves - they decay naturally, don't convert them
+                    continue;
+                } else if (CursedLogBlock.isLogBlock(targetBlockState)) {
+                    // Preserve the axis orientation for logs
+                    targetState = ModBlocks.CURSED_LOG.getDefaultState();
+                    if (targetBlockState.contains(net.minecraft.block.PillarBlock.AXIS)) {
+                        targetState = targetState.with(net.minecraft.block.PillarBlock.AXIS, 
+                                                      targetBlockState.get(net.minecraft.block.PillarBlock.AXIS));
+                    }
+                } else if (CursedLogBlock.isPlankBlock(targetBlockState)) {
+                    targetState = ModBlocks.CURSED_WOOD_PLANK.getDefaultState();
+                } else if (CursedSandBlock.isSandBlock(targetBlockState)) {
+                    targetState = ModBlocks.CURSED_SAND.getDefaultState();
                 } else {
                     targetState = ModBlocks.CURSED_EARTH.getDefaultState();
                 }
@@ -634,6 +667,32 @@ public class CursedEarthBlock extends BaseAncientCurseBlock {
     }
     
     /**
+     * Determines if a block is a leaf block that should become blackened leaves
+     */
+    private boolean isLeafBlock(BlockState state) {
+        Block block = state.getBlock();
+        
+        // Check if it's any type of leaves block
+        if (block instanceof LeavesBlock) {
+            return true;
+        }
+        
+        // Check if block is tagged as leaves (for modded compatibility)
+        if (state.isIn(BlockTags.LEAVES)) {
+            return true;
+        }
+        
+        // Check for modded leaves by name
+        String blockName = block.getTranslationKey().toLowerCase();
+        if (blockName.contains("leaves") || blockName.contains("leaf") || 
+            blockName.contains("foliage")) {
+            return true;
+        }
+        
+        return false;
+    }
+    
+    /**
      * Determines if a block is a stone type that should become cursed stone
      */
     private boolean isStoneType(Block block) {
@@ -693,7 +752,9 @@ public class CursedEarthBlock extends BaseAncientCurseBlock {
         // BLACKLIST approach - explicitly exclude what we DON'T want to corrupt
         
         // Never spread to cursed blocks
-        if (block == ModBlocks.CURSED_EARTH || block == ModBlocks.CURSED_STONE) {
+        if (block == ModBlocks.CURSED_EARTH || block == ModBlocks.CURSED_STONE || 
+            block == ModBlocks.CURSED_LOG || block == ModBlocks.CURSED_WOOD_PLANK ||
+            block == ModBlocks.CURSED_SAND) {
             return false;
         }
         
@@ -780,6 +841,14 @@ public class CursedEarthBlock extends BaseAncientCurseBlock {
     }
     
     /**
+     * Static version of isLeafBlock for death burst and tendril spreading
+     */
+    private static boolean isLeafBlockStatic(BlockState state) {
+        CursedEarthBlock temp = (CursedEarthBlock) ModBlocks.CURSED_EARTH;
+        return temp.isLeafBlock(state);
+    }
+    
+    /**
      * Static version of isStoneType for death burst
      */
     private static boolean isStoneTypeStatic(Block block) {
@@ -840,6 +909,254 @@ public class CursedEarthBlock extends BaseAncientCurseBlock {
     }
     
     /**
+     * Decays nearby leaf blocks with gradual withering effect
+     */
+    private void decayNearbyLeaves(ServerWorld world, BlockPos pos, Random random) {
+        // Skip if already at max withering leaves
+        if (leafWitherStartTimes.size() >= MAX_WITHERING_LEAVES) {
+            return;
+        }
+        
+        // Smaller search radius for more controlled decay
+        int radius = 2;
+        int verticalRadius = 2; // Reduced vertical range
+        long currentTime = world.getTime();
+        
+        // Process withering leaves less frequently to reduce lag
+        if (currentTime % 10 == 0) { // Only process every 10 ticks
+            leafWitherStartTimes.entrySet().removeIf(entry -> {
+                BlockPos leafPos = entry.getKey();
+                long startTime = entry.getValue();
+                
+                // Quick distance check - don't process far leaves
+                double distance = Math.sqrt(leafPos.getSquaredDistance(pos));
+                if (distance > 10) {
+                    return true; // Too far, remove from tracking
+                }
+                
+                // Check if leaf still exists
+                if (!isLeafBlock(world.getBlockState(leafPos))) {
+                    return true; // Remove from tracking
+                }
+                
+                // Calculate wither progress (0.0 to 1.0)
+                float progress = (float)(currentTime - startTime) / LEAF_WITHER_TIME;
+                
+                if (progress >= 1.0f) {
+                    // Time to break the leaf silently
+                    breakLeafSilently(world, leafPos);
+                    return true; // Remove from tracking
+                } else if (currentTime % 20 == 0) { // Particles only every second
+                    // Spawn subtle withering particles based on progress
+                    if (random.nextFloat() < progress * 0.3f) {
+                        spawnWitherParticles(world, leafPos, progress, random);
+                    }
+                }
+                return false; // Keep tracking
+            });
+        }
+        
+        // Don't add new withering if we're at the limit
+        if (leafWitherStartTimes.size() >= MAX_WITHERING_LEAVES) {
+            return;
+        }
+        
+        // Find the closest non-withering leaf to start withering
+        BlockPos closestLeaf = null;
+        double closestDistance = Double.MAX_VALUE;
+        
+        for (int x = -radius; x <= radius; x++) {
+            for (int y = -1; y <= verticalRadius; y++) {
+                for (int z = -radius; z <= radius; z++) {
+                    BlockPos leafPos = pos.add(x, y, z);
+                    
+                    // Skip if already withering
+                    if (leafWitherStartTimes.containsKey(leafPos)) {
+                        continue;
+                    }
+                    
+                    BlockState leafState = world.getBlockState(leafPos);
+                    if (isLeafBlock(leafState)) {
+                        double distance = Math.sqrt(x*x + y*y + z*z);
+                        
+                        // Prefer leaves that are:
+                        // 1. Closer to cursed earth
+                        // 2. Have withering neighbors (creates spreading effect)
+                        double effectiveDistance = distance;
+                        
+                        // Check for withering neighbors
+                        int witheringNeighbors = 0;
+                        for (Direction dir : Direction.values()) {
+                            if (leafWitherStartTimes.containsKey(leafPos.offset(dir))) {
+                                witheringNeighbors++;
+                            }
+                        }
+                        
+                        // Reduce effective distance if has withering neighbors
+                        effectiveDistance -= witheringNeighbors * 0.5;
+                        
+                        if (effectiveDistance < closestDistance) {
+                            closestDistance = effectiveDistance;
+                            closestLeaf = leafPos;
+                        }
+                    }
+                }
+            }
+        }
+        
+        // Start withering the closest leaf
+        if (closestLeaf != null && closestDistance <= radius) {
+            leafWitherStartTimes.put(closestLeaf, currentTime);
+            
+            // Spawn initial corruption particles
+            spawnInitialCorruptionParticles(world, closestLeaf, random);
+        }
+    }
+    
+    /**
+     * Breaks a leaf block silently without sound or drops
+     */
+    private void breakLeafSilently(ServerWorld world, BlockPos pos) {
+        // Set to air without playing break sound
+        world.setBlockState(pos, Blocks.AIR.getDefaultState(), 2); // Flag 2 = no sound
+        
+        // Spawn minimal ash particles (reduced from 5 to 2)
+        for (int i = 0; i < 2; i++) {
+            double x = pos.getX() + 0.5 + (world.random.nextDouble() - 0.5) * 0.3;
+            double y = pos.getY() + 0.5;
+            double z = pos.getZ() + 0.5 + (world.random.nextDouble() - 0.5) * 0.3;
+            
+            world.spawnParticles(
+                ParticleTypes.ASH,
+                x, y, z,
+                1,
+                0.02, -0.01, 0.02,
+                0.005
+            );
+        }
+    }
+    
+    /**
+     * Spawn subtle particles showing the withering progress
+     */
+    private void spawnWitherParticles(ServerWorld world, BlockPos pos, float progress, Random random) {
+        // Single particle only
+        if (random.nextFloat() < 0.5f) { // 50% chance for any particle at all
+            // Dark particles that get darker as withering progresses
+            float darkness = 0.25f - (progress * 0.2f);
+            Vector3f color = new Vector3f(darkness, darkness * 0.8f, darkness);
+            
+            double x = pos.getX() + 0.5;
+            double y = pos.getY() + 0.3;
+            double z = pos.getZ() + 0.5;
+            
+            world.spawnParticles(
+                new DustParticleEffect(color, 0.4f),
+                x, y, z,
+                1,
+                0, -0.005, 0,
+                0
+            );
+        }
+    }
+    
+    /**
+     * Spawn initial particles when a leaf starts withering
+     */
+    private void spawnInitialCorruptionParticles(ServerWorld world, BlockPos pos, Random random) {
+        // Single subtle particle
+        double x = pos.getX() + 0.5;
+        double y = pos.getY() + 0.5;
+        double z = pos.getZ() + 0.5;
+        
+        world.spawnParticles(
+            new DustParticleEffect(new Vector3f(0.15f, 0.1f, 0.2f), 0.3f),
+            x, y, z,
+            1,
+            0.01, 0.01, 0.01,
+            0
+        );
+    }
+    
+    /**
+     * Replace nearby grass with Reed of Sekhem
+     */
+    private void replaceNearbyGrass(ServerWorld world, BlockPos pos, Random random) {
+        // Small radius to keep it controlled
+        int radius = 3;
+        
+        // Look for grass in the area
+        for (int x = -radius; x <= radius; x++) {
+            for (int z = -radius; z <= radius; z++) {
+                for (int y = 0; y <= 2; y++) {
+                    BlockPos grassPos = pos.add(x, y, z);
+                    BlockState state = world.getBlockState(grassPos);
+                    
+                    // Check if it's grass or tall grass
+                    if (isGrassPlant(state)) {
+                        // Distance-based chance
+                        double distance = Math.sqrt(x*x + y*y + z*z);
+                        float replaceChance = 0.3f * (1.0f - (float)(distance / (radius + 1)));
+                        
+                        if (random.nextFloat() < replaceChance) {
+                            // Store original grass type for restoration
+                            CursedEarthManager.getInstance().storeOriginalBlock(world, grassPos, state);
+                            
+                            // Replace with Reed of Sekhem
+                            BlockState reedState = CursedPlantBlocks.REED_OF_SEKHEM.getDefaultState();
+                            if (reedState.canPlaceAt(world, grassPos)) {
+                                world.setBlockState(grassPos, reedState);
+                                
+                                // Spawn corruption particles
+                                for (int i = 0; i < 3; i++) {
+                                    double px = grassPos.getX() + 0.5 + (random.nextDouble() - 0.5) * 0.3;
+                                    double py = grassPos.getY() + 0.5;
+                                    double pz = grassPos.getZ() + 0.5 + (random.nextDouble() - 0.5) * 0.3;
+                                    
+                                    world.spawnParticles(
+                                        new DustParticleEffect(CURSED_PARTICLE_COLOR, 0.5f),
+                                        px, py, pz,
+                                        1,
+                                        0, 0.05, 0,
+                                        0
+                                    );
+                                }
+                                
+                                return; // Only replace one grass per tick
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    /**
+     * Check if a block is a grass plant (not grass block)
+     */
+    private boolean isGrassPlant(BlockState state) {
+        Block block = state.getBlock();
+        
+        // Check for vanilla grass plants
+        if (block == Blocks.GRASS || // Short grass in 1.20.1
+            block == Blocks.TALL_GRASS ||
+            block == Blocks.FERN ||
+            block == Blocks.LARGE_FERN) {
+            return true;
+        }
+        
+        // Check for modded grass by name
+        String blockName = block.getTranslationKey().toLowerCase();
+        if ((blockName.contains("grass") && !blockName.contains("block")) || // Grass but not grass block
+            blockName.contains("fern") ||
+            blockName.contains("tallgrass")) {
+            return true;
+        }
+        
+        return false;
+    }
+    
+    /**
      * Attempts to spawn a cursed plant on top of cursed earth
      */
     private void attemptPlantSpawn(ServerWorld world, BlockPos pos, Random random) {
@@ -862,7 +1179,7 @@ public class CursedEarthBlock extends BaseAncientCurseBlock {
             }
         }
         
-        // Select a random cursed plant - includes ALL cursed plants
+        // Select a random cursed plant - EXCLUDE Reed of Sekhem (it replaces grass instead)
         Block[] cursedPlants = {
             CursedPlantBlocks.CURSED_SPRIG,
             CursedPlantBlocks.CURSED_SPROUT,
@@ -875,7 +1192,7 @@ public class CursedEarthBlock extends BaseAncientCurseBlock {
             CursedPlantBlocks.KHEMNU_POD,
             CursedPlantBlocks.KHERU_MOSS,
             CursedPlantBlocks.MENFET_SPRIG,
-            CursedPlantBlocks.REED_OF_SEKHEM,
+            // CursedPlantBlocks.REED_OF_SEKHEM, // Removed - only spawns by replacing grass
             CursedPlantBlocks.SUTEKH_COIL
         };
         
@@ -927,14 +1244,14 @@ public class CursedEarthBlock extends BaseAncientCurseBlock {
         }
         
         // Select which entity to spawn
-        // 50% chance for Djeserhath, 50% for Khamsin Spread Small (more balanced, less overall spawns)
-        boolean spawnDjeserhath = random.nextFloat() < 0.5f;
+        // 90% chance for Djeserhath, 10% for Khamsin Spread Small (reduced by 80%)
+        boolean spawnDjeserhath = random.nextFloat() < 0.9f;
         
         if (spawnDjeserhath) {
             // Spawn Djeserhath (cactus eye entity)
             com.ancientcurse.entity.DjeserhathEntity djeserhath = ModEntities.DJESERHATH.create(world);
             if (djeserhath != null) {
-                djeserhath.setPosition(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5);
+                djeserhath.setPosition(pos.getX() + 0.5, pos.getY() + 0.1, pos.getZ() + 0.5);
                 
                 // Make it start in dormant state
                 djeserhath.setHealth(djeserhath.getMaxHealth());
@@ -956,6 +1273,16 @@ public class CursedEarthBlock extends BaseAncientCurseBlock {
                 }
             }
         } else {
+            // Check for nearby Khamsin Spread Small entities (40 block radius)
+            Box khamsinSearchBox = new Box(pos).expand(40, 20, 40);
+            List<com.ancientcurse.entity.KhamsinSpreadSmallEntity> nearbyKhamsins = 
+                world.getNonSpectatingEntities(com.ancientcurse.entity.KhamsinSpreadSmallEntity.class, khamsinSearchBox);
+            
+            // Don't spawn if there's already one within 40 blocks
+            if (!nearbyKhamsins.isEmpty()) {
+                return; // Too close to existing Khamsin Spread Small
+            }
+            
             // Spawn Khamsin Spread Small (floating mystical rock)
             com.ancientcurse.entity.KhamsinSpreadSmallEntity khamsin = ModEntities.KHAMSIN_SPREAD_SMALL.create(world);
             if (khamsin != null) {
@@ -1040,9 +1367,26 @@ public class CursedEarthBlock extends BaseAncientCurseBlock {
             if (canSpreadToStatic(world, surfacePos)) {
                 // Determine which cursed block type based on target
                 BlockState targetBlockState = world.getBlockState(surfacePos);
-                BlockState newState = isStoneTypeStatic(targetBlockState.getBlock()) ? 
-                    ModBlocks.CURSED_STONE.getDefaultState() : 
-                    ModBlocks.CURSED_EARTH.getDefaultState();
+                BlockState newState;
+                
+                if (isStoneTypeStatic(targetBlockState.getBlock())) {
+                    newState = ModBlocks.CURSED_STONE.getDefaultState();
+                } else if (isLeafBlockStatic(targetBlockState)) {
+                    // Skip leaves - they decay naturally
+                    continue;
+                } else if (CursedLogBlock.isLogBlock(targetBlockState)) {
+                    newState = ModBlocks.CURSED_LOG.getDefaultState();
+                    if (targetBlockState.contains(net.minecraft.block.PillarBlock.AXIS)) {
+                        newState = newState.with(net.minecraft.block.PillarBlock.AXIS, 
+                                                targetBlockState.get(net.minecraft.block.PillarBlock.AXIS));
+                    }
+                } else if (CursedLogBlock.isPlankBlock(targetBlockState)) {
+                    newState = ModBlocks.CURSED_WOOD_PLANK.getDefaultState();
+                } else if (CursedSandBlock.isSandBlock(targetBlockState)) {
+                    newState = ModBlocks.CURSED_SAND.getDefaultState();
+                } else {
+                    newState = ModBlocks.CURSED_EARTH.getDefaultState();
+                }
                 
                 CursedEarthManager.getInstance().queueSpread(
                     world, start, surfacePos, newState);
@@ -1062,9 +1406,26 @@ public class CursedEarthBlock extends BaseAncientCurseBlock {
                         
                         if (sideSurface != null && canSpreadToStatic(world, sideSurface) && random.nextFloat() < 0.6f) {
                             BlockState sideBlockState = world.getBlockState(sideSurface);
-                            BlockState sideNewState = isStoneTypeStatic(sideBlockState.getBlock()) ? 
-                                ModBlocks.CURSED_STONE.getDefaultState() : 
-                                ModBlocks.CURSED_EARTH.getDefaultState();
+                            BlockState sideNewState;
+                            
+                            if (isStoneTypeStatic(sideBlockState.getBlock())) {
+                                sideNewState = ModBlocks.CURSED_STONE.getDefaultState();
+                            } else if (isLeafBlockStatic(sideBlockState)) {
+                                // Skip leaves - they decay naturally
+                                continue;
+                            } else if (CursedLogBlock.isLogBlock(sideBlockState)) {
+                                sideNewState = ModBlocks.CURSED_LOG.getDefaultState();
+                                if (sideBlockState.contains(net.minecraft.block.PillarBlock.AXIS)) {
+                                    sideNewState = sideNewState.with(net.minecraft.block.PillarBlock.AXIS, 
+                                                                    sideBlockState.get(net.minecraft.block.PillarBlock.AXIS));
+                                }
+                            } else if (CursedLogBlock.isPlankBlock(sideBlockState)) {
+                                sideNewState = ModBlocks.CURSED_WOOD_PLANK.getDefaultState();
+                            } else if (CursedSandBlock.isSandBlock(sideBlockState)) {
+                                sideNewState = ModBlocks.CURSED_SAND.getDefaultState();
+                            } else {
+                                sideNewState = ModBlocks.CURSED_EARTH.getDefaultState();
+                            }
                             
                             CursedEarthManager.getInstance().queueSpread(
                                 world, surfacePos, sideSurface, sideNewState);
@@ -1116,9 +1477,26 @@ public class CursedEarthBlock extends BaseAncientCurseBlock {
                     
                     if (canSpreadToStatic(world, surfacePos)) {
                         BlockState centerBlockState = world.getBlockState(surfacePos);
-                        BlockState centerNewState = isStoneTypeStatic(centerBlockState.getBlock()) ? 
-                            ModBlocks.CURSED_STONE.getDefaultState() : 
-                            ModBlocks.CURSED_EARTH.getDefaultState();
+                        BlockState centerNewState;
+                        
+                        if (isStoneTypeStatic(centerBlockState.getBlock())) {
+                            centerNewState = ModBlocks.CURSED_STONE.getDefaultState();
+                        } else if (isLeafBlockStatic(centerBlockState)) {
+                            // Skip leaves - they decay naturally
+                            continue;
+                        } else if (CursedLogBlock.isLogBlock(centerBlockState)) {
+                            centerNewState = ModBlocks.CURSED_LOG.getDefaultState();
+                            if (centerBlockState.contains(net.minecraft.block.PillarBlock.AXIS)) {
+                                centerNewState = centerNewState.with(net.minecraft.block.PillarBlock.AXIS, 
+                                                                    centerBlockState.get(net.minecraft.block.PillarBlock.AXIS));
+                            }
+                        } else if (CursedLogBlock.isPlankBlock(centerBlockState)) {
+                            centerNewState = ModBlocks.CURSED_WOOD_PLANK.getDefaultState();
+                        } else if (CursedSandBlock.isSandBlock(centerBlockState)) {
+                            centerNewState = ModBlocks.CURSED_SAND.getDefaultState();
+                        } else {
+                            centerNewState = ModBlocks.CURSED_EARTH.getDefaultState();
+                        }
                         
                         CursedEarthManager.getInstance().queueSpread(
                             world, center, surfacePos, centerNewState);
@@ -1165,6 +1543,12 @@ public class CursedEarthBlock extends BaseAncientCurseBlock {
             // Clean up death burst cooldowns
             deathBurstCooldowns.entrySet().removeIf(entry -> 
                 currentTime - entry.getValue() > DEATH_BURST_COOLDOWN * 2);
+                
+            // Clean up withering leaves that are too old or no longer exist
+            leafWitherStartTimes.entrySet().removeIf(entry -> {
+                long startTime = entry.getValue();
+                return currentTime - startTime > LEAF_WITHER_TIME * 2;
+            });
                 
             // Clear spread cache periodically to handle block changes
             spreadableBlockCache.clear();

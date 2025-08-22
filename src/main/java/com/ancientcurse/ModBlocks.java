@@ -708,6 +708,34 @@ public class ModBlocks {
             .luminance(state -> 2) // Slight glow effect
     );
     
+    // Cursed Wood blocks - corrupted versions of logs and planks
+    public static final Block CURSED_LOG = new CursedLogBlock(
+        FabricBlockSettings.create()
+            .mapColor(MapColor.TERRACOTTA_PURPLE)
+            .strength(2.0f)
+            .sounds(BlockSoundGroup.WOOD)
+            .ticksRandomly() // Enable spreading
+            .luminance(state -> 1) // Very faint glow
+    );
+    
+    public static final Block CURSED_WOOD_PLANK = new CursedWoodPlankBlock(
+        FabricBlockSettings.create()
+            .mapColor(MapColor.TERRACOTTA_PURPLE)
+            .strength(2.0f, 3.0f)
+            .sounds(BlockSoundGroup.WOOD)
+            .ticksRandomly() // Enable spreading
+    );
+    
+    // Cursed Sand - corrupted sand that falls and spreads
+    public static final Block CURSED_SAND = new CursedSandBlock(
+        FabricBlockSettings.create()
+            .mapColor(MapColor.TERRACOTTA_PURPLE)
+            .strength(0.5f)
+            .sounds(BlockSoundGroup.SAND)
+            .ticksRandomly() // Enable spreading
+            .luminance(state -> 1) // Very faint glow
+    );
+    
     // Solar Spire Components - Three blocks that combine to form a Solar Spire
     public static final Block SOLAR_SPIRE_PLINTH = new SolarSpirePlinthBlock(
         FabricBlockSettings.create()
@@ -1402,6 +1430,25 @@ public class ModBlocks {
             CURSED_EARTH
         );
         
+        // Register Cursed Wood blocks
+        Registry.register(
+            Registries.BLOCK,
+            new Identifier(AncientCurse.MOD_ID, "cursed_log"),
+            CURSED_LOG
+        );
+        
+        Registry.register(
+            Registries.BLOCK,
+            new Identifier(AncientCurse.MOD_ID, "cursed_wood_plank"),
+            CURSED_WOOD_PLANK
+        );
+        
+        Registry.register(
+            Registries.BLOCK,
+            new Identifier(AncientCurse.MOD_ID, "cursed_sand"),
+            CURSED_SAND
+        );
+        
         // Register Solar Spire Components
         Registry.register(
             Registries.BLOCK,
@@ -1604,6 +1651,9 @@ public class ModBlocks {
         registerBlockItem(WIND_SWEPT_BLACKSTONE_STAIRS, ModItemGroup.ANCIENT_CURSE);
         registerBlockItem(WIND_SWEPT_BLACKSTONE_SLAB, ModItemGroup.ANCIENT_CURSE);
         registerBlockItem(CURSED_EARTH, ModItemGroup.ANCIENT_CURSE);
+        registerBlockItem(CURSED_LOG, ModItemGroup.ANCIENT_CURSE);
+        registerBlockItem(CURSED_WOOD_PLANK, ModItemGroup.ANCIENT_CURSE);
+        registerBlockItem(CURSED_SAND, ModItemGroup.ANCIENT_CURSE);
         registerBlockItem(SOLAR_SPIRE_PLINTH, ModItemGroup.ANCIENT_CURSE);
         registerBlockItem(SOLAR_SPIRE_CRUCIBLE, ModItemGroup.ANCIENT_CURSE);
         registerBlockItem(SOLAR_SPIRE_PYRAMIDION, ModItemGroup.ANCIENT_CURSE);

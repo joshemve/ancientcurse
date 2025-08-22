@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "axis=x": {
+      "model": "ancientcurse:block/cursed_log",
+      "x": 90,
+      "y": 90
+    },
+    "axis=y": {
+      "model": "ancientcurse:block/cursed_log"
+    },
+    "axis=z": {
+      "model": "ancientcurse:block/cursed_log",
+      "x": 90
+    }
+  }
+}
