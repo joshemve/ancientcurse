@@ -30,15 +30,15 @@ import java.util.Map;
 
 /**
  * Cursed Sand - A corrupted version of sand that falls and spreads the curse
- * Inherits from FallingBlock to maintain sand physics
+ * Inherits from SandBlock to maintain proper sand physics and block state
  */
-public class CursedSandBlock extends FallingBlock {
+public class CursedSandBlock extends SandBlock {
     private static final Vector3f CURSED_PARTICLE_COLOR = new Vector3f(0.5f, 0.3f, 0.4f); // Sandy purple
     private static final Map<BlockPos, Long> spreadCooldowns = new HashMap<>();
     private static final int SPREAD_COOLDOWN = 140; // Slower than cursed earth
-    
-    public CursedSandBlock(Settings settings) {
-        super(settings);
+
+    public CursedSandBlock(int color, Settings settings) {
+        super(color, settings);
     }
     
     @Override

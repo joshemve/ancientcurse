@@ -42,22 +42,27 @@ public class WitheredPharaohEntity extends HostileEntity implements GeoEntity {
     private int magicAttackCooldown = 0;
     private int magicAttackWarmup = 0;
     private LivingEntity magicAttackTarget;
-    private static final int MAGIC_COOLDOWN = 100; // 5 seconds
-    private static final int MAGIC_WARMUP = 30; // 1.5 seconds
+    private static final int MAGIC_COOLDOWN = 160; // 8 seconds (to account for full animation time)
+    private static final int MAGIC_WARMUP = 20; // 1 second warmup
     private static final float MAGIC_ATTACK_RANGE = 16.0F;
     
     // Animation state tracking
     private boolean isScreaming = false;
     private int screamTime = 0;
-    private static final int SCREAM_DURATION = 172; // 8.5833 seconds * 20 ticks
+    private static final int SCREAM_DURATION = 172; // 8.5833 seconds * 20 ticks (actual animation length)
     
     private boolean isFlying = false;
     private int flyingTime = 0;
     
+    // Spawn animation tracking
+    private boolean isSpawning = true; // Start with spawn animation
+    private int spawnTime = 0;
+    private static final int SPAWN_DURATION = 48; // 2.375 seconds * 20 ticks (actual animation length)
+    
     // Animation state tracking for attacks
     private boolean isPerformingMagicAttack = false;
     private int magicAttackAnimationTime = 0;
-    private static final int MAGIC_ATTACK_ANIMATION_DURATION = 30; // 1.5 seconds for magic_attack2
+    private static final int MAGIC_ATTACK_ANIMATION_DURATION = 119; // 5.9583 seconds * 20 ticks (actual animation length)
     
     // Track if the entity is dead for animation purposes
     private static final TrackedData<Boolean> IS_DYING = DataTracker.registerData(WitheredPharaohEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
@@ -204,7 +209,10 @@ public class WitheredPharaohEntity extends HostileEntity implements GeoEntity {
             if (pharaoh.magicAttackWarmup == 0 && pharaoh.magicAttackTarget != null && pharaoh.magicAttackTarget.isAlive()) {
                 pharaoh.triggerMagicAttack(); // Trigger animation
                 pharaoh.magicAttackCooldown = MAGIC_COOLDOWN;
-                // Don't perform attack yet, wait for animation
+                // Log for debugging
+                if (!pharaoh.getWorld().isClient) {
+                    System.out.println("Withered Pharaoh starting magic_attack2 animation");
+                }
             }
         }
         
@@ -231,6 +239,9 @@ public class WitheredPharaohEntity extends HostileEntity implements GeoEntity {
         // Death controller needs highest priority (lowest number)
         controllerRegistrar.add(new AnimationController<>(this, "deathController", -1, this::deathPredicate));
         
+        // Spawn controller (very high priority)
+        controllerRegistrar.add(new AnimationController<>(this, "spawnController", 0, this::spawnPredicate));
+        
         // Scream controller (high priority for intimidation)
         controllerRegistrar.add(new AnimationController<>(this, "screamController", 1, this::screamPredicate));
         
@@ -247,6 +258,79 @@ public class WitheredPharaohEntity extends HostileEntity implements GeoEntity {
     
     @Override
     public void tick() {
+        // Handle spawn animation
+        if (this.isSpawning) {
+            this.spawnTime++;
+            
+            // Prevent movement during spawn animation
+            this.setVelocity(0, 0, 0);
+            this.setTarget(null);
+            this.getNavigation().stop();
+            
+            // Spawn particles - sand and dust being thrown up
+            if (this.getWorld() instanceof ServerWorld && this.spawnTime % 2 == 0) {
+                ServerWorld serverWorld = (ServerWorld) this.getWorld();
+                
+                // Sand particles erupting from ground
+                for (int i = 0; i < 5; i++) {
+                    double offsetX = (this.random.nextDouble() - 0.5) * 1.5;
+                    double offsetZ = (this.random.nextDouble() - 0.5) * 1.5;
+                    double yVelocity = 0.1 + this.random.nextDouble() * 0.2;
+                    
+                    serverWorld.spawnParticles(
+                        new DustParticleEffect(new Vector3f(0.86f, 0.8f, 0.6f), 1.5f),
+                        this.getX() + offsetX,
+                        this.getY(),
+                        this.getZ() + offsetZ,
+                        1, 0, yVelocity, 0, 0.05
+                    );
+                }
+                
+                // Ground breaking particles using poof effect
+                serverWorld.spawnParticles(
+                    ParticleTypes.POOF,
+                    this.getX(), this.getY() + 0.1, this.getZ(),
+                    3, 0.5, 0.1, 0.5, 0.1
+                );
+                
+                // Dark energy particles as it emerges
+                if (this.spawnTime > 24) {
+                    serverWorld.spawnParticles(
+                        ParticleTypes.SMOKE,
+                        this.getX(), this.getY() + this.getHeight() * 0.5, this.getZ(),
+                        3, 0.3, 0.3, 0.3, 0.02
+                    );
+                }
+            }
+            
+            // Play digging sounds
+            if (this.spawnTime == 1 || this.spawnTime == 15 || this.spawnTime == 30) {
+                this.playSound(SoundEvents.BLOCK_GRAVEL_BREAK, 1.0f, 0.8f);
+            }
+            
+            // End spawn animation
+            if (this.spawnTime >= SPAWN_DURATION) {
+                this.isSpawning = false;
+                this.spawnTime = 0;
+                
+                // Play emergence sound
+                this.playSound(SoundEvents.ENTITY_WITHER_SPAWN, 1.0f, 1.0f);
+                
+                // Final burst of particles
+                if (this.getWorld() instanceof ServerWorld) {
+                    ServerWorld serverWorld = (ServerWorld) this.getWorld();
+                    serverWorld.spawnParticles(
+                        ParticleTypes.POOF,
+                        this.getX(), this.getY() + 0.5, this.getZ(),
+                        20, 0.5, 0.5, 0.5, 0.05
+                    );
+                }
+            }
+            
+            // Skip normal tick logic during spawn animation
+            return;
+        }
+        
         // If we're playing the death animation, handle it specially
         if (this.playingDeathAnimation) {
             this.deathTime++;
@@ -289,7 +373,7 @@ public class WitheredPharaohEntity extends HostileEntity implements GeoEntity {
                 AncientCurse.LOGGER.debug("Death animation progress: " + this.deathTime + "/193 ticks");
             }
             
-            // After death animation finishes (9.625 seconds = ~193 ticks), actually remove entity
+            // After death animation finishes (9.625 seconds = 193 ticks), actually remove entity
             if (this.deathTime >= 193) {
                 if (!this.getWorld().isClient) {
                     AncientCurse.LOGGER.debug("Death animation complete, removing entity");
@@ -323,8 +407,8 @@ public class WitheredPharaohEntity extends HostileEntity implements GeoEntity {
             this.setVelocity(0, this.getVelocity().y, 0);
             this.getNavigation().stop();
             
-            // Shoot the wither skull 0.5 seconds (10 ticks) into the animation
-            if (this.magicAttackAnimationTime == 10 && this.magicAttackTarget != null && this.magicAttackTarget.isAlive()) {
+            // Shoot the wither skull at 2 seconds (40 ticks) into the animation to better sync with arm raising
+            if (this.magicAttackAnimationTime == 40 && this.magicAttackTarget != null && this.magicAttackTarget.isAlive()) {
                 // Perform the actual attack
                 if (this.getWorld() instanceof ServerWorld) {
                     ServerWorld serverWorld = (ServerWorld) this.getWorld();
@@ -394,6 +478,10 @@ public class WitheredPharaohEntity extends HostileEntity implements GeoEntity {
             if (this.magicAttackAnimationTime >= MAGIC_ATTACK_ANIMATION_DURATION) {
                 this.isPerformingMagicAttack = false;
                 this.magicAttackAnimationTime = 0;
+                this.magicAttackTarget = null;
+                if (!this.getWorld().isClient) {
+                    System.out.println("Withered Pharaoh finished magic_attack2 animation");
+                }
             }
         }
         
@@ -470,13 +558,13 @@ public class WitheredPharaohEntity extends HostileEntity implements GeoEntity {
         }
         
         // Random chance to start screaming (intimidation)
-        if (!this.isScreaming && !this.isDying() && this.getTarget() != null && this.random.nextInt(400) == 0) {
+        if (!this.isScreaming && !this.isDying() && !this.isSpawning && this.getTarget() != null && this.random.nextInt(400) == 0) {
             this.startScream();
         }
         
         // Check if should be flying (when target is far away or entity is elevated)
         LivingEntity target = this.getTarget();
-        if (target != null && !this.isDying()) {
+        if (target != null && !this.isDying() && !this.isSpawning) {
             double distance = this.squaredDistanceTo(target);
             boolean shouldFly = distance > 64.0 || this.getY() > target.getY() + 2.0;
             
@@ -528,11 +616,22 @@ public class WitheredPharaohEntity extends HostileEntity implements GeoEntity {
     }
     
     /**
+     * Spawn animation controller
+     */
+    private <T extends GeoAnimatable> PlayState spawnPredicate(AnimationState<T> state) {
+        if (this.isSpawning) {
+            state.getController().setAnimation(RawAnimation.begin().then("animation.the_withered_pharaoh.spawn", Animation.LoopType.PLAY_ONCE));
+            return PlayState.CONTINUE;
+        }
+        return PlayState.STOP;
+    }
+    
+    /**
      * Main movement animation controller for idle/walk animations
      */
     private <T extends GeoAnimatable> PlayState movementPredicate(AnimationState<T> state) {
-        // Don't play movement animations if dying, screaming, flying, or performing attacks
-        if (this.isDying() || this.isScreaming || this.isFlying || this.isPerformingMagicAttack) {
+        // Don't play movement animations if dying, spawning, screaming, flying, or performing attacks
+        if (this.isDying() || this.isSpawning || this.isScreaming || this.isFlying || this.isPerformingMagicAttack) {
             return PlayState.STOP;
         }
         
@@ -549,12 +648,16 @@ public class WitheredPharaohEntity extends HostileEntity implements GeoEntity {
      * Magic attack animation controller
      */
     private <T extends GeoAnimatable> PlayState magicAttackPredicate(AnimationState<T> state) {
-        // Don't play attack animations if dying
-        if (this.isDying()) {
+        // Don't play attack animations if dying or spawning
+        if (this.isDying() || this.isSpawning) {
             return PlayState.STOP;
         }
         
         if (this.isPerformingMagicAttack) {
+            // Force animation reset to ensure it plays from the beginning
+            if (this.magicAttackAnimationTime <= 1) {
+                state.getController().forceAnimationReset();
+            }
             // Use magic_attack2 for wither skull projectile attacks
             state.getController().setAnimation(RawAnimation.begin().then("animation.the_withered_pharaoh.magic_attack2", Animation.LoopType.PLAY_ONCE));
             return PlayState.CONTINUE;
@@ -686,7 +789,7 @@ public class WitheredPharaohEntity extends HostileEntity implements GeoEntity {
      * Start the scream animation
      */
     public void startScream() {
-        if (!this.isScreaming && !this.isDying()) {
+        if (!this.isScreaming && !this.isDying() && !this.isSpawning) {
             this.isScreaming = true;
             this.screamTime = 0;
             // Play a scary sound
@@ -698,7 +801,7 @@ public class WitheredPharaohEntity extends HostileEntity implements GeoEntity {
      * Start the flying animation
      */
     public void startFlying() {
-        if (!this.isFlying && !this.isDying()) {
+        if (!this.isFlying && !this.isDying() && !this.isSpawning) {
             this.isFlying = true;
             this.flyingTime = 0;
         }
@@ -730,11 +833,12 @@ public class WitheredPharaohEntity extends HostileEntity implements GeoEntity {
      * Trigger a magic attack animation
      */
     public void triggerMagicAttack() {
-        if (!this.isPerformingMagicAttack) {
+        if (!this.isPerformingMagicAttack && !this.isSpawning && !this.isDying()) {
             this.isPerformingMagicAttack = true;
             this.magicAttackAnimationTime = 0;
+            // Force animation reset to ensure it plays from start
             if (!this.getWorld().isClient) {
-                System.out.println("Withered Pharaoh triggered magic attack animation (magic_attack2)");
+                System.out.println("Withered Pharaoh triggered magic attack animation (magic_attack2) - Duration: " + MAGIC_ATTACK_ANIMATION_DURATION + " ticks");
             }
         }
     }
@@ -781,7 +885,7 @@ public class WitheredPharaohEntity extends HostileEntity implements GeoEntity {
         super.tickMovement();
         
         // Ambient particles when not in special animations
-        if (!this.isDying() && !this.isScreaming && this.age % 20 == 0) {
+        if (!this.isDying() && !this.isScreaming && !this.isSpawning && this.age % 20 == 0) {
             if (this.getWorld() instanceof ServerWorld) {
                 ServerWorld serverWorld = (ServerWorld) this.getWorld();
                 

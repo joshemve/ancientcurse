@@ -67,7 +67,7 @@ public class AnkhCounterHudRenderer {
         // Determine text color based on ankh value
         int textColor = ankhValue <= LOW_THRESHOLD ? TEXT_COLOR_LOW : TEXT_COLOR;
         
-        // Draw the text centered
+        // Draw the text centered - renders at default HUD layer for proper chat transparency
         drawContext.drawCenteredTextWithShadow(
             textRenderer, 
             Text.literal(displayText), 

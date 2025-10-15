@@ -728,6 +728,7 @@ public class ModBlocks {
     
     // Cursed Sand - corrupted sand that falls and spreads
     public static final Block CURSED_SAND = new CursedSandBlock(
+        0x6B4C6B, // Purple-sand color value (hex color for the falling sand entity)
         FabricBlockSettings.create()
             .mapColor(MapColor.TERRACOTTA_PURPLE)
             .strength(0.5f)
