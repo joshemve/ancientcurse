@@ -42,38 +42,45 @@ public class AnkhCounterHudRenderer {
     
     /**
      * Render the Ankh counter on the HUD.
-     * 
+     *
      * @param drawContext The draw context
      * @param player The player entity
      */
     private static void renderAnkhCounter(DrawContext drawContext, PlayerEntity player) {
         MinecraftClient client = MinecraftClient.getInstance();
         TextRenderer textRenderer = client.textRenderer;
-        
+
         // Get the client-side ankh value for display
         int ankhValue = AnkhDataManager.getClientAnkhValue();
-        
+
         // Format the text to display (smaller size, no bold formatting)
         String displayText = String.format("%d", ankhValue);
-        
+
         // Calculate position (centered between hearts and health bar)
         int screenWidth = client.getWindow().getScaledWidth();
         int screenHeight = client.getWindow().getScaledHeight();
-        
+
         // Position: centered horizontally, positioned lower to avoid item name text
         int x = screenWidth / 2;
         int y = screenHeight - 46; // Positioned lower to avoid item name text
-        
+
         // Determine text color based on ankh value
         int textColor = ankhValue <= LOW_THRESHOLD ? TEXT_COLOR_LOW : TEXT_COLOR;
-        
-        // Draw the text centered - renders at default HUD layer for proper chat transparency
+
+        // Push the matrix stack to render at a higher z-level than chat messages
+        MatrixStack matrices = drawContext.getMatrices();
+        matrices.push();
+        matrices.translate(0.0, 0.0, 200.0); // Render at z=200 to appear above chat (chat is at z=0)
+
+        // Draw the text centered - now renders above chat messages
         drawContext.drawCenteredTextWithShadow(
-            textRenderer, 
-            Text.literal(displayText), 
-            x, 
-            y, 
+            textRenderer,
+            Text.literal(displayText),
+            x,
+            y,
             textColor
         );
+
+        matrices.pop();
     }
 }

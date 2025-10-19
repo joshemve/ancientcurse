@@ -72,7 +72,7 @@ public class ModEntities {
         Registries.ENTITY_TYPE,
         new Identifier(AncientCurse.MOD_ID, "anubis"),
         FabricEntityTypeBuilder.create(SpawnGroup.MONSTER, AnubisEntity::new)
-            .dimensions(EntityDimensions.fixed(1.2f, 2.5f)) // Boss size
+            .dimensions(EntityDimensions.fixed(1.5f, 3.0f)) // Larger hitbox for easier targeting
             .trackRangeBlocks(128) // Larger tracking range for boss
             .build()
     );
@@ -115,7 +115,7 @@ public class ModEntities {
         Registries.ENTITY_TYPE,
         new Identifier(AncientCurse.MOD_ID, "thoth"),
         FabricEntityTypeBuilder.create(SpawnGroup.MONSTER, ThothEntity::new)
-            .dimensions(EntityDimensions.fixed(1.5f, 3.0f)) // Tall floating god
+            .dimensions(EntityDimensions.fixed(1.8f, 3.5f)) // Larger hitbox for easier targeting
             .trackRangeBlocks(128) // Large tracking range for boss
             .trackedUpdateRate(1) // Frequent updates for smooth boss movement
             .build()

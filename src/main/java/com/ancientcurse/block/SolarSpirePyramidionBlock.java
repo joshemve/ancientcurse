@@ -115,8 +115,9 @@ public class SolarSpirePyramidionBlock extends BaseAncientCurseBlock {
         world.removeBlock(plinthPos.up(), false);   // Remove crucible
         world.removeBlock(plinthPos, false);        // Remove plinth
         
-        // Place the Solar Spire at the plinth position
-        BlockState spireState = ModBlocks.SOLAR_SPIRE.getDefaultState();
+        // Place the Solar Spire at the plinth position (will automatically create 3-block structure)
+        BlockState spireState = ModBlocks.SOLAR_SPIRE.getDefaultState()
+            .with(SolarSpireBlock.THIRD, SolarSpireBlock.ThirdPart.LOWER);
         world.setBlockState(plinthPos, spireState);
         
         // Get the block entity and trigger spawn animation

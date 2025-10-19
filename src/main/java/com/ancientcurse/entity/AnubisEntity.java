@@ -99,12 +99,12 @@ public class AnubisEntity extends HostileEntity implements GeoEntity {
 
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
     private final ServerBossBar bossBar;
-    
+
     // State tracking
     private BossPhase currentPhase = BossPhase.DORMANT;
     private int phaseTimer = 0;
     private final Set<UUID> safePlayers = new HashSet<>();
-    
+
     // Animation tracking
     private String currentAnimation = "";
     private boolean playingSpecialAnimation = false;
@@ -112,6 +112,10 @@ public class AnubisEntity extends HostileEntity implements GeoEntity {
     private PlayerEntity judgedPlayer;
     private int judgementTimer;
     private float targetHoverHeight;
+
+    // Performance optimization
+    private float lastHealthPercentage = 1.0f; // Track last health percentage for boss bar updates
+    private int bossBarUpdateCooldown = 0; // Cooldown for boss bar player list updates
 
     public AnubisEntity(EntityType<? extends HostileEntity> entityType, World world) {
         super(entityType, world);
@@ -134,7 +138,7 @@ public class AnubisEntity extends HostileEntity implements GeoEntity {
                 .add(EntityAttributes.GENERIC_MAX_HEALTH, 200.0D) // Boss health
                 .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.4D)
                 .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 15.0D)
-                .add(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE, 0.8D)
+                .add(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE, 0.8D) // Normal boss knockback resistance
                 .add(EntityAttributes.GENERIC_ARMOR, 8.0D)
                 .add(EntityAttributes.GENERIC_FOLLOW_RANGE, 64.0D);
     }
@@ -252,18 +256,32 @@ public class AnubisEntity extends HostileEntity implements GeoEntity {
     }
 
     private void updateBossBar() {
-        // Update boss bar health
-        bossBar.setPercent(getHealth() / getMaxHealth());
-        
-        // Add/remove players from boss bar
-        for (PlayerEntity player : getWorld().getPlayers()) {
-            if (player instanceof ServerPlayerEntity serverPlayer) {
-                if (squaredDistanceTo(player) <= BOSS_DETECTION_RADIUS * BOSS_DETECTION_RADIUS) {
-                    bossBar.addPlayer(serverPlayer);
-                } else {
-                    bossBar.removePlayer(serverPlayer);
+        // Only update health percentage if it has changed significantly (more than 1% change)
+        float currentHealthPercentage = getHealth() / getMaxHealth();
+        if (Math.abs(currentHealthPercentage - lastHealthPercentage) > 0.01f) {
+            bossBar.setPercent(currentHealthPercentage);
+            lastHealthPercentage = currentHealthPercentage;
+        }
+
+        // Only update player list every 20 ticks (1 second) to reduce overhead
+        if (bossBarUpdateCooldown <= 0) {
+            bossBarUpdateCooldown = 20; // Reset cooldown
+
+            // Add/remove players from boss bar
+            for (PlayerEntity player : getWorld().getPlayers()) {
+                if (player instanceof ServerPlayerEntity serverPlayer) {
+                    boolean isNearby = squaredDistanceTo(player) <= BOSS_DETECTION_RADIUS * BOSS_DETECTION_RADIUS;
+                    boolean isTracking = bossBar.getPlayers().contains(serverPlayer);
+
+                    if (isNearby && !isTracking) {
+                        bossBar.addPlayer(serverPlayer);
+                    } else if (!isNearby && isTracking) {
+                        bossBar.removePlayer(serverPlayer);
+                    }
                 }
             }
+        } else {
+            bossBarUpdateCooldown--;
         }
     }
 
@@ -621,15 +639,30 @@ public class AnubisEntity extends HostileEntity implements GeoEntity {
             setJudging(false);
             targetHoverHeight = 0.0F;
         }
-        
+
         // If player is deemed safe, reduce damage significantly
-        if (currentPhase == BossPhase.MERCIFUL && 
+        if (currentPhase == BossPhase.MERCIFUL &&
             source.getAttacker() instanceof PlayerEntity player &&
             safePlayers.contains(player.getUuid())) {
             amount *= 0.1F; // 90% damage reduction
         }
-        
+
         return super.damage(source, amount);
+    }
+
+    @Override
+    public void addVelocity(double deltaX, double deltaY, double deltaZ) {
+        // Limit upward velocity to prevent Anubis from flying too high when hit
+        // This is especially important for abilities like the Mace of Horus
+        if (deltaY > 0.3) {
+            deltaY = 0.3; // Cap upward velocity at 0.3 blocks/tick
+        }
+
+        // Also reduce horizontal knockback for this boss
+        deltaX *= 0.2;
+        deltaZ *= 0.2;
+
+        super.addVelocity(deltaX, deltaY, deltaZ);
     }
 
     @Override

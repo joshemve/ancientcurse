@@ -197,6 +197,7 @@ public class AncientCurseClient implements ClientModInitializer {
         BlockRenderLayerMap.INSTANCE.putBlock(ModBlocks.PISTIA_STRATIOTES, RenderLayer.getCutout());
         BlockRenderLayerMap.INSTANCE.putBlock(ModBlocks.LOTUS_FLOWER_PAD, RenderLayer.getCutout());
         BlockRenderLayerMap.INSTANCE.putBlock(ModBlocks.BLOOD_LOTUS, RenderLayer.getCutout());
+        BlockRenderLayerMap.INSTANCE.putBlock(ModBlocks.DATE_BLOCK, RenderLayer.getCutout());
         
         // Register torch transparency
         BlockRenderLayerMap.INSTANCE.putBlock(ModBlocks.SANDSTONE_TORCH, RenderLayer.getCutout());

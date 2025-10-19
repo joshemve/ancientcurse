@@ -1,9 +1,21 @@
 {
   "variants": {
-    "activated=false": {
+    "activated=false,third=lower": {
       "model": "ancientcurse:block/solar_spire"
     },
-    "activated=true": {
+    "activated=true,third=lower": {
+      "model": "ancientcurse:block/solar_spire"
+    },
+    "activated=false,third=middle": {
+      "model": "ancientcurse:block/solar_spire"
+    },
+    "activated=true,third=middle": {
+      "model": "ancientcurse:block/solar_spire"
+    },
+    "activated=false,third=upper": {
+      "model": "ancientcurse:block/solar_spire"
+    },
+    "activated=true,third=upper": {
       "model": "ancientcurse:block/solar_spire"
     }
   }

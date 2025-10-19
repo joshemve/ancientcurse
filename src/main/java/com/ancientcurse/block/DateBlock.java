@@ -80,16 +80,21 @@ public class DateBlock extends Block {
     // Using the non-deprecated method for neighbor updates in 1.20.1
     @Override
     public BlockState getStateForNeighborUpdate(
-            BlockState state, 
-            Direction direction, 
-            BlockState neighborState, 
-            WorldAccess world, 
-            BlockPos pos, 
+            BlockState state,
+            Direction direction,
+            BlockState neighborState,
+            WorldAccess world,
+            BlockPos pos,
             BlockPos neighborPos) {
         // If the supporting block is removed, break this block
         // FACING points TOWARD the log, so we check if that direction is the one that changed
         if (direction == state.get(FACING) && !state.canPlaceAt(world, pos)) {
-            return null; // This will cause the block to be broken naturally
+            // Drop the item before breaking the block to avoid NPE
+            if (!world.isClient()) {
+                ItemStack itemStack = new ItemStack(ModItems.SEKHEM_DATE);
+                Block.dropStack((World) world, pos, itemStack);
+            }
+            return Blocks.AIR.getDefaultState(); // Return AIR instead of null to avoid NPE
         }
         return state;
     }

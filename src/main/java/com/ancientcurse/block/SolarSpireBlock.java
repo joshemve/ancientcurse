@@ -26,7 +26,9 @@ import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.BooleanProperty;
+import net.minecraft.state.property.EnumProperty;
 import net.minecraft.state.property.Properties;
+import net.minecraft.util.StringIdentifiable;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Formatting;
@@ -53,9 +55,12 @@ import java.util.Random;
  * Solar Spire that purifies ALL connected cursed earth when activated with an Eye of Apophis
  */
 public class SolarSpireBlock extends BlockWithEntity implements LandingBlock {
-    
+
     public static final BooleanProperty ACTIVATED = BooleanProperty.of("activated");
-    private static final VoxelShape SHAPE = Block.createCuboidShape(3, 0, 3, 13, 48, 13);
+    public static final EnumProperty<ThirdPart> THIRD = EnumProperty.of("third", ThirdPart.class);
+
+    // Shapes for each third of the 3-block tall structure
+    private static final VoxelShape SHAPE = Block.createCuboidShape(3, 0, 3, 13, 16, 13);
     private static final int BLOCKS_PER_WAVE = 100; // Process 100 blocks per wave (balanced for performance)
     private static final int WAVE_TICK_DELAY = 5; // Process every 0.25 seconds (balanced)
     private static final boolean REDUCED_PARTICLES = true; // Reduce particles to prevent lag
@@ -72,16 +77,23 @@ public class SolarSpireBlock extends BlockWithEntity implements LandingBlock {
     
     public SolarSpireBlock(Settings settings) {
         super(settings);
-        setDefaultState(getStateManager().getDefaultState().with(ACTIVATED, false));
+        setDefaultState(getStateManager().getDefaultState()
+            .with(ACTIVATED, false)
+            .with(THIRD, ThirdPart.LOWER));
     }
-    
+
     @Override
     protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
-        builder.add(ACTIVATED);
+        builder.add(ACTIVATED, THIRD);
     }
     
     @Override
     public VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
+        return SHAPE;
+    }
+
+    @Override
+    public VoxelShape getCollisionShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
         return SHAPE;
     }
     
@@ -95,37 +107,41 @@ public class SolarSpireBlock extends BlockWithEntity implements LandingBlock {
     
     @Override
     public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
+        // Get the lower block position for interaction
+        BlockPos lowerPos = getLowerBlockPos(state, pos);
+        BlockState lowerState = world.getBlockState(lowerPos);
+
         ItemStack stack = player.getStackInHand(hand);
-        
+
         // Check if player is using Eye of Apophis
         if (stack.getItem() == ModItems.EYE_OF_APOPHIS) {
             if (!world.isClient) {
                 // Check if already activated
-                if (state.get(ACTIVATED)) {
+                if (lowerState.get(ACTIVATED)) {
                     player.sendMessage(Text.translatable("block.ancientcurse.solar_spire.already_active")
                         .formatted(Formatting.YELLOW), true);
                     return ActionResult.SUCCESS;
                 }
-                
+
                 // Check for nearby cursed earth
-                if (!hasNearbyCursedEarth(world, pos)) {
+                if (!hasNearbyCursedEarth(world, lowerPos)) {
                     player.sendMessage(Text.translatable("block.ancientcurse.solar_spire.no_corruption")
                         .formatted(Formatting.RED), true);
                     return ActionResult.SUCCESS;
                 }
-                
-                // Activate the solar spire
-                activateSpire(world, pos, player, stack);
-                
+
+                // Activate the solar spire at the lower block position
+                activateSpire(world, lowerPos, player, stack);
+
                 // Consume the Eye of Apophis
                 if (!player.isCreative()) {
                     stack.decrement(1);
                 }
             }
-            
+
             return ActionResult.SUCCESS;
         }
-        
+
         return ActionResult.PASS;
     }
     
@@ -148,8 +164,11 @@ public class SolarSpireBlock extends BlockWithEntity implements LandingBlock {
     }
     
     private void activateSpire(World world, BlockPos pos, PlayerEntity player, ItemStack eyeStack) {
-        // Set the block to activated state
-        world.setBlockState(pos, world.getBlockState(pos).with(ACTIVATED, true));
+        // Set all three blocks to activated state
+        BlockState lowerState = world.getBlockState(pos);
+        world.setBlockState(pos, lowerState.with(ACTIVATED, true));
+        world.setBlockState(pos.up(), world.getBlockState(pos.up()).with(ACTIVATED, true));
+        world.setBlockState(pos.up(2), world.getBlockState(pos.up(2)).with(ACTIVATED, true));
         
         // Trigger the activate animation on the block entity
         if (world.getBlockEntity(pos) instanceof SolarSpireBlockEntity blockEntity) {
@@ -442,16 +461,19 @@ public class SolarSpireBlock extends BlockWithEntity implements LandingBlock {
     }
     
     private void deactivateSpire(World world, BlockPos pos) {
+        // Deactivate all three parts
         world.setBlockState(pos, world.getBlockState(pos).with(ACTIVATED, false));
-        
+        world.setBlockState(pos.up(), world.getBlockState(pos.up()).with(ACTIVATED, false));
+        world.setBlockState(pos.up(2), world.getBlockState(pos.up(2)).with(ACTIVATED, false));
+
         // Tell block entity to stop working animation
         if (world.getBlockEntity(pos) instanceof SolarSpireBlockEntity blockEntity) {
             blockEntity.deactivate();
         }
-        
+
         // Remove from active spires
         activeSpires.remove(pos);
-        
+
         world.playSound(null, pos, SoundEvents.BLOCK_BEACON_DEACTIVATE, SoundCategory.BLOCKS, 1.0F, 1.0F);
     }
     
@@ -567,17 +589,50 @@ public class SolarSpireBlock extends BlockWithEntity implements LandingBlock {
     @Override
     public void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved) {
         if (!state.isOf(newState.getBlock())) {
+            // Get the lower block position for cleanup
+            BlockPos lowerPos = getLowerBlockPos(state, pos);
+
             // Clean up active operations and powering up tracking if block is broken
-            activeOperations.remove(pos);
-            poweringUpSpires.remove(pos);
-            activeSpires.remove(pos);
-            
-            // Return Eye of Apophis if it was active
-            if (state.get(ACTIVATED) && world.getBlockEntity(pos) instanceof SolarSpireBlockEntity blockEntity) {
+            activeOperations.remove(lowerPos);
+            poweringUpSpires.remove(lowerPos);
+            activeSpires.remove(lowerPos);
+
+            // Return Eye of Apophis if it was active (only from lower block)
+            if (state.get(ACTIVATED) && world.getBlockEntity(lowerPos) instanceof SolarSpireBlockEntity blockEntity) {
                 blockEntity.dropStoredEye();
+            }
+
+            // Remove the other two parts of the structure
+            if (!world.isClient) {
+                ThirdPart third = state.get(THIRD);
+                if (third == ThirdPart.LOWER) {
+                    // Remove middle and upper
+                    world.removeBlock(pos.up(), false);
+                    world.removeBlock(pos.up(2), false);
+                } else if (third == ThirdPart.MIDDLE) {
+                    // Remove lower and upper
+                    world.removeBlock(pos.down(), false);
+                    world.removeBlock(pos.up(), false);
+                } else if (third == ThirdPart.UPPER) {
+                    // Remove lower and middle
+                    world.removeBlock(pos.down(2), false);
+                    world.removeBlock(pos.down(), false);
+                }
             }
         }
         super.onStateReplaced(state, world, pos, newState, moved);
+    }
+
+    /**
+     * Get the position of the lower block regardless of which part we're called from
+     */
+    private BlockPos getLowerBlockPos(BlockState state, BlockPos pos) {
+        ThirdPart third = state.get(THIRD);
+        return switch (third) {
+            case MIDDLE -> pos.down();
+            case UPPER -> pos.down(2);
+            default -> pos; // LOWER
+        };
     }
     
     @Override
@@ -588,12 +643,31 @@ public class SolarSpireBlock extends BlockWithEntity implements LandingBlock {
     @Nullable
     @Override
     public BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
-        return new SolarSpireBlockEntity(pos, state);
+        // Only create block entity for the lower part
+        if (state.get(THIRD) == ThirdPart.LOWER) {
+            return new SolarSpireBlockEntity(pos, state);
+        }
+        return null;
     }
     
     @Override
     public void onBlockAdded(BlockState state, World world, BlockPos pos, BlockState oldState, boolean notify) {
         super.onBlockAdded(state, world, pos, oldState, notify);
+
+        // If this is the lower part being placed, create the middle and upper parts
+        if (!world.isClient && state.get(THIRD) == ThirdPart.LOWER) {
+            BlockPos middlePos = pos.up();
+            BlockPos upperPos = pos.up(2);
+
+            // Check if there's space for the full structure
+            if (world.getBlockState(middlePos).isReplaceable() && world.getBlockState(upperPos).isReplaceable()) {
+                // Place middle part
+                world.setBlockState(middlePos, state.with(THIRD, ThirdPart.MIDDLE), Block.NOTIFY_ALL);
+                // Place upper part
+                world.setBlockState(upperPos, state.with(THIRD, ThirdPart.UPPER), Block.NOTIFY_ALL);
+            }
+        }
+
         // Schedule a tick to check if we should fall
         world.scheduleBlockTick(pos, this, 2);
     }
@@ -1165,10 +1239,22 @@ public class SolarSpireBlock extends BlockWithEntity implements LandingBlock {
     }
     
     public boolean canPlaceAt(BlockState state, BlockView world, BlockPos pos) {
-        // Solar Spire needs solid ground beneath it to stand
-        BlockPos below = pos.down();
-        BlockState belowState = world.getBlockState(below);
-        return belowState.isSideSolidFullSquare(world, below, Direction.UP);
+        ThirdPart third = state.get(THIRD);
+
+        if (third == ThirdPart.LOWER) {
+            // Lower part needs solid ground beneath it
+            BlockPos below = pos.down();
+            BlockState belowState = world.getBlockState(below);
+            return belowState.isSideSolidFullSquare(world, below, Direction.UP);
+        } else if (third == ThirdPart.MIDDLE) {
+            // Middle part needs lower part below
+            BlockState below = world.getBlockState(pos.down());
+            return below.isOf(this) && below.get(THIRD) == ThirdPart.LOWER;
+        } else { // UPPER
+            // Upper part needs middle part below
+            BlockState below = world.getBlockState(pos.down());
+            return below.isOf(this) && below.get(THIRD) == ThirdPart.MIDDLE;
+        }
     }
     
     @Override
@@ -1235,5 +1321,30 @@ public class SolarSpireBlock extends BlockWithEntity implements LandingBlock {
             pos.getX() + 0.5, pos.getY() + 3.5, pos.getZ() + 0.5,
             1, 0, 0, 0, 0
         );
+    }
+
+    /**
+     * Enum for the three parts of the Solar Spire (3 blocks tall)
+     */
+    public enum ThirdPart implements StringIdentifiable {
+        LOWER("lower"),
+        MIDDLE("middle"),
+        UPPER("upper");
+
+        private final String name;
+
+        ThirdPart(String name) {
+            this.name = name;
+        }
+
+        @Override
+        public String asString() {
+            return this.name;
+        }
+
+        @Override
+        public String toString() {
+            return this.name;
+        }
     }
 }

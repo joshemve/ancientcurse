@@ -291,6 +291,15 @@ public class SolarSpireBlockEntity extends BlockEntity implements GeoBlockEntity
         // Handle power-up sequence
         if (blockEntity.powerUpStage > 0 && blockEntity.powerUpStage < 7) {
             blockEntity.powerUpTimer++;
+            
+            // Safety check: if timer exceeds reasonable bounds, force progression
+            // This prevents infinite charging if the state gets corrupted
+            if (blockEntity.powerUpTimer > 100) { // 5 seconds max per stage (way more than needed)
+                blockEntity.powerUpStage++;
+                blockEntity.powerUpTimer = 0;
+                blockEntity.markDirty();
+            }
+            
             // Progress to next stage every 20 ticks (1 second) - doubled from 10 ticks
             if (blockEntity.powerUpTimer >= 20) {
                 blockEntity.powerUpStage++;

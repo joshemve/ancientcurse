@@ -113,6 +113,7 @@ public class ModBlocks {
         FabricBlockSettings.create()
             .strength(0.2f)
             .nonOpaque()
+            .notSolid()
             .sounds(BlockSoundGroup.WOOD)
             .breakInstantly()
     );

@@ -91,7 +91,7 @@ public class ThothEntity extends HostileEntity implements GeoEntity {
     private int timeMagicTicks = 0;
     private boolean initialized = false;
     private int spawnTransitionTicks = 0;
-    
+
     // Animation tracking
     private int attackAnimationTicks = 0;
     private boolean shouldBeGrounded = false;
@@ -99,14 +99,16 @@ public class ThothEntity extends HostileEntity implements GeoEntity {
     // Combat state management
     private int combatTimeout = 0;
     private static final int MAX_COMBAT_TIMEOUT = 100; // 5 seconds
-    
+
     // Phase system
     private boolean hasEnteredPhase2 = false;
     private boolean hasEnteredPhase3 = false;
-    
+
     // Performance caching
     private PlayerEntity cachedTarget;
     private int targetCacheTime = 0;
+    private float lastHealthPercentage = 1.0f; // Track last health percentage for boss bar updates
+    private int bossBarUpdateCooldown = 0; // Cooldown for boss bar player list updates
     
     public ThothEntity(EntityType<? extends HostileEntity> entityType, World world) {
         super(entityType, world);
@@ -135,7 +137,7 @@ public class ThothEntity extends HostileEntity implements GeoEntity {
                 .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 15.0) // High damage
                 .add(EntityAttributes.GENERIC_FOLLOW_RANGE, 32.0) // Large detection range
                 .add(EntityAttributes.GENERIC_ARMOR, 10.0) // High armor
-                .add(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE, 0.6) // Reduced to allow some knockback
+                .add(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE, 0.6) // Normal knockback resistance
                 .add(EntityAttributes.GENERIC_FLYING_SPEED, 0.2);
     }
     
@@ -377,24 +379,40 @@ public class ThothEntity extends HostileEntity implements GeoEntity {
                 return;
             }
         }
-        
+
         try {
-            this.bossBar.setPercent(this.getHealth() / this.getMaxHealth());
-            
-            List<PlayerEntity> nearbyPlayers = this.getWorld().getNonSpectatingEntities(
-                PlayerEntity.class, 
-                new Box(this.getBlockPos()).expand(64)
-            );
-            
-            for (PlayerEntity player : nearbyPlayers) {
-                if (player instanceof ServerPlayerEntity serverPlayer) {
-                    this.bossBar.addPlayer(serverPlayer);
-                }
+            // Only update health percentage if it has changed significantly (more than 1% change)
+            float currentHealthPercentage = this.getHealth() / this.getMaxHealth();
+            if (Math.abs(currentHealthPercentage - lastHealthPercentage) > 0.01f) {
+                this.bossBar.setPercent(currentHealthPercentage);
+                lastHealthPercentage = currentHealthPercentage;
             }
-            
-            this.bossBar.getPlayers().removeIf(player -> {
-                return this.squaredDistanceTo(player) > 64 * 64;
-            });
+
+            // Only update player list every 20 ticks (1 second) to reduce overhead
+            if (bossBarUpdateCooldown <= 0) {
+                bossBarUpdateCooldown = 20; // Reset cooldown
+
+                List<PlayerEntity> nearbyPlayers = this.getWorld().getNonSpectatingEntities(
+                    PlayerEntity.class,
+                    new Box(this.getBlockPos()).expand(64)
+                );
+
+                // Add nearby players who aren't already tracking
+                for (PlayerEntity player : nearbyPlayers) {
+                    if (player instanceof ServerPlayerEntity serverPlayer) {
+                        if (!this.bossBar.getPlayers().contains(serverPlayer)) {
+                            this.bossBar.addPlayer(serverPlayer);
+                        }
+                    }
+                }
+
+                // Remove players who are too far away
+                this.bossBar.getPlayers().removeIf(player -> {
+                    return this.squaredDistanceTo(player) > 64 * 64;
+                });
+            } else {
+                bossBarUpdateCooldown--;
+            }
         } catch (Exception e) {
             // Silently handle boss bar errors to prevent spam
         }
@@ -1177,13 +1195,28 @@ public class ThothEntity extends HostileEntity implements GeoEntity {
         if (dataTracker.get(IS_CASTING_TIME_MAGIC)) {
             amount *= 0.3f;
         }
-        
+
         float healthPercent = this.getHealth() / this.getMaxHealth();
         if (healthPercent < 0.25f) {
             amount *= 0.8f;
         }
-        
+
         return super.damage(source, amount);
+    }
+
+    @Override
+    public void addVelocity(double deltaX, double deltaY, double deltaZ) {
+        // Limit upward velocity to prevent Thoth from flying too high when hit
+        // This is especially important for abilities like the Mace of Horus
+        if (deltaY > 0.3) {
+            deltaY = 0.3; // Cap upward velocity at 0.3 blocks/tick
+        }
+
+        // Also reduce horizontal knockback for this boss
+        deltaX *= 0.2;
+        deltaZ *= 0.2;
+
+        super.addVelocity(deltaX, deltaY, deltaZ);
     }
     
     @Override
