@@ -107,6 +107,7 @@ public class ModBlocks {
             .strength(0.2f)
             .nonOpaque()
             .sounds(BlockSoundGroup.GRASS)
+            .ticksRandomly() // Required for leaf decay
     );
     
     public static final Block DATE_BLOCK = new DateBlock(

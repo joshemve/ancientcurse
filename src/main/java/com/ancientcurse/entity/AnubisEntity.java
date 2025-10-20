@@ -140,7 +140,7 @@ public class AnubisEntity extends HostileEntity implements GeoEntity {
                 .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 15.0D)
                 .add(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE, 0.8D) // Normal boss knockback resistance
                 .add(EntityAttributes.GENERIC_ARMOR, 8.0D)
-                .add(EntityAttributes.GENERIC_FOLLOW_RANGE, 64.0D);
+                .add(EntityAttributes.GENERIC_FOLLOW_RANGE, 64.0D); // Already has good range
     }
 
     /* -------------------------------------------------------------------- */
@@ -568,7 +568,7 @@ public class AnubisEntity extends HostileEntity implements GeoEntity {
         // Sky yelling special attack
         if (isSkyYelling()) {
             s.getController().setAnimation(RawAnimation.begin()
-                    .then("animation.anubis.attack_2_howl", Animation.LoopType.PLAY_ONCE));
+                    .then("animation.anubis.attack_2", Animation.LoopType.PLAY_ONCE));
             return PlayState.CONTINUE;
         }
         
@@ -631,20 +631,30 @@ public class AnubisEntity extends HostileEntity implements GeoEntity {
 
     @Override
     public boolean damage(DamageSource source, float amount) {
-        // If player attacks during judgment, become enraged
-        if (currentPhase == BossPhase.JUDGING && source.getAttacker() instanceof PlayerEntity) {
-            setBossPhase(BossPhase.ENRAGED);
-            setTarget((LivingEntity) source.getAttacker());
-            setHovering(false);
-            setJudging(false);
-            targetHoverHeight = 0.0F;
-        }
+        // If attacked by a player (including ranged), ensure we target them
+        if (source.getAttacker() instanceof PlayerEntity player) {
+            // If we're dormant or have no target, wake up and target the attacker
+            if (currentPhase == BossPhase.DORMANT) {
+                setBossPhase(BossPhase.AWAKENING);
+                phaseTimer = 0;
+            }
+            if (this.getTarget() == null && currentPhase != BossPhase.MERCIFUL) {
+                this.setTarget(player);
+            }
 
-        // If player is deemed safe, reduce damage significantly
-        if (currentPhase == BossPhase.MERCIFUL &&
-            source.getAttacker() instanceof PlayerEntity player &&
-            safePlayers.contains(player.getUuid())) {
-            amount *= 0.1F; // 90% damage reduction
+            // If player attacks during judgment, become enraged
+            if (currentPhase == BossPhase.JUDGING) {
+                setBossPhase(BossPhase.ENRAGED);
+                setTarget(player);
+                setHovering(false);
+                setJudging(false);
+                targetHoverHeight = 0.0F;
+            }
+
+            // If player is deemed safe, reduce damage significantly
+            if (currentPhase == BossPhase.MERCIFUL && safePlayers.contains(player.getUuid())) {
+                amount *= 0.1F; // 90% damage reduction
+            }
         }
 
         return super.damage(source, amount);

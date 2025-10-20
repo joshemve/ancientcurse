@@ -230,7 +230,7 @@ public class WitheredPharaohEntity extends HostileEntity implements GeoEntity {
             .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.25D)
             .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 8.0D) // Increased damage
             .add(EntityAttributes.GENERIC_ATTACK_KNOCKBACK, 1.0D)
-            .add(EntityAttributes.GENERIC_FOLLOW_RANGE, 32.0D) // Increased awareness range
+            .add(EntityAttributes.GENERIC_FOLLOW_RANGE, 64.0D) // Increased from 32 to 64 for better ranged detection
             .add(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE, 0.6D);
     }
     

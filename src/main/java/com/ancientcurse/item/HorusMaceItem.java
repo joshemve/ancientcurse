@@ -172,10 +172,12 @@ public class HorusMaceItem extends SwordItem implements GeoItem {
     @Override
     public void inventoryTick(ItemStack stack, World world, net.minecraft.entity.Entity entity, int slot, boolean selected) {
         if (!world.isClient && entity instanceof PlayerEntity player && selected) {
-            // Falcon's Sight - night vision when held
-            if (!player.hasStatusEffect(StatusEffects.NIGHT_VISION) || 
-                player.getStatusEffect(StatusEffects.NIGHT_VISION).getDuration() < 220) {
-                player.addStatusEffect(new StatusEffectInstance(StatusEffects.NIGHT_VISION, 240, 0, true, false));
+            // Falcon's Sight - night vision when held (smooth, no flashing)
+            // Only reapply when effect is about to expire to prevent flashing
+            if (!player.hasStatusEffect(StatusEffects.NIGHT_VISION) ||
+                player.getStatusEffect(StatusEffects.NIGHT_VISION).getDuration() < 10) {
+                // Long duration (30 seconds) with ambient effect (no particles, subtle icon)
+                player.addStatusEffect(new StatusEffectInstance(StatusEffects.NIGHT_VISION, 600, 0, true, false, false));
             }
         }
     }

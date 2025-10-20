@@ -135,7 +135,7 @@ public class ThothEntity extends HostileEntity implements GeoEntity {
                 .add(EntityAttributes.GENERIC_MAX_HEALTH, 300.0) // Boss health
                 .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.25) // Increased from 0.15 for better ground movement
                 .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 15.0) // High damage
-                .add(EntityAttributes.GENERIC_FOLLOW_RANGE, 32.0) // Large detection range
+                .add(EntityAttributes.GENERIC_FOLLOW_RANGE, 64.0) // Increased from 32 to 64 for better ranged detection
                 .add(EntityAttributes.GENERIC_ARMOR, 10.0) // High armor
                 .add(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE, 0.6) // Normal knockback resistance
                 .add(EntityAttributes.GENERIC_FLYING_SPEED, 0.2);
@@ -315,9 +315,9 @@ public class ThothEntity extends HostileEntity implements GeoEntity {
                 }
             }
             
-            // Heal Thoth during time magic
-            if (timeMagicTicks % 20 == 0) {
-                this.heal(3.0f);
+            // Heal Thoth during time magic - reduced healing
+            if (timeMagicTicks % 40 == 0) { // Changed from every 20 ticks to every 40 ticks
+                this.heal(1.5f); // Reduced from 3.0f to 1.5f
             }
         }
         
@@ -374,6 +374,7 @@ public class ThothEntity extends HostileEntity implements GeoEntity {
                     BossBar.Color.PURPLE,
                     BossBar.Style.NOTCHED_10
                 );
+                this.bossBar.setDarkenSky(true); // Add dramatic effect
             } catch (Exception e) {
                 // Skip boss bar if initialization fails
                 return;
@@ -613,18 +614,18 @@ public class ThothEntity extends HostileEntity implements GeoEntity {
         }
         
         dataTracker.set(ATTACK_COOLDOWN, 0);
-        this.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, 200, 3));
-        this.addStatusEffect(new StatusEffectInstance(StatusEffects.REGENERATION, 300, 1));
-        this.addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED, Integer.MAX_VALUE, 1, false, false));
-        this.addStatusEffect(new StatusEffectInstance(StatusEffects.STRENGTH, Integer.MAX_VALUE, 1, false, false));
-        
-        performTimeBend();
+        this.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, 200, 2)); // Reduced from 3 to 2
+        this.addStatusEffect(new StatusEffectInstance(StatusEffects.REGENERATION, 200, 1)); // Reduced duration from 300 to 200
+        this.addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED, 200, 1, false, false)); // Changed from MAX_VALUE to 200
+        this.addStatusEffect(new StatusEffectInstance(StatusEffects.STRENGTH, 200, 1, false, false)); // Changed from MAX_VALUE to 200
+
+        // Don't recursively call performTimeBend() here - it's already being triggered
     }
     
     private void chooseStrategicAttack() {
         LivingEntity target = this.getTarget();
-        if (!(target instanceof PlayerEntity)) return;
         if (target == null) return;
+        if (!(target instanceof PlayerEntity)) return;
         
         double distance = this.squaredDistanceTo(target);
         float healthPercent = this.getHealth() / this.getMaxHealth();
@@ -916,17 +917,17 @@ public class ThothEntity extends HostileEntity implements GeoEntity {
         @Override
         public boolean canStart() {
             this.target = thoth.getTarget();
-            return thoth.isAlive() && 
-                   target != null && 
+            return thoth.isAlive() &&
+                   target != null &&
                    thoth.dataTracker.get(ATTACK_COOLDOWN) == 0 &&
                    thoth.attackAnimationTicks == 0 && // Don't interrupt animations
-                   thoth.squaredDistanceTo(target) < 256;
+                   thoth.squaredDistanceTo(target) < 4096; // Increased from 256 (16 blocks) to 4096 (64 blocks)
         }
-        
+
         @Override
         public boolean shouldContinue() {
-            return target != null && target.isAlive() && 
-                   thoth.squaredDistanceTo(target) < 400;
+            return target != null && target.isAlive() &&
+                   thoth.squaredDistanceTo(target) < 5184; // Increased from 400 (20 blocks) to 5184 (72 blocks)
         }
         
         @Override
@@ -1192,13 +1193,29 @@ public class ThothEntity extends HostileEntity implements GeoEntity {
     /* ---------- BOSS BEHAVIOR ---------- */
     @Override
     public boolean damage(DamageSource source, float amount) {
-        if (dataTracker.get(IS_CASTING_TIME_MAGIC)) {
-            amount *= 0.3f;
+        // If attacked by a player (including ranged), ensure we target them
+        if (source.getAttacker() instanceof PlayerEntity player && this.getTarget() == null) {
+            this.setTarget(player);
+            // Enter combat state immediately
+            combatTimeout = MAX_COMBAT_TIMEOUT;
+            dataTracker.set(IS_IN_COMBAT, true);
+            dataTracker.set(HAS_BEEN_IN_COMBAT, true);
         }
 
+        // During time magic, reduce damage but not as extremely
+        if (dataTracker.get(IS_CASTING_TIME_MAGIC)) {
+            amount *= 0.5f; // Changed from 0.3f to 0.5f (50% damage instead of 30%)
+        }
+
+        // Phase 3 damage reduction - less extreme
         float healthPercent = this.getHealth() / this.getMaxHealth();
         if (healthPercent < 0.25f) {
-            amount *= 0.8f;
+            amount *= 0.9f; // Changed from 0.8f to 0.9f (10% reduction instead of 20%)
+        }
+
+        // Prevent healing above max health
+        if (this.getHealth() > this.getMaxHealth()) {
+            this.setHealth(this.getMaxHealth());
         }
 
         return super.damage(source, amount);
