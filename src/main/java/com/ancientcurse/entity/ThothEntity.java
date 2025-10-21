@@ -94,6 +94,8 @@ public class ThothEntity extends HostileEntity implements GeoEntity {
 
     // Animation tracking
     private int attackAnimationTicks = 0;
+    private boolean animationLocked = false; // Prevents animation interruptions
+    private int lastAttackState = ATTACK_NONE; // Track last attack to prevent glitching
 
     // Combat state management
     private int combatTimeout = 0;
@@ -169,14 +171,19 @@ public class ThothEntity extends HostileEntity implements GeoEntity {
             hasSpawned = true;
         }
         
-        // Handle attack animation timer
+        // Handle attack animation timer with animation locking
         if (attackAnimationTicks > 0) {
+            animationLocked = true; // Lock animation during attack
             attackAnimationTicks--;
             if (attackAnimationTicks == 0) {
                 // Reset attack state when animation completes
+                lastAttackState = dataTracker.get(ATTACK_STATE);
                 dataTracker.set(ATTACK_STATE, ATTACK_NONE);
                 dataTracker.set(IS_READING, false); // Reset reading state
+                animationLocked = false; // Unlock animation
             }
+        } else {
+            animationLocked = false; // Ensure animation is unlocked when not attacking
         }
         
         // Handle cooldowns
@@ -710,7 +717,8 @@ public class ThothEntity extends HostileEntity implements GeoEntity {
     
     /* ---------- ATTACK METHODS ---------- */
     public void performMagicBallAttack() {
-        if (dataTracker.get(ATTACK_COOLDOWN) > 0 || attackAnimationTicks > 0) return;
+        // Don't interrupt ongoing animations or if on cooldown
+        if (dataTracker.get(ATTACK_COOLDOWN) > 0 || animationLocked || attackAnimationTicks > 0) return;
         
         dataTracker.set(ATTACK_STATE, ATTACK_MAGIC_BALL);
         dataTracker.set(ATTACK_COOLDOWN, MAX_ATTACK_COOLDOWN);
@@ -758,7 +766,8 @@ public class ThothEntity extends HostileEntity implements GeoEntity {
     }
     
     public void performScrollBlast() {
-        if (dataTracker.get(ATTACK_COOLDOWN) > 0 || attackAnimationTicks > 0) return;
+        // Don't interrupt ongoing animations or if on cooldown
+        if (dataTracker.get(ATTACK_COOLDOWN) > 0 || animationLocked || attackAnimationTicks > 0) return;
         
         dataTracker.set(ATTACK_STATE, ATTACK_SCROLL_BLAST);
         dataTracker.set(ATTACK_COOLDOWN, MAX_ATTACK_COOLDOWN);
@@ -813,7 +822,8 @@ public class ThothEntity extends HostileEntity implements GeoEntity {
     }
     
     public void performTimeBend() {
-        if (dataTracker.get(ATTACK_COOLDOWN) > 0 || attackAnimationTicks > 0) return;
+        // Don't interrupt ongoing animations or if on cooldown
+        if (dataTracker.get(ATTACK_COOLDOWN) > 0 || animationLocked || attackAnimationTicks > 0) return;
         
         dataTracker.set(ATTACK_STATE, ATTACK_TIME_BEND);
         dataTracker.set(ATTACK_COOLDOWN, MAX_ATTACK_COOLDOWN * 2);
@@ -833,7 +843,8 @@ public class ThothEntity extends HostileEntity implements GeoEntity {
     }
     
     public void summonEntities() {
-        if (dataTracker.get(SUMMONING_COOLDOWN) > 0 || attackAnimationTicks > 0) return;
+        // Don't interrupt ongoing animations or if on cooldown
+        if (dataTracker.get(SUMMONING_COOLDOWN) > 0 || animationLocked || attackAnimationTicks > 0) return;
         
         dataTracker.set(ATTACK_STATE, ATTACK_ENTITY_SUMMON);
         dataTracker.set(SUMMONING_COOLDOWN, MAX_SUMMONING_COOLDOWN);
@@ -852,7 +863,8 @@ public class ThothEntity extends HostileEntity implements GeoEntity {
     }
     
     public void performMeleeAttack() {
-        if (dataTracker.get(ATTACK_COOLDOWN) > 0 || attackAnimationTicks > 0) return;
+        // Don't interrupt ongoing animations or if on cooldown
+        if (dataTracker.get(ATTACK_COOLDOWN) > 0 || animationLocked || attackAnimationTicks > 0) return;
         
         dataTracker.set(ATTACK_STATE, ATTACK_MELEE);
         dataTracker.set(ATTACK_COOLDOWN, MAX_ATTACK_COOLDOWN / 2); // Shorter cooldown for melee
@@ -920,6 +932,7 @@ public class ThothEntity extends HostileEntity implements GeoEntity {
             return thoth.isAlive() &&
                    target != null &&
                    thoth.dataTracker.get(ATTACK_COOLDOWN) == 0 &&
+                   !thoth.animationLocked && // Don't start if animation is locked
                    thoth.attackAnimationTicks == 0 && // Don't interrupt animations
                    thoth.squaredDistanceTo(target) < 4096; // Increased from 256 (16 blocks) to 4096 (64 blocks)
         }
@@ -972,8 +985,9 @@ public class ThothEntity extends HostileEntity implements GeoEntity {
         
         @Override
         public boolean canStart() {
-            return thoth.getTarget() != null && 
+            return thoth.getTarget() != null &&
                    thoth.dataTracker.get(SUMMONING_COOLDOWN) == 0 &&
+                   !thoth.animationLocked && // Don't start if animation is locked
                    thoth.attackAnimationTicks == 0 &&
                    thoth.getHealth() < thoth.getMaxHealth() * 0.5f;
         }
@@ -993,8 +1007,9 @@ public class ThothEntity extends HostileEntity implements GeoEntity {
         
         @Override
         public boolean canStart() {
-            return thoth.getTarget() != null && 
+            return thoth.getTarget() != null &&
                    thoth.dataTracker.get(ATTACK_COOLDOWN) == 0 &&
+                   !thoth.animationLocked && // Don't start if animation is locked
                    thoth.attackAnimationTicks == 0 &&
                    thoth.getHealth() < thoth.getMaxHealth() * 0.3f &&
                    !thoth.dataTracker.get(IS_CASTING_TIME_MAGIC);
@@ -1009,7 +1024,8 @@ public class ThothEntity extends HostileEntity implements GeoEntity {
     /* ---------- GECKOLIB ANIMATIONS ---------- */
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
-        controllers.add(new AnimationController<>(this, "controller", 0, this::predicate));
+        // Use 5 tick transition time for smooth animation blending
+        controllers.add(new AnimationController<>(this, "controller", 5, this::predicate));
     }
     
     private <T extends GeoEntity> PlayState predicate(AnimationState<T> state) {
@@ -1018,16 +1034,18 @@ public class ThothEntity extends HostileEntity implements GeoEntity {
         boolean isCastingTime = this.dataTracker.get(IS_CASTING_TIME_MAGIC);
         boolean hasBeenInCombat = this.dataTracker.get(HAS_BEEN_IN_COMBAT);
         boolean isReading = this.dataTracker.get(IS_READING);
-        
+
         // Priority 1: Spawn animation (highest priority) - let it complete fully
         if (spawnTransitionTicks > 0 && !hasSpawned) {
             state.getController().setAnimation(RawAnimation.begin().then("animation.thoth.entity_spawn", Animation.LoopType.PLAY_ONCE));
             return PlayState.CONTINUE;
         }
-        
+
         // Priority 2: Attack animations (when actively attacking) - let each complete fully
-        if (attackAnimationTicks > 0) {
-            switch (attackState) {
+        // Use the lastAttackState when transitioning to prevent animation glitching
+        if (attackAnimationTicks > 0 || animationLocked) {
+            int effectiveAttackState = (attackState != ATTACK_NONE) ? attackState : lastAttackState;
+            switch (effectiveAttackState) {
                 case ATTACK_MAGIC_BALL:
                     // Magic ball projectile attack - uses attack_1 animation
                     state.getController().setAnimation(RawAnimation.begin().then("animation.thoth.attack_1", Animation.LoopType.PLAY_ONCE));
@@ -1192,6 +1210,12 @@ public class ThothEntity extends HostileEntity implements GeoEntity {
     /* ---------- BOSS BEHAVIOR ---------- */
     @Override
     public boolean damage(DamageSource source, float amount) {
+        // Don't interrupt ongoing attack animations (prevents glitching)
+        if (animationLocked && attackAnimationTicks > 0) {
+            // Still take damage but don't change state
+            return super.damage(source, amount);
+        }
+
         // If attacked by a player (including ranged), ensure we target them
         if (source.getAttacker() instanceof PlayerEntity player && this.getTarget() == null) {
             this.setTarget(player);
