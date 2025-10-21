@@ -1,6 +1,17 @@
 {
-  "parent": "minecraft:block/carpet",
+  "ambientocclusion": false,
+  "elements": [
+    {
+      "from": [0, 0, 0],
+      "to": [16, 0.25, 16],
+      "faces": {
+        "down": {"texture": "#dust", "uv": [0, 0, 16, 16]},
+        "up": {"texture": "#dust", "uv": [0, 0, 16, 16]}
+      }
+    }
+  ],
   "textures": {
-    "wool": "ancientcurse:block/salt_dust"
+    "dust": "ancientcurse:block/salt_dust",
+    "particle": "ancientcurse:block/salt_dust"
   }
 }

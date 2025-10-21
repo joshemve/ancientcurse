@@ -26,7 +26,8 @@ public class SaltDustBlock extends Block {
     public static final EnumProperty<WireConnection> WIRE_CONNECTION_SOUTH = Properties.SOUTH_WIRE_CONNECTION;
     public static final EnumProperty<WireConnection> WIRE_CONNECTION_WEST = Properties.WEST_WIRE_CONNECTION;
     
-    private static final VoxelShape DOT_SHAPE = Block.createCuboidShape(3.0, 0.0, 3.0, 13.0, 1.0, 13.0);
+    // Flat shape on the ground, like redstone dust (0 to 0.25 pixels tall)
+    private static final VoxelShape DOT_SHAPE = Block.createCuboidShape(0.0, 0.0, 0.0, 16.0, 0.25, 16.0);
     private static final VoxelShape[] SHAPES = new VoxelShape[16];
     
     static {

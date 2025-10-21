@@ -9,8 +9,6 @@ import net.minecraft.block.FarmlandBlock;
 import net.minecraft.block.ShapeContext;
 import net.minecraft.item.ItemConvertible;
 import net.minecraft.item.ItemStack;
-import net.minecraft.loot.context.LootContextParameterSet;
-import net.minecraft.loot.context.LootContextParameters;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.IntProperty;
@@ -21,8 +19,6 @@ import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldView;
-
-import java.util.List;
 
 /**
  * Flax crop block that produces flax fibers, an important material
@@ -63,26 +59,10 @@ public class FlaxCropBlock extends CropBlock {
         return new ItemStack(ModItems.FLAX_SEEDS);
     }
 
-    // Override getDroppedStacks to control drops directly
-    @Override
-    public List<ItemStack> getDroppedStacks(BlockState state, LootContextParameterSet.Builder builder) {
-        List<ItemStack> drops = super.getDroppedStacks(state, builder);
-        int age = state.get(AGE);
-
-        // Only drop fiber if fully grown
-        if (age == getMaxAge()) {
-            // Add flax fiber (e.g., 1-3 fibers)
-            drops.add(new ItemStack(ModItems.FLAX_FIBER, builder.getWorld().random.nextInt(3) + 1)); 
-            // Remove default seed drop if we add fiber
-            drops.removeIf(stack -> stack.isOf(ModItems.FLAX_SEEDS));
-            // Add back 1 seed guaranteed, plus chance for more
-            drops.add(new ItemStack(ModItems.FLAX_SEEDS, 1));
-            if (builder.getWorld().random.nextInt(4) == 0) { // 25% chance for extra seed
-                 drops.add(new ItemStack(ModItems.FLAX_SEEDS, 1));
-            }
-        }
-        return drops;
-    }
+    // Drops are now handled by the loot table at data/ancientcurse/loot_tables/blocks/flax.json
+    // When fully grown (age 3), drops:
+    // - 1-3 flax fiber (affected by Fortune)
+    // - 0-3 additional flax seeds (average ~1.7, affected by Fortune)
 
     @Override
     public VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {

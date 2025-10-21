@@ -32,7 +32,7 @@ public class ThothMagicBallEntity extends ThrownItemEntity {
     
     @Override
     protected Item getDefaultItem() {
-        return Items.ENDER_PEARL; // Visual item for the projectile
+        return Items.FIRE_CHARGE; // Visual item for the projectile - changed from ender pearl
     }
     
     @Override

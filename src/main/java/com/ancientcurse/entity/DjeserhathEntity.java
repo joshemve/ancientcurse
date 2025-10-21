@@ -613,7 +613,7 @@ public class DjeserhathEntity extends HostileEntity implements GeoEntity {
             host.dataTracker.set(JAW_OPENNESS, 1.0f); // Fully open
             host.setAttacking(true); // This triggers the attack animation
             biteCooldown = 15; // Ticks until bite
-            attackAnimationDuration = 30; // Total animation duration
+            attackAnimationDuration = 45; // 2.25 seconds - matches attack animation length
         }
 
         @Override 

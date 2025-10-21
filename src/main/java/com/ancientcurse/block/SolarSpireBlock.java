@@ -461,10 +461,20 @@ public class SolarSpireBlock extends BlockWithEntity implements LandingBlock {
     }
     
     private void deactivateSpire(World world, BlockPos pos) {
-        // Deactivate all three parts
-        world.setBlockState(pos, world.getBlockState(pos).with(ACTIVATED, false));
-        world.setBlockState(pos.up(), world.getBlockState(pos.up()).with(ACTIVATED, false));
-        world.setBlockState(pos.up(2), world.getBlockState(pos.up(2)).with(ACTIVATED, false));
+        // Deactivate all three parts - check if they're still Solar Spire blocks first
+        BlockState baseState = world.getBlockState(pos);
+        BlockState middleState = world.getBlockState(pos.up());
+        BlockState topState = world.getBlockState(pos.up(2));
+
+        if (baseState.contains(ACTIVATED)) {
+            world.setBlockState(pos, baseState.with(ACTIVATED, false));
+        }
+        if (middleState.contains(ACTIVATED)) {
+            world.setBlockState(pos.up(), middleState.with(ACTIVATED, false));
+        }
+        if (topState.contains(ACTIVATED)) {
+            world.setBlockState(pos.up(2), topState.with(ACTIVATED, false));
+        }
 
         // Tell block entity to stop working animation
         if (world.getBlockEntity(pos) instanceof SolarSpireBlockEntity blockEntity) {

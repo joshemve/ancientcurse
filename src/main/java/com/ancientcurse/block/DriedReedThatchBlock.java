@@ -17,8 +17,8 @@ public class DriedReedThatchBlock extends HorizontalFacingBlock {
     
     @Override
     public BlockState getPlacementState(ItemPlacementContext ctx) {
-        // Make the block face the player when placed
-        return this.getDefaultState().with(FACING, ctx.getPlayerLookDirection().getOpposite());
+        // Make the block face the player when placed (horizontal direction only)
+        return this.getDefaultState().with(FACING, ctx.getHorizontalPlayerFacing().getOpposite());
     }
     
     @Override

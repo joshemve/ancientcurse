@@ -43,7 +43,7 @@ import com.ancientcurse.item.BronzeToolMaterial;
  */
 public class ModItems {
     // Define items
-    public static final StaffOfRaItem STAFF_OF_RA = new StaffOfRaItem(new FabricItemSettings(), "staff_of_ra");
+    public static final StaffOfRaItem STAFF_OF_RA = new StaffOfRaItem(new FabricItemSettings().maxCount(1), "staff_of_ra");
     
     // Admin tool for managing curse zones
     public static final CurseZoneAdminWand CURSE_ZONE_ADMIN_WAND = new CurseZoneAdminWand(new FabricItemSettings().maxCount(1));
@@ -142,8 +142,8 @@ public class ModItems {
     public static final PhialOfLotusEssenceItem PHIAL_OF_LOTUS_ESSENCE = new PhialOfLotusEssenceItem(new FabricItemSettings());
     public static final ElixirOfRasSparkItem ELIXIR_OF_RAS_SPARK = new ElixirOfRasSparkItem(new FabricItemSettings());
     public static final AncientPickItem ANCIENT_PICK = new AncientPickItem(new FabricItemSettings());
-    public static final SerpentStaffItem SERPENT_STAFF = new SerpentStaffItem(new FabricItemSettings());
-    public static final WitheredStaffItem WITHERED_STAFF = new WitheredStaffItem(new FabricItemSettings());
+    public static final SerpentStaffItem SERPENT_STAFF = new SerpentStaffItem(new FabricItemSettings().maxCount(1));
+    public static final WitheredStaffItem WITHERED_STAFF = new WitheredStaffItem(new FabricItemSettings().maxCount(1));
     public static final ScarabIncenseItem SCARAB_INCENSE_ITEM = new ScarabIncenseItem(new FabricItemSettings());
     public static final EternalSigilItem ETERNAL_SIGIL = new EternalSigilItem(
         new FabricItemSettings().maxCount(1)

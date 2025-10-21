@@ -1,0 +1,8 @@
+{
+  "replace": false,
+  "values": [
+    "ancientcurse:gold_flaked_river_bed",
+    "ancientcurse:riverbed_clay",
+    "ancientcurse:salt_bed"
+  ]
+}

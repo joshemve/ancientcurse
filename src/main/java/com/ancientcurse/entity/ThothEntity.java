@@ -71,22 +71,22 @@ public class ThothEntity extends HostileEntity implements GeoEntity {
     private static final int ATTACK_ENTITY_SUMMON = 4;
     private static final int ATTACK_MELEE = 5;
     
-    private static final int MAX_ATTACK_COOLDOWN = 120; // 6 seconds
+    private static final int MAX_ATTACK_COOLDOWN = 80; // 4 seconds
     private static final int MAX_SUMMONING_COOLDOWN = 400; // 20 seconds
     private static final int TIME_MAGIC_DURATION = 200; // 10 seconds
-    
-    // Animation durations based on actual animation lengths (in ticks, 20 ticks = 1 second)
-    private static final int SPAWN_ANIMATION_DURATION = 100; // 5 seconds for entity_spawn
-    private static final int ATTACK_1_ANIMATION_DURATION = 60; // 3 seconds for attack_1 (magic ball & melee)
-    private static final int ATTACK_2_ANIMATION_DURATION = 80; // 4 seconds for attack_2 (scroll blast)
-    private static final int TIME_BEND_ANIMATION_DURATION = 120; // 6 seconds for time_bend
-    private static final int SUMMON_ANIMATION_DURATION = 100; // 5 seconds for entity_spawn (summon)
-    public static final int SPAWN_TRANSITION_DURATION = 100; // 5 seconds for spawn transition effects
+
+    // Animation durations - MUST MATCH the actual animation file lengths (in ticks, 20 ticks = 1 second)
+    // From thoth.animation.json:
+    private static final int SPAWN_ANIMATION_DURATION = 60; // 3.0 seconds (entity_spawn animation is 3s)
+    private static final int ATTACK_1_ANIMATION_DURATION = 45; // 2.25 seconds (attack_1 animation is 2.25s)
+    private static final int ATTACK_2_ANIMATION_DURATION = 110; // 5.5 seconds (attack_2 animation is 5.5s)
+    private static final int TIME_BEND_ANIMATION_DURATION = 103; // 5.125 seconds (time_bend animation is 5.125s)
+    private static final int SUMMON_ANIMATION_DURATION = 60; // 3.0 seconds (entity_spawn is reused for summon)
+    public static final int SPAWN_TRANSITION_DURATION = 60; // 3.0 seconds (matches entity_spawn animation)
     
     /* ---------- FIELDS ---------- */
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
     private ServerBossBar bossBar;
-    private int magicCastingTicks = 0;
     private boolean hasSpawned = false;
     private int timeMagicTicks = 0;
     private boolean initialized = false;
@@ -94,7 +94,6 @@ public class ThothEntity extends HostileEntity implements GeoEntity {
 
     // Animation tracking
     private int attackAnimationTicks = 0;
-    private boolean shouldBeGrounded = false;
 
     // Combat state management
     private int combatTimeout = 0;
@@ -104,9 +103,7 @@ public class ThothEntity extends HostileEntity implements GeoEntity {
     private boolean hasEnteredPhase2 = false;
     private boolean hasEnteredPhase3 = false;
 
-    // Performance caching
-    private PlayerEntity cachedTarget;
-    private int targetCacheTime = 0;
+    // Performance optimization
     private float lastHealthPercentage = 1.0f; // Track last health percentage for boss bar updates
     private int bossBarUpdateCooldown = 0; // Cooldown for boss bar player list updates
     
@@ -114,19 +111,8 @@ public class ThothEntity extends HostileEntity implements GeoEntity {
         super(entityType, world);
         this.experiencePoints = 100; // Boss-level XP
         
-        // Initialize boss bar only on server side
-        if (!world.isClient) {
-            try {
-                this.bossBar = new ServerBossBar(
-                    Text.translatable("entity.ancientcurse.thoth"), 
-                    BossBar.Color.PURPLE, 
-                    BossBar.Style.PROGRESS
-                );
-            } catch (Exception e) {
-                AncientCurse.LOGGER.warn("Failed to create boss bar for Thoth: " + e.getMessage());
-                this.bossBar = null;
-            }
-        }
+        // Don't create boss bar in constructor - it will be created lazily in handleBossBar()
+        // This prevents duplicate boss bars when entity is loaded from NBT
     }
     
     /* ---------- ATTRIBUTES ---------- */
@@ -225,15 +211,26 @@ public class ThothEntity extends HostileEntity implements GeoEntity {
         boolean isInCombat = combatTimeout > 0;
         if (isInCombat != dataTracker.get(IS_IN_COMBAT)) {
             dataTracker.set(IS_IN_COMBAT, isInCombat);
-            
+
             if (isInCombat) {
                 dataTracker.set(HAS_BEEN_IN_COMBAT, true); // Set this permanently
-                // Smoothly transition to ground-based movement
+                // Always use gravity in combat to prevent floating exploitation
                 this.setNoGravity(false);
             } else if (hasSpawned) {
-                // Return to floating when not in combat (but only after spawn)
-                this.setNoGravity(true);
+                // Only float when idle and on solid ground
+                BlockPos below = this.getBlockPos().down();
+                if (this.getWorld().getBlockState(below).isSolidBlock(this.getWorld(), below)) {
+                    this.setNoGravity(true);
+                } else {
+                    // Don't float over cliffs or in the air
+                    this.setNoGravity(false);
+                }
             }
+        }
+
+        // Additional safety check: prevent floating too high
+        if (this.getY() > 320 || (!this.isOnGround() && this.fallDistance > 5)) {
+            this.setNoGravity(false); // Force gravity if too high or falling
         }
         
         // Handle reading behavior (when peaceful and not moving)
@@ -407,9 +404,12 @@ public class ThothEntity extends HostileEntity implements GeoEntity {
                     }
                 }
 
-                // Remove players who are too far away
+                // Remove players who are too far away (limit to 64 blocks)
                 this.bossBar.getPlayers().removeIf(player -> {
-                    return this.squaredDistanceTo(player) > 64 * 64;
+                    double dist = this.squaredDistanceTo(player);
+                    // Also check Y distance to prevent showing across dimensions/heights
+                    double yDist = Math.abs(player.getY() - this.getY());
+                    return dist > 64 * 64 || yDist > 64 || player.getWorld() != this.getWorld();
                 });
             } else {
                 bossBarUpdateCooldown--;
@@ -934,7 +934,6 @@ public class ThothEntity extends HostileEntity implements GeoEntity {
         public void start() {
             attackTimer = 0;
             thoth.setNoGravity(false); // Ensure grounded
-            thoth.shouldBeGrounded = true;
         }
         
         @Override
@@ -1250,6 +1249,17 @@ public class ThothEntity extends HostileEntity implements GeoEntity {
         super.remove(reason);
         
         // Ensure boss bar is cleared when entity is removed for any reason
+        if (!this.getWorld().isClient && this.bossBar != null) {
+            this.bossBar.clearPlayers();
+            this.bossBar = null;
+        }
+    }
+    
+    @Override
+    public void onRemoved() {
+        super.onRemoved();
+        
+        // Clean up boss bar when entity is unloaded (chunk unload)
         if (!this.getWorld().isClient && this.bossBar != null) {
             this.bossBar.clearPlayers();
             this.bossBar = null;
