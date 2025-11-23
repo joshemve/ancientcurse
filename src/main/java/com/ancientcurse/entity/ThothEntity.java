@@ -522,7 +522,7 @@ public class ThothEntity extends HostileEntity implements GeoEntity {
         switch (attackState) {
             case ATTACK_MELEE:
                 // attack_1 animation is 45 ticks (2.25s)
-                // FIXED: Apply damage at 1.5 seconds (30 ticks elapsed) = attackAnimationTicks 15
+                // Ground slam hits at 1.5 seconds (30 ticks elapsed) = attackAnimationTicks 15
                 // attackAnimationTicks counts DOWN from 45, so 1.5s into animation = 45 - 30 = 15 ticks remaining
                 if (attackAnimationTicks == 15) {
                     // Play wind gust sound when staff hits ground
@@ -1114,19 +1114,19 @@ public class ThothEntity extends HostileEntity implements GeoEntity {
             double baseY = spawnPos.getY();
             double baseZ = spawnPos.getZ() + 0.5;
 
-            // Create tornado effect with multiple particle rings at different heights
-            int particlesPerRing = 8; // 8 particles per ring
-            int rings = 3; // 3 rings per tick for dense tornado
+            // Create simple tornado effect - just a few spinning particles
+            int particlesPerRing = 3; // Only 3 particles per ring
+            int rings = 2; // 2 rings total
 
             for (int ring = 0; ring < rings; ring++) {
                 // Height increases with progress (tornado builds upward)
                 double height = progress * 2.5 * (ring / (double) rings);
 
-                // Radius decreases with height (tornado shape)
-                double radius = 0.8 * (1.0 - (ring / (double) rings) * 0.5);
+                // Radius for tornado shape
+                double radius = 0.6;
 
                 for (int p = 0; p < particlesPerRing; p++) {
-                    // Spiral angle increases with height for swirling effect
+                    // Spiral angle for swirling effect
                     double particleAngle = (p / (double) particlesPerRing) * Math.PI * 2.0;
                     particleAngle += (ring * 0.5) + (progress * Math.PI * 4.0); // Spinning effect
 
@@ -1137,41 +1137,22 @@ public class ThothEntity extends HostileEntity implements GeoEntity {
                     double particleY = baseY + height;
                     double particleZ = baseZ + offsetZ;
 
-                    // ENCHANTMENT TABLE particles - primary magical effect (more frequent)
+                    // Dark purple particles (DRAGON_BREATH for dark purple glow)
                     ((ServerWorld)this.getWorld()).spawnParticles(
-                        ParticleTypes.ENCHANT,
+                        ParticleTypes.DRAGON_BREATH,
                         particleX, particleY, particleZ,
-                        2, 0.05, 0.1, 0.05, 0.3
+                        1, 0.01, 0.03, 0.01, 0.01
                     );
 
-                    // Dark purple SOUL particles instead of WITCH (darker, more mystical)
-                    // Only spawn every 3rd particle to reduce purple count
-                    if (p % 3 == 0) {
+                    // Enchant particles (only on first ring)
+                    if (ring == 0) {
                         ((ServerWorld)this.getWorld()).spawnParticles(
-                            ParticleTypes.SOUL,
+                            ParticleTypes.ENCHANT,
                             particleX, particleY, particleZ,
-                            1, 0.02, 0.05, 0.02, 0.02
-                        );
-                    }
-
-                    // Dragon breath for dark purple glow (every other particle)
-                    if (p % 2 == 0) {
-                        ((ServerWorld)this.getWorld()).spawnParticles(
-                            ParticleTypes.DRAGON_BREATH,
-                            particleX, particleY, particleZ,
-                            1, 0.01, 0.03, 0.01, 0.01
+                            1, 0.05, 0.1, 0.05, 0.2
                         );
                     }
                 }
-            }
-
-            // Add ground particles at base of tornado (dust being kicked up)
-            if (this.random.nextFloat() < 0.5f) {
-                ((ServerWorld)this.getWorld()).spawnParticles(
-                    ParticleTypes.POOF,
-                    baseX, baseY + 0.1, baseZ,
-                    2, 0.3, 0.05, 0.3, 0.02
-                );
             }
         }
 
@@ -1241,11 +1222,11 @@ public class ThothEntity extends HostileEntity implements GeoEntity {
                         10, 0.3, 0.3, 0.3, 0.1
                     );
 
-                    // Purple magical particles
+                    // Dark purple magical particles
                     ((ServerWorld)this.getWorld()).spawnParticles(
-                        ParticleTypes.WITCH,
+                        ParticleTypes.DRAGON_BREATH,
                         beetle.getX(), beetle.getY() + 0.5, beetle.getZ(),
-                        5, 0.3, 0.5, 0.3, 0.05
+                        2, 0.3, 0.5, 0.3, 0.05
                     );
 
                     AncientCurse.LOGGER.info("Thoth summoned scarab beetle #{} at ({}, {}, {})",
