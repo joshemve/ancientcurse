@@ -31,7 +31,7 @@ public class ThothModel extends GeoModel<ThothEntity> {
     /* ------------------ CACHED BONES ------------------ */
     private CoreGeoBone head, body, root, thoth;
     private CoreGeoBone leftArm, rightArm, leftHand, rightHand;
-    private CoreGeoBone staff, scroll, tome;
+    private CoreGeoBone staffOfThoth, scroll;
     private CoreGeoBone leftLeg, rightLeg;
     private CoreGeoBone eyes, ibisHead;
 
@@ -93,8 +93,9 @@ public class ThothModel extends GeoModel<ThothEntity> {
         
         if (!thoth.isInCombat()) {
             // Gentle visual bobbing motion for peaceful floating look
-            float bobOffset = MathHelper.sin(age * 0.05f) * FLOATING_BOB_AMPLITUDE;
-            this.thoth.setPosY(bobOffset);
+            // REMOVED: Manual setPosY conflicts with animation file's idle floating
+            // float bobOffset = MathHelper.sin(age * 0.05f) * FLOATING_BOB_AMPLITUDE;
+            // this.thoth.setPosY(bobOffset);
             
             // Slight body rotation for mystical floating effect
             float bodyRotation = MathHelper.sin(age * 0.03f) * 0.02f;
@@ -106,7 +107,7 @@ public class ThothModel extends GeoModel<ThothEntity> {
             if (rightLeg != null) rightLeg.setRotX(-robeWave);
         } else {
             // Combat mode - more stable stance but keep slight mystical effects
-            this.thoth.setPosY(0);
+            // this.thoth.setPosY(0);
             
             // Very subtle body movement in combat for divine presence
             float combatSway = MathHelper.sin(age * 0.02f) * 0.01f;
@@ -142,87 +143,73 @@ public class ThothModel extends GeoModel<ThothEntity> {
     /**
      * Apply staff-specific animations based on Thoth's state
      * NOTE: Do NOT manipulate arm bones during attack animations - let GeckoLib handle them
+     * IMPORTANT: Only apply visual effects to props (staff), never during active attack animations
      */
     private void applyStaffAnimations(ThothEntity thoth, float age) {
-        if (staff == null) return;
-        
+        if (staffOfThoth == null) return;
+
         int attackState = thoth.getAttackState();
-        
-        // Only apply staff effects, never manipulate arms during attacks
-        if (attackState == 1) { // Magic ball attack
-            // Staff glowing effect only
-            float glowPulse = MathHelper.sin(age * 0.5f) * 0.2f;
-            staff.setScaleX(1.0f + glowPulse);
-            staff.setScaleY(1.0f + glowPulse);
-            
-        } else if (attackState == 3) { // Time bend attack
-            // Staff spinning motion only
-            float spinRotation = age * 0.3f;
-            staff.setRotZ(spinRotation);
-            
-        } else {
-            // Reset staff effects only
-            staff.setRotZ(0);
-            staff.setScaleX(1.0f);
-            staff.setScaleY(1.0f);
+
+        // FIXED: Only apply effects when NOT actively attacking to prevent animation conflicts
+        // Let GeckoLib's animations handle everything during attacks
+        if (attackState == 0 && !thoth.isInCombat()) {
+            // Idle mystical glow effect only when peaceful
+            float idleGlow = MathHelper.sin(age * 0.1f) * 0.05f + 1.0f;
+            staffOfThoth.setScaleX(idleGlow);
+            staffOfThoth.setScaleY(idleGlow);
         }
-        
-        // NEVER manipulate arm bones during attacks - GeckoLib animations handle this
+        // All attack animations are now 100% controlled by GeckoLib animation files
+        // No manual bone manipulation during combat or attacks
     }
 
     /**
-     * Apply reading animations when Thoth is reading scrolls or tomes
-     * NOTE: Only manipulate props (scroll/tome), not hands/arms during attacks
+     * Apply reading animations when Thoth is reading scrolls
+     * FIXED: Never manipulate bones during attacks - only apply subtle idle effects
      */
     private void applyReadingAnimations(ThothEntity thoth, float age) {
-        if (scroll == null || tome == null) return;
-        
-        if (thoth.isReading()) {
-            // Only manipulate hand during non-attack reading (idle reading)
-            if (leftHand != null && thoth.getAttackState() == 0) {
-                // Gentle page turning motion only during idle reading
-                float pageFlip = MathHelper.sin(age * 0.1f) * 0.1f;
+        if (scroll == null) return;
+
+        // FIXED: Only apply reading effects during peaceful idle state
+        // All attack animations (including scroll blast) are 100% handled by GeckoLib
+        if (thoth.isReading() && thoth.getAttackState() == 0 && !thoth.isInCombat()) {
+            // Very subtle page turning motion during peaceful reading only
+            if (leftHand != null) {
+                float pageFlip = MathHelper.sin(age * 0.08f) * 0.08f;
                 leftHand.setRotX(pageFlip);
             }
-            
-            // Scroll/tome positioning (props only, not hands)
-            if (thoth.getAttackState() == 2) { // Scroll blast attack
-                scroll.setRotX((float) Math.toRadians(-30));
-                scroll.setPosY(0.2f);
-            } else {
-                // Reading tome in idle
-                tome.setRotX((float) Math.toRadians(-15));
-                tome.setPosY(0.1f);
+        } else if (thoth.getAttackState() == 0) {
+            // Only reset when not in attack animation
+            if (leftHand != null) {
+                leftHand.setRotX(0);
             }
-        } else {
-            // Reset reading poses
-            if (leftHand != null && thoth.getAttackState() == 0) {
-                leftHand.setRotX(0); // Only reset hand when not attacking
-            }
-            scroll.setRotX(0);
-            scroll.setPosY(0);
-            tome.setRotX(0);
-            tome.setPosY(0);
         }
+        // Scroll position is now 100% controlled by animation files during attacks
     }
 
     /**
      * Apply special time magic visual effects
-     * NOTE: Do NOT manipulate arm bones during attack animations - let GeckoLib handle them
+     * FIXED: Only apply subtle scale distortion to body, never manipulate limbs
      */
     private void applyTimeMagicEffects(ThothEntity thoth, float age) {
-        if (!thoth.isCastingTimeMagic()) return;
-        
-        // Time distortion effect on the entire model (body only, not arms)
-        float timeWarp = MathHelper.sin(age * 0.15f) * 0.03f;
-        
+        if (!thoth.isCastingTimeMagic()) {
+            // Reset time distortion when not casting
+            if (body != null) {
+                body.setScaleX(1.0f);
+                body.setScaleZ(1.0f);
+            }
+            return;
+        }
+
+        // Very subtle time distortion effect on body only during time magic
+        // This adds visual flair without interfering with the time_bend animation
+        float timeWarp = MathHelper.sin(age * 0.12f) * 0.02f;
+
         if (body != null) {
             body.setScaleX(1.0f + timeWarp);
             body.setScaleZ(1.0f - timeWarp);
         }
-        
-        // REMOVED: Do not manipulate arms during time magic - GeckoLib animations handle this
-        // The time_bend animation in the JSON file will control arm positioning
+
+        // All limb positioning and rotations are 100% controlled by time_bend animation
     }
 
     /**
@@ -244,9 +231,9 @@ public class ThothModel extends GeoModel<ThothEntity> {
         rightLeg = getModelBone("right_leg");
         
         // Equipment bones
-        staff = getModelBone("staff");
+        staffOfThoth = getModelBone("staff_of_thoth"); // Fixed bone name
         scroll = getModelBone("scroll");
-        tome = getModelBone("tome");
+        // tome = getModelBone("tome"); // Removed: Bone does not exist
         
         // Feature bones
         eyes = getModelBone("eyes");

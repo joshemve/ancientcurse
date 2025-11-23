@@ -1,0 +1,21 @@
+{
+  "variants": {
+    "": [
+      {
+        "model": "ancientcurse:block/sand_path"
+      },
+      {
+        "model": "ancientcurse:block/sand_path",
+        "y": 90
+      },
+      {
+        "model": "ancientcurse:block/sand_path",
+        "y": 180
+      },
+      {
+        "model": "ancientcurse:block/sand_path",
+        "y": 270
+      }
+    ]
+  }
+}

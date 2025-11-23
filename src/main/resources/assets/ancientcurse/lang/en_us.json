@@ -1,4 +1,6 @@
 {
+  "item.ancientcurse.animation_debug_stick": "Animation Debug Stick",
+  "item.ancientcurse.animation_debug_stick.tooltip": "Right-click entities to see their current animation state",
   "item.ancientcurse.staff_of_ra": "Staff of Ra",
   "item.ancientcurse.staff_of_ra.tooltip": "Divine staff blessed by the sun god himself",
   "item.ancientcurse.staff_of_ra.tooltip1": "Hold right-click to charge a devastating sun beam",
@@ -237,6 +239,7 @@
   "block.ancientcurse.sycamore_slab": "Sycamore Slab",
   "block.ancientcurse.sycamore_leaves": "Sycamore Leaves",
   "block.ancientcurse.sycamore_leaves.tooltip": "Leaves that bear sacred figs",
+  "block.ancientcurse.sycamore_sapling": "Sycamore Sapling",
   "block.ancientcurse.date_palm_log": "Date Palm Log",
   "block.ancientcurse.date_palm_log.tooltip": "Sturdy wood from desert palms",
   "block.ancientcurse.date_palm_planks": "Date Palm Planks",
@@ -246,6 +249,7 @@
   "block.ancientcurse.date_palm_slab": "Date Palm Slab",
   "block.ancientcurse.date_palm_leaves": "Date Palm Leaves",
   "block.ancientcurse.date_palm_leaves.tooltip": "Fronds that provide shade and dates",
+  "block.ancientcurse.date_palm_sapling": "Date Palm Sapling",
   "block.ancientcurse.date_block": "Date Fruit",
   "block.ancientcurse.date_block.tooltip": "Bundle of sweet desert dates",
   "block.ancientcurse.smooth_sand": "Smooth Sand",
@@ -295,6 +299,8 @@
   "block.ancientcurse.sandstone_brick_tiles_slab": "Sandstone Brick Tiles Slab",
   "block.ancientcurse.sandstone_brick_tiles_stairs": "Sandstone Brick Tiles Stairs",
   "block.ancientcurse.sandstone_brick_tiles_wall": "Sandstone Brick Tiles Wall",
+  "block.ancientcurse.sand_path": "Sand Path",
+  "block.ancientcurse.sandstone_path": "Sandstone Path",
   "block.ancientcurse.polished_bronze": "Polished Bronze",
   "block.ancientcurse.deshret_wavy_sand": "Deshret Wavy Sand",
   "block.ancientcurse.hardened_deshret_stone": "Hardened Deshret Stone",
@@ -439,6 +445,16 @@
   
   "commands.khamsin.success.single": "Applied Khamsin Curse (Stage %d) to %s",
   "commands.khamsin.success.multiple": "Applied Khamsin Curse (Stage %d) to %d players",
-  
-  "tooltip.ancientcurse.ancient_curse": "Ancient Curse"
+
+  "tooltip.ancientcurse.ancient_curse": "Ancient Curse",
+
+  "subtitles.ancientcurse.thoth_ambient": "Thoth whispers ancient words",
+  "subtitles.ancientcurse.thoth_attack_magic_ball": "Thoth casts magic ball",
+  "subtitles.ancientcurse.thoth_attack_melee": "Thoth strikes with staff",
+  "subtitles.ancientcurse.thoth_attack_scroll_blast": "Thoth unleashes forbidden knowledge",
+  "subtitles.ancientcurse.thoth_attack_time_bend": "Time bends to Thoth's will",
+  "subtitles.ancientcurse.thoth_spawn": "Thoth manifests",
+  "subtitles.ancientcurse.thoth_death": "Thoth fades from existence",
+  "subtitles.ancientcurse.thoth_hurt": "Thoth grunts in pain",
+  "subtitles.ancientcurse.thoth_summon": "Thoth summons servants"
 }

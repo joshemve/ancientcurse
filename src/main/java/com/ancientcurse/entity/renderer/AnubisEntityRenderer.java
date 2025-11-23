@@ -25,51 +25,24 @@ public class AnubisEntityRenderer extends GeoEntityRenderer<AnubisEntity> {
     @Override
     public void render(AnubisEntity entity, float entityYaw, float partialTick, MatrixStack poseStack,
                       VertexConsumerProvider bufferSource, int packedLight) {
-        
+
+        // FIXED: Removed MatrixStack transformations that interfere with GeckoLib animations
+        // MatrixStack.translate() affects ALL rendering including bone animations, causing arms to "break"
+        // Phase-specific scaling is kept minimal and only applied to root entity scale
+
         poseStack.push();
-        
-        // Scale based on boss phase for dramatic effect
-        float scale = switch (entity.getBossPhase()) {
-            case AWAKENING -> 1.1F;
-            case JUDGING -> 1.15F;
-            case ENRAGED -> 1.2F;
-            case MERCIFUL -> 1.05F;
-            case COMBAT -> 1.1F;
-            case DORMANT -> 1.0F;
-            case DEAD -> 0.9F;
-            default -> 1.0F;
-        };
+
+        // MINIMAL scaling only - removed phase-specific scales that were breaking animations
+        // If you need phase effects, implement them in the animation files instead
+        float scale = 1.0F; // Use consistent scale to prevent animation glitches
         poseStack.scale(scale, scale, scale);
-        
-        // Apply phase-specific visual effects using pose stack
-        switch (entity.getBossPhase()) {
-            case AWAKENING:
-                // Trembling effect during awakening
-                float shake = (float) (Math.sin(entity.age * 0.3f) * 0.02f);
-                poseStack.translate(shake, 0, shake);
-                break;
-                
-            case JUDGING:
-                // Subtle floating effect during judgment
-                float judgeFloat = (float) (Math.sin(entity.age * 0.05f) * 0.05f);
-                poseStack.translate(0, judgeFloat, 0);
-                break;
-                
-            case MERCIFUL:
-                // Gentle swaying when merciful
-                float sway = (float) (Math.sin(entity.age * 0.02f) * 0.03f);
-                poseStack.translate(sway, 0, 0);
-                break;
-                
-            case ENRAGED:
-                // Aggressive trembling when enraged
-                float rage = (float) (Math.sin(entity.age * 0.4f) * 0.01f);
-                poseStack.translate(rage, rage * 0.5f, rage);
-                break;
-        }
-        
+
+        // REMOVED: All translate() calls - these were breaking howl animations
+        // The constant adjustments to the MatrixStack were conflicting with GeckoLib's
+        // bone position calculations, causing arms to move incorrectly
+
         super.render(entity, entityYaw, partialTick, poseStack, bufferSource, packedLight);
-        
+
         poseStack.pop();
     }
 

@@ -4,8 +4,10 @@ import com.ancientcurse.AncientCurse;
 import com.ancientcurse.ModItems;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.PillarBlock;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.StateManager;
@@ -22,9 +24,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * A special log block that grows figs over time and can be harvested
+ * A special log block that grows figs over time and can be harvested.
+ * Extends PillarBlock so it supports the log AXIS property for proper tree generation.
  */
-public class SycamoreFigLogBlock extends Block {
+public class SycamoreFigLogBlock extends PillarBlock {
     // Define the growth stage property (0-3)
     public static final IntProperty STAGE = IntProperty.of("stage", 0, 3);
     
@@ -36,14 +39,21 @@ public class SycamoreFigLogBlock extends Block {
 
     public SycamoreFigLogBlock(Settings settings) {
         super(settings);
-        // Set the default state to stage 0 (no figs)
-        this.setDefaultState(this.getStateManager().getDefaultState().with(STAGE, 0));
+        // Default state: axis Y and stage 0
+        this.setDefaultState(this.getStateManager().getDefaultState()
+            .with(AXIS, Direction.Axis.Y)
+            .with(STAGE, 0));
     }
 
     @Override
     protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
-        // Add the STAGE property to the block state
-        builder.add(STAGE);
+        // Add AXIS (from PillarBlock) and STAGE properties
+        builder.add(AXIS, STAGE);
+    }
+
+    @Override
+    public BlockState getPlacementState(ItemPlacementContext ctx) {
+        return this.getDefaultState().with(AXIS, ctx.getSide().getAxis());
     }
 
     @Override

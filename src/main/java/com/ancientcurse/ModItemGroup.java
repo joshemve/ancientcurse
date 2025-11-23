@@ -34,6 +34,9 @@ public class ModItemGroup {
             .displayName(Text.translatable("itemgroup.ancientcurse"))
             .icon(() -> new ItemStack(ModItems.STAFF_OF_RA, 1))
             .entries((displayContext, entries) -> {
+                // Debug Tools
+                safeAdd(entries, ModItems.ANIMATION_DEBUG_STICK);
+
                 // Tools and Items
                 safeAdd(entries, ModItems.STAFF_OF_RA);
                 
@@ -63,6 +66,7 @@ public class ModItemGroup {
                 safeAdd(entries, ModBlocks.SYCAMORE_FENCE);
                 safeAdd(entries, ModBlocks.SYCAMORE_FENCE_GATE);
                 safeAdd(entries, ModBlocks.SYCAMORE_LEAVES);
+                safeAdd(entries, ModBlocks.SYCAMORE_SAPLING);
                 safeAdd(entries, ModBlocks.DATE_PALM_LOG);
                 safeAdd(entries, ModBlocks.DATE_PALM_PLANKS);
                 safeAdd(entries, com.ancientcurse.block.registry.ConstructionBlocks.DATE_PALM_STAIRS);
@@ -70,6 +74,7 @@ public class ModItemGroup {
                 safeAdd(entries, ModBlocks.DATE_PALM_FENCE);
                 safeAdd(entries, ModBlocks.DATE_PALM_FENCE_GATE);
                 safeAdd(entries, ModBlocks.DATE_PALM_LEAVES);
+                safeAdd(entries, ModBlocks.DATE_PALM_SAPLING);
                 
                 // Terrain blocks
                 safeAdd(entries, ModBlocks.SMOOTH_SAND);

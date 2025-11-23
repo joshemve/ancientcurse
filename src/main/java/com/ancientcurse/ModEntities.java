@@ -104,7 +104,7 @@ public class ModEntities {
         Registries.ENTITY_TYPE,
         new Identifier(AncientCurse.MOD_ID, "scarab_beetle"),
         FabricEntityTypeBuilder.create(SpawnGroup.CREATURE, ScarabBeetleEntity::new)
-            .dimensions(EntityDimensions.fixed(1.4f, 0.6f)) // Wider to match model proportions
+            .dimensions(EntityDimensions.fixed(1.0f, 0.9f)) // Increased height from 0.6 to 0.9 for easier hitting
             .trackRangeBlocks(48)
             .trackedUpdateRate(3)
             .build()

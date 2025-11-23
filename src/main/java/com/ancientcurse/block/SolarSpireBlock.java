@@ -146,15 +146,16 @@ public class SolarSpireBlock extends BlockWithEntity implements LandingBlock {
     }
     
     private boolean hasNearbyCursedEarth(World world, BlockPos center) {
-        // Check in a small radius for any cursed earth or cursed stone
+        // Check in a small radius for any cursed blocks (including submerged)
         int checkRadius = 10;
         for (int x = -checkRadius; x <= checkRadius; x++) {
-            for (int y = -3; y <= 3; y++) {
+            for (int y = -10; y <= 10; y++) { // Increased from -3/+3 to -10/+10 for submerged detection
                 for (int z = -checkRadius; z <= checkRadius; z++) {
                     BlockPos checkPos = center.add(x, y, z);
                     BlockState state = world.getBlockState(checkPos);
                     if (state.getBlock() == ModBlocks.CURSED_EARTH || 
-                        state.getBlock() == ModBlocks.CURSED_STONE) {
+                        state.getBlock() == ModBlocks.CURSED_STONE ||
+                        state.getBlock() == ModBlocks.CURSED_SAND) { // Added cursed sand
                         return true;
                     }
                 }
@@ -711,9 +712,12 @@ public class SolarSpireBlock extends BlockWithEntity implements LandingBlock {
         private int blocksRestored = 0;
         private float currentRadius = 1.0f; // Start at radius 1
         private int emptyWaveCount = 0; // Track waves with no corruption found
+        private int waveCount = 0; // Track total waves for throttling
         private static final float RADIUS_INCREMENT = 6.0f; // Base expansion rate (reduced for thoroughness)
-        private static final int JUMP_SEARCH_RADIUS = 35; // Search radius for corruption jumps
+        private static final int JUMP_SEARCH_RADIUS = 60; // Increased from 35 to 60 for distant corruption
         private static final float ORGANIC_VARIATION = 0.3f; // Adds natural variation to the wave
+        private static final int RESCAN_INTERVAL = 5; // Only re-scan for placed blocks every 5 waves
+        private static final int RESCAN_RADIUS = 30; // Only re-scan within 30 blocks of spire
         private final Random waveRandom = new Random(); // For organic patterns
         
         public CleansingOperation(BlockPos start, UUID playerUuid) {
@@ -729,9 +733,15 @@ public class SolarSpireBlock extends BlockWithEntity implements LandingBlock {
         public boolean processWave(ServerWorld world, BlockPos stationPos) {
             int processedThisTick = 0;
             boolean foundAnyCorruption = false;
+            waveCount++;
             
-            // Always scan the current radius thoroughly
+            // Scan the current radius thoroughly
             scanCurrentRadius(world);
+            
+            // Only re-scan for placed blocks every N waves and only near the spire
+            if (waveCount % RESCAN_INTERVAL == 0 && currentRadius < 100) {
+                rescanForPlacedBlocks(world);
+            }
             
             // Add all corrupted blocks from adjacent to already processed blocks
             expandFromProcessedBlocks(world);
@@ -802,18 +812,19 @@ public class SolarSpireBlock extends BlockWithEntity implements LandingBlock {
         private void scanCurrentRadius(ServerWorld world) {
             int radiusInt = (int)Math.ceil(currentRadius);
             
-            // Scan everything within current radius thoroughly
+            // Scan everything within current radius thoroughly (but only NEW positions)
             for (int x = -radiusInt; x <= radiusInt; x++) {
                 for (int z = -radiusInt; z <= radiusInt; z++) {
                     double horizontalDistance = Math.sqrt(x * x + z * z);
                     
                     // Check if within current scanning radius
                     if (horizontalDistance <= currentRadius) {
-                        // Slightly reduce Y range at very long distances for performance
-                        int yRange = currentRadius > 150 ? 7 : 10;
+                        // Increased Y range for submerged blocks
+                        int yRange = currentRadius > 150 ? 10 : 15; // Increased from 7/10 to 10/15
                         for (int y = -yRange; y <= yRange; y++) {
                             BlockPos checkPos = centerPos.add(x, y, z);
                             
+                            // Only check NEW positions (not already processed or in frontier)
                             if (!processed.contains(checkPos) && !corruptionFrontier.containsKey(checkPos)) {
                                 BlockState state = world.getBlockState(checkPos);
                                 if (isCorruptedBlock(state)) {
@@ -828,10 +839,47 @@ public class SolarSpireBlock extends BlockWithEntity implements LandingBlock {
             }
         }
         
+        /**
+         * Re-scan a small area around the spire for blocks placed AFTER cleansing started
+         * Only called periodically to avoid performance issues
+         */
+        private void rescanForPlacedBlocks(ServerWorld world) {
+            // Only scan a small radius around the spire (where players are likely to place blocks)
+            for (int x = -RESCAN_RADIUS; x <= RESCAN_RADIUS; x++) {
+                for (int z = -RESCAN_RADIUS; z <= RESCAN_RADIUS; z++) {
+                    double horizontalDistance = Math.sqrt(x * x + z * z);
+                    
+                    if (horizontalDistance <= RESCAN_RADIUS) {
+                        // Check a moderate Y range
+                        for (int y = -10; y <= 10; y++) {
+                            BlockPos checkPos = centerPos.add(x, y, z);
+                            
+                            // Check if this position was already processed but is now corrupted again
+                            if (processed.contains(checkPos)) {
+                                BlockState state = world.getBlockState(checkPos);
+                                if (isCorruptedBlock(state)) {
+                                    // Block was placed after cleansing! Re-add to frontier
+                                    float priority = (float)Math.sqrt(checkPos.getSquaredDistance(centerPos));
+                                    corruptionFrontier.put(checkPos, priority);
+                                    processed.remove(checkPos);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
         private void expandFromProcessedBlocks(ServerWorld world) {
             // Check around all recently processed blocks for missed corruption
+            // Limit to prevent checking too many blocks
             Set<BlockPos> recentlyProcessed = new HashSet<>();
+            int checkLimit = 500; // Limit to 500 most recent blocks for performance
+            int checked = 0;
+            
             for (BlockPos processedPos : processed) {
+                if (checked++ >= checkLimit) break; // Performance limit
+                
                 // Only check recently processed blocks (within current radius + a bit)
                 if (processedPos.isWithinDistance(centerPos, currentRadius + 10)) {
                     recentlyProcessed.add(processedPos);
@@ -956,20 +1004,21 @@ public class SolarSpireBlock extends BlockWithEntity implements LandingBlock {
         private boolean isCorruptedBlock(BlockState state) {
             Block block = state.getBlock();
             
-            // Check for cursed earth and cursed stone
-            if (block == ModBlocks.CURSED_EARTH || block == ModBlocks.CURSED_STONE) {
+            // Check for cursed earth, cursed stone, and cursed sand
+            if (block == ModBlocks.CURSED_EARTH || block == ModBlocks.CURSED_STONE || block == ModBlocks.CURSED_SAND) {
                 return true;
             }
             
             // Check if it's from the CursedPlantBlocks registry, Small Khamsin Spread, or Reed of Sekhem
             String blockName = Registries.BLOCK.getId(block).getPath();
-            if (blockName.contains("cursed") || blockName.contains("withered") || 
+            if (blockName.contains("cursed") || blockName.contains("withered") ||
                 blockName.contains("isfet") || blockName.contains("duat") ||
                 blockName.contains("khemnu") || blockName.contains("kheru") ||
                 blockName.contains("menfet") || blockName.contains("sutekh") ||
                 blockName.contains("bloodshade") || blockName.contains("duamutef") ||
                 blockName.contains("khamsin") || blockName.contains("reed_of_sekhem") ||
-                blockName.contains("sekhem")) {
+                blockName.contains("sekhem") || blockName.contains("vine_of_apep") ||
+                blockName.contains("apep")) {
                 return true;
             }
             
@@ -1004,20 +1053,20 @@ public class SolarSpireBlock extends BlockWithEntity implements LandingBlock {
                 if (blockName.contains("reed_of_sekhem") || blockName.contains("sekhem")) {
                     BlockState originalState = tracker.getOriginalBlock(pos);
                     if (originalState != null) {
-                        // Restore to original grass/fern
-                        AncientCurse.LOGGER.debug("Restoring Reed of Sekhem to original {} at {}", 
+                        // Restore to original grass/fern (no drops)
+                        AncientCurse.LOGGER.debug("Restoring Reed of Sekhem to original {} at {}",
                             originalState.getBlock().getTranslationKey(), pos);
-                        world.setBlockState(pos, originalState);
+                        world.setBlockState(pos, originalState, Block.NOTIFY_ALL | Block.SKIP_DROPS);
                         tracker.clearTracking(pos);
                         blocksRestored++;
                     } else {
-                        // No tracked original, just remove it
-                        world.setBlockState(pos, Blocks.AIR.getDefaultState());
+                        // No tracked original, just remove it (no drops)
+                        world.setBlockState(pos, Blocks.AIR.getDefaultState(), Block.NOTIFY_ALL | Block.SKIP_DROPS);
                     }
                 } else {
-                    // Other corrupted plants are just removed (replaced with air)
+                    // Other corrupted plants are just removed (replaced with air, no drops)
                     AncientCurse.LOGGER.debug("Removing corrupted plant at {}: {}", pos, blockName);
-                    world.setBlockState(pos, Blocks.AIR.getDefaultState());
+                    world.setBlockState(pos, Blocks.AIR.getDefaultState(), Block.NOTIFY_ALL | Block.SKIP_DROPS);
                 }
                 
                 // Also remove any Khamsin entities at this position
@@ -1025,33 +1074,38 @@ public class SolarSpireBlock extends BlockWithEntity implements LandingBlock {
             } else {
                 // For cursed earth/stone, try to restore original
                 BlockState originalState = tracker.getOriginalBlock(pos);
-                
-                AncientCurse.LOGGER.debug("Cleansing {} at {} - Original tracked: {}", 
-                    currentBlock.getTranslationKey(), pos, 
+
+                AncientCurse.LOGGER.debug("Cleansing {} at {} - Original tracked: {}",
+                    currentBlock.getTranslationKey(), pos,
                     originalState != null ? originalState.getBlock().getTranslationKey() : "null");
-                
-                if (originalState != null && originalState.getBlock() != ModBlocks.CURSED_EARTH && 
+
+                if (originalState != null && originalState.getBlock() != ModBlocks.CURSED_EARTH &&
                     originalState.getBlock() != ModBlocks.CURSED_STONE) {
-                    // Restore to original state
-                    AncientCurse.LOGGER.info("Restoring {} to original {} at {}", 
+                    // Restore to original state (no drops)
+                    AncientCurse.LOGGER.info("Restoring {} to original {} at {}",
                         currentBlock.getTranslationKey(), originalState.getBlock().getTranslationKey(), pos);
-                    world.setBlockState(pos, originalState);
+                    world.setBlockState(pos, originalState, Block.NOTIFY_ALL | Block.SKIP_DROPS);
                     tracker.clearTracking(pos);
                     blocksRestored++;
                 } else if (currentBlock == ModBlocks.CURSED_EARTH) {
-                    // No tracked original - default cursed earth to grass block
+                    // No tracked original - default cursed earth to grass block (no drops)
                     AncientCurse.LOGGER.debug("No original tracked for cursed earth at {}, defaulting to grass", pos);
-                    world.setBlockState(pos, Blocks.GRASS_BLOCK.getDefaultState());
+                    world.setBlockState(pos, Blocks.GRASS_BLOCK.getDefaultState(), Block.NOTIFY_ALL | Block.SKIP_DROPS);
                     tracker.clearTracking(pos); // Clear any stale tracking
                 } else if (currentBlock == ModBlocks.CURSED_STONE) {
-                    // No tracked original - default cursed stone to regular stone
+                    // No tracked original - default cursed stone to regular stone (no drops)
                     AncientCurse.LOGGER.debug("No original tracked for cursed stone at {}, defaulting to stone", pos);
-                    world.setBlockState(pos, Blocks.STONE.getDefaultState());
+                    world.setBlockState(pos, Blocks.STONE.getDefaultState(), Block.NOTIFY_ALL | Block.SKIP_DROPS);
+                    tracker.clearTracking(pos); // Clear any stale tracking
+                } else if (currentBlock == ModBlocks.CURSED_SAND) {
+                    // No tracked original - default cursed sand to regular sand (no drops)
+                    AncientCurse.LOGGER.debug("No original tracked for cursed sand at {}, defaulting to sand", pos);
+                    world.setBlockState(pos, Blocks.SAND.getDefaultState(), Block.NOTIFY_ALL | Block.SKIP_DROPS);
                     tracker.clearTracking(pos); // Clear any stale tracking
                 } else {
-                    // Some other corrupted block with no original tracked - remove it
+                    // Some other corrupted block with no original tracked - remove it (no drops)
                     AncientCurse.LOGGER.debug("No original tracked for {} at {}, removing", blockName, pos);
-                    world.setBlockState(pos, Blocks.AIR.getDefaultState());
+                    world.setBlockState(pos, Blocks.AIR.getDefaultState(), Block.NOTIFY_ALL | Block.SKIP_DROPS);
                 }
             }
             

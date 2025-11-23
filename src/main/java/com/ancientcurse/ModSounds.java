@@ -10,12 +10,27 @@ public class ModSounds {
     // Thoth Sound Events
     public static final SoundEvent THOTH_AMBIENT = registerSoundEvent("thoth_ambient");
     public static final SoundEvent THOTH_ATTACK_MAGIC_BALL = registerSoundEvent("thoth_attack_magic_ball");
+    public static final SoundEvent THOTH_ATTACK_MELEE = registerSoundEvent("thoth_attack_melee");
     public static final SoundEvent THOTH_ATTACK_SCROLL_BLAST = registerSoundEvent("thoth_attack_scroll_blast");
     public static final SoundEvent THOTH_ATTACK_TIME_BEND = registerSoundEvent("thoth_attack_time_bend");
     public static final SoundEvent THOTH_SPAWN = registerSoundEvent("thoth_spawn");
     public static final SoundEvent THOTH_DEATH = registerSoundEvent("thoth_death");
     public static final SoundEvent THOTH_HURT = registerSoundEvent("thoth_hurt");
     public static final SoundEvent THOTH_SUMMON = registerSoundEvent("thoth_summon");
+    public static final SoundEvent THOTH_INTRUDERS = registerSoundEvent("thoth_intruders");
+    public static final SoundEvent THOTH_YELL = registerSoundEvent("thoth_yell");
+    public static final SoundEvent THOTH_WIND_GUST = registerSoundEvent("thoth_wind_gust");
+    public static final SoundEvent THOTH_MAGIC_ATTACK = registerSoundEvent("thoth_magic_attack");
+    
+    // Thoth laugh variants (randomly chosen for personality)
+    public static final SoundEvent THOTH_LAUGH_1 = registerSoundEvent("thoth_laugh_1");
+    public static final SoundEvent THOTH_LAUGH_2 = registerSoundEvent("thoth_laugh_2");
+    public static final SoundEvent THOTH_LAUGH_3 = registerSoundEvent("thoth_laugh_3");
+    public static final SoundEvent THOTH_LAUGH_4 = registerSoundEvent("thoth_laugh_4");
+    
+    // Additional hit/breath sounds
+    public static final SoundEvent THOTH_HIT_2 = registerSoundEvent("thoth_hit_2");
+    public static final SoundEvent THOTH_BREATH_1 = registerSoundEvent("thoth_breath_1");
 
 
     private static SoundEvent registerSoundEvent(String name) {

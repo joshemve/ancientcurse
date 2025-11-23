@@ -386,17 +386,83 @@ public class CursedStoneBlock extends BaseAncientCurseBlock {
             
             // Decrease ankh value when standing on cursed stone (slower than cursed earth)
             if (world.getTime() % 100 == 0) { // Every 5 seconds (twice as fast as before)
-                AnkhDataManager.decreaseAnkhValue(player, 1);
+                int newAnkh = AnkhDataManager.decreaseAnkhValue(player, 1);
+
+                // Handle Ankh depletion when standing on cursed blocks
+                if (newAnkh <= 0) {
+                    handleAnkhDepletionOnCursedBlock(player, world, pos);
+                }
             }
         }
     }
     
+    /**
+     * Handles what happens when a player's Ankh meter depletes while standing on cursed stone blocks.
+     * Applies damage and debuff effects to punish the player for staying on cursed ground.
+     */
+    private void handleAnkhDepletionOnCursedBlock(PlayerEntity player, ServerWorld world, BlockPos pos) {
+        // Apply magic damage when Ankh is depleted on cursed blocks
+        player.damage(world.getDamageSources().magic(), 1.5f);
+
+        // Apply wither effect to show the curse is harming the player
+        player.addStatusEffect(new net.minecraft.entity.effect.StatusEffectInstance(
+            net.minecraft.entity.effect.StatusEffects.WITHER,
+            100, // 5 seconds
+            0,
+            false,
+            true,
+            true
+        ));
+
+        // Apply weakness to encourage leaving the cursed area
+        player.addStatusEffect(new net.minecraft.entity.effect.StatusEffectInstance(
+            net.minecraft.entity.effect.StatusEffects.WEAKNESS,
+            200, // 10 seconds
+            0,
+            false,
+            true,
+            true
+        ));
+
+        // Spawn ominous particles around the player
+        for (int i = 0; i < 15; i++) {
+            double offsetX = (world.random.nextDouble() - 0.5) * 1.5;
+            double offsetY = world.random.nextDouble() * 2.0;
+            double offsetZ = (world.random.nextDouble() - 0.5) * 1.5;
+
+            world.addParticle(
+                new net.minecraft.particle.DustParticleEffect(CURSED_PARTICLE_COLOR, 1.5f),
+                player.getX() + offsetX,
+                player.getY() + offsetY,
+                player.getZ() + offsetZ,
+                0, 0.05, 0
+            );
+        }
+
+        // Play warning sound
+        world.playSound(
+            null,
+            player.getX(), player.getY(), player.getZ(),
+            net.minecraft.sound.SoundEvents.ENTITY_ENDER_DRAGON_GROWL,
+            player.getSoundCategory(),
+            0.5f,
+            1.5f
+        );
+
+        // Send warning message
+        player.sendMessage(
+            net.minecraft.text.Text.literal("The cursed stone drains your essence!")
+                .formatted(net.minecraft.util.Formatting.DARK_GRAY, net.minecraft.util.Formatting.ITALIC),
+            true // Action bar
+        );
+    }
+
     // Helper class for spread candidates
     private static class SpreadCandidate {
         final BlockPos pos;
         final Direction direction;
         final float weight;
-        
+
         SpreadCandidate(BlockPos pos, Direction direction, float weight) {
             this.pos = pos;
             this.direction = direction;

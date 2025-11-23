@@ -4,10 +4,15 @@ import com.ancientcurse.ModBlocks;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.TorchBlock;
 import net.minecraft.item.ItemPlacementContext;
+import net.minecraft.item.ItemStack;
+import net.minecraft.loot.context.LootContextParameterSet;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.WorldView;
+
+import java.util.Collections;
+import java.util.List;
 
 public class SandstoneTorchBlock extends TorchBlock {
     public SandstoneTorchBlock(Settings settings) {
@@ -42,5 +47,11 @@ public class SandstoneTorchBlock extends TorchBlock {
         }
         
         return blockState;
+    }
+
+    @Override
+    public List<ItemStack> getDroppedStacks(BlockState state, LootContextParameterSet.Builder builder) {
+        // Always drop the sandstone torch item
+        return Collections.singletonList(new ItemStack(ModBlocks.SANDSTONE_TORCH));
     }
 }

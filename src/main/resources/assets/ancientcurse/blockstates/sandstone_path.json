@@ -1,0 +1,21 @@
+{
+  "variants": {
+    "": [
+      {
+        "model": "ancientcurse:block/sandstone_path"
+      },
+      {
+        "model": "ancientcurse:block/sandstone_path",
+        "y": 90
+      },
+      {
+        "model": "ancientcurse:block/sandstone_path",
+        "y": 180
+      },
+      {
+        "model": "ancientcurse:block/sandstone_path",
+        "y": 270
+      }
+    ]
+  }
+}

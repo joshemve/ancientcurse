@@ -881,7 +881,12 @@ public class CursedEarthBlock extends BaseAncientCurseBlock {
             // Only decrease ankh value when standing on cursed earth (no negative status effects)
             long currentTime = world.getTime();
             if (currentTime % 50 == 0) { // Every 2.5 seconds (twice as fast as before)
-                AnkhDataManager.decreaseAnkhValue(player, 1);
+                int newAnkh = AnkhDataManager.decreaseAnkhValue(player, 1);
+
+                // Handle Ankh depletion when standing on cursed blocks
+                if (newAnkh <= 0) {
+                    handleAnkhDepletionOnCursedBlock(player, world, pos);
+                }
             }
             
             // Apply additional effects based on exposure time
@@ -908,6 +913,77 @@ public class CursedEarthBlock extends BaseAncientCurseBlock {
         }
     }
     
+    /**
+     * Handles what happens when a player's Ankh meter depletes while standing on cursed earth blocks.
+     * Applies damage and debuff effects to punish the player for staying on cursed ground.
+     */
+    private void handleAnkhDepletionOnCursedBlock(PlayerEntity player, ServerWorld world, BlockPos pos) {
+        // Apply magic damage when Ankh is depleted on cursed blocks
+        player.damage(world.getDamageSources().magic(), 2.0f);
+
+        // Apply wither effect to show the curse is harming the player
+        player.addStatusEffect(new net.minecraft.entity.effect.StatusEffectInstance(
+            net.minecraft.entity.effect.StatusEffects.WITHER,
+            120, // 6 seconds (longer than other cursed blocks)
+            0,
+            false,
+            true,
+            true
+        ));
+
+        // Apply slowness to make it harder to escape
+        player.addStatusEffect(new net.minecraft.entity.effect.StatusEffectInstance(
+            net.minecraft.entity.effect.StatusEffects.SLOWNESS,
+            200, // 10 seconds
+            1,
+            false,
+            true,
+            true
+        ));
+
+        // Apply weakness
+        player.addStatusEffect(new net.minecraft.entity.effect.StatusEffectInstance(
+            net.minecraft.entity.effect.StatusEffects.WEAKNESS,
+            200, // 10 seconds
+            0,
+            false,
+            true,
+            true
+        ));
+
+        // Spawn ominous particles around the player (more particles than other cursed blocks)
+        for (int i = 0; i < 20; i++) {
+            double offsetX = (world.random.nextDouble() - 0.5) * 2.0;
+            double offsetY = world.random.nextDouble() * 2.5;
+            double offsetZ = (world.random.nextDouble() - 0.5) * 2.0;
+
+            world.addParticle(
+                new net.minecraft.particle.DustParticleEffect(CURSED_PARTICLE_COLOR, 1.5f),
+                player.getX() + offsetX,
+                player.getY() + offsetY,
+                player.getZ() + offsetZ,
+                0, 0.08, 0
+            );
+        }
+
+        // Play warning sound (deeper pitch for earth)
+        world.playSound(
+            null,
+            player.getX(), player.getY(), player.getZ(),
+            net.minecraft.sound.SoundEvents.ENTITY_WARDEN_AMBIENT,
+            player.getSoundCategory(),
+            0.6f,
+            0.8f
+        );
+
+        // Send warning message
+        player.sendMessage(
+            net.minecraft.text.Text.literal("The cursed earth consumes your soul!")
+                .formatted(net.minecraft.util.Formatting.DARK_GREEN, net.minecraft.util.Formatting.BOLD),
+            true // Action bar
+        );
+    }
+
     /**
      * Decays nearby leaf blocks with gradual withering effect
      */

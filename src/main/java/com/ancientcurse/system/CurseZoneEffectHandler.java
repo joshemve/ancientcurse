@@ -11,11 +11,19 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.math.BlockPos;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+
 public class CurseZoneEffectHandler {
-    
+
     private static int tickCounter = 0;
     private static final int TICKS_PER_SECOND = 20;
     private static final int DRAIN_INTERVAL_SECONDS = 3; // Apply drain every 3 seconds
+
+    // Cooldown tracking for Ankh depletion effects (prevents spam)
+    private static final Map<UUID, Long> depletionEffectCooldowns = new HashMap<>();
+    private static final long DEPLETION_EFFECT_COOLDOWN_TICKS = 60; // 3 seconds between depletion effects
     
     /**
      * Called every server tick to handle curse zone effects
@@ -49,9 +57,14 @@ public class CurseZoneEffectHandler {
                         // drainRate is per minute, so divide by 60 for per second, then multiply by interval
                         float drainPerInterval = (drainRate / 60.0f) * DRAIN_INTERVAL_SECONDS;
                         int drainAmount = Math.max(1, Math.round(drainPerInterval));
-                        
+
                         int newAnkh = AnkhDataManager.decreaseAnkhValue(player, drainAmount);
-                        
+
+                        // Handle Ankh depletion (when meter hits 0)
+                        if (newAnkh <= 0) {
+                            handleAnkhDepletion(player, zone);
+                        }
+
                         // Send update packet to client to update HUD
                         com.ancientcurse.network.CurseZonePackets.sendAnkhValueToClient(player, newAnkh);
                     }
@@ -68,6 +81,78 @@ public class CurseZoneEffectHandler {
         }
     }
     
+    /**
+     * Handles what happens when a player's Ankh meter is fully depleted (hits 0).
+     * This applies severe consequences including direct damage and powerful curses.
+     * Uses cooldown system to prevent spam effects.
+     */
+    private static void handleAnkhDepletion(ServerPlayerEntity player, CurseZoneArea zone) {
+        UUID playerId = player.getUuid();
+        long currentTime = player.getWorld().getTime();
+
+        // Check cooldown to prevent spam
+        Long lastEffect = depletionEffectCooldowns.get(playerId);
+        if (lastEffect != null && (currentTime - lastEffect) < DEPLETION_EFFECT_COOLDOWN_TICKS) {
+            return; // Still on cooldown, skip effects
+        }
+
+        // Update cooldown
+        depletionEffectCooldowns.put(playerId, currentTime);
+
+        // Apply direct damage when Ankh is depleted (1 heart every 3 seconds)
+        player.damage(player.getWorld().getDamageSources().magic(), 2.0f);
+
+        // Automatically apply maximum Khamsin curse when depleted
+        if (zone.isEffectsEnabled()) {
+            // Force Stage 5 curse (most severe) when Ankh is depleted
+            StatusEffect maxCurse = ModStatusEffects.KHAMSIN_CURSE_STAGE_5;
+
+            // Apply the maximum curse with extended duration
+            player.addStatusEffect(new StatusEffectInstance(
+                maxCurse,
+                300, // 15 seconds (longer than normal refresh)
+                0,
+                false,
+                true,
+                true
+            ));
+        }
+
+        // Apply additional debilitating effects when Ankh is fully depleted
+        player.addStatusEffect(new StatusEffectInstance(
+            net.minecraft.entity.effect.StatusEffects.DARKNESS,
+            200, // 10 seconds
+            0,
+            false,
+            true,
+            true
+        ));
+
+        // Add a visual/audio warning to the player
+        player.sendMessage(
+            net.minecraft.text.Text.literal("Your Ankh protection has failed! The curse consumes you...")
+                .formatted(net.minecraft.util.Formatting.DARK_RED, net.minecraft.util.Formatting.BOLD),
+            true // Show as action bar (above hotbar)
+        );
+
+        // Play ominous sound effect
+        player.getWorld().playSound(
+            null,
+            player.getX(), player.getY(), player.getZ(),
+            net.minecraft.sound.SoundEvents.ENTITY_WARDEN_AMBIENT,
+            player.getSoundCategory(),
+            0.8f,
+            0.5f
+        );
+
+        // Clean up stale cooldowns (every 100 activations or so)
+        if (depletionEffectCooldowns.size() > 100) {
+            depletionEffectCooldowns.entrySet().removeIf(entry ->
+                (currentTime - entry.getValue()) > DEPLETION_EFFECT_COOLDOWN_TICKS * 10
+            );
+        }
+    }
+
     /**
      * Applies Khamsin curse effect to a player based on the zone's level
      */

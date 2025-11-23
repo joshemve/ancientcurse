@@ -19,6 +19,7 @@ import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraft.entity.Entity.RemovalReason;
 import software.bernie.geckolib.animatable.GeoEntity;
@@ -135,12 +136,12 @@ public class AnubisEntity extends HostileEntity implements GeoEntity {
 
     public static DefaultAttributeContainer.Builder createAnubisAttributes() {
         return HostileEntity.createHostileAttributes()
-                .add(EntityAttributes.GENERIC_MAX_HEALTH, 200.0D) // Boss health
+                .add(EntityAttributes.GENERIC_MAX_HEALTH, 150.0D) // Boss health (reduced for balance)
                 .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.4D)
-                .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 15.0D)
-                .add(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE, 0.8D) // Normal boss knockback resistance
+                .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 8.0D) // Balanced damage
+                .add(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE, 0.5D) // Moderate knockback resistance
                 .add(EntityAttributes.GENERIC_ARMOR, 8.0D)
-                .add(EntityAttributes.GENERIC_FOLLOW_RANGE, 64.0D); // Already has good range
+                .add(EntityAttributes.GENERIC_FOLLOW_RANGE, 48.0D); // Reasonable aggro range
     }
 
     /* -------------------------------------------------------------------- */
@@ -454,6 +455,10 @@ public class AnubisEntity extends HostileEntity implements GeoEntity {
             yellTimer = SKY_YELL_DURATION;
             anubis.setSkyYelling(true);
             anubis.playingSpecialAnimation = true;
+            
+            // Play sound once at start
+            anubis.getWorld().playSound(null, anubis.getX(), anubis.getY(), anubis.getZ(),
+                    SoundEvents.ENTITY_WOLF_HOWL, SoundCategory.HOSTILE, 2.0F, 0.8F);
         }
 
         @Override
@@ -468,12 +473,6 @@ public class AnubisEntity extends HostileEntity implements GeoEntity {
             // Look up to the sky
             anubis.setYaw(anubis.getYaw());
             anubis.setPitch(-70.0F); // Look up
-            
-            // Play sound periodically
-            if (yellTimer % 20 == 0) {
-                anubis.getWorld().playSound(null, anubis.getX(), anubis.getY(), anubis.getZ(),
-                        SoundEvents.ENTITY_WOLF_HOWL, SoundCategory.HOSTILE, 2.0F, 0.8F);
-            }
         }
 
         @Override
@@ -656,8 +655,24 @@ public class AnubisEntity extends HostileEntity implements GeoEntity {
                 amount *= 0.1F; // 90% damage reduction
             }
         }
+        
+        // TACTICAL REACTIVITY: Evasive Leap
+        // 30% chance to leap away when hit to reset combat spacing
+        if (source.getAttacker() instanceof LivingEntity attacker && !this.getWorld().isClient) {
+             if (this.random.nextFloat() < 0.3f && this.isOnGround()) {
+                 performTacticalLeap(attacker);
+             }
+        }
 
         return super.damage(source, amount);
+    }
+    
+    private void performTacticalLeap(LivingEntity attacker) {
+        Vec3d awayDir = this.getPos().subtract(attacker.getPos()).normalize();
+        // Leap backwards/sideways with force
+        this.addVelocity(awayDir.x * 1.2, 0.6, awayDir.z * 1.2);
+        this.velocityModified = true;
+        this.playSound(SoundEvents.ENTITY_WOLF_GROWL, 1.0f, 1.2f);
     }
 
     @Override

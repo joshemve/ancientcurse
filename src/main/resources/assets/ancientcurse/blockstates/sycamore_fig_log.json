@@ -1,8 +1,19 @@
 {
   "variants": {
-    "stage=0": { "model": "ancientcurse:block/sycamore_fig_log_stage_0" },
-    "stage=1": { "model": "ancientcurse:block/sycamore_fig_log_stage_1" },
-    "stage=2": { "model": "ancientcurse:block/sycamore_fig_log_stage_2" },
-    "stage=3": { "model": "ancientcurse:block/sycamore_fig_log_stage_3" }
+    "axis=x,stage=0": { "model": "ancientcurse:block/sycamore_fig_log_stage_0" },
+    "axis=y,stage=0": { "model": "ancientcurse:block/sycamore_fig_log_stage_0" },
+    "axis=z,stage=0": { "model": "ancientcurse:block/sycamore_fig_log_stage_0" },
+
+    "axis=x,stage=1": { "model": "ancientcurse:block/sycamore_fig_log_stage_1" },
+    "axis=y,stage=1": { "model": "ancientcurse:block/sycamore_fig_log_stage_1" },
+    "axis=z,stage=1": { "model": "ancientcurse:block/sycamore_fig_log_stage_1" },
+
+    "axis=x,stage=2": { "model": "ancientcurse:block/sycamore_fig_log_stage_2" },
+    "axis=y,stage=2": { "model": "ancientcurse:block/sycamore_fig_log_stage_2" },
+    "axis=z,stage=2": { "model": "ancientcurse:block/sycamore_fig_log_stage_2" },
+
+    "axis=x,stage=3": { "model": "ancientcurse:block/sycamore_fig_log_stage_3" },
+    "axis=y,stage=3": { "model": "ancientcurse:block/sycamore_fig_log_stage_3" },
+    "axis=z,stage=3": { "model": "ancientcurse:block/sycamore_fig_log_stage_3" }
   }
 }

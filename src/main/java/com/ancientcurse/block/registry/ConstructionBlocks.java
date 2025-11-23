@@ -3,10 +3,13 @@ package com.ancientcurse.block.registry;
 import com.ancientcurse.AncientCurse;
 import com.ancientcurse.ModBlocks;
 import com.ancientcurse.ModItemGroup;
+import com.ancientcurse.block.SandPathBlock;
+import com.ancientcurse.block.SandstonePathBlock;
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
 import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
+import net.minecraft.block.MapColor;
 import net.minecraft.block.SlabBlock;
 import net.minecraft.block.StairsBlock;
 import net.minecraft.block.WallBlock;
@@ -22,7 +25,23 @@ import net.minecraft.util.Identifier;
  * Includes bricks, tiles, and other decorative building materials
  */
 public class ConstructionBlocks {
-    
+
+    // Path blocks for desert environments
+    public static final Block SAND_PATH = new SandPathBlock(
+        FabricBlockSettings.create()
+            .mapColor(MapColor.PALE_YELLOW)
+            .strength(0.65f)
+            .sounds(BlockSoundGroup.SAND)
+    );
+
+    public static final Block SANDSTONE_PATH = new SandstonePathBlock(
+        FabricBlockSettings.create()
+            .mapColor(MapColor.PALE_YELLOW)
+            .strength(0.8f)
+            .sounds(BlockSoundGroup.STONE)
+            .requiresTool()
+    );
+
     // Sandstone variants
     public static final Block SANDSTONE_BRICK_TILES = new Block(
         FabricBlockSettings.copyOf(Blocks.SANDSTONE)
@@ -92,7 +111,19 @@ public class ConstructionBlocks {
      */
     public static void registerBlocks() {
         AncientCurse.LOGGER.info("Registering construction blocks");
-        
+
+        // Register path blocks
+        Registry.register(
+            Registries.BLOCK,
+            new Identifier(AncientCurse.MOD_ID, "sand_path"),
+            SAND_PATH
+        );
+        Registry.register(
+            Registries.BLOCK,
+            new Identifier(AncientCurse.MOD_ID, "sandstone_path"),
+            SANDSTONE_PATH
+        );
+
         // Register sandstone variants
         Registry.register(
             Registries.BLOCK,
@@ -171,7 +202,11 @@ public class ConstructionBlocks {
      */
     public static void registerBlockItems() {
         AncientCurse.LOGGER.info("Registering construction block items");
-        
+
+        // Register path block items
+        registerBlockItem(SAND_PATH, "sand_path", ModItemGroup.ANCIENT_CURSE);
+        registerBlockItem(SANDSTONE_PATH, "sandstone_path", ModItemGroup.ANCIENT_CURSE);
+
         // Register sandstone variant items
         registerBlockItem(SANDSTONE_BRICK_TILES, "sandstone_brick_tiles", ModItemGroup.ANCIENT_CURSE);
         

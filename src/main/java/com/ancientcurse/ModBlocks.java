@@ -13,6 +13,7 @@ import net.minecraft.block.SandBlock;
 import net.minecraft.block.SlabBlock;
 import net.minecraft.block.StairsBlock;
 import net.minecraft.block.WallBlock;
+import net.minecraft.block.SaplingBlock;
 import net.minecraft.block.FenceBlock;
 import net.minecraft.block.FenceGateBlock;
 import net.minecraft.block.WoodType;
@@ -70,6 +71,12 @@ public class ModBlocks {
             .ticksRandomly() // Enable random ticks for leaf decay
     );
     
+    // Sycamore Sapling - grows into a sycamore tree
+    public static final Block SYCAMORE_SAPLING = new SaplingBlock(
+        new com.ancientcurse.world.gen.SycamoreSaplingGenerator(),
+        FabricBlockSettings.copyOf(Blocks.OAK_SAPLING)
+    );
+    
     public static final Block DATE_PALM_LOG = new DatePalmLogBlock(
         FabricBlockSettings.create()
             .mapColor(MapColor.TERRACOTTA_GRAY)
@@ -108,6 +115,12 @@ public class ModBlocks {
             .nonOpaque()
             .sounds(BlockSoundGroup.GRASS)
             .ticksRandomly() // Required for leaf decay
+    );
+
+    // Date Palm Sapling - grows into a date palm tree
+    public static final Block DATE_PALM_SAPLING = new DatePalmSaplingBlock(
+        new com.ancientcurse.world.gen.DatePalmSaplingGenerator(),
+        FabricBlockSettings.copyOf(Blocks.OAK_SAPLING)
     );
     
     public static final Block DATE_BLOCK = new DateBlock(
@@ -919,6 +932,13 @@ public class ModBlocks {
             new Identifier(AncientCurse.MOD_ID, "sycamore_leaves"),
             SYCAMORE_LEAVES
         );
+        
+        // Register the sycamore sapling
+        Registry.register(
+            Registries.BLOCK,
+            new Identifier(AncientCurse.MOD_ID, "sycamore_sapling"),
+            SYCAMORE_SAPLING
+        );
 
         // REMOVED: Anubus Glyph block was causing registration conflicts
         // Registry.register(Registries.BLOCK, new Identifier(AncientCurse.MOD_ID, "anubus_glyph"), ANUBUS_GLYPH_BLOCK);
@@ -958,6 +978,13 @@ public class ModBlocks {
             Registries.BLOCK,
             new Identifier(AncientCurse.MOD_ID, "date_palm_leaves"),
             DATE_PALM_LEAVES
+        );
+
+        // Register Date Palm Sapling
+        Registry.register(
+            Registries.BLOCK,
+            new Identifier(AncientCurse.MOD_ID, "date_palm_sapling"),
+            DATE_PALM_SAPLING
         );
         
         // Register Date Block (fruit)
@@ -1582,11 +1609,13 @@ public class ModBlocks {
         registerBlockItem(SYCAMORE_FENCE, ModItemGroup.ANCIENT_CURSE);
         registerBlockItem(SYCAMORE_FENCE_GATE, ModItemGroup.ANCIENT_CURSE);
         registerBlockItem(SYCAMORE_LEAVES, ModItemGroup.ANCIENT_CURSE);
+        registerBlockItem(SYCAMORE_SAPLING, ModItemGroup.ANCIENT_CURSE);
         registerBlockItem(DATE_PALM_LOG, ModItemGroup.ANCIENT_CURSE);
         registerBlockItem(DATE_PALM_PLANKS, ModItemGroup.ANCIENT_CURSE);
         registerBlockItem(DATE_PALM_FENCE, ModItemGroup.ANCIENT_CURSE);
         registerBlockItem(DATE_PALM_FENCE_GATE, ModItemGroup.ANCIENT_CURSE);
         registerBlockItem(DATE_PALM_LEAVES, ModItemGroup.ANCIENT_CURSE);
+        registerBlockItem(DATE_PALM_SAPLING, ModItemGroup.ANCIENT_CURSE);
         registerBlockItem(SMOOTH_SAND, ModItemGroup.ANCIENT_CURSE);
         registerBlockItem(NILE_RIVER_SAND, ModItemGroup.ANCIENT_CURSE);
         registerBlockItem(FERTILE_NILE_SILT, ModItemGroup.ANCIENT_CURSE);

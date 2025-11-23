@@ -17,6 +17,8 @@ import com.ancientcurse.system.CursedEarthManager;
 import com.ancientcurse.ModSounds;
 import com.ancientcurse.network.CurseZonePackets;
 import com.ancientcurse.event.PlayerJoinHandler;
+import com.ancientcurse.event.PathCreationHandler;
+import com.ancientcurse.event.AnimationDebugHandler;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 // import com.ancientcurse.screen.ModScreenHandlers;
 // import com.ancientcurse.worldgen.ModWorldGen;
@@ -75,27 +77,31 @@ public class AncientCurse implements ModInitializer {
     @Override
     public void onInitialize() {
         LOGGER.info("Initializing Ancient Curse Mod");
-        
+
         // Initialize GeckoLib
         GeckoLib.initialize();
-        
+
         // Register content
         registerContent();
-        
+
         // Register worldgen components
         registerWorldgenComponents();
-        
+
         // Register commands
         registerCommands();
-        
+
         // Register network packets
         CurseZonePackets.registerServerPackets();
         LOGGER.info("Curse Zone network packets registered");
-        
+
         // Initialize Cursed Earth Manager
         CursedEarthManager.getInstance();
         LOGGER.info("Cursed Earth performance system initialized");
-        
+
+        // Register fuel values for wood blocks
+        ModFuelRegistry.registerFuels();
+        LOGGER.info("Fuel values registered for wood blocks");
+
         LOGGER.info("Ancient Curse Mod fully initialized");
     }
     
@@ -150,6 +156,12 @@ public class AncientCurse implements ModInitializer {
         
         // Register player join handler for curse zone syncing
         PlayerJoinHandler.register();
+
+        // Register path creation handler for sand/sandstone paths
+        PathCreationHandler.register();
+
+        // Register animation debug handler for debug stick
+        AnimationDebugHandler.register();
     }
     
     /**

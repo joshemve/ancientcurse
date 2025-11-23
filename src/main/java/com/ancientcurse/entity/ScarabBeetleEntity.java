@@ -2,6 +2,7 @@ package com.ancientcurse.entity;
 
 import com.ancientcurse.AncientCurse;
 import com.ancientcurse.ModItems;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityData;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.SpawnReason;
@@ -60,19 +61,25 @@ public class ScarabBeetleEntity extends TameableEntity implements GeoEntity {
     private static final int EMERGE_TIME = 43; // ~2.16 seconds (matches dig_up animation)
     
     // Animation state flags
-    public boolean isAttacking = false;
     public boolean isBurrowing = false;
     public boolean isEmerging = false;
     public boolean isUnderground = false;
-    
+
     // Timers
     private int burrowTicks = 0;
     private int emergeTicks = 0;
-    private int attackCooldown = 0;
     
-    // Tracked data for sitting
+    // Summoner tracking - UUID of the entity that summoned this beetle (e.g., Thoth)
+    private UUID summonerUUID = null;
+
+    // Tracked data for client/server sync
     private static final TrackedData<Boolean> SITTING = DataTracker.registerData(ScarabBeetleEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
     private static final TrackedData<Boolean> CLIMBING = DataTracker.registerData(ScarabBeetleEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
+    private static final TrackedData<Boolean> ATTACKING = DataTracker.registerData(ScarabBeetleEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
+    private static final TrackedData<Integer> ATTACK_COOLDOWN = DataTracker.registerData(ScarabBeetleEntity.class, TrackedDataHandlerRegistry.INTEGER);
+    private static final TrackedData<Integer> ATTACK_VARIANT = DataTracker.registerData(ScarabBeetleEntity.class, TrackedDataHandlerRegistry.INTEGER);
+    private static final TrackedData<Boolean> SUMMONED = DataTracker.registerData(ScarabBeetleEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
+    private static final TrackedData<Integer> LIFESPAN_TICKS = DataTracker.registerData(ScarabBeetleEntity.class, TrackedDataHandlerRegistry.INTEGER);
     
     // GeckoLib animation
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
@@ -89,7 +96,7 @@ public class ScarabBeetleEntity extends TameableEntity implements GeoEntity {
                 .add(EntityAttributes.GENERIC_MAX_HEALTH, 18.0)
                 .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.28)
                 .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 4.0)
-                .add(EntityAttributes.GENERIC_FOLLOW_RANGE, 20.0)
+                .add(EntityAttributes.GENERIC_FOLLOW_RANGE, 12.0) // Reduced from 20 to prevent long-range aggro
                 .add(EntityAttributes.GENERIC_ARMOR, 2.0);
     }
     
@@ -122,20 +129,37 @@ public class ScarabBeetleEntity extends TameableEntity implements GeoEntity {
     @Override
     public void tick() {
         super.tick();
-        
+
         age++;
-        
+
         // Update climbing state for animations
         this.setClimbing(this.horizontalCollision && !this.isOnGround());
-        
-        // Manage attack cooldown
-        if (attackCooldown > 0) {
-            attackCooldown--;
-            if (attackCooldown == 0) {
-                isAttacking = false;
+
+        // CRITICAL: Ensure gravity is always enabled unless actively underground
+        // This prevents the beetle from accidentally flying if burrow sequence is interrupted
+        if (!isUnderground && this.hasNoGravity()) {
+            this.setNoGravity(false);
+        }
+
+        // Manage attack cooldown and apply damage at correct animation frame
+        int cooldown = this.dataTracker.get(ATTACK_COOLDOWN);
+        if (cooldown > 0) {
+            // Apply damage at frame 10 (when animation shows bite/strike)
+            if (cooldown == MAX_ATTACK_COOLDOWN - 10 && this.getTarget() != null) {
+                LivingEntity target = this.getTarget();
+                // Verify target is still in range before applying damage
+                if (this.squaredDistanceTo(target) <= 4.0) {
+                    super.tryAttack(target);
+                }
+            }
+
+            cooldown--;
+            this.dataTracker.set(ATTACK_COOLDOWN, cooldown);
+            if (cooldown == 0) {
+                this.dataTracker.set(ATTACKING, false);
             }
         }
-        
+
         // Manage burrowing animation
         if (burrowTicks > 0) {
             burrowTicks--;
@@ -144,7 +168,7 @@ public class ScarabBeetleEntity extends TameableEntity implements GeoEntity {
                 isUnderground = true;
             }
         }
-        
+
         // Manage emerging animation
         if (emergeTicks > 0) {
             emergeTicks--;
@@ -153,22 +177,80 @@ public class ScarabBeetleEntity extends TameableEntity implements GeoEntity {
                 isUnderground = false;
             }
         }
+        
+        // Handle summoned beetle lifespan (3 minutes = 3600 ticks)
+        if (this.dataTracker.get(SUMMONED)) {
+            // Despawn immediately if difficulty is set to peaceful
+            if (this.getWorld().getDifficulty() == net.minecraft.world.Difficulty.PEACEFUL) {
+                if (this.getWorld() instanceof ServerWorld serverWorld) {
+                    serverWorld.spawnParticles(
+                        ParticleTypes.POOF,
+                        this.getX(), this.getY() + 0.5, this.getZ(),
+                        10, 0.3, 0.3, 0.3, 0.1
+                    );
+                }
+                this.discard();
+                return;
+            }
+            
+            // Despawn if summoner (Thoth) is dead or removed
+            if (summonerUUID != null && !this.getWorld().isClient) {
+                Entity summoner = ((ServerWorld)this.getWorld()).getEntity(summonerUUID);
+                if (summoner == null || !summoner.isAlive()) {
+                    // Summoner is dead/removed, despawn this beetle
+                    if (this.getWorld() instanceof ServerWorld serverWorld) {
+                        serverWorld.spawnParticles(
+                            ParticleTypes.POOF,
+                            this.getX(), this.getY() + 0.5, this.getZ(),
+                            10, 0.3, 0.3, 0.3, 0.1
+                        );
+                    }
+                    this.discard();
+                    return;
+                }
+            }
+            
+            int lifespan = this.dataTracker.get(LIFESPAN_TICKS);
+            if (lifespan > 0) {
+                lifespan--;
+                this.dataTracker.set(LIFESPAN_TICKS, lifespan);
+                
+                // Despawn when lifespan expires
+                if (lifespan == 0) {
+                    // Spawn poof particles
+                    if (this.getWorld() instanceof ServerWorld serverWorld) {
+                        serverWorld.spawnParticles(
+                            ParticleTypes.POOF,
+                            this.getX(), this.getY() + 0.5, this.getZ(),
+                            10, 0.3, 0.3, 0.3, 0.1
+                        );
+                    }
+                    this.discard(); // Remove the entity
+                }
+            }
+        }
     }
     
-    /* ---------- COMBAT - SIMPLIFIED ---------- */
-    public boolean tryAttack(LivingEntity target) {
-        if (attackCooldown > 0) return false;
-        
-        attackCooldown = MAX_ATTACK_COOLDOWN;
-        isAttacking = true;
-        
-        boolean attackSuccess = super.tryAttack(target);
-        
-        if (attackSuccess) {
-            this.playSound(SoundEvents.ENTITY_SPIDER_HURT, 1.0f, 0.8f + this.random.nextFloat() * 0.4f);
-        }
-        
-        return attackSuccess;
+    /* ---------- COMBAT - ANIMATION TRIGGERS ATTACK ---------- */
+    @Override
+    public boolean tryAttack(Entity target) {
+        if (this.dataTracker.get(ATTACK_COOLDOWN) > 0) return false;
+
+        // Set attack state using tracked data for client/server sync
+        this.dataTracker.set(ATTACK_COOLDOWN, MAX_ATTACK_COOLDOWN);
+        this.dataTracker.set(ATTACKING, true);
+
+        // Choose attack animation variant ONCE at attack start (not every frame!)
+        int variant = this.random.nextBoolean() ? 1 : 0;
+        this.dataTracker.set(ATTACK_VARIANT, variant);
+
+        // Play attack sound
+        this.playSound(SoundEvents.ENTITY_SPIDER_HURT, 1.0f, 0.8f + this.random.nextFloat() * 0.4f);
+
+        // NOTE: Damage will be applied after 10 ticks (0.5 seconds) in tick() method
+        // This syncs damage with the animation bite/strike frame
+        // We return true to tell MeleeAttackGoal the attack started successfully
+        return true;
     }
     
     @Override
@@ -176,12 +258,22 @@ public class ScarabBeetleEntity extends TameableEntity implements GeoEntity {
         if (this.isInvulnerableTo(source)) {
             return false;
         }
-        
+
         // Make sitting beetles stand up when damaged
         if (this.isSitting()) {
             this.setSitting(false);
         }
-        
+
+        // If beetle is damaged while underground or emerging, force it back to normal state
+        if (isUnderground || isEmerging || isBurrowing) {
+            isUnderground = false;
+            isEmerging = false;
+            isBurrowing = false;
+            emergeTicks = 0;
+            burrowTicks = 0;
+            this.setNoGravity(false); // Critical: restore gravity immediately
+        }
+
         // Chance to burrow when health is low (only if not tamed or owner is far away)
         if (this.getHealth() / this.getMaxHealth() < 0.3f && !isBurrowing && !isUnderground && this.isOnGround()) {
             if (!this.isTamed() || (this.getOwner() != null && this.squaredDistanceTo(this.getOwner()) > 144)) {
@@ -190,7 +282,7 @@ public class ScarabBeetleEntity extends TameableEntity implements GeoEntity {
                 }
             }
         }
-        
+
         return super.damage(source, amount);
     }
     
@@ -285,8 +377,12 @@ public class ScarabBeetleEntity extends TameableEntity implements GeoEntity {
     
     private <T extends GeoAnimatable> PlayState predicate(AnimationState<T> state) {
         // Animation controller with all animations
-        
+
         if (this.isDead()) {
+            // Ensure gravity is restored when dead to prevent floating corpses
+            if (this.hasNoGravity()) {
+                this.setNoGravity(false);
+            }
             state.getController().setAnimation(RawAnimation.begin()
                 .then("animation.scarab_beetle.death", Animation.LoopType.HOLD_ON_LAST_FRAME));
             return PlayState.CONTINUE;
@@ -306,22 +402,18 @@ public class ScarabBeetleEntity extends TameableEntity implements GeoEntity {
             return PlayState.CONTINUE;
         }
         
-        // Attack animations
-        if (isAttacking) {
-            // Play attack animation only at the beginning of the attack
-            if (attackCooldown > 20) {
-                // Use attack2 for alternate attacks
-                if (this.getRandom().nextBoolean()) {
-                    state.getController().setAnimation(RawAnimation.begin()
-                        .then("animation.scarab_beetle.attack2", Animation.LoopType.PLAY_ONCE));
-                } else {
-                    state.getController().setAnimation(RawAnimation.begin()
-                        .then("animation.scarab_beetle.attack", Animation.LoopType.PLAY_ONCE));
-                }
-            } else {
-                // After attack animation, return to idle while still in attack cooldown
+        // Attack animations - Uses tracked data for client/server sync
+        boolean isAttacking = this.dataTracker.get(ATTACKING);
+        int attackCooldown = this.dataTracker.get(ATTACK_COOLDOWN);
+        if (isAttacking && attackCooldown > 0) {
+            // Use the variant chosen at attack start (prevents animation glitching)
+            int variant = this.dataTracker.get(ATTACK_VARIANT);
+            if (variant == 1) {
                 state.getController().setAnimation(RawAnimation.begin()
-                    .then("animation.scarab_beetle.idle", Animation.LoopType.LOOP));
+                    .then("animation.scarab_beetle.attack2", Animation.LoopType.PLAY_ONCE));
+            } else {
+                state.getController().setAnimation(RawAnimation.begin()
+                    .then("animation.scarab_beetle.attack", Animation.LoopType.PLAY_ONCE));
             }
             return PlayState.CONTINUE;
         }
@@ -356,40 +448,61 @@ public class ScarabBeetleEntity extends TameableEntity implements GeoEntity {
         super.initDataTracker();
         this.dataTracker.startTracking(SITTING, false);
         this.dataTracker.startTracking(CLIMBING, false);
+        this.dataTracker.startTracking(ATTACKING, false);
+        this.dataTracker.startTracking(ATTACK_COOLDOWN, 0);
+        this.dataTracker.startTracking(ATTACK_VARIANT, 0);
+        this.dataTracker.startTracking(SUMMONED, false);
+        this.dataTracker.startTracking(LIFESPAN_TICKS, 0);
     }
     
     @Override
     public void writeCustomDataToNbt(NbtCompound nbt) {
         super.writeCustomDataToNbt(nbt);
-        
+
         // Save animation state
-        nbt.putBoolean("IsAttacking", isAttacking);
+        nbt.putBoolean("IsAttacking", this.dataTracker.get(ATTACKING));
         nbt.putBoolean("IsBurrowing", isBurrowing);
         nbt.putBoolean("IsEmerging", isEmerging);
         nbt.putBoolean("IsUnderground", isUnderground);
         nbt.putBoolean("IsSitting", this.isSitting());
-        
+
         // Save timers
         nbt.putInt("BurrowTicks", burrowTicks);
         nbt.putInt("EmergeTicks", emergeTicks);
-        nbt.putInt("AttackCooldown", attackCooldown);
+        nbt.putInt("AttackCooldown", this.dataTracker.get(ATTACK_COOLDOWN));
+        nbt.putInt("AttackAnimationVariant", this.dataTracker.get(ATTACK_VARIANT));
+        
+        // Save summoned state
+        nbt.putBoolean("IsSummoned", this.dataTracker.get(SUMMONED));
+        nbt.putInt("LifespanTicks", this.dataTracker.get(LIFESPAN_TICKS));
+        if (summonerUUID != null) {
+            nbt.putUuid("SummonerUUID", summonerUUID);
+        }
     }
     
     @Override
     public void readCustomDataFromNbt(NbtCompound nbt) {
         super.readCustomDataFromNbt(nbt);
-        
+
         // Load animation state
-        isAttacking = nbt.getBoolean("IsAttacking");
+        this.dataTracker.set(ATTACKING, nbt.getBoolean("IsAttacking"));
         isBurrowing = nbt.getBoolean("IsBurrowing");
         isEmerging = nbt.getBoolean("IsEmerging");
         isUnderground = nbt.getBoolean("IsUnderground");
         this.setSitting(nbt.getBoolean("IsSitting"));
-        
+
         // Load timers
         burrowTicks = nbt.getInt("BurrowTicks");
         emergeTicks = nbt.getInt("EmergeTicks");
-        attackCooldown = nbt.getInt("AttackCooldown");
+        this.dataTracker.set(ATTACK_COOLDOWN, nbt.getInt("AttackCooldown"));
+        this.dataTracker.set(ATTACK_VARIANT, nbt.getInt("AttackAnimationVariant"));
+        
+        // Load summoned state
+        this.dataTracker.set(SUMMONED, nbt.getBoolean("IsSummoned"));
+        this.dataTracker.set(LIFESPAN_TICKS, nbt.getInt("LifespanTicks"));
+        if (nbt.containsUuid("SummonerUUID")) {
+            summonerUUID = nbt.getUuid("SummonerUUID");
+        }
     }
     
     /* ---------- INTERACTION ---------- */
@@ -499,7 +612,17 @@ public class ScarabBeetleEntity extends TameableEntity implements GeoEntity {
     
     /* ---------- GETTERS ---------- */
     public boolean isBurrowing() { return isBurrowing; }
-    public boolean isAttacking() { return isAttacking; }
+    public boolean isAttacking() { return this.dataTracker.get(ATTACKING); }
+    
+    /**
+     * Mark this beetle as summoned by Thoth with a 3-minute lifespan
+     * @param summonerUUID The UUID of the entity that summoned this beetle (e.g., Thoth)
+     */
+    public void setSummoned(UUID summonerUUID) {
+        this.dataTracker.set(SUMMONED, true);
+        this.dataTracker.set(LIFESPAN_TICKS, 3600); // 3 minutes = 180 seconds = 3600 ticks
+        this.summonerUUID = summonerUUID;
+    }
     
     @Override
     public ScarabBeetleEntity createChild(ServerWorld world, PassiveEntity mate) {

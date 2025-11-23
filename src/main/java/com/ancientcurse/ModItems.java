@@ -1,5 +1,6 @@
 package com.ancientcurse;
 
+import com.ancientcurse.item.AnimationDebugStick;
 import com.ancientcurse.item.AncientPickItem;
 import com.ancientcurse.item.CurseZoneAdminWand;
 import com.ancientcurse.item.CustomAnimatedItem;
@@ -47,6 +48,9 @@ public class ModItems {
     
     // Admin tool for managing curse zones
     public static final CurseZoneAdminWand CURSE_ZONE_ADMIN_WAND = new CurseZoneAdminWand(new FabricItemSettings().maxCount(1));
+
+    // Debug tool for viewing entity animations
+    public static final AnimationDebugStick ANIMATION_DEBUG_STICK = new AnimationDebugStick(new FabricItemSettings().maxCount(1));
     
     // Ankh restoration items
     public static final PharaohsBloodItem PHARAOHS_BLOOD = new PharaohsBloodItem(new FabricItemSettings());
@@ -507,6 +511,13 @@ public class ModItems {
             Registries.ITEM,
             new Identifier(AncientCurse.MOD_ID, "ankh_wand"),
             CURSE_ZONE_ADMIN_WAND
+        );
+
+        // Register Animation Debug Stick
+        Registry.register(
+            Registries.ITEM,
+            new Identifier(AncientCurse.MOD_ID, "animation_debug_stick"),
+            ANIMATION_DEBUG_STICK
         );
         
         // Register Ankh restoration items

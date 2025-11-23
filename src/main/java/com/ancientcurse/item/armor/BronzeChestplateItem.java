@@ -27,18 +27,21 @@ public class BronzeChestplateItem extends ArmorItem implements GeoItem {
     
     @Override
     public void createRenderer(Consumer<Object> consumer) {
-        consumer.accept(new RenderProvider() {
-            private BronzeChestplateRenderer renderer;
-            
-            @Override
-            public BipedEntityModel<LivingEntity> getHumanoidArmorModel(LivingEntity livingEntity, ItemStack itemStack, EquipmentSlot equipmentSlot, BipedEntityModel<LivingEntity> original) {
-                if (this.renderer == null)
-                    this.renderer = new BronzeChestplateRenderer();
-                
-                this.renderer.prepForRender(livingEntity, itemStack, equipmentSlot, original);
-                return this.renderer;
-            }
-        });
+        consumer.accept(new BronzeChestplateRenderProvider());
+    }
+    
+    // Static nested class to avoid inner class compilation issues
+    private static class BronzeChestplateRenderProvider implements RenderProvider {
+        private BronzeChestplateRenderer renderer;
+
+        @Override
+        public BipedEntityModel<LivingEntity> getHumanoidArmorModel(LivingEntity livingEntity, ItemStack itemStack, EquipmentSlot equipmentSlot, BipedEntityModel<LivingEntity> original) {
+            if (this.renderer == null)
+                this.renderer = new BronzeChestplateRenderer();
+
+            this.renderer.prepForRender(livingEntity, itemStack, equipmentSlot, original);
+            return this.renderer;
+        }
     }
     
     @Override

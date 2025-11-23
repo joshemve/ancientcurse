@@ -33,7 +33,7 @@ import software.bernie.geckolib.renderer.layer.GeoRenderLayer;
 public class ThothRenderer extends GeoEntityRenderer<ThothEntity> {
     
     private static final Identifier TEXTURE_GREEN = new Identifier(AncientCurse.MOD_ID, "textures/entity/thoth_green.png");
-    private static final Identifier EYES_TEXTURE = new Identifier(AncientCurse.MOD_ID, "textures/entity/thoth_eyes.png");
+    private static final Identifier EYES_TEXTURE = new Identifier(AncientCurse.MOD_ID, "textures/entity/thoth_glow.png");
     
     // Cached RenderLayers to avoid map lookups each frame
     private static final RenderLayer RENDER_LAYER_GREEN = RenderLayer.getEntityTranslucent(TEXTURE_GREEN);
@@ -46,18 +46,18 @@ public class ThothRenderer extends GeoEntityRenderer<ThothEntity> {
     
     // Attack state constants (matching ThothEntity)
     private static final int ATTACK_NONE = 0;
-    private static final int ATTACK_MAGIC_BALL = 1;
-    private static final int ATTACK_SCROLL_BLAST = 2;
-    private static final int ATTACK_TIME_BEND = 3;
-    private static final int ATTACK_ENTITY_SUMMON = 4;
+    private static final int ATTACK_SCROLL_BLAST = 1;
+    private static final int ATTACK_TIME_BEND = 2;
+    private static final int ATTACK_ENTITY_SUMMON = 3;
     
     public ThothRenderer(EntityRendererFactory.Context renderManager) {
         super(renderManager, new ThothModel());
-        
+
         // Add layers in order of rendering
-        this.addRenderLayer(new ThothGlowingEyesLayer(this));
-        this.addRenderLayer(new ThothParticleLayer(this));
-        
+        // DISABLED: All render layers causing visual issues
+        // this.addRenderLayer(new ThothGlowingEyesLayer(this));
+        // this.addRenderLayer(new ThothParticleLayer(this));
+
         // Scale up for boss presence
         this.shadowRadius = 1.5f;
     }
@@ -65,87 +65,14 @@ public class ThothRenderer extends GeoEntityRenderer<ThothEntity> {
     @Override
     public void render(ThothEntity entity, float entityYaw, float partialTick, MatrixStack poseStack,
                       VertexConsumerProvider bufferSource, int packedLight) {
-        
-        // Scale up the entity for boss presence
+
         poseStack.push();
-        
-        // Base scale for boss presence
-        float baseScale = 1.2f;
-        
-        // Eye tracking for intimidation - only subtle when in combat
-        if (entity.getTarget() != null && entity.isInCombat()) {
-            Vec3d targetPos = entity.getTarget().getEyePos();
-            Vec3d entityPos = entity.getEyePos();
-            Vec3d lookVec = targetPos.subtract(entityPos).normalize();
-            
-            // Apply subtle head turn toward target
-            float targetYaw = (float)(MathHelper.atan2(lookVec.z, lookVec.x) * (180F / Math.PI)) - 90.0F;
-            float yawDiff = MathHelper.wrapDegrees(targetYaw - entity.getYaw());
-            yawDiff = MathHelper.clamp(yawDiff, -30.0F, 30.0F); // Limit head turn
-            
-            poseStack.multiply(net.minecraft.util.math.RotationAxis.POSITIVE_Y.rotationDegrees(yawDiff * 0.5f));
-        }
-        
-        // Special effects during spawn transition
-        if (entity.isInSpawnTransition()) {
-            // No flickering, just ensure base scale is applied
-        }
-        // Apply base scale regardless of spawn transition
-        poseStack.scale(baseScale, baseScale, baseScale);
-        
-        // Visual effects based on combat state
-        if (!entity.isInCombat() && !entity.isOnGround()) {
-            // Only apply floating effect if actually floating (not on ground)
-            float bobOffset = MathHelper.sin((entity.age + partialTick) * 0.05f) * 0.1f;
-            poseStack.translate(0, bobOffset, 0);
-        } else if (entity.isInCombat()) {
-            // Combat mode - minimal sway to show divine presence without disrupting movement
-            float groundedSway = MathHelper.sin((entity.age + partialTick) * 0.02f) * 0.02f;
-            poseStack.translate(0, groundedSway, 0);
-        }
-        
-        // Attack-specific visual effects using entity getters
-        if (entity.isScrollBlastAttack()) {
-            // Enhanced vibration effect with Y component and charge progression
-            int attackTicks = entity.age % 40; // Assume 2-second attack cycle
-            float chargeProgress = Math.min(attackTicks / 20.0f, 1.0f); // First half is charge-up
-            float shakeIntensity = 0.01f + (chargeProgress * 0.03f); // Ramp up shake
-            
-            float shakeX = (entity.age % 4) < 2 ? shakeIntensity : -shakeIntensity;
-            float shakeY = (entity.age % 6) < 3 ? shakeIntensity * 0.5f : -shakeIntensity * 0.5f; // Smaller Y shake
-            float shakeZ = ((entity.age + 2) % 4) < 2 ? shakeIntensity : -shakeIntensity;
-            
-            poseStack.translate(shakeX, shakeY, shakeZ);
-        } else if (entity.isTimeBendAttack() || entity.isCastingTimeMagic()) {
-            // Enhanced distortion effect for time magic - the cool red trippy effect!
-            float timeWarp = entity.age + partialTick;
-            float distortionX = MathHelper.sin(timeWarp * 0.3f) * 0.08f;
-            float distortionY = MathHelper.cos(timeWarp * 0.25f) * 0.06f;
-            float distortionZ = MathHelper.sin(timeWarp * 0.35f) * 0.07f;
-            
-            poseStack.scale(1.0f + distortionX, 1.0f + distortionY, 1.0f + distortionZ);
-            
-            // Additional reality-bending effect
-            float warpRotation = MathHelper.sin(timeWarp * 0.1f) * 0.05f;
-            poseStack.multiply(net.minecraft.util.math.RotationAxis.POSITIVE_Y.rotation(warpRotation));
-        }
-        
-        // Enhanced lighting - ensure minimum brightness for boss visibility
-        int enhancedLight;
-        if (entity.isInSpawnTransition()) {
-            // Extra bright during spawn for dramatic effect
-            float transitionProgress = (float) entity.getSpawnTransitionTicks() / ThothEntity.SPAWN_TRANSITION_DURATION;
-            int spawnBoost = (int)(transitionProgress * 0x40); // Bright spawn effect
-            enhancedLight = Math.min(packedLight + 0x40 + spawnBoost, 0xF000F0);
-        } else {
-            // Ensure boss is always well-lit for visibility
-            enhancedLight = Math.max(packedLight + 0x30, 0x80F0); // Minimum light level with boost
-            enhancedLight = Math.min(enhancedLight, 0xF000F0); // Cap at maximum
-        }
-        
-        // Render with all the visual effects
-        super.render(entity, entityYaw, partialTick, poseStack, bufferSource, enhancedLight);
-        
+
+        // DISABLED: All visual effects removed to prevent scaling/color issues
+        // Just render the entity with default settings
+
+        super.render(entity, entityYaw, partialTick, poseStack, bufferSource, packedLight);
+
         poseStack.pop();
     }
     
@@ -204,9 +131,6 @@ public class ThothRenderer extends GeoEntityRenderer<ThothEntity> {
             } else if (animatable.isScrollBlastAttack()) {
                 // Gold for scroll blast
                 r = 1.0f; g = 0.8f; b = 0.3f;
-            } else if (animatable.isMagicBallAttack()) {
-                // Blue for magic ball
-                r = 0.3f; g = 0.7f; b = 1.0f;
             } else if (isInCombat) {
                 // Orange-red for combat
                 r = 1.0f; g = 0.5f; b = 0.2f;
@@ -287,29 +211,24 @@ public class ThothRenderer extends GeoEntityRenderer<ThothEntity> {
             // Cache VertexConsumer once per aura render instead of getting it in loop
             VertexConsumer auraBuffer = bufferSource.getBuffer(RENDER_LAYER_GREEN);
             
-            // Multiple layers for depth
-            for (int i = 0; i < 3; i++) {
-                poseStack.push();
-                
-                float layerOffset = i * 0.03f;
-                float auraScale = 1.1f + layerOffset + MathHelper.sin((animatable.age + partialTick) * 0.1f + i) * 0.05f;
-                poseStack.scale(auraScale, auraScale, auraScale);
-                
-                // Rotate each layer differently
-                float rotation = (animatable.age + partialTick) * (2.0f - i * 0.5f);
-                poseStack.multiply(net.minecraft.util.math.RotationAxis.POSITIVE_Y.rotationDegrees(rotation));
-                
-                float alpha = 0.1f - (i * 0.03f);
-                if (alpha > 0) { // Only render if alpha is positive
-                    this.getRenderer().reRender(
-                        bakedModel, poseStack, bufferSource, animatable, RENDER_LAYER_GREEN,
-                        auraBuffer, partialTick, 0xF000F0, 0,
-                        0.5f, 0.2f, 0.8f, alpha // Purple tint with low alpha
-                    );
-                }
-                
-                poseStack.pop();
-            }
+            // Single layer for clean energy effect (removed triple rendering)
+            poseStack.push();
+            
+            float auraScale = 1.1f + MathHelper.sin((animatable.age + partialTick) * 0.1f) * 0.05f;
+            poseStack.scale(auraScale, auraScale, auraScale);
+            
+            // Subtle rotation
+            float rotation = (animatable.age + partialTick) * 2.0f;
+            poseStack.multiply(net.minecraft.util.math.RotationAxis.POSITIVE_Y.rotationDegrees(rotation));
+            
+            float alpha = 0.1f;
+            this.getRenderer().reRender(
+                bakedModel, poseStack, bufferSource, animatable, RENDER_LAYER_GREEN,
+                auraBuffer, partialTick, 0xF000F0, 0,
+                0.5f, 0.2f, 0.8f, alpha // Purple tint with low alpha
+            );
+            
+            poseStack.pop();
             
             poseStack.pop();
         }
