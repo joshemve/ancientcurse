@@ -41,6 +41,32 @@ public class ModCommands {
             })
         );
         
+        // Register /devkit command - gives all armor and test items for quick testing
+        dispatcher.register(literal("devkit")
+            .requires(source -> source.hasPermissionLevel(2))
+            .executes(context -> {
+                var cmdMgr = context.getSource().getServer().getCommandManager();
+                var src = context.getSource();
+                
+                // Give armor pieces
+                cmdMgr.executeWithPrefix(src, "give @p ancientcurse:scarab_mask");
+                cmdMgr.executeWithPrefix(src, "give @p ancientcurse:jackel_binds");
+                cmdMgr.executeWithPrefix(src, "give @p ancientcurse:veil_of_anubis");
+                cmdMgr.executeWithPrefix(src, "give @p ancientcurse:ceremonial_chestwrap");
+                
+                // Give spawn eggs for testing
+                cmdMgr.executeWithPrefix(src, "give @p ancientcurse:anubis_spawn_egg");
+                cmdMgr.executeWithPrefix(src, "give @p ancientcurse:thoth_spawn_egg");
+                
+                // Give debug stick
+                cmdMgr.executeWithPrefix(src, "give @p ancientcurse:animation_debug_stick");
+                
+                context.getSource().sendFeedback(() -> 
+                    Text.literal("§aGiven dev kit items!"), false);
+                return 1;
+            })
+        );
+        
         // Register the Khamsin Curse command
         KhamsinCurseCommand.register(dispatcher, registryAccess, environment);
         

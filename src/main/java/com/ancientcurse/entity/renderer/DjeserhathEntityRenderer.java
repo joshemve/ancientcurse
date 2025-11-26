@@ -27,11 +27,14 @@ public class DjeserhathEntityRenderer extends GeoEntityRenderer<DjeserhathEntity
     }
     
     @Override
-    public void preRender(MatrixStack poseStack, DjeserhathEntity animatable, BakedGeoModel model, 
-                         VertexConsumerProvider bufferSource, VertexConsumer buffer, 
-                         boolean isReRender, float partialTick, int packedLight, 
+    public void preRender(MatrixStack poseStack, DjeserhathEntity animatable, BakedGeoModel model,
+                         VertexConsumerProvider bufferSource, VertexConsumer buffer,
+                         boolean isReRender, float partialTick, int packedLight,
                          int packedOverlay, float red, float green, float blue, float alpha) {
-        super.preRender(poseStack, animatable, model, bufferSource, buffer, isReRender, 
+        // Raise the model slightly to avoid z-fighting with the block below
+        poseStack.translate(0, 0.01, 0);
+
+        super.preRender(poseStack, animatable, model, bufferSource, buffer, isReRender,
                        partialTick, packedLight, packedOverlay, red, green, blue, alpha);
         
         // Keep only the plant base static by counter-rotating it

@@ -5,8 +5,10 @@ import com.ancientcurse.ModEntities;
 import com.ancientcurse.ModItems;
 import com.ancientcurse.ModBlocks;
 import com.ancientcurse.ModBlockEntities;
+import com.ancientcurse.ModParticles;
 import com.ancientcurse.block.registry.PotteryBlocks;
 import com.ancientcurse.client.model.*;
+import com.ancientcurse.client.particle.ZulmakParticle;
 import com.ancientcurse.client.render.*;
 import com.ancientcurse.client.render.entity.*;
 import com.ancientcurse.client.renderer.block.SolarSpireRenderer;
@@ -14,12 +16,14 @@ import com.ancientcurse.client.render.item.SerpentStaffRenderer;
 import com.ancientcurse.client.color.RockColorProvider;
 import com.ancientcurse.entity.model.*;
 import com.ancientcurse.entity.renderer.*;
+import com.ancientcurse.entity.renderer.ZulmakRenderer;
 import com.ancientcurse.network.CurseZonePackets;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
+import net.fabricmc.fabric.api.client.particle.v1.ParticleFactoryRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.BlockEntityRendererRegistry;
@@ -62,10 +66,13 @@ public class AncientCurseClient implements ClientModInitializer {
         
         // Register entity renderers FIRST before anything else
         registerEntityRenderers();
-        
+
         // Register block entity renderers
         registerBlockEntityRenderers();
-        
+
+        // Register particle factories
+        registerParticleFactories();
+
         // Register render layers for transparent blocks
         registerRenderLayers();
         
@@ -77,6 +84,9 @@ public class AncientCurseClient implements ClientModInitializer {
         
         // Register the Ankh Counter HUD renderer
         AnkhCounterHudRenderer.register();
+
+        // Register the Jackel Binds HUD renderer
+        JackelBindsHudRenderer.register();
         
         // Register render layers for cursed plants
         CursedPlantRenderLayer.register();
@@ -166,6 +176,9 @@ public class AncientCurseClient implements ClientModInitializer {
         
         // Register the Thoth Magic Ball projectile renderer
         EntityRendererRegistry.register(ModEntities.THOTH_MAGIC_BALL, FlyingItemEntityRenderer::new);
+
+        // Register the Zulmak renderer
+        EntityRendererRegistry.register(ModEntities.ZULMAK, ZulmakRenderer::new);
     }
     
     /**
@@ -173,9 +186,21 @@ public class AncientCurseClient implements ClientModInitializer {
      */
     private void registerBlockEntityRenderers() {
         AncientCurse.LOGGER.info("Registering block entity renderers for " + AncientCurse.MOD_ID);
-        
+
         // Register the Solar Spire renderer
         BlockEntityRendererRegistry.register(ModBlockEntities.SOLAR_SPIRE, SolarSpireRenderer::new);
+    }
+
+    /**
+     * Register particle factories for custom particles
+     */
+    private void registerParticleFactories() {
+        AncientCurse.LOGGER.info("Registering particle factories for " + AncientCurse.MOD_ID);
+
+        // Register Zulmak particle factory - spinning particles around Zulmak's blocks
+        ParticleFactoryRegistry.getInstance().register(ModParticles.ZULMAK_PARTICLE, ZulmakParticle.Factory::new);
+
+        AncientCurse.LOGGER.info("Particle factories registered");
     }
     
     /**
@@ -201,6 +226,12 @@ public class AncientCurseClient implements ClientModInitializer {
 
         // Register salt dust with transparency
         BlockRenderLayerMap.INSTANCE.putBlock(ModBlocks.SALT_DUST, RenderLayer.getCutout());
+
+        // Register pitfall trap with transparency
+        BlockRenderLayerMap.INSTANCE.putBlock(com.ancientcurse.block.registry.ConstructionBlocks.PITFALL_TRAP, RenderLayer.getCutout());
+        
+        // Register spike with transparency
+        BlockRenderLayerMap.INSTANCE.putBlock(com.ancientcurse.block.registry.ConstructionBlocks.SPIKE, RenderLayer.getCutout());
 
         BlockRenderLayerMap.INSTANCE.putBlock(ModBlocks.PISTIA_STRATIOTES, RenderLayer.getCutout());
         BlockRenderLayerMap.INSTANCE.putBlock(ModBlocks.LOTUS_FLOWER_PAD, RenderLayer.getCutout());
@@ -251,7 +282,10 @@ public class AncientCurseClient implements ClientModInitializer {
             ModBlocks.MEDIUM_ROCK,
             ModBlocks.LARGE_ROCK
         );
-        
+
+        // Override spawn egg tinting for Zulmak - use white (no tint) so custom texture shows correctly
+        ColorProviderRegistry.ITEM.register((stack, tintIndex) -> -1, ModItems.ZULMAK_SPAWN_EGG);
+
         AncientCurse.LOGGER.info("Registered color providers");
     }
 }

@@ -227,7 +227,7 @@ public class DjeserhathEntity extends HostileEntity implements GeoEntity {
                 }
             }
             
-            // IMPROVED: Better player-facing when activated
+            // Rotate to face target when activated (renderer counter-rotates bottom_plant to keep it static)
             if (isActivated()) {
                 LivingEntity target = getTarget();
                 if (target != null && target.isAlive()) {
@@ -235,20 +235,14 @@ public class DjeserhathEntity extends HostileEntity implements GeoEntity {
                     double dx = target.getX() - this.getX();
                     double dz = target.getZ() - this.getZ();
                     float targetYaw = (float) (Math.atan2(dz, dx) * 180.0 / Math.PI) - 90.0F;
-                    
-                    // Don't rotate the entire entity - this keeps the bottom_plant stationary
-                    // The renderer will handle rotating individual body parts to track the target
-                    // Comment out the rotation code:
-                    /*
+
+                    // Smoothly rotate entity to face target
                     float yawDiff = MathHelper.wrapDegrees(targetYaw - this.getYaw());
-                    float rotationSpeed = 4.0F;
-                    
-                    if (Math.abs(yawDiff) > 5.0F) {
-                        this.setYaw(this.getYaw() + MathHelper.clamp(yawDiff, -rotationSpeed, rotationSpeed));
-                        this.bodyYaw = this.getYaw();
-                        this.headYaw = this.getYaw();
-                    }
-                    */
+                    float rotationSpeed = 8.0F; // Fast rotation to track moving players
+
+                    this.setYaw(this.getYaw() + MathHelper.clamp(yawDiff, -rotationSpeed, rotationSpeed));
+                    this.bodyYaw = this.getYaw();
+                    this.headYaw = this.getYaw();
                 }
             }
         }
@@ -769,8 +763,9 @@ public class DjeserhathEntity extends HostileEntity implements GeoEntity {
         @Override
         public void tick() {
             if (spitTarget != null) {
-                // Look control disabled - rotation handled in renderer
-                
+                // Face the target while preparing to spit
+                host.getLookControl().lookAt(spitTarget, 30.0F, 30.0F);
+
                 // Begin opening jaw as we prepare to spit
                 host.dataTracker.set(JAW_OPENNESS, Math.min(1.0f, host.getJawOpenness() + 0.1f));
                 
@@ -885,9 +880,15 @@ public class DjeserhathEntity extends HostileEntity implements GeoEntity {
         return SoundEvents.BLOCK_FUNGUS_BREAK; 
     }
     
-    @Override 
-    protected SoundEvent getDeathSound() { 
-        return SoundEvents.BLOCK_SLIME_BLOCK_BREAK; 
+    @Override
+    protected SoundEvent getDeathSound() {
+        return SoundEvents.BLOCK_SLIME_BLOCK_BREAK;
+    }
+
+    @Override
+    public boolean cannotDespawn() {
+        // Boss entities should never despawn
+        return true;
     }
 
     @Override

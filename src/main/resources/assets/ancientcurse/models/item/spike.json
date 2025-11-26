@@ -1,0 +1,8 @@
+{
+  "parent": "ancientcurse:block/spike",
+  "display": {
+    "gui": {
+      "translation": [0, 2.5, 0]
+    }
+  }
+}

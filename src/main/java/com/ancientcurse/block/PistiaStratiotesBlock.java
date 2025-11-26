@@ -35,15 +35,39 @@ public class PistiaStratiotesBlock extends Block {
 
     @Override
     public BlockState getPlacementState(ItemPlacementContext ctx) {
-        FluidState fluidState = ctx.getWorld().getFluidState(ctx.getBlockPos());
-        return fluidState.isIn(FluidTags.WATER) && fluidState.getLevel() == 8 ? super.getPlacementState(ctx) : null;
+        BlockPos pos = ctx.getBlockPos();
+        BlockState blockStateAtPos = ctx.getWorld().getBlockState(pos);
+        FluidState fluidState = ctx.getWorld().getFluidState(pos);
+
+        // Can be placed if:
+        // 1. Position has full water (level 8) OR
+        // 2. Position has a replaceable block (like seagrass, kelp, etc.) with water below
+        if (fluidState.isIn(FluidTags.WATER) && fluidState.getLevel() == 8) {
+            return super.getPlacementState(ctx);
+        }
+
+        // Check if we can replace the block at this position and there's water below
+        if (blockStateAtPos.isReplaceable() && !blockStateAtPos.isAir()) {
+            FluidState belowFluid = ctx.getWorld().getFluidState(pos.down());
+            if (belowFluid.isIn(FluidTags.WATER) && belowFluid.getLevel() == 8) {
+                return super.getPlacementState(ctx);
+            }
+        }
+
+        return null;
     }
 
     @Override
     public boolean canPlaceAt(BlockState state, WorldView world, BlockPos pos) {
-        BlockPos blockPos = pos.down();
-        FluidState fluidState = world.getFluidState(blockPos);
-        return fluidState.isIn(FluidTags.WATER) && fluidState.getLevel() == 8;
+        // Check if there's water at this position (floating on water)
+        FluidState fluidState = world.getFluidState(pos);
+        if (fluidState.isIn(FluidTags.WATER) && fluidState.getLevel() == 8) {
+            return true;
+        }
+
+        // Or if there's water directly below (placed on seagrass, etc.)
+        FluidState belowFluid = world.getFluidState(pos.down());
+        return belowFluid.isIn(FluidTags.WATER) && belowFluid.getLevel() == 8;
     }
 
     @Override

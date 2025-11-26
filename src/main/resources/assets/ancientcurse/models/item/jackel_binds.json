@@ -1,0 +1,6 @@
+{
+  "parent": "item/generated",
+  "textures": {
+    "layer0": "ancientcurse:item/jackel_binds_item"
+  }
+}

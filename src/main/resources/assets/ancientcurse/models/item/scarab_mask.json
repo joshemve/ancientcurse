@@ -1,6 +1,37 @@
 {
-  "parent": "item/generated",
+  "credit": "Made with Blockbench",
+  "parent": "builtin/entity",
+  "display": {
+    "thirdperson_righthand": {
+      "scale": [0.3, 0.3, 0.3]
+    },
+    "thirdperson_lefthand": {
+      "scale": [0.3, 0.3, 0.3]
+    },
+    "firstperson_righthand": {
+      "scale": [0.3, 0.3, 0.3]
+    },
+    "firstperson_lefthand": {
+      "scale": [0.3, 0.3, 0.3]
+    },
+    "ground": {
+      "translation": [0, 7, 0],
+      "scale": [0.3, 0.3, 0.3]
+    },
+    "gui": {
+      "rotation": [0, 151, 0],
+      "translation": [-0.75, -13.25, 0],
+      "scale": [0.34, 0.34, 0.34]
+    },
+    "head": {
+      "scale": [0.3, 0.3, 0.3]
+    },
+    "fixed": {
+      "translation": [0, 0, -2],
+      "scale": [0.3, 0.3, 0.3]
+    }
+  },
   "textures": {
-    "layer0": "ancientcurse:item/scarab_mask"
+    "particle": "ancientcurse:armor/scarab_mask"
   }
 }

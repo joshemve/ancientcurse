@@ -12,6 +12,7 @@ import com.ancientcurse.entity.ThothEntity;
 import com.ancientcurse.entity.ThothMagicBallEntity;
 import com.ancientcurse.entity.KhamsinOrbEntity;
 import com.ancientcurse.entity.WitheredPharaohEntity;
+import com.ancientcurse.entity.ZulmakEntity;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricEntityTypeBuilder;
 import net.minecraft.entity.EntityDimensions;
@@ -104,7 +105,7 @@ public class ModEntities {
         Registries.ENTITY_TYPE,
         new Identifier(AncientCurse.MOD_ID, "scarab_beetle"),
         FabricEntityTypeBuilder.create(SpawnGroup.CREATURE, ScarabBeetleEntity::new)
-            .dimensions(EntityDimensions.fixed(1.0f, 0.9f)) // Increased height from 0.6 to 0.9 for easier hitting
+            .dimensions(EntityDimensions.fixed(1.3f, 0.9f)) // Width 1.3 (longer body), height 0.9 for easier hitting
             .trackRangeBlocks(48)
             .trackedUpdateRate(3)
             .build()
@@ -146,7 +147,18 @@ public class ModEntities {
             .trackRangeBlocks(64)
             .trackedUpdateRate(5) // Smooth projectile movement
             .build());
-    
+
+    // Register the Zulmak entity (hostile mob)
+    public static final EntityType<ZulmakEntity> ZULMAK = Registry.register(
+        Registries.ENTITY_TYPE,
+        new Identifier(AncientCurse.MOD_ID, "zulmak"),
+        FabricEntityTypeBuilder.create(SpawnGroup.MONSTER, ZulmakEntity::new)
+            .dimensions(EntityDimensions.fixed(1.0f, 2.0f)) // Adjust based on model size
+            .trackRangeBlocks(64)
+            .trackedUpdateRate(3)
+            .build()
+    );
+
     /**
      * Registers all mod entities
      */
@@ -162,6 +174,7 @@ public class ModEntities {
         FabricDefaultAttributeRegistry.register(SCARAB_BEETLE, ScarabBeetleEntity.createScarabBeetleAttributes());
         FabricDefaultAttributeRegistry.register(THOTH, ThothEntity.createThothAttributes());
         FabricDefaultAttributeRegistry.register(KHAMSIN_SPREAD_SMALL, KhamsinSpreadSmallEntity.createKhamsinSpreadSmallAttributes());
+        FabricDefaultAttributeRegistry.register(ZULMAK, ZulmakEntity.createZulmakAttributes());
 
     }
     

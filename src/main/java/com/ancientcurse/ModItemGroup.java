@@ -106,6 +106,8 @@ public class ModItemGroup {
                 safeAdd(entries, com.ancientcurse.block.registry.ConstructionBlocks.SANDSTONE_BRICKS_WALL);
                 safeAdd(entries, ModBlocks.SANDSTONE_PILLAR);
                 safeAdd(entries, ModBlocks.SUNBAKED_CLAY);
+                safeAdd(entries, com.ancientcurse.block.registry.ConstructionBlocks.PITFALL_TRAP);
+                safeAdd(entries, com.ancientcurse.block.registry.ConstructionBlocks.SPIKE);
                 
                 // Pottery and vessel blocks
                 safeAdd(entries, com.ancientcurse.block.registry.PotteryBlocks.OFFERING_POT);
@@ -183,6 +185,7 @@ public class ModItemGroup {
                 safeAdd(entries, ModItems.VEIL_OF_ANUBIS);
                 safeAdd(entries, ModItems.CEREMONIAL_CHESTWRAP);
                 safeAdd(entries, ModItems.SCARAB_MASK);
+                safeAdd(entries, ModItems.JACKEL_BINDS);
                 
                 // Crops (Blocks themselves, for placing if needed)
                 safeAdd(entries, ModBlocks.FLAX);
@@ -313,6 +316,7 @@ public class ModItemGroup {
                 safeAdd(entries, ModItems.SCARAB_BEETLE_SPAWN_EGG);
                 safeAdd(entries, ModItems.THOTH_SPAWN_EGG);
                 safeAdd(entries, ModItems.KHAMSIN_SPREAD_SMALL_SPAWN_EGG);
+                safeAdd(entries, ModItems.ZULMAK_SPAWN_EGG);
                 // Lotus spawn egg removed to fix conflicts
             })
             .build()

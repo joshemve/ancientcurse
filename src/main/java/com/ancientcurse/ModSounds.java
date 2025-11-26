@@ -32,6 +32,46 @@ public class ModSounds {
     public static final SoundEvent THOTH_HIT_2 = registerSoundEvent("thoth_hit_2");
     public static final SoundEvent THOTH_BREATH_1 = registerSoundEvent("thoth_breath_1");
 
+    // Anubis Sound Events - Movement
+    public static final SoundEvent ANUBIS_STEP = registerSoundEvent("anubis_step");
+    public static final SoundEvent ANUBIS_STEP_HEAVY = registerSoundEvent("anubis_step_heavy");
+    public static final SoundEvent ANUBIS_FOOTSTEP_1 = registerSoundEvent("anubis_footstep_1");
+    
+    // Anubis Voice - Hurt variations (randomly chosen when hit)
+    public static final SoundEvent ANUBIS_HURT_1 = registerSoundEvent("anubis_hurt_1");
+    public static final SoundEvent ANUBIS_HURT_2 = registerSoundEvent("anubis_hurt_2");
+    public static final SoundEvent ANUBIS_HURT_3 = registerSoundEvent("anubis_hurt_3");
+    public static final SoundEvent ANUBIS_HURT_4 = registerSoundEvent("anubis_hurt_4");
+    
+    // Anubis Voice - Breathing (ambient/idle)
+    public static final SoundEvent ANUBIS_BREATH_1 = registerSoundEvent("anubis_breath_1");
+    public static final SoundEvent ANUBIS_BREATH_2 = registerSoundEvent("anubis_breath_2");
+    public static final SoundEvent ANUBIS_RUNNING_BREATHING = registerSoundEvent("anubis_running_breathing");
+    
+    // Anubis Voice - Howls (sky yell attack)
+    public static final SoundEvent ANUBIS_HOWL_1 = registerSoundEvent("anubis_howl_1");
+    public static final SoundEvent ANUBIS_HOWL_2 = registerSoundEvent("anubis_howl_2");
+    
+    // Anubis Voice - Whoosh (attack sounds)
+    public static final SoundEvent ANUBIS_WHOOSH_1 = registerSoundEvent("anubis_whoosh_1");
+    public static final SoundEvent ANUBIS_WHOOSH_2 = registerSoundEvent("anubis_whoosh_2");
+    public static final SoundEvent ANUBIS_ATTACK_1_WHOOSH_LAYER = registerSoundEvent("anubis_attack_1_whoosh_layer");
+    
+    // Anubis Voice - Evil Laughs (when damaging player)
+    public static final SoundEvent ANUBIS_EVIL_LAUGH_1 = registerSoundEvent("anubis_evil_laugh_1");
+    public static final SoundEvent ANUBIS_EVIL_LAUGH_2 = registerSoundEvent("anubis_evil_laugh_2");
+    
+    // Anubis Voice - Judgment
+    public static final SoundEvent ANUBIS_JUDGEMENT = registerSoundEvent("anubis_judgement");
+    public static final SoundEvent ANUBIS_JUDGEMENT_SAFE = registerSoundEvent("anubis_judgement_safe");
+    
+    // Anubis Voice - Combat
+    public static final SoundEvent ANUBIS_HEART_IS_HEAVY = registerSoundEvent("anubis_heart_is_heavy");
+    
+    // Anubis - Judgment Effects
+    public static final SoundEvent ANUBIS_JUDGEMENT_WHOOSH = registerSoundEvent("anubis_judgement_whoosh");
+    public static final SoundEvent ANUBIS_MAGIC_SHIMMER = registerSoundEvent("anubis_magic_shimmer");
+    public static final SoundEvent ANUBIS_JUDGEMENT_LOOP = registerSoundEvent("anubis_judgement_loop");
 
     private static SoundEvent registerSoundEvent(String name) {
         Identifier id = new Identifier(AncientCurse.MOD_ID, name);

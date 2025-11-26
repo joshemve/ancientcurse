@@ -5,12 +5,17 @@
   "compatibilityLevel": "JAVA_17",
   "mixins": [
     "SingleBiomePresetMixin",
-    "PlayerEntityMixin"
+    "PlayerEntityMixin",
+    "JackelBindsRestrictionMixin",
+    "JackelBindsServerMixin"
   ],
   "client": [
     "client.EntityRenderDispatcherMixin",
     "client.EntityRenderersMixin",
-    "client.SafeEntityRenderMixin"
+    "client.SafeEntityRenderMixin",
+    "client.JackelBindsScreenMixin",
+    "client.JackelBindsFirstPersonMixin",
+    "client.JackelBindsArmMixin"
   ],
   "injectors": {
     "defaultRequire": 1

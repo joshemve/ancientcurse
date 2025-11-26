@@ -125,7 +125,10 @@ public class AncientCurse implements ModInitializer {
         // ModBlocks.registerBlocks(); // REMOVED: Blocks are now registered through BlockRegistry system
         ModItems.registerItems();
         ModSounds.registerSounds();
-        
+
+        // Register mod particles
+        ModParticles.registerParticles();
+
         // Register mod entities
         ModEntities.registerEntities();
         
@@ -152,10 +155,22 @@ public class AncientCurse implements ModInitializer {
             com.ancientcurse.effect.TornadoManager.tick(server);
             LocusSwarmCommand.tickSwarm();
             com.ancientcurse.system.CurseZoneEffectHandler.tick(server);
+
+            // Apply Jackel Binds effects to bound players and tick breakout manager
+            long currentTime = server.getOverworld().getTime();
+            com.ancientcurse.system.JackelBindsBreakoutManager.getInstance().tick(currentTime);
+            for (var player : server.getPlayerManager().getPlayerList()) {
+                com.ancientcurse.item.armor.JackelBindsItem.applyBindEffects(player);
+            }
         });
         
         // Register player join handler for curse zone syncing
         PlayerJoinHandler.register();
+
+        // Register player disconnect handler to clean up breakout progress
+        net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
+            com.ancientcurse.system.JackelBindsBreakoutManager.getInstance().resetProgress(handler.player.getUuid());
+        });
 
         // Register path creation handler for sand/sandstone paths
         PathCreationHandler.register();

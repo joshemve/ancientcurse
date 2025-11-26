@@ -3,7 +3,7 @@ plugins {
     id 'maven-publish'
 }
 
-version = '1.0.2'
+version = '1.0.4'
 group = 'com.ancientcurse'
 archivesBaseName = 'ancientcurse'
 
@@ -78,6 +78,10 @@ loom {
         client {
             // Set your Minecraft username to use your skin
             property 'fabric.client.username', 'Joshemve'
+            
+            // Dev optimizations - faster loading
+            vmArg '-XX:+IgnoreUnrecognizedVMOptions'
+            vmArg '-XX:+AllowEnhancedClassRedefinition' // Better hot-swap if using DCEVM
         }
         // Add this configuration for data generation
         datagenClient {

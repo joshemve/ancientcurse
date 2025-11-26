@@ -889,6 +889,19 @@
 						}
 					}
 				},
+				"right_foot": {
+					"rotation": {
+						"0.0": {
+							"vector": [25, 0, 0]
+						},
+						"0.75": {
+							"vector": [-10, 0, 0]
+						},
+						"1.5": {
+							"vector": [25, 0, 0]
+						}
+					}
+				},
 				"back_cloth_flap": {
 					"rotation": {
 						"0.0": {

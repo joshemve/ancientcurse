@@ -72,7 +72,7 @@ public class WitheredPharaohEntity extends HostileEntity implements GeoEntity {
     public WitheredPharaohEntity(EntityType<? extends HostileEntity> entityType, World world) {
         super(entityType, world);
         this.setPathfindingPenalty(PathNodeType.WATER, -1.0F);
-        this.experiencePoints = 20; // More XP than regular mobs
+        this.experiencePoints = 12; // Mid-tier minion XP (between regular mob and boss)
     }
     
     @Override
@@ -223,15 +223,16 @@ public class WitheredPharaohEntity extends HostileEntity implements GeoEntity {
     
     /**
      * Set up entity attributes like health, movement speed, attack damage
+     * Stats tuned for mid-tier minion role (summoned by Zulmak)
      */
     public static DefaultAttributeContainer.Builder createWitheredPharaohAttributes() {
         return HostileEntity.createHostileAttributes()
-            .add(EntityAttributes.GENERIC_MAX_HEALTH, 60.0D) // Increased health
+            .add(EntityAttributes.GENERIC_MAX_HEALTH, 40.0D) // Reduced health for minion role
             .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.25D)
-            .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 8.0D) // Increased damage
+            .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 6.0D) // Reduced damage for minion role
             .add(EntityAttributes.GENERIC_ATTACK_KNOCKBACK, 1.0D)
-            .add(EntityAttributes.GENERIC_FOLLOW_RANGE, 64.0D) // Increased from 32 to 64 for better ranged detection
-            .add(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE, 0.6D);
+            .add(EntityAttributes.GENERIC_FOLLOW_RANGE, 48.0D) // Reduced follow range
+            .add(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE, 0.4D); // Reduced knockback resistance
     }
     
     @Override
@@ -723,7 +724,13 @@ public class WitheredPharaohEntity extends HostileEntity implements GeoEntity {
     protected SoundEvent getDeathSound() {
         return SoundEvents.ENTITY_WITHER_DEATH;
     }
-    
+
+    @Override
+    public boolean cannotDespawn() {
+        // Allow despawn - Withered Pharaoh is a mid-tier minion, not a boss
+        return false;
+    }
+
     @Override
     public boolean damage(DamageSource source, float amount) {
         // Make the pharaoh immediately target players who attack it

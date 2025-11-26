@@ -52,14 +52,40 @@ public class LotusFlowerPadBlock extends Block {
     
     @Override
     public boolean canPlaceAt(BlockState state, WorldView world, BlockPos pos) {
-        // Can only be placed on water
-        FluidState fluidState = world.getFluidState(pos.down());
-        return fluidState.isOf(Fluids.WATER) && fluidState.getLevel() == 8;
+        // Can be placed if there's water at this position (floating on water)
+        FluidState fluidState = world.getFluidState(pos);
+        if (fluidState.isOf(Fluids.WATER) && fluidState.getLevel() == 8) {
+            return true;
+        }
+
+        // Or if there's water directly below (when placed on seagrass, kelp, etc.)
+        FluidState belowFluid = world.getFluidState(pos.down());
+        return belowFluid.isOf(Fluids.WATER) && belowFluid.getLevel() == 8;
     }
-    
+
     @Override
     public BlockState getPlacementState(ItemPlacementContext ctx) {
         World world = ctx.getWorld();
+        BlockPos pos = ctx.getBlockPos();
+        BlockState blockStateAtPos = world.getBlockState(pos);
+        FluidState fluidState = world.getFluidState(pos);
+
+        // Check if we can place here
+        // Can place if: 1) Position has full water OR 2) Replaceable block with water below
+        boolean canPlace = false;
+        if (fluidState.isOf(Fluids.WATER) && fluidState.getLevel() == 8) {
+            canPlace = true;
+        } else if (blockStateAtPos.isReplaceable() && !blockStateAtPos.isAir()) {
+            FluidState belowFluid = world.getFluidState(pos.down());
+            if (belowFluid.isOf(Fluids.WATER) && belowFluid.getLevel() == 8) {
+                canPlace = true;
+            }
+        }
+
+        if (!canPlace) {
+            return null;
+        }
+
         // Set initial open/closed state based on time of day
         boolean isDay = world.getTimeOfDay() % 24000 < 13000;
         return this.getDefaultState().with(OPEN, isDay);

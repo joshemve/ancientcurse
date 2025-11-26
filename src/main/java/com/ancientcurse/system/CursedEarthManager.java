@@ -145,7 +145,12 @@ public class CursedEarthManager {
             if (isProtectedByCleansingStation(world, request.toPos)) {
                 return false;
             }
-            
+
+            // Check for salt circle protection
+            if (isProtectedBySaltCircle(world, request.toPos)) {
+                return false;
+            }
+
             // ALSO check if we're in an active cleansing zone
             if (com.ancientcurse.block.SolarSpireBlock.isInActiveCleansingZone(request.toPos)) {
                 return false; // Don't spread into active cleansing zones

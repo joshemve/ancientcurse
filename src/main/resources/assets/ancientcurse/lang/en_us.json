@@ -53,7 +53,11 @@
   "entity.ancientcurse.khamsin_spread_small": "Khamsin Spread (Small)",
   "item.ancientcurse.khamsin_spread_small_spawn_egg": "Khamsin Spread Small Spawn Egg",
   "item.ancientcurse.khamsin_spread_small_spawn_egg.tooltip": "Summon a mystical floating rock that's part of the curse system",
-  
+
+  "entity.ancientcurse.zulmak": "Zulmak",
+  "item.ancientcurse.zulmak_spawn_egg": "Zulmak Spawn Egg",
+  "item.ancientcurse.zulmak_spawn_egg.tooltip": "Summon a Zulmak",
+
   "entity.ancientcurse.snake_head_projectile": "Snake Head Projectile",
   
   "entity.ancientcurse.anubis": "Anubis, the Jackal-Headed God",
@@ -110,6 +114,9 @@
   
   "item.ancientcurse.scarab_mask": "Scarab Mask",
   "item.ancientcurse.scarab_mask.tooltip": "Sacred mask of the divine scarab",
+
+  "item.ancientcurse.jackel_binds": "Jackal Binds",
+  "item.ancientcurse.jackel_binds.tooltip": "Ancient restraints",
 
   "item.ancientcurse.the_broken_crook": "The Broken Crook",
   "item.ancientcurse.the_broken_crook.tooltip": "Fragment of a pharaoh's ceremonial staff",
@@ -223,6 +230,8 @@
   "block.ancientcurse.sandstone_bricks_stairs": "Sandstone Bricks Stairs",
   "block.ancientcurse.sandstone_bricks_wall": "Sandstone Bricks Wall",
   "block.ancientcurse.sandstone_pillar": "Sandstone Pillar",
+  "block.ancientcurse.pitfall_trap": "Pitfall Trap",
+  "block.ancientcurse.spike": "Wooden Spikes",
 
   "block.ancientcurse.anubus__glyph": "Anubus Glyph",
   "block.ancientcurse.anubus__glyph.tooltip": "Sacred hieroglyphic block",

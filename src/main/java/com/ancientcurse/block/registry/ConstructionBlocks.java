@@ -5,6 +5,8 @@ import com.ancientcurse.ModBlocks;
 import com.ancientcurse.ModItemGroup;
 import com.ancientcurse.block.SandPathBlock;
 import com.ancientcurse.block.SandstonePathBlock;
+import com.ancientcurse.block.custom.PitfallTrapBlock;
+import com.ancientcurse.block.custom.SpikeBlock;
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
 import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
 import net.minecraft.block.Block;
@@ -105,6 +107,25 @@ public class ConstructionBlocks {
     public static final Block DATE_PALM_SLAB = new SlabBlock(
         FabricBlockSettings.copyOf(ModBlocks.DATE_PALM_PLANKS)
     );
+
+    // Traps
+    public static final Block PITFALL_TRAP = new PitfallTrapBlock(
+        FabricBlockSettings.create()
+            .mapColor(MapColor.OAK_TAN)
+            .strength(0.5f)
+            .sounds(BlockSoundGroup.SCAFFOLDING)
+            .nonOpaque()  // Required for transparency - allows seeing block below
+    );
+    
+    // Spike trap - wooden spikes that damage entities
+    public static final Block SPIKE = new SpikeBlock(
+        FabricBlockSettings.create()
+            .mapColor(MapColor.OAK_TAN)
+            .strength(0.5f)
+            .sounds(BlockSoundGroup.WOOD)
+            .nonOpaque()  // Required for transparency
+            .noCollision() // Entities can walk into spikes
+    );
     
     /**
      * Registers all construction blocks to the game registry
@@ -195,6 +216,18 @@ public class ConstructionBlocks {
             new Identifier(AncientCurse.MOD_ID, "date_palm_slab"),
             DATE_PALM_SLAB
         );
+
+        // Register traps
+        Registry.register(
+            Registries.BLOCK,
+            new Identifier(AncientCurse.MOD_ID, "pitfall_trap"),
+            PITFALL_TRAP
+        );
+        Registry.register(
+            Registries.BLOCK,
+            new Identifier(AncientCurse.MOD_ID, "spike"),
+            SPIKE
+        );
     }
     
     /**
@@ -230,6 +263,10 @@ public class ConstructionBlocks {
         // Register wood slab items
         registerBlockItem(SYCAMORE_SLAB, "sycamore_slab", ModItemGroup.ANCIENT_CURSE);
         registerBlockItem(DATE_PALM_SLAB, "date_palm_slab", ModItemGroup.ANCIENT_CURSE);
+        
+        // Register trap items
+        registerBlockItem(PITFALL_TRAP, "pitfall_trap", ModItemGroup.ANCIENT_CURSE);
+        registerBlockItem(SPIKE, "spike", ModItemGroup.ANCIENT_CURSE);
     }
     
     /**

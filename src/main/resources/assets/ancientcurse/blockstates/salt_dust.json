@@ -3,46 +3,228 @@
     {
       "when": {
         "OR": [
-          {"north": "none", "east": "none", "south": "none", "west": "none"},
-          {"north": "side|up", "east": "side|up"},
-          {"east": "side|up", "south": "side|up"},
-          {"south": "side|up", "west": "side|up"},
-          {"west": "side|up", "north": "side|up"}
+          {
+            "activated": "false",
+            "east": "none",
+            "north": "none",
+            "south": "none",
+            "west": "none"
+          },
+          {
+            "activated": "false",
+            "east": "side|up",
+            "north": "side|up"
+          },
+          {
+            "activated": "false",
+            "east": "side|up",
+            "south": "side|up"
+          },
+          {
+            "activated": "false",
+            "south": "side|up",
+            "west": "side|up"
+          },
+          {
+            "activated": "false",
+            "north": "side|up",
+            "west": "side|up"
+          }
         ]
       },
-      "apply": {"model": "ancientcurse:block/salt_dust_dot"}
+      "apply": {
+        "model": "ancientcurse:block/salt_dust_dot"
+      }
     },
     {
-      "when": {"OR": [{"north": "side|up"}, {"north": "none", "east": "none", "south": "side|up", "west": "none"}]},
-      "apply": {"model": "ancientcurse:block/salt_dust_line0"}
+      "when": {
+        "OR": [
+          {
+            "activated": "true",
+            "east": "none",
+            "north": "none",
+            "south": "none",
+            "west": "none"
+          },
+          {
+            "activated": "true",
+            "east": "side|up",
+            "north": "side|up"
+          },
+          {
+            "activated": "true",
+            "east": "side|up",
+            "south": "side|up"
+          },
+          {
+            "activated": "true",
+            "south": "side|up",
+            "west": "side|up"
+          },
+          {
+            "activated": "true",
+            "north": "side|up",
+            "west": "side|up"
+          }
+        ]
+      },
+      "apply": {
+        "model": "ancientcurse:block/salt_dust_dot_activated"
+      }
     },
     {
-      "when": {"OR": [{"east": "side|up"}, {"north": "none", "east": "none", "south": "none", "west": "side|up"}]},
-      "apply": {"model": "ancientcurse:block/salt_dust_line0", "y": 90}
+      "when": {
+        "activated": "false",
+        "north": "side|up"
+      },
+      "apply": {
+        "model": "ancientcurse:block/salt_dust_side0"
+      }
     },
     {
-      "when": {"OR": [{"south": "side|up"}, {"north": "side|up", "east": "none", "south": "none", "west": "none"}]},
-      "apply": {"model": "ancientcurse:block/salt_dust_line1"}
+      "when": {
+        "activated": "true",
+        "north": "side|up"
+      },
+      "apply": {
+        "model": "ancientcurse:block/salt_dust_side0_activated"
+      }
     },
     {
-      "when": {"OR": [{"west": "side|up"}, {"north": "none", "east": "side|up", "south": "none", "west": "none"}]},
-      "apply": {"model": "ancientcurse:block/salt_dust_line1", "y": 90}
+      "when": {
+        "activated": "false",
+        "south": "side|up"
+      },
+      "apply": {
+        "model": "ancientcurse:block/salt_dust_side_alt0"
+      }
     },
     {
-      "when": {"north": "up"},
-      "apply": {"model": "ancientcurse:block/salt_dust_line2"}
+      "when": {
+        "activated": "true",
+        "south": "side|up"
+      },
+      "apply": {
+        "model": "ancientcurse:block/salt_dust_side_alt0_activated"
+      }
     },
     {
-      "when": {"east": "up"},
-      "apply": {"model": "ancientcurse:block/salt_dust_line2", "y": 90}
+      "when": {
+        "activated": "false",
+        "east": "side|up"
+      },
+      "apply": {
+        "model": "ancientcurse:block/salt_dust_side_alt1",
+        "y": 270
+      }
     },
     {
-      "when": {"south": "up"},
-      "apply": {"model": "ancientcurse:block/salt_dust_line3"}
+      "when": {
+        "activated": "true",
+        "east": "side|up"
+      },
+      "apply": {
+        "model": "ancientcurse:block/salt_dust_side_alt1_activated",
+        "y": 270
+      }
     },
     {
-      "when": {"west": "up"},
-      "apply": {"model": "ancientcurse:block/salt_dust_line3", "y": 90}
+      "when": {
+        "activated": "false",
+        "west": "side|up"
+      },
+      "apply": {
+        "model": "ancientcurse:block/salt_dust_side1",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "activated": "true",
+        "west": "side|up"
+      },
+      "apply": {
+        "model": "ancientcurse:block/salt_dust_side1_activated",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "activated": "false",
+        "north": "up"
+      },
+      "apply": {
+        "model": "ancientcurse:block/salt_dust_up"
+      }
+    },
+    {
+      "when": {
+        "activated": "true",
+        "north": "up"
+      },
+      "apply": {
+        "model": "ancientcurse:block/salt_dust_up_activated"
+      }
+    },
+    {
+      "when": {
+        "activated": "false",
+        "east": "up"
+      },
+      "apply": {
+        "model": "ancientcurse:block/salt_dust_up",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "activated": "true",
+        "east": "up"
+      },
+      "apply": {
+        "model": "ancientcurse:block/salt_dust_up_activated",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "activated": "false",
+        "south": "up"
+      },
+      "apply": {
+        "model": "ancientcurse:block/salt_dust_up",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "activated": "true",
+        "south": "up"
+      },
+      "apply": {
+        "model": "ancientcurse:block/salt_dust_up_activated",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "activated": "false",
+        "west": "up"
+      },
+      "apply": {
+        "model": "ancientcurse:block/salt_dust_up",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "activated": "true",
+        "west": "up"
+      },
+      "apply": {
+        "model": "ancientcurse:block/salt_dust_up_activated",
+        "y": 270
+      }
     }
   ]
 }

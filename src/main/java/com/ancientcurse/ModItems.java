@@ -213,7 +213,15 @@ public class ModItems {
         0x8B008B, // Secondary color (dark magenta/purple)
         new FabricItemSettings()
     );
-    
+
+    // Zulmak spawn egg (hostile mob)
+    public static final SpawnEggItem ZULMAK_SPAWN_EGG = new SpawnEggItem(
+        ModEntities.ZULMAK,
+        0x3D3D3D, // Primary color (dark gray)
+        0x8B0000, // Secondary color (dark red)
+        new FabricItemSettings()
+    );
+
     public static final Item SCARAB_SHELL = new Item(new FabricItemSettings());
     public static final Item SCARAB_SHELL_FRAGMENT = new Item(new FabricItemSettings());
     
@@ -262,6 +270,9 @@ public class ModItems {
         -3.2F, // Slow attack speed
         new FabricItemSettings().maxCount(1).maxDamage(2500) // More durable than bronze
     );
+
+    // Jackel Binds - Restraining handcuffs
+    public static final Item JACKEL_BINDS = new com.ancientcurse.item.armor.JackelBindsItem();
 
     /**
      * Registers all mod items
@@ -673,6 +684,20 @@ public class ModItems {
             Registries.ITEM,
             new Identifier(AncientCurse.MOD_ID, "khamsin_spread_small_spawn_egg"),
             KHAMSIN_SPREAD_SMALL_SPAWN_EGG
+        );
+
+        // Register Zulmak spawn egg
+        Registry.register(
+            Registries.ITEM,
+            new Identifier(AncientCurse.MOD_ID, "zulmak_spawn_egg"),
+            ZULMAK_SPAWN_EGG
+        );
+
+        // Register Jackel Binds
+        Registry.register(
+            Registries.ITEM,
+            new Identifier(AncientCurse.MOD_ID, "jackel_binds"),
+            JACKEL_BINDS
         );
     }
 }

@@ -1,0 +1,31 @@
+{
+	"format_version": "1.8.0",
+	"animations": {
+		"animation.jackel_binds.idle": {
+			"loop": true,
+			"bones": {
+				"bipedRightArm": {
+					"rotation": {
+						"vector": [-44.45536, -10.37735, -6.04138]
+					}
+				},
+				"armorRightArm": {
+					"rotation": {
+						"vector": [0, 0, -4]
+					}
+				},
+				"bipedLeftArm": {
+					"rotation": {
+						"vector": [-42.93565, 15.01996, 15.56447]
+					}
+				},
+				"armorLeftArm": {
+					"scale": {
+						"vector": [0.3, 1, 1]
+					}
+				}
+			}
+		}
+	},
+	"geckolib_format_version": 2
+}

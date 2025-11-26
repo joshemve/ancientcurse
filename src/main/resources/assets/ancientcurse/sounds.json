@@ -228,5 +228,260 @@
         "pitch": 1.0
       }
     ]
+  },
+  "anubis_step": {
+    "subtitle": "subtitles.ancientcurse.anubis_step",
+    "sounds": [
+      {
+        "name": "minecraft:entity/ravager/step",
+        "volume": 1.0,
+        "pitch": 0.8
+      },
+      {
+        "name": "minecraft:entity/iron_golem/step",
+        "volume": 0.9,
+        "pitch": 0.9
+      }
+    ]
+  },
+  "anubis_step_heavy": {
+    "subtitle": "subtitles.ancientcurse.anubis_step",
+    "sounds": [
+      {
+        "name": "minecraft:entity/ravager/step",
+        "volume": 1.3,
+        "pitch": 0.7
+      },
+      {
+        "name": "minecraft:entity/warden/step",
+        "volume": 1.2,
+        "pitch": 0.8
+      },
+      {
+        "name": "minecraft:entity/iron_golem/step",
+        "volume": 1.1,
+        "pitch": 0.75
+      }
+    ]
+  },
+  "anubis_footstep_1": {
+    "subtitle": "subtitles.ancientcurse.anubis_step",
+    "sounds": [
+      {
+        "name": "ancientcurse:anubis/footstep_1",
+        "volume": 1.0,
+        "pitch": 1.0
+      }
+    ]
+  },
+  "anubis_hurt_1": {
+    "subtitle": "subtitles.ancientcurse.anubis_hurt",
+    "sounds": [
+      {
+        "name": "ancientcurse:anubis/anubis_hurt_1",
+        "volume": 1.0,
+        "pitch": 1.0
+      }
+    ]
+  },
+  "anubis_hurt_2": {
+    "subtitle": "subtitles.ancientcurse.anubis_hurt",
+    "sounds": [
+      {
+        "name": "ancientcurse:anubis/anubis_hurt_2",
+        "volume": 1.0,
+        "pitch": 1.0
+      }
+    ]
+  },
+  "anubis_hurt_3": {
+    "subtitle": "subtitles.ancientcurse.anubis_hurt",
+    "sounds": [
+      {
+        "name": "ancientcurse:anubis/anubis_hurt_3",
+        "volume": 1.0,
+        "pitch": 1.0
+      }
+    ]
+  },
+  "anubis_hurt_4": {
+    "subtitle": "subtitles.ancientcurse.anubis_hurt",
+    "sounds": [
+      {
+        "name": "ancientcurse:anubis/anubis_hurt_4",
+        "volume": 1.0,
+        "pitch": 1.0
+      }
+    ]
+  },
+  "anubis_breath_1": {
+    "subtitle": "subtitles.ancientcurse.anubis_ambient",
+    "sounds": [
+      {
+        "name": "ancientcurse:anubis/anubis_breath_1",
+        "volume": 1.5,
+        "pitch": 1.0
+      }
+    ]
+  },
+  "anubis_breath_2": {
+    "subtitle": "subtitles.ancientcurse.anubis_ambient",
+    "sounds": [
+      {
+        "name": "ancientcurse:anubis/anubis_breath_2",
+        "volume": 1.5,
+        "pitch": 1.0
+      }
+    ]
+  },
+  "anubis_running_breathing": {
+    "subtitle": "subtitles.ancientcurse.anubis_ambient",
+    "sounds": [
+      {
+        "name": "ancientcurse:anubis/running_breathing",
+        "volume": 1.0,
+        "pitch": 1.0
+      }
+    ]
+  },
+  "anubis_howl_1": {
+    "subtitle": "subtitles.ancientcurse.anubis_howl",
+    "sounds": [
+      {
+        "name": "ancientcurse:anubis/howl_1",
+        "volume": 2.0,
+        "pitch": 1.0
+      }
+    ]
+  },
+  "anubis_howl_2": {
+    "subtitle": "subtitles.ancientcurse.anubis_howl",
+    "sounds": [
+      {
+        "name": "ancientcurse:anubis/howl_2",
+        "volume": 2.0,
+        "pitch": 1.0
+      }
+    ]
+  },
+  "anubis_whoosh_1": {
+    "subtitle": "subtitles.ancientcurse.anubis_attack",
+    "sounds": [
+      {
+        "name": "ancientcurse:anubis/anubis_whoosh_1",
+        "volume": 1.0,
+        "pitch": 1.0
+      }
+    ]
+  },
+  "anubis_whoosh_2": {
+    "subtitle": "subtitles.ancientcurse.anubis_attack",
+    "sounds": [
+      {
+        "name": "ancientcurse:anubis/anubis_whoosh_2",
+        "volume": 1.0,
+        "pitch": 1.0
+      }
+    ]
+  },
+  "anubis_attack_1_whoosh_layer": {
+    "subtitle": "subtitles.ancientcurse.anubis_attack",
+    "sounds": [
+      {
+        "name": "ancientcurse:anubis/attack_1_whoosh_layer",
+        "volume": 1.0,
+        "pitch": 1.0
+      }
+    ]
+  },
+  "anubis_evil_laugh_1": {
+    "subtitle": "subtitles.ancientcurse.anubis_laugh",
+    "sounds": [
+      {
+        "name": "ancientcurse:anubis/evil_laugh_1",
+        "volume": 1.3,
+        "pitch": 1.0
+      }
+    ]
+  },
+  "anubis_evil_laugh_2": {
+    "subtitle": "subtitles.ancientcurse.anubis_laugh",
+    "sounds": [
+      {
+        "name": "ancientcurse:anubis/evil_laugh_2",
+        "volume": 1.3,
+        "pitch": 1.0
+      }
+    ]
+  },
+  "anubis_judgement": {
+    "subtitle": "subtitles.ancientcurse.anubis_judgement",
+    "sounds": [
+      {
+        "name": "ancientcurse:anubis/judgement",
+        "volume": 2.0,
+        "pitch": 1.0
+      }
+    ]
+  },
+  "anubis_judgement_safe": {
+    "subtitle": "subtitles.ancientcurse.anubis_judgement_safe",
+    "sounds": [
+      {
+        "name": "ancientcurse:anubis/judgement_safe",
+        "volume": 2.0,
+        "pitch": 1.0
+      }
+    ]
+  },
+  "anubis_heart_is_heavy": {
+    "subtitle": "subtitles.ancientcurse.anubis_heart_heavy",
+    "sounds": [
+      {
+        "name": "ancientcurse:anubis/heart_is_heavy",
+        "volume": 2.0,
+        "pitch": 1.0
+      }
+    ]
+  },
+  "anubis_judgement_whoosh": {
+    "subtitle": "subtitles.ancientcurse.anubis_judgement_whoosh",
+    "sounds": [
+      {
+        "name": "ancientcurse:anubis/judgement_whoosh",
+        "volume": 1.5,
+        "pitch": 1.0
+      }
+    ]
+  },
+  "anubis_magic_shimmer": {
+    "subtitle": "subtitles.ancientcurse.anubis_magic_shimmer",
+    "sounds": [
+      {
+        "name": "ancientcurse:anubis/magic_shimmer",
+        "volume": 1.2,
+        "pitch": 1.0
+      }
+    ]
+  },
+  "anubis_judgement_loop": {
+    "subtitle": "subtitles.ancientcurse.anubis_judgement",
+    "sounds": [
+      {
+        "name": "minecraft:block/beacon/ambient",
+        "volume": 0.8,
+        "pitch": 0.6
+      },
+      {
+        "name": "minecraft:block/enchantment_table/use",
+        "volume": 0.6,
+        "pitch": 0.7
+      },
+      {
+        "name": "minecraft:block/amethyst_block/chime",
+        "volume": 0.9,
+        "pitch": 0.5
+      }
+    ]
   }
 }

@@ -1,0 +1,18 @@
+{
+	"parent": "block/thin_block",
+	"ambientocclusion": false,
+	"textures": {
+		"texture": "ancientcurse:block/pitfall_trap",
+		"particle": "ancientcurse:block/pitfall_trap"
+	},
+	"elements": [
+		{
+			"from": [0, 0, 0],
+			"to": [16, 0.5, 16],
+			"faces": {
+				"up": {"uv": [0, 0, 16, 16], "texture": "#texture"},
+				"down": {"uv": [0, 0, 16, 16], "texture": "#texture"}
+			}
+		}
+	]
+}

@@ -21,6 +21,7 @@ import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.mob.HostileEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.particle.DustParticleEffect;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
@@ -126,7 +127,11 @@ public class ThothEntity extends HostileEntity implements GeoEntity {
     private boolean isPlayingDeathAnimation = false;
     private int deathAnimationTicks = 0;
     private static final int DEATH_ANIMATION_DURATION = 60; // 3 seconds for dramatic death
-    
+
+    // Time Bend facing lock system
+    private UUID timeBendTargetUUID = null; // Track player to face during time_bend
+    private Vec3d timeBendFacingPos = null; // Fallback position if player disconnects
+
     public ThothEntity(EntityType<? extends HostileEntity> entityType, World world) {
         super(entityType, world);
         this.experiencePoints = 100; // Boss-level XP
@@ -212,6 +217,55 @@ public class ThothEntity extends HostileEntity implements GeoEntity {
                 handleAnimationFrameEffects();
             }
 
+            // FACING LOCK: Keep Thoth facing the target during time_bend animation
+            if (dataTracker.get(ATTACK_STATE) == ATTACK_TIME_BEND && timeBendTargetUUID != null) {
+                PlayerEntity targetPlayer = null;
+
+                // Try to find the target player by UUID
+                for (PlayerEntity player : this.getWorld().getPlayers()) {
+                    if (player.getUuid().equals(timeBendTargetUUID)) {
+                        targetPlayer = player;
+                        break;
+                    }
+                }
+
+                // Calculate yaw and pitch to face the target
+                Vec3d targetPos;
+                if (targetPlayer != null && targetPlayer.isAlive()) {
+                    // Update facing position to track moving player
+                    targetPos = targetPlayer.getPos();
+                    timeBendFacingPos = targetPos; // Update for fallback
+                } else if (timeBendFacingPos != null) {
+                    // Use last known position if player disconnected or died
+                    targetPos = timeBendFacingPos;
+                } else {
+                    // No target available, skip facing lock
+                    targetPos = null;
+                }
+
+                if (targetPos != null) {
+                    // Calculate direction vector from Thoth to target
+                    double deltaX = targetPos.x - this.getX();
+                    double deltaY = targetPos.y + (targetPlayer != null ? targetPlayer.getStandingEyeHeight() : 1.0) - this.getEyeY();
+                    double deltaZ = targetPos.z - this.getZ();
+                    double horizontalDistance = Math.sqrt(deltaX * deltaX + deltaZ * deltaZ);
+
+                    // Calculate yaw (horizontal rotation)
+                    float targetYaw = (float)(MathHelper.atan2(deltaZ, deltaX) * (180.0 / Math.PI)) - 90.0f;
+
+                    // Calculate pitch (vertical rotation)
+                    float targetPitch = (float)(-(MathHelper.atan2(deltaY, horizontalDistance) * (180.0 / Math.PI)));
+
+                    // Set rotation directly for instant facing lock
+                    this.setYaw(targetYaw);
+                    this.setPitch(targetPitch);
+                    this.headYaw = targetYaw;
+                    this.prevYaw = targetYaw;
+                    this.prevPitch = targetPitch;
+                    this.prevHeadYaw = targetYaw;
+                }
+            }
+
             attackAnimationTicks--;
             if (attackAnimationTicks == 0) {
                 // Reset attack state when animation completes
@@ -219,10 +273,14 @@ public class ThothEntity extends HostileEntity implements GeoEntity {
                 dataTracker.set(ATTACK_STATE, ATTACK_NONE);
                 dataTracker.set(IS_READING, false); // Reset reading state
                 animationLocked = false; // Unlock animation
-                
+
                 // Clear lifted players when Time Bend ends
                 liftedPlayers.clear();
                 hasThrown = false;
+
+                // Clear time bend facing lock
+                timeBendTargetUUID = null;
+                timeBendFacingPos = null;
             }
         } else {
             animationLocked = false; // Ensure animation is unlocked when not attacking
@@ -406,11 +464,41 @@ public class ThothEntity extends HostileEntity implements GeoEntity {
                         this.getX(), this.getY() + 1.0, this.getZ(),
                         50, 2.0, 2.0, 2.0, 0.3
                     );
+                    
+                    // Totem-like particle explosion for epic finish
+                    for (int i = 0; i < 60; i++) {
+                        double vx = (this.random.nextDouble() - 0.5) * 1.0;
+                        double vy = this.random.nextDouble() * 0.6 + 0.4;
+                        double vz = (this.random.nextDouble() - 0.5) * 1.0;
+                        serverWorld.spawnParticles(
+                            ParticleTypes.TOTEM_OF_UNDYING,
+                            this.getX(), this.getY() + 1.5, this.getZ(),
+                            1, vx, vy, vz, 0.3
+                        );
+                    }
+                    
+                    // Drop massive XP (god-level boss)
+                    net.minecraft.entity.ExperienceOrbEntity.spawn(
+                        serverWorld, this.getPos(), 750 // More XP than Anubis - god of wisdom
+                    );
                 }
                 
                 // Final sound
                 this.getWorld().playSound(null, this.getX(), this.getY(), this.getZ(),
                     SoundEvents.ENTITY_GENERIC_EXPLODE, this.getSoundCategory(), 3.0f, 0.5f);
+                
+                // Victory message to nearby players
+                Box announceArea = new Box(this.getBlockPos()).expand(64);
+                List<PlayerEntity> nearbyPlayers = this.getWorld().getNonSpectatingEntities(PlayerEntity.class, announceArea);
+                for (PlayerEntity player : nearbyPlayers) {
+                    player.sendMessage(
+                        Text.literal("§5§l✦ §dThoth, God of Wisdom, has been defeated! §5§l✦"),
+                        false
+                    );
+                    // Challenge complete sound for each player
+                    this.getWorld().playSound(null, player.getX(), player.getY(), player.getZ(),
+                        SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, this.getSoundCategory(), 1.0f, 1.0f);
+                }
                 
                 // Clean up boss bar
                 if (this.bossBar != null) {
@@ -522,9 +610,9 @@ public class ThothEntity extends HostileEntity implements GeoEntity {
         switch (attackState) {
             case ATTACK_MELEE:
                 // attack_1 animation is 45 ticks (2.25s)
-                // Ground slam hits at 1.5 seconds (30 ticks elapsed) = attackAnimationTicks 15
-                // attackAnimationTicks counts DOWN from 45, so 1.5s into animation = 45 - 30 = 15 ticks remaining
-                if (attackAnimationTicks == 15) {
+                // Ground slam hits at 2.0 seconds (40 ticks elapsed) = attackAnimationTicks 5
+                // attackAnimationTicks counts DOWN from 45, so 2.0s into animation = 45 - 40 = 5 ticks remaining
+                if (attackAnimationTicks == 5) {
                     // Play wind gust sound when staff hits ground
                     if (!this.getWorld().isClient) {
                         this.getWorld().playSound(null, this.getX(), this.getY(), this.getZ(),
@@ -1144,12 +1232,15 @@ public class ThothEntity extends HostileEntity implements GeoEntity {
                         1, 0.01, 0.03, 0.01, 0.01
                     );
 
-                    // Enchant particles (only on first ring)
+                    // Dark purple custom dust particles for mystical effect
                     if (ring == 0) {
                         ((ServerWorld)this.getWorld()).spawnParticles(
-                            ParticleTypes.ENCHANT,
+                            new DustParticleEffect(
+                                new org.joml.Vector3f(0.4f, 0.0f, 0.5f), // Dark purple RGB
+                                1.0f // Particle size
+                            ),
                             particleX, particleY, particleZ,
-                            1, 0.05, 0.1, 0.05, 0.2
+                            1, 0.05, 0.1, 0.05, 0.02
                         );
                     }
                 }
@@ -2086,14 +2177,40 @@ public class ThothEntity extends HostileEntity implements GeoEntity {
     public void performTimeBend() {
         // Don't interrupt ongoing animations or if on cooldown
         if (dataTracker.get(ATTACK_COOLDOWN) > 0 || animationLocked || attackAnimationTicks > 0) return;
-        
+
         dataTracker.set(ATTACK_STATE, ATTACK_TIME_BEND);
         dataTracker.set(ATTACK_COOLDOWN, MAX_ATTACK_COOLDOWN * 2);
         dataTracker.set(IS_CASTING_TIME_MAGIC, true);
         timeMagicTicks = 0;
         attackAnimationTicks = TIME_BEND_ANIMATION_DURATION; // Longer for time magic
         timeBendCooldown = 1200; // 60 seconds cooldown (increased from 30s)
-        
+
+        // Capture target player for facing lock during animation
+        PlayerEntity targetPlayer = null;
+
+        // First, try to get the player who last attacked (getAttacker)
+        if (this.getAttacker() instanceof PlayerEntity) {
+            targetPlayer = (PlayerEntity) this.getAttacker();
+        }
+        // If no attacker, use current target
+        else if (this.getTarget() instanceof PlayerEntity) {
+            targetPlayer = (PlayerEntity) this.getTarget();
+        }
+        // If no target, find nearest player
+        else {
+            targetPlayer = this.getWorld().getClosestPlayer(this, 64.0);
+        }
+
+        // Store the target player for facing lock
+        if (targetPlayer != null) {
+            timeBendTargetUUID = targetPlayer.getUuid();
+            timeBendFacingPos = targetPlayer.getPos();
+        } else {
+            // Fallback: face forward if no player found
+            timeBendTargetUUID = null;
+            timeBendFacingPos = this.getPos().add(this.getRotationVector().multiply(5.0));
+        }
+
         // Time pulse will happen at 2.75 seconds via handleAnimationFrameEffects()
 
         // LAYERED SOUND DESIGN for epic time-bending effect

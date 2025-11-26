@@ -193,14 +193,115 @@ public class AnimationDebugStick extends Item {
         UUID entityUUID = anubis.getUuid();
         EntityDebugState lastState = lastStates.get(entityUUID);
 
-        // First time tracking
+        AnubisEntity.BossPhase currentPhase = anubis.getBossPhase();
+        boolean currentHovering = anubis.isHovering();
+        boolean currentJudging = anubis.isJudging();
+        boolean currentSkyYelling = anubis.isSkyYelling();
+        boolean currentPlayerSafe = anubis.isPlayerSafe();
+        boolean currentAttacking = anubis.handSwinging && anubis.handSwingTicks > 0;
+
+        // Calculate movement state
+        double velocitySquared = anubis.getVelocity().horizontalLengthSquared();
+        boolean currentMoving = velocitySquared > 0.01;
+        boolean currentRunning = velocitySquared > 0.05;
+
+        // First time tracking this entity
         if (lastState == null) {
             lastState = new EntityDebugState();
+            lastState.anubisPhase = currentPhase;
+            lastState.anubisHovering = currentHovering;
+            lastState.anubisJudging = currentJudging;
+            lastState.anubisSkyYelling = currentSkyYelling;
+            lastState.anubisPlayerSafe = currentPlayerSafe;
+            lastState.anubisAttacking = currentAttacking;
+            lastState.anubisMoving = currentMoving;
+            lastState.anubisRunning = currentRunning;
             lastStates.put(entityUUID, lastState);
-            player.sendMessage(Text.literal("§a[Animation] §fMonitoring Anubis - state tracking not fully implemented"), false);
+
+            // Print initial state
+            String animation = getAnubisAnimationName(currentPhase, currentHovering, currentJudging, currentSkyYelling, currentPlayerSafe, anubis);
+            player.sendMessage(Text.literal("§a[Animation] §bCurrent: §f" + animation), false);
+            player.sendMessage(Text.literal("§a[Animation] §bPhase: §f" + currentPhase.name()), false);
+            player.sendMessage(Text.literal("§7[Debug] Moving: " + currentMoving + " | Running: " + currentRunning + " | Attacking: " + currentAttacking), false);
+            return;
         }
 
-        // TODO: Add Anubis-specific state tracking when needed
+        // Check for phase changes
+        if (currentPhase != lastState.anubisPhase) {
+            String newAnimation = getAnubisAnimationName(currentPhase, currentHovering, currentJudging, currentSkyYelling, currentPlayerSafe, anubis);
+            player.sendMessage(Text.literal("§a[Animation] §ePhase: §7" + lastState.anubisPhase.name() + " §7-> §b" + currentPhase.name() + " §7| §f" + newAnimation), false);
+            lastState.anubisPhase = currentPhase;
+        }
+
+        // Check for hovering state changes
+        if (currentHovering != lastState.anubisHovering) {
+            if (currentHovering) {
+                player.sendMessage(Text.literal("§a[Animation] §bStarted Hovering"), false);
+            } else {
+                player.sendMessage(Text.literal("§a[Animation] §7Stopped Hovering"), false);
+            }
+            lastState.anubisHovering = currentHovering;
+        }
+
+        // Check for judging state changes
+        if (currentJudging != lastState.anubisJudging) {
+            if (currentJudging) {
+                player.sendMessage(Text.literal("§a[Animation] §dStarted Judging §7| §fanimation.anubis.judgement_idle"), false);
+            } else {
+                player.sendMessage(Text.literal("§a[Animation] §7Stopped Judging"), false);
+            }
+            lastState.anubisJudging = currentJudging;
+        }
+
+        // Check for sky yelling state changes
+        if (currentSkyYelling != lastState.anubisSkyYelling) {
+            if (currentSkyYelling) {
+                player.sendMessage(Text.literal("§a[Animation] §6Started Sky Yell §7| §fanimation.anubis.attack_2"), false);
+            } else {
+                player.sendMessage(Text.literal("§a[Animation] §7Stopped Sky Yell"), false);
+            }
+            lastState.anubisSkyYelling = currentSkyYelling;
+        }
+
+        // Check for player safe state changes
+        if (currentPlayerSafe != lastState.anubisPlayerSafe) {
+            if (currentPlayerSafe) {
+                player.sendMessage(Text.literal("§a[Animation] §2Player Deemed Safe §7| §fanimation.anubis.judgement_safe"), false);
+            } else {
+                player.sendMessage(Text.literal("§a[Animation] §7Player No Longer Safe"), false);
+            }
+            lastState.anubisPlayerSafe = currentPlayerSafe;
+        }
+
+        // Check for attacking state changes (melee attack)
+        if (currentAttacking != lastState.anubisAttacking) {
+            if (currentAttacking) {
+                player.sendMessage(Text.literal("§a[Animation] §cStarted Melee Attack §7| §fanimation.anubis.attack_1"), false);
+            } else {
+                player.sendMessage(Text.literal("§a[Animation] §7Stopped Melee Attack"), false);
+            }
+            lastState.anubisAttacking = currentAttacking;
+        }
+
+        // Check for movement state changes
+        if (currentMoving != lastState.anubisMoving) {
+            if (currentMoving) {
+                String moveAnim = currentRunning ? "animation.anubis.running" : "animation.anubis.walking";
+                player.sendMessage(Text.literal("§a[Animation] §3Started Moving §7| §f" + moveAnim), false);
+            } else {
+                player.sendMessage(Text.literal("§a[Animation] §7Stopped Moving §7| §fanimation.anubis.idle"), false);
+            }
+            lastState.anubisMoving = currentMoving;
+            lastState.anubisRunning = currentRunning;
+        } else if (currentMoving && currentRunning != lastState.anubisRunning) {
+            // Still moving but speed changed
+            if (currentRunning) {
+                player.sendMessage(Text.literal("§a[Animation] §3Speed Up - Running §7| §fanimation.anubis.running"), false);
+            } else {
+                player.sendMessage(Text.literal("§a[Animation] §3Slowed Down - Walking §7| §fanimation.anubis.walking"), false);
+            }
+            lastState.anubisRunning = currentRunning;
+        }
     }
 
     private static String getThothAttackName(int attackState) {
@@ -232,11 +333,11 @@ public class AnimationDebugStick extends Item {
                 if (isCasting) {
                     return "animation.thoth.time_bend";
                 }
-                
+
                 // Check if actually moving to determine walking vs idle
                 double velocitySquared = thoth.getVelocity().horizontalLengthSquared();
                 boolean isMoving = velocitySquared > 0.001; // Same threshold as ThothEntity
-                
+
                 if (isMoving) {
                     return "animation.thoth.walking";
                 } else if (inCombat) {
@@ -245,6 +346,47 @@ public class AnimationDebugStick extends Item {
                     return "animation.thoth.idle";
                 }
         }
+    }
+
+    private static String getAnubisAnimationName(AnubisEntity.BossPhase phase, boolean hovering, boolean judging, boolean skyYelling, boolean playerSafe, AnubisEntity anubis) {
+        // Death animation takes absolute priority
+        if (phase == AnubisEntity.BossPhase.DEAD) {
+            return "animation.anubis.death";
+        }
+
+        // Special animations take priority
+        if (skyYelling) {
+            return "animation.anubis.attack_2";
+        }
+
+        if (judging && playerSafe) {
+            return "animation.anubis.judgement_safe";
+        }
+
+        if (judging) {
+            return "animation.anubis.judgement_idle";
+        }
+
+        // Attack animations (check if attacking)
+        if (anubis.handSwinging) {
+            return "animation.anubis.attack_1";
+        }
+
+        // Movement animations
+        double velocitySquared = anubis.getVelocity().horizontalLengthSquared();
+        boolean isMoving = velocitySquared > 0.01; // Movement threshold
+
+        if (isMoving) {
+            // Determine if running or walking based on speed
+            if (velocitySquared > 0.05) {
+                return "animation.anubis.running";
+            } else {
+                return "animation.anubis.walking";
+            }
+        }
+
+        // Default to idle
+        return "animation.anubis.idle";
     }
 
     /**
@@ -258,10 +400,21 @@ public class AnimationDebugStick extends Item {
     }
 
     private static class EntityDebugState {
+        // Thoth state
         int thothAttackState = 0;
         boolean thothCasting = false;
         boolean thothInCombat = false;
         boolean thothReading = false;
         boolean thothSpawning = false;
+
+        // Anubis state
+        AnubisEntity.BossPhase anubisPhase = AnubisEntity.BossPhase.DORMANT;
+        boolean anubisHovering = false;
+        boolean anubisJudging = false;
+        boolean anubisSkyYelling = false;
+        boolean anubisPlayerSafe = false;
+        boolean anubisAttacking = false;
+        boolean anubisMoving = false;
+        boolean anubisRunning = false;
     }
 }

@@ -38,14 +38,15 @@ public class DeadPapyrusReedBlock extends PlantBlock {
     }
     
     private boolean isSupportingBlock(BlockState state) {
-        // Dead papyrus can be placed on sand, dirt-like blocks, or Nile silt variants
+        // Dead papyrus can be placed on sand, dirt-like blocks, sandstone, or Nile silt variants
         Block block = state.getBlock();
-        return block == Blocks.SAND || 
-               block == Blocks.RED_SAND || 
-               block == ModBlocks.FERTILE_NILE_SILT || 
-               block == ModBlocks.DRY_NILE_SILT || 
-               block == Blocks.DIRT || 
-               block == Blocks.GRASS_BLOCK || 
+        return block == Blocks.SAND ||
+               block == Blocks.RED_SAND ||
+               block == Blocks.SANDSTONE ||
+               block == ModBlocks.FERTILE_NILE_SILT ||
+               block == ModBlocks.DRY_NILE_SILT ||
+               block == Blocks.DIRT ||
+               block == Blocks.GRASS_BLOCK ||
                block == ModBlocks.ARID_NILE_TURF ||
                block == ModBlocks.SMOOTH_SAND ||
                block == ModBlocks.NILE_RIVER_SAND ||
