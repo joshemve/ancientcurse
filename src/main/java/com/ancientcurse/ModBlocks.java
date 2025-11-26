@@ -2,9 +2,11 @@ package com.ancientcurse;
 
 import com.ancientcurse.block.*;
 import com.ancientcurse.block.BloodLotusBlock;
+import com.ancientcurse.block.registry.ConstructionBlocks;
 // PotteryBlocks is referenced in comments only, no import needed
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
 import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
+import net.fabricmc.fabric.api.registry.FlammableBlockRegistry;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
@@ -17,6 +19,7 @@ import net.minecraft.block.SaplingBlock;
 import net.minecraft.block.FenceBlock;
 import net.minecraft.block.FenceGateBlock;
 import net.minecraft.block.WoodType;
+import net.minecraft.block.piston.PistonBehavior;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.registry.Registries;
@@ -604,16 +607,16 @@ public class ModBlocks {
     // - SCARAB_SEALED_URN
     // - PHARAOHS_INCENSE_JAR
 
-    // Pistia Stratiotes - water lettuce, floats on water
+    // Pistia Stratiotes - water lettuce, floats on water like lily pads
     public static final Block PISTIA_STRATIOTES = new PistiaStratiotesBlock(
         FabricBlockSettings.create()
             .mapColor(MapColor.DARK_GREEN)
             .strength(0.0f)
             .sounds(BlockSoundGroup.WET_GRASS)
             .nonOpaque()
-            .noCollision()
             .breakInstantly()
             .notSolid()
+            .pistonBehavior(PistonBehavior.DESTROY)
     );
     
     // Cyperus - Ancient Egyptian water plant (papyrus sedge)
@@ -1749,14 +1752,61 @@ public class ModBlocks {
     private static void registerLotusFlowerPadItem() {
         // Register the custom Lotus Flower Pad item that allows water placement
         Identifier itemId = new Identifier(AncientCurse.MOD_ID, "lotus_flower_pad");
-        
+
         if (Registries.ITEM.containsId(itemId)) {
             System.out.println("Skipping duplicate item registration for: " + itemId);
             return;
         }
-        
-        Registry.register(Registries.ITEM, itemId, 
+
+        Registry.register(Registries.ITEM, itemId,
             new com.ancientcurse.item.LotusFlowerPadItem(LOTUS_FLOWER_PAD, new FabricItemSettings()));
         AncientCurse.LOGGER.info("Registered custom item for Lotus Flower Pad with water placement");
+    }
+
+    /**
+     * Registers flammability for all wood-based blocks in the mod.
+     * This allows them to catch fire and burn like vanilla wood.
+     *
+     * Vanilla values for reference:
+     * - Logs: burn=5, spread=5
+     * - Planks: burn=5, spread=20
+     * - Leaves: burn=30, spread=60
+     * - Fences/Gates: burn=5, spread=20
+     * - Stairs/Slabs: burn=5, spread=20
+     */
+    public static void registerFlammableBlocks() {
+        FlammableBlockRegistry registry = FlammableBlockRegistry.getDefaultInstance();
+
+        AncientCurse.LOGGER.info("Registering flammable blocks for " + AncientCurse.MOD_ID);
+
+        // Sycamore wood blocks
+        registry.add(SYCAMORE_FIG_LOG, 5, 5);      // Log: burn=5, spread=5
+        registry.add(SYCAMORE_PLANKS, 5, 20);      // Planks: burn=5, spread=20
+        registry.add(SYCAMORE_FENCE, 5, 20);       // Fence: burn=5, spread=20
+        registry.add(SYCAMORE_FENCE_GATE, 5, 20);  // Fence Gate: burn=5, spread=20
+        registry.add(SYCAMORE_LEAVES, 30, 60);     // Leaves: burn=30, spread=60
+
+        // Date Palm wood blocks
+        registry.add(DATE_PALM_LOG, 5, 5);         // Log: burn=5, spread=5
+        registry.add(DATE_PALM_PLANKS, 5, 20);     // Planks: burn=5, spread=20
+        registry.add(DATE_PALM_FENCE, 5, 20);      // Fence: burn=5, spread=20
+        registry.add(DATE_PALM_FENCE_GATE, 5, 20); // Fence Gate: burn=5, spread=20
+        registry.add(DATE_PALM_LEAVES, 30, 60);    // Leaves: burn=30, spread=60
+
+        // Construction blocks - stairs and slabs from ConstructionBlocks registry
+        registry.add(ConstructionBlocks.SYCAMORE_STAIRS, 5, 20);
+        registry.add(ConstructionBlocks.SYCAMORE_SLAB, 5, 20);
+        registry.add(ConstructionBlocks.DATE_PALM_STAIRS, 5, 20);
+        registry.add(ConstructionBlocks.DATE_PALM_SLAB, 5, 20);
+
+        // Cursed wood blocks (can burn but spread less - cursed nature resists fire slightly)
+        registry.add(CURSED_LOG, 5, 3);            // Log: burn=5, spread=3 (resists spreading)
+        registry.add(CURSED_WOOD_PLANK, 5, 10);    // Planks: burn=5, spread=10 (resists spreading)
+
+        // Other flammable blocks
+        registry.add(DRIED_REED_THATCH, 30, 60);   // Very flammable like leaves
+        registry.add(DEAD_PAPYRUS_REED, 15, 30);   // Moderately flammable
+
+        AncientCurse.LOGGER.info("Flammable blocks registered successfully");
     }
 }

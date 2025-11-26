@@ -1087,21 +1087,29 @@ public class SolarSpireBlock extends BlockWithEntity implements LandingBlock {
                     world.setBlockState(pos, originalState, Block.NOTIFY_ALL | Block.SKIP_DROPS);
                     tracker.clearTracking(pos);
                     blocksRestored++;
+                    // Check for cursed plants growing on top
+                    cleanseOrphanedPlantAbove(world, pos);
                 } else if (currentBlock == ModBlocks.CURSED_EARTH) {
                     // No tracked original - default cursed earth to grass block (no drops)
                     AncientCurse.LOGGER.debug("No original tracked for cursed earth at {}, defaulting to grass", pos);
                     world.setBlockState(pos, Blocks.GRASS_BLOCK.getDefaultState(), Block.NOTIFY_ALL | Block.SKIP_DROPS);
                     tracker.clearTracking(pos); // Clear any stale tracking
+                    // Check for cursed plants growing on top
+                    cleanseOrphanedPlantAbove(world, pos);
                 } else if (currentBlock == ModBlocks.CURSED_STONE) {
                     // No tracked original - default cursed stone to regular stone (no drops)
                     AncientCurse.LOGGER.debug("No original tracked for cursed stone at {}, defaulting to stone", pos);
                     world.setBlockState(pos, Blocks.STONE.getDefaultState(), Block.NOTIFY_ALL | Block.SKIP_DROPS);
                     tracker.clearTracking(pos); // Clear any stale tracking
+                    // Check for cursed plants growing on top
+                    cleanseOrphanedPlantAbove(world, pos);
                 } else if (currentBlock == ModBlocks.CURSED_SAND) {
                     // No tracked original - default cursed sand to regular sand (no drops)
                     AncientCurse.LOGGER.debug("No original tracked for cursed sand at {}, defaulting to sand", pos);
                     world.setBlockState(pos, Blocks.SAND.getDefaultState(), Block.NOTIFY_ALL | Block.SKIP_DROPS);
                     tracker.clearTracking(pos); // Clear any stale tracking
+                    // Check for cursed plants growing on top
+                    cleanseOrphanedPlantAbove(world, pos);
                 } else {
                     // Some other corrupted block with no original tracked - remove it (no drops)
                     AncientCurse.LOGGER.debug("No original tracked for {} at {}, removing", blockName, pos);
@@ -1129,7 +1137,7 @@ public class SolarSpireBlock extends BlockWithEntity implements LandingBlock {
             // Find and remove any Khamsin or Djeserhath entities at or near this position
             Box searchBox = new Box(pos).expand(1.0); // Check a small area around the block
             List<Entity> entities = world.getOtherEntities(null, searchBox);
-            
+
             for (Entity entity : entities) {
                 String entityName = Registries.ENTITY_TYPE.getId(entity.getType()).getPath();
                 if (entityName.contains("khamsin") || entityName.contains("djeserhath")) {
@@ -1137,18 +1145,61 @@ public class SolarSpireBlock extends BlockWithEntity implements LandingBlock {
                     world.spawnParticles(ParticleTypes.WAX_ON,
                         entity.getX(), entity.getY() + 0.5, entity.getZ(),
                         3, 0.2, 0.2, 0.2, 0.05); // Reduced from 10 to 3 particles
-                    
+
                     // Play sound for Djeserhath removal (more dramatic)
                     if (entityName.contains("djeserhath")) {
-                        world.playSound(null, entity.getBlockPos(), SoundEvents.ENTITY_BLAZE_DEATH, 
+                        world.playSound(null, entity.getBlockPos(), SoundEvents.ENTITY_BLAZE_DEATH,
                             SoundCategory.HOSTILE, 1.0F, 1.5F);
                     }
-                    
+
                     // Remove the entity
                     entity.discard();
-                    
+
                     AncientCurse.LOGGER.debug("Cleansed {} entity at {}", entityName, pos);
                 }
+            }
+        }
+
+        /**
+         * Checks and removes any cursed plants growing on top of a cleansed block.
+         * This ensures plants don't remain orphaned after their supporting cursed earth/stone is cleansed.
+         */
+        private void cleanseOrphanedPlantAbove(ServerWorld world, BlockPos pos) {
+            BlockPos abovePos = pos.up();
+            BlockState aboveState = world.getBlockState(abovePos);
+            Block aboveBlock = aboveState.getBlock();
+            String aboveBlockName = Registries.BLOCK.getId(aboveBlock).getPath();
+
+            // Check if the block above is a cursed plant
+            boolean isCursedPlant = aboveBlockName.contains("cursed") ||
+                                    aboveBlockName.contains("withered") ||
+                                    aboveBlockName.contains("isfet") ||
+                                    aboveBlockName.contains("duat") ||
+                                    aboveBlockName.contains("khemnu") ||
+                                    aboveBlockName.contains("kheru") ||
+                                    aboveBlockName.contains("menfet") ||
+                                    aboveBlockName.contains("sutekh") ||
+                                    aboveBlockName.contains("bloodshade") ||
+                                    aboveBlockName.contains("duamutef") ||
+                                    aboveBlockName.contains("khamsin") ||
+                                    aboveBlockName.contains("reed_of_sekhem") ||
+                                    aboveBlockName.contains("sekhem");
+
+            if (isCursedPlant) {
+                // Remove the cursed plant (no drops, to match cleansing behavior)
+                AncientCurse.LOGGER.debug("Cleansing orphaned cursed plant {} at {} (was on top of cleansed block)",
+                    aboveBlockName, abovePos);
+                world.setBlockState(abovePos, Blocks.AIR.getDefaultState(), Block.NOTIFY_ALL | Block.SKIP_DROPS);
+
+                // Small visual effect
+                if (!REDUCED_PARTICLES || world.random.nextFloat() < 0.05f) {
+                    world.spawnParticles(ParticleTypes.WAX_ON,
+                        abovePos.getX() + 0.5, abovePos.getY() + 0.5, abovePos.getZ() + 0.5,
+                        2, 0.2, 0.2, 0.2, 0.02);
+                }
+
+                // Also check if there are any Khamsin entities at the plant position
+                cleanseKhamsinEntities(world, abovePos);
             }
         }
     }

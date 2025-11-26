@@ -1,5 +1,6 @@
 package com.ancientcurse.entity;
 
+import com.ancientcurse.AncientCurse;
 import com.ancientcurse.ModBlocks;
 import com.ancientcurse.ModEntities;
 import com.ancientcurse.ModParticles;
@@ -113,10 +114,19 @@ public class ZulmakEntity extends HostileEntity implements GeoEntity {
     private static final int SUMMON_COOLDOWN_TICKS = 600; // 30 seconds between summons
     private static final int MAX_SUMMONED_PHARAOHS = 2; // Max minions at once
 
+    // Cursed Earth spread attack - uses attack_2 animation with Khamsin spread
+    private static final int CURSED_EARTH_CHANNEL_TICKS = 30; // 1.5 seconds channeling (attack_2 animation)
+    private static final int CURSED_EARTH_COOLDOWN_TICKS = 300; // 15 seconds between attacks (longer cooldown)
+    private static final float CURSED_EARTH_COMBAT_CHANCE = 0.008f; // 0.8% chance per tick (much rarer)
+    private int cursedEarthCooldownTicks = 0;
+    private int cursedEarthChannelTicks = 0;
+    public static final int ATTACK_CURSED_EARTH = 8; // New attack state for cursed earth
+
     // Wind attack: uses attack_2 animation, pushes and damages nearby players
+    // Note: Cursed earth spreads passively WITHOUT triggering this animation
     private static final int WIND_ATTACK_CHANNEL_TICKS = 25; // 1.25 seconds of channeling
-    private static final int WIND_ATTACK_COOLDOWN_TICKS = 200; // 10 seconds between wind attacks
-    private static final float WIND_ATTACK_CHANCE = 0.15f; // 15% chance per tick when conditions met
+    private static final int WIND_ATTACK_COOLDOWN_TICKS = 400; // 20 seconds between wind attacks (longer cooldown)
+    private static final float WIND_ATTACK_CHANCE = 0.03f; // 3% chance per second (reduced - wind attack is rare)
     private static final double WIND_ATTACK_RADIUS = 6.0; // Range of wind attack
     private static final float WIND_ATTACK_DAMAGE = 6.0f; // Damage dealt
     private static final double WIND_KNOCKBACK_STRENGTH = 1.5; // Horizontal knockback
@@ -125,19 +135,20 @@ public class ZulmakEntity extends HostileEntity implements GeoEntity {
     // Pickup attack: animation.zulmak.pickup - 2.75s at 0.6x speed = ~92 ticks
     private static final int PICKUP_ANIMATION_TICKS = 92;
     private static final int PICKUP_COOLDOWN_TICKS = 400; // 20 seconds between pickups
-    private static final double PICKUP_GRAB_RANGE = 3.0; // Range to grab player
-    // Key timing points in ticks (at 0.6x speed)
-    private static final int PICKUP_GRAB_TICK = 8;      // 0.1667s * 20 / 0.6 = ~6 ticks - when player is grabbed
-    private static final int PICKUP_HOLD_START = 18;    // 0.6667s - player at face level
-    private static final int PICKUP_THROW_START = 72;   // 2.1667s - throw begins
-    private static final int PICKUP_RELEASE_TICK = 80;  // 2.4167s - player released
+    private static final double PICKUP_GRAB_RANGE = 4.5; // Range to grab player (increased for easier triggering)
+    // Key timing points in ticks
+    private static final int PICKUP_GRAB_TICK = 8;      // Player grabbed
+    private static final int PICKUP_HOLD_START = 18;    // Player at face level
+    private static final int PICKUP_THROW_START = 40;   // Throw windup starts
+    private static final int PICKUP_RELEASE_TICK = 45;  // 2.25s - Player thrown!
     private static final float PICKUP_THROW_POWER = 2.5f; // How hard the player is thrown
 
     // Locust swarm attack: uses attack_2 animation, summons locust entities
-    private static final int LOCUST_SWARM_CHANNEL_TICKS = 50; // 2.5 seconds of channeling
-    private static final int LOCUST_SWARM_COOLDOWN_TICKS = 400; // 20 seconds between locust attacks
-    private static final float LOCUST_SWARM_DAMAGE = 4.0f; // Damage per tick while in swarm
-    private static final double LOCUST_SWARM_RADIUS = 8.0; // Range of locust swarm
+    private static final int LOCUST_SWARM_CHANNEL_TICKS = 40; // 2 seconds of channeling
+    private static final int LOCUST_SWARM_COOLDOWN_TICKS = 200; // 10 seconds between locust attacks
+    private static final int LOCUST_SPAWN_COUNT = 5; // Number of locusts to spawn
+    private static final double LOCUST_SWARM_RADIUS = 10.0; // Range of locust swarm
+    private static final float LOCUST_SWARM_DAMAGE = 4.0f; // Damage per player in range
 
     // Downed phase: triggered at 75%, 50%, 25% health - Zulmak falls, becomes invulnerable, spawns minions
     private static final int DOWNED_DURATION_TICKS = 160; // 8 seconds downed
@@ -202,6 +213,8 @@ public class ZulmakEntity extends HostileEntity implements GeoEntity {
     private int deathAnimationTicks = 0;
     // Death animation: 0.5833s at 0.6x speed = ~20 ticks, add buffer for visual
     private static final int DEATH_ANIMATION_DURATION = 30;
+    // 40% health death animation (epic fake death with resurrection)
+    private boolean hasPlayed40PercentDeathAnimation = false;
 
     // Boss bar optimization
     private float lastHealthPercentage = 1.0f;
@@ -225,12 +238,12 @@ public class ZulmakEntity extends HostileEntity implements GeoEntity {
     /* ---------- ATTRIBUTES ---------- */
     public static DefaultAttributeContainer.Builder createZulmakAttributes() {
         return HostileEntity.createHostileAttributes()
-                .add(EntityAttributes.GENERIC_MAX_HEALTH, 80.0) // Tanky mob
+                .add(EntityAttributes.GENERIC_MAX_HEALTH, 500.0) // Boss-tier health
                 .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.28) // Moderately fast
-                .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 12.0) // Strong attacks
+                .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 7.0) // Moderate attacks (spawns minions to compensate)
                 .add(EntityAttributes.GENERIC_FOLLOW_RANGE, 32.0) // Detection range
-                .add(EntityAttributes.GENERIC_ARMOR, 6.0) // Some armor
-                .add(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE, 0.4); // Resist knockback
+                .add(EntityAttributes.GENERIC_ARMOR, 10.0) // Strong armor
+                .add(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE, 0.8); // High knockback resist
     }
 
     /* ---------- INITIALIZATION ---------- */
@@ -257,7 +270,7 @@ public class ZulmakEntity extends HostileEntity implements GeoEntity {
         // this.goalSelector.add(3, new ZulmakSummonGoal(this)); // Summon takes priority when conditions met
         this.goalSelector.add(3, new ZulmakMeleeAttackGoal(this, 1.2D, false));
         this.goalSelector.add(4, new WanderAroundFarGoal(this, 0.8D));
-        this.goalSelector.add(5, new LookAtEntityGoal(this, PlayerEntity.class, 8.0F));
+        this.goalSelector.add(5, new ZulmakLookAtTargetGoal(this, PlayerEntity.class, 8.0F));
         this.goalSelector.add(6, new LookAroundGoal(this));
 
         // Target selection
@@ -562,6 +575,7 @@ public class ZulmakEntity extends HostileEntity implements GeoEntity {
 
         public ZulmakPickupGoal(ZulmakEntity zulmak) {
             this.zulmak = zulmak;
+            this.setControls(java.util.EnumSet.of(Control.MOVE, Control.LOOK));
         }
 
         @Override
@@ -571,22 +585,46 @@ public class ZulmakEntity extends HostileEntity implements GeoEntity {
             // 2. Pickup cooldown expired
             // 3. Has a player target in range
             // 4. Health below 50% (desperate attack)
-            if (zulmak.getAttackState() != ATTACK_NONE) return false;
-            if (zulmak.pickupCooldownTicks > 0) return false;
-            if (zulmak.getHealth() > zulmak.getMaxHealth() * 0.5f) return false;
+            if (zulmak.getAttackState() != ATTACK_NONE) {
+                if (zulmak.age % 100 == 0) AncientCurse.LOGGER.debug("Pickup blocked: already in attack state {}", zulmak.getAttackState());
+                return false;
+            }
+            if (zulmak.pickupCooldownTicks > 0) {
+                if (zulmak.age % 100 == 0) AncientCurse.LOGGER.debug("Pickup blocked: cooldown {} ticks remaining", zulmak.pickupCooldownTicks);
+                return false;
+            }
+            float healthPercent = zulmak.getHealth() / zulmak.getMaxHealth();
+            if (healthPercent > 0.5f) {
+                if (zulmak.age % 100 == 0) AncientCurse.LOGGER.debug("Pickup blocked: health too high ({}% > 50%)", (int)(healthPercent * 100));
+                return false;
+            }
+            if (zulmak.isDowned()) return false; // Don't pickup during downed phase
+            if (zulmak.isPlayingDeathAnimation()) return false; // Don't pickup during death
 
             // Find a nearby player in grab range
             LivingEntity target = zulmak.getTarget();
-            if (!(target instanceof PlayerEntity player)) return false;
+            if (!(target instanceof PlayerEntity player)) {
+                if (zulmak.age % 100 == 0) AncientCurse.LOGGER.debug("Pickup blocked: target is not a player (target={})", target);
+                return false;
+            }
             if (!player.isAlive() || player.isSpectator()) return false;
 
             double distSq = zulmak.squaredDistanceTo(player);
-            if (distSq > PICKUP_GRAB_RANGE * PICKUP_GRAB_RANGE) return false;
+            double dist = Math.sqrt(distSq);
+            if (distSq > PICKUP_GRAB_RANGE * PICKUP_GRAB_RANGE) {
+                if (zulmak.age % 100 == 0) AncientCurse.LOGGER.debug("Pickup blocked: player too far ({} > {} blocks)", String.format("%.1f", dist), PICKUP_GRAB_RANGE);
+                return false;
+            }
 
             // Don't grab players who are flying or in creative
             if (player.getAbilities().flying || player.isCreative()) return false;
 
             targetPlayer = player;
+
+            // Debug log
+            AncientCurse.LOGGER.info("=== Zulmak STARTING PICKUP ATTACK on player {} at distance {} blocks (health: {}%) ===",
+                player.getName().getString(), String.format("%.1f", dist), (int)(healthPercent * 100));
+
             return true;
         }
 
@@ -637,6 +675,45 @@ public class ZulmakEntity extends HostileEntity implements GeoEntity {
         }
     }
 
+    /**
+     * Custom look at target goal that respects downed state.
+     * Prevents Zulmak from rotating/looking around while downed.
+     */
+    private static class ZulmakLookAtTargetGoal extends LookAtEntityGoal {
+        private final ZulmakEntity zulmak;
+
+        public ZulmakLookAtTargetGoal(ZulmakEntity entity, Class<? extends LivingEntity> targetType, float range) {
+            super(entity, targetType, range);
+            this.zulmak = entity;
+        }
+
+        @Override
+        public boolean canStart() {
+            // Don't look around while downed (channeling regeneration)
+            if (zulmak.isDowned()) {
+                return false;
+            }
+            // Don't look around during death animation
+            if (zulmak.isPlayingDeathAnimation()) {
+                return false;
+            }
+            return super.canStart();
+        }
+
+        @Override
+        public boolean shouldContinue() {
+            // Stop looking if we enter downed state
+            if (zulmak.isDowned()) {
+                return false;
+            }
+            // Stop looking during death animation
+            if (zulmak.isPlayingDeathAnimation()) {
+                return false;
+            }
+            return super.shouldContinue();
+        }
+    }
+
     /* ---------- TICK & UPDATE ---------- */
     @Override
     public void tick() {
@@ -674,6 +751,17 @@ public class ZulmakEntity extends HostileEntity implements GeoEntity {
             }
             if (awakenedSoundCooldown > 0) {
                 awakenedSoundCooldown--;
+            }
+            if (cursedEarthCooldownTicks > 0) {
+                cursedEarthCooldownTicks--;
+            }
+
+            // Try cursed earth spread attack around players during combat
+            tryCursedEarthSpreadAttack();
+
+            // Handle cursed earth channeling
+            if (getAttackState() == ATTACK_CURSED_EARTH && cursedEarthChannelTicks > 0) {
+                tickCursedEarthAttack();
             }
 
             // Handle locust swarm channeling
@@ -759,6 +847,9 @@ public class ZulmakEntity extends HostileEntity implements GeoEntity {
 
             // Handle boss bar
             handleBossBar();
+
+            // Check for 40% health threshold - trigger epic death animation
+            check40PercentHealthThreshold();
         }
 
         // Client-side particle effects - spinning around the spinning blocks
@@ -900,6 +991,97 @@ public class ZulmakEntity extends HostileEntity implements GeoEntity {
         }
     }
 
+    /**
+     * Checks if Zulmak has reached 40% health and triggers epic death animation
+     * This is called every tick on server side
+     */
+    private void check40PercentHealthThreshold() {
+        // Don't trigger if already played, already downed, playing death animation, or actually dead
+        if (hasPlayed40PercentDeathAnimation || isDowned() || playingDeathAnimation || this.isDead()) {
+            return;
+        }
+
+        float healthPercent = this.getHealth() / this.getMaxHealth();
+        if (healthPercent <= 0.40f) {
+            trigger40PercentDeathAnimation();
+        }
+    }
+
+    /**
+     * Triggers the epic 40% health death animation with godlike effects
+     * After animation completes, Zulmak will resurrect with 10% health restored
+     */
+    private void trigger40PercentDeathAnimation() {
+        if (!(this.getWorld() instanceof ServerWorld serverWorld)) {
+            return;
+        }
+
+        hasPlayed40PercentDeathAnimation = true;
+        playingDeathAnimation = true;
+        deathAnimationTicks = 0;
+
+        // Cancel all actions and release grabbed player
+        setAttackState(ATTACK_NONE);
+        if (getGrabbedPlayer() != null) {
+            setGrabbedPlayerUUID(null);
+            grabbedPlayerCache = null;
+        }
+
+        // Stop all movement
+        this.getNavigation().stop();
+        this.setVelocity(0, this.getVelocity().y, 0);
+
+        // Epic dramatic sounds - layered for godlike effect
+        this.playSound(ModSounds.ZULMAK_DEATH, 2.5f, 0.5f);
+        this.playSound(SoundEvents.ENTITY_WITHER_DEATH, 1.5f, 0.3f);
+        this.playSound(SoundEvents.ENTITY_ENDER_DRAGON_GROWL, 1.2f, 0.4f);
+
+        // Play dramatic sound for all nearby players
+        List<ServerPlayerEntity> nearbyPlayers = serverWorld.getPlayers(player ->
+                player.squaredDistanceTo(this) <= 64.0 * 64.0);
+
+        for (ServerPlayerEntity player : nearbyPlayers) {
+            player.playSound(SoundEvents.BLOCK_BELL_USE, SoundCategory.HOSTILE, 1.5f, 0.5f);
+            player.getWorld().playSound(null, player.getBlockPos(),
+                    SoundEvents.ENTITY_LIGHTNING_BOLT_THUNDER, SoundCategory.HOSTILE, 0.8f, 0.8f);
+        }
+
+        // Massive particle burst - 50 soul fire and witch particles
+        for (int i = 0; i < 50; i++) {
+            double offsetX = (this.random.nextDouble() - 0.5) * 4.0;
+            double offsetY = this.random.nextDouble() * 3.0;
+            double offsetZ = (this.random.nextDouble() - 0.5) * 4.0;
+
+            serverWorld.spawnParticles(ParticleTypes.SOUL_FIRE_FLAME,
+                    this.getX() + offsetX,
+                    this.getY() + offsetY,
+                    this.getZ() + offsetZ,
+                    1, 0, 0, 0, 0.1);
+
+            serverWorld.spawnParticles(ParticleTypes.WITCH,
+                    this.getX() + offsetX,
+                    this.getY() + offsetY,
+                    this.getZ() + offsetZ,
+                    1, 0, 0, 0, 0.05);
+        }
+
+        // Shockwave ring of enchant particles
+        for (int angle = 0; angle < 360; angle += 10) {
+            double radian = Math.toRadians(angle);
+            double radius = 3.0;
+            double x = this.getX() + Math.cos(radian) * radius;
+            double z = this.getZ() + Math.sin(radian) * radius;
+            serverWorld.spawnParticles(ParticleTypes.ENCHANT,
+                    x, this.getY() + 0.5, z,
+                    1, 0, 0, 0, 0.1);
+        }
+
+        // Flash effect
+        serverWorld.spawnParticles(ParticleTypes.FLASH,
+                this.getX(), this.getY() + 1.5, this.getZ(),
+                1, 0, 0, 0, 0);
+    }
+
     /* ---------- COMBAT ---------- */
     @Override
     public boolean tryAttack(net.minecraft.entity.Entity target) {
@@ -973,8 +1155,16 @@ public class ZulmakEntity extends HostileEntity implements GeoEntity {
             this.playSound(ModSounds.ZULMAK_FIRST_HIT, 1.5f, 1.0f);
         }
 
-        // Normal damage handling
-        return super.damage(source, amount);
+        // Normal damage handling - let parent handle it
+        boolean damaged = super.damage(source, amount);
+        
+        // Manually play hurt sound to ensure it's audible (parent may use low volume)
+        if (damaged && !this.getWorld().isClient) {
+            // Play hurt sound with random pitch variation
+            this.playSound(ModSounds.ZULMAK_HURT, 1.2f, 0.9f + this.random.nextFloat() * 0.2f);
+        }
+        
+        return damaged;
     }
 
     /**
@@ -1164,15 +1354,15 @@ public class ZulmakEntity extends HostileEntity implements GeoEntity {
             return;
         }
 
-        // Only use when health is below 40% (desperate attack)
-        if (this.getHealth() > this.getMaxHealth() * 0.4f) {
+        // Don't use during downed phase
+        if (isDowned()) {
             return;
         }
 
-        // Check if there are players nearby
+        // Check if there are players nearby (within range)
         List<PlayerEntity> nearbyPlayers = this.getWorld().getEntitiesByClass(
                 PlayerEntity.class,
-                new Box(this.getBlockPos()).expand(LOCUST_SWARM_RADIUS),
+                new Box(this.getBlockPos()).expand(LOCUST_SWARM_RADIUS + 5),
                 player -> player.isAlive() && !player.isSpectator() && !player.isCreative()
         );
 
@@ -1180,8 +1370,12 @@ public class ZulmakEntity extends HostileEntity implements GeoEntity {
             return;
         }
 
-        // 10% chance per second (0.5% per tick) to trigger locust swarm
-        if (this.random.nextFloat() < 0.005f) {
+        // Higher chance to trigger - scales with missing health
+        // Base 1.5% per tick, up to 3% when low health
+        float healthPercent = this.getHealth() / this.getMaxHealth();
+        float triggerChance = 0.015f + (1.0f - healthPercent) * 0.015f;
+
+        if (this.random.nextFloat() < triggerChance) {
             startLocustSwarmAttack();
         }
     }
@@ -1207,86 +1401,91 @@ public class ZulmakEntity extends HostileEntity implements GeoEntity {
     }
 
     /**
-     * Spawns locust swarm particles during the channel phase
+     * Spawns locust swarm particles during the channel phase (optimized - only every 3 ticks)
      */
     private void spawnLocustSwarmParticles() {
         if (!(this.getWorld() instanceof ServerWorld serverWorld)) return;
 
+        // Only spawn particles every 3 ticks for optimization
+        if (locustSwarmChannelTicks % 3 != 0) return;
+
         // Calculate swarm intensity based on channel progress
         float progress = 1.0f - ((float) locustSwarmChannelTicks / LOCUST_SWARM_CHANNEL_TICKS);
-        int particleCount = (int) (10 + progress * 30); // More particles as attack charges
+        int particleCount = (int) (5 + progress * 15); // Reduced particle count
 
         for (int i = 0; i < particleCount; i++) {
             double angle = this.random.nextDouble() * Math.PI * 2;
-            double radius = LOCUST_SWARM_RADIUS * (0.2 + this.random.nextDouble() * 0.8);
+            double radius = 3.0 + this.random.nextDouble() * 4.0; // Closer to Zulmak
             double height = this.random.nextDouble() * 3.0;
 
             double x = this.getX() + Math.cos(angle) * radius;
             double z = this.getZ() + Math.sin(angle) * radius;
             double y = this.getY() + height;
 
-            // Swirling velocity
-            double velX = -Math.sin(angle) * 0.15;
-            double velZ = Math.cos(angle) * 0.15;
-            double velY = (this.random.nextDouble() - 0.5) * 0.1;
-
             // Use campfire smoke for locust-like effect
             serverWorld.spawnParticles(ParticleTypes.CAMPFIRE_COSY_SMOKE, x, y, z, 1, 0.1, 0.1, 0.1, 0.02);
-
-            // Add some soul particles for mystical effect
-            if (this.random.nextFloat() < 0.2f) {
-                serverWorld.spawnParticles(ParticleTypes.SOUL, x, y, z, 1, 0.1, 0.1, 0.1, 0.01);
-            }
         }
     }
 
     /**
-     * Performs the locust swarm attack - damages and debuffs all nearby players
+     * Performs the locust swarm attack - spawns actual Locus entities that chase players
      */
     private void performLocustSwarmAttack() {
         if (!(this.getWorld() instanceof ServerWorld serverWorld)) return;
 
-        // Get all players in range
+        // Get nearby players for targeting
         List<PlayerEntity> nearbyPlayers = this.getWorld().getEntitiesByClass(
                 PlayerEntity.class,
-                new Box(this.getBlockPos()).expand(LOCUST_SWARM_RADIUS),
-                player -> player.isAlive() && !player.isSpectator()
+                new Box(this.getBlockPos()).expand(LOCUST_SWARM_RADIUS + 5),
+                player -> player.isAlive() && !player.isSpectator() && !player.isCreative()
         );
 
-        for (PlayerEntity player : nearbyPlayers) {
-            if (!player.isCreative()) {
-                // Deal damage
-                player.damage(this.getDamageSources().magic(), LOCUST_SWARM_DAMAGE);
+        // Spawn Locus entities around Zulmak
+        for (int i = 0; i < LOCUST_SPAWN_COUNT; i++) {
+            // Calculate spawn position in a circle around Zulmak
+            double angle = (Math.PI * 2 * i) / LOCUST_SPAWN_COUNT + this.random.nextDouble() * 0.5;
+            double spawnRadius = 2.0 + this.random.nextDouble() * 2.0;
+            double spawnX = this.getX() + Math.cos(angle) * spawnRadius;
+            double spawnZ = this.getZ() + Math.sin(angle) * spawnRadius;
+            double spawnY = this.getY() + 0.5 + this.random.nextDouble();
 
-                // Apply slowness and blindness effects
-                player.addStatusEffect(new net.minecraft.entity.effect.StatusEffectInstance(
-                        net.minecraft.entity.effect.StatusEffects.SLOWNESS, 100, 1)); // 5 seconds
-                player.addStatusEffect(new net.minecraft.entity.effect.StatusEffectInstance(
-                        net.minecraft.entity.effect.StatusEffects.BLINDNESS, 60, 0)); // 3 seconds
+            // Create and spawn the Locus entity
+            LocusEntity locus = ModEntities.LOCUS.create(serverWorld);
+            if (locus != null) {
+                locus.refreshPositionAndAngles(spawnX, spawnY, spawnZ, this.random.nextFloat() * 360.0f, 0.0f);
 
-                // Play zap sound on each player
-                playPlayerZapSound(player);
+                // Set target to nearest player if available
+                if (!nearbyPlayers.isEmpty()) {
+                    PlayerEntity target = nearbyPlayers.get(this.random.nextInt(nearbyPlayers.size()));
+                    locus.setTarget(target);
+                }
+
+                // Spawn with particles
+                serverWorld.spawnEntity(locus);
+
+                // Spawn effect at spawn location
+                serverWorld.spawnParticles(ParticleTypes.CAMPFIRE_COSY_SMOKE, spawnX, spawnY, spawnZ,
+                        5, 0.3, 0.3, 0.3, 0.05);
+                serverWorld.spawnParticles(ParticleTypes.SMOKE, spawnX, spawnY, spawnZ,
+                        3, 0.2, 0.2, 0.2, 0.02);
             }
         }
 
-        // Spawn explosion of locust particles
-        for (int i = 0; i < 80; i++) {
+        // Spawn explosion of locust-like particles around Zulmak
+        for (int i = 0; i < 40; i++) {
             double angle = this.random.nextDouble() * Math.PI * 2;
-            double radius = this.random.nextDouble() * LOCUST_SWARM_RADIUS;
-            double height = this.random.nextDouble() * 4.0;
+            double radius = this.random.nextDouble() * 4.0;
+            double height = this.random.nextDouble() * 3.0;
 
             double x = this.getX() + Math.cos(angle) * radius;
             double z = this.getZ() + Math.sin(angle) * radius;
             double y = this.getY() + height;
 
-            serverWorld.spawnParticles(ParticleTypes.CAMPFIRE_COSY_SMOKE, x, y, z, 1, 0.3, 0.3, 0.3, 0.15);
-            if (this.random.nextFloat() < 0.3f) {
-                serverWorld.spawnParticles(ParticleTypes.SOUL, x, y, z, 1, 0.2, 0.2, 0.2, 0.1);
-            }
+            serverWorld.spawnParticles(ParticleTypes.CAMPFIRE_COSY_SMOKE, x, y, z, 1, 0.2, 0.2, 0.2, 0.1);
         }
 
-        // Also spread cursed earth during locust attack
-        spawnCursedEarthFromAttack(serverWorld);
+        // Play buzzing/swarm sound effect
+        this.playSound(SoundEvents.ENTITY_BEE_LOOP_AGGRESSIVE, 2.0f, 0.5f);
     }
 
     /**
@@ -1359,6 +1558,201 @@ public class ZulmakEntity extends HostileEntity implements GeoEntity {
         }
     }
 
+    /* ---------- CURSED EARTH SPREAD ATTACK ---------- */
+
+    /**
+     * Attempts to start the cursed earth attack - channels with attack_2 animation
+     * then spreads cursed earth around nearby players.
+     */
+    private void tryCursedEarthSpreadAttack() {
+        if (this.getWorld().isClient) return;
+        if (cursedEarthCooldownTicks > 0) return;
+        if (isDowned()) return;
+
+        // Don't start if already in another attack
+        if (getAttackState() != ATTACK_NONE) return;
+
+        // Only attack when in combat (has a target)
+        LivingEntity target = this.getTarget();
+        if (target == null || !target.isAlive()) return;
+
+        // Check if there are players nearby
+        List<PlayerEntity> nearbyPlayers = this.getWorld().getEntitiesByClass(
+                PlayerEntity.class,
+                new Box(this.getBlockPos()).expand(16),
+                player -> player.isAlive() && !player.isSpectator() && !player.isCreative()
+        );
+        if (nearbyPlayers.isEmpty()) return;
+
+        // Random chance each tick to start the attack
+        if (this.random.nextFloat() > CURSED_EARTH_COMBAT_CHANCE) return;
+
+        // Start the cursed earth attack!
+        startCursedEarthAttack();
+    }
+
+    /**
+     * Starts the cursed earth attack - plays attack_2 animation while channeling
+     */
+    private void startCursedEarthAttack() {
+        setAttackState(ATTACK_CURSED_EARTH);
+        cursedEarthChannelTicks = CURSED_EARTH_CHANNEL_TICKS;
+
+        // Stop movement while channeling
+        this.getNavigation().stop();
+
+        // Play cursed earth attack sound at start
+        playCursedEarthAttackSound();
+    }
+
+    /**
+     * Handles the cursed earth channeling tick - spawns particles during channel,
+     * then releases the attack when channel completes.
+     */
+    private void tickCursedEarthAttack() {
+        if (cursedEarthChannelTicks <= 0) return;
+
+        // Stop movement during channel
+        this.getNavigation().stop();
+        this.setVelocity(0, this.getVelocity().y, 0);
+
+        // Look at target while channeling
+        LivingEntity target = this.getTarget();
+        if (target != null) {
+            this.getLookControl().lookAt(target, 30.0F, 30.0F);
+        }
+
+        cursedEarthChannelTicks--;
+
+        // Spawn dark channeling particles
+        if (this.getWorld() instanceof ServerWorld serverWorld) {
+            // Dark energy rising from ground
+            double angle = (CURSED_EARTH_CHANNEL_TICKS - cursedEarthChannelTicks) * 0.4;
+            for (int i = 0; i < 3; i++) {
+                double offsetAngle = angle + (Math.PI * 2 * i / 3);
+                double x = this.getX() + Math.cos(offsetAngle) * 2.0;
+                double z = this.getZ() + Math.sin(offsetAngle) * 2.0;
+                serverWorld.spawnParticles(ParticleTypes.SOUL,
+                        x, this.getY() + 0.2, z,
+                        2, 0.2, 0.3, 0.2, 0.02);
+            }
+
+            // Smoke rising
+            if (cursedEarthChannelTicks % 5 == 0) {
+                serverWorld.spawnParticles(ParticleTypes.SMOKE,
+                        this.getX(), this.getY(), this.getZ(),
+                        8, 2.0, 0.1, 2.0, 0.01);
+            }
+        }
+
+        // Channel complete - release the attack!
+        if (cursedEarthChannelTicks <= 0) {
+            performCursedEarthAttack();
+            setAttackState(ATTACK_NONE);
+            cursedEarthCooldownTicks = CURSED_EARTH_COOLDOWN_TICKS;
+        }
+    }
+
+    /**
+     * Performs the actual cursed earth spread around all nearby players
+     */
+    private void performCursedEarthAttack() {
+        if (!(this.getWorld() instanceof ServerWorld serverWorld)) return;
+
+        // Find all nearby players
+        List<PlayerEntity> nearbyPlayers = serverWorld.getEntitiesByClass(
+                PlayerEntity.class,
+                new Box(this.getBlockPos()).expand(16),
+                player -> player.isAlive() && !player.isSpectator() && !player.isCreative()
+        );
+
+        // Play the cursed earth sound ONCE at the start (not per player)
+        playCursedEarthAttackSound();
+
+        // Spread cursed earth around each player
+        for (PlayerEntity player : nearbyPlayers) {
+            spawnCursedEarthAroundPlayer(serverWorld, player);
+        }
+    }
+
+    /**
+     * Spreads cursed earth in a radius around a target player position.
+     * Also spawns Khamsin Spread entities for visual effect.
+     */
+    private void spawnCursedEarthAroundPlayer(ServerWorld serverWorld, PlayerEntity player) {
+        BlockPos centerPos = player.getBlockPos();
+        int radius = 2 + this.random.nextInt(3); // 2-4 block radius around player
+
+        int blocksConverted = 0;
+        for (int x = -radius; x <= radius; x++) {
+            for (int z = -radius; z <= radius; z++) {
+                // Circular spread pattern
+                if (x * x + z * z > radius * radius) continue;
+
+                // Random chance to place (creates patchy spread)
+                if (this.random.nextFloat() > 0.6f) continue;
+
+                BlockPos targetPos = centerPos.add(x, 0, z);
+
+                // Find the ground level
+                for (int y = 2; y >= -2; y--) {
+                    BlockPos checkPos = targetPos.add(0, y, 0);
+                    BlockPos abovePos = checkPos.up();
+
+                    // Check if this is a valid spot (solid block with air above)
+                    if (serverWorld.getBlockState(checkPos).isSolidBlock(serverWorld, checkPos)
+                            && serverWorld.getBlockState(abovePos).isAir()) {
+
+                        // Don't convert if already cursed
+                        net.minecraft.block.BlockState currentState = serverWorld.getBlockState(checkPos);
+                        if (currentState.isOf(ModBlocks.CURSED_EARTH) || currentState.isOf(ModBlocks.CURSED_SAND)) {
+                            break;
+                        }
+
+                        // Replace the top block with Cursed Earth or Cursed Sand
+                        if (currentState.isOf(net.minecraft.block.Blocks.SAND) ||
+                            currentState.isOf(net.minecraft.block.Blocks.RED_SAND)) {
+                            serverWorld.setBlockState(checkPos, ModBlocks.CURSED_SAND.getDefaultState());
+                        } else {
+                            serverWorld.setBlockState(checkPos, ModBlocks.CURSED_EARTH.getDefaultState());
+                        }
+                        blocksConverted++;
+
+                        // Spawn dark particles at conversion
+                        if (this.random.nextFloat() < 0.5f) {
+                            serverWorld.spawnParticles(ParticleTypes.SOUL,
+                                    checkPos.getX() + 0.5, checkPos.getY() + 1.0, checkPos.getZ() + 0.5,
+                                    2, 0.3, 0.2, 0.3, 0.02);
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+
+        // Spawn Khamsin Spread entities around the affected area (just 1-2)
+        int khamsinCount = 1 + this.random.nextInt(2); // 1-2 entities (reduced)
+        for (int i = 0; i < khamsinCount; i++) {
+            double angle = this.random.nextDouble() * Math.PI * 2;
+            double dist = 1.0 + this.random.nextDouble() * (radius + 1);
+            double khamsinX = player.getX() + Math.cos(angle) * dist;
+            double khamsinZ = player.getZ() + Math.sin(angle) * dist;
+            double khamsinY = player.getY() + 0.3 + this.random.nextDouble() * 1.0;
+
+            KhamsinSpreadSmallEntity khamsin = ModEntities.KHAMSIN_SPREAD_SMALL.create(serverWorld);
+            if (khamsin != null) {
+                khamsin.refreshPositionAndAngles(khamsinX, khamsinY, khamsinZ,
+                        this.random.nextFloat() * 360, 0);
+                serverWorld.spawnEntity(khamsin);
+            }
+        }
+
+        // Spawn additional particles in a burst around player
+        serverWorld.spawnParticles(ParticleTypes.SMOKE,
+                player.getX(), player.getY() + 0.5, player.getZ(),
+                20, radius * 0.5, 0.5, radius * 0.5, 0.05);
+    }
+
     /* ---------- PICKUP ATTACK ---------- */
 
     /**
@@ -1427,46 +1821,50 @@ public class ZulmakEntity extends HostileEntity implements GeoEntity {
      * Updates the grabbed player's position based on the animation's player_locator bone.
      * This runs on both client and server to keep the player smoothly attached.
      *
-     * The player_locator positions from the animation are in 1/16ths of a block (model units).
-     * We interpolate between keyframes based on current animation tick.
+     * The player_locator positions from the animation are in model units (pixels).
+     * Blockbench uses 16 pixels = 1 block.
+     *
+     * Animation values are ABSOLUTE positions relative to the model origin (Zulmak's feet).
+     * At peak (y=93 model units = 5.8 blocks), which matches Zulmak's raised hand height.
      */
     private void updateGrabbedPlayerPosition() {
         PlayerEntity grabbed = getGrabbedPlayer();
-        if (grabbed == null || playerHasBeenThrown) return;
+        if (grabbed == null || playerHasBeenThrown) {
+            if (grabbed == null && !this.getWorld().isClient) {
+                AncientCurse.LOGGER.warn("updateGrabbedPlayerPosition: grabbed player is null! pickupAnimationTicks={}, attackState={}, grabbedPlayerCache={}",
+                    pickupAnimationTicks, getAttackState(), grabbedPlayerCache != null ? "present" : "null");
+            }
+            return;
+        }
 
         int tick = pickupAnimationTicks;
 
-        // Get the player position from animation keyframes (values in 1/16 block units)
-        // Keyframes: time -> [x, y, z]
-        // 0.0s (0 ticks)    -> [0, 0, -12]
-        // 0.1667s (3 ticks) -> [0, 7, -16]
-        // 0.4167s (8 ticks) -> [0, 65, -17]
-        // 0.6667s (13 ticks) -> [0, 90, -5]
-        // 0.9167s (18 ticks) -> [0, 93, 2]
-        // 1.1667s (23 ticks) -> [0, 93, 2]
-        // 1.4167s (28 ticks) -> [0, 72.3, -6.3]
-        // 1.6667s (33 ticks) -> [-7.3, 72.3, -14.2]
-        // 2.0s (40 ticks)    -> [-1.2, 78.1, -3.8]
-        // 2.1667s (43 ticks) -> [-1.2, 85, 15.4]
-        // 2.4167s (48 ticks) -> [-1.2, 85.1, -59.6] (release point)
-        // 2.6667s (53 ticks) -> [-1.2, 55, -94.2]
+        // Debug log every 10 ticks
+        if (!this.getWorld().isClient && tick % 10 == 0) {
+            AncientCurse.LOGGER.info("Updating grabbed player position: tick={}, player={}", tick, grabbed.getName().getString());
+        }
 
-        // Adjust for 0.6x animation speed: multiply tick thresholds by 1/0.6 ≈ 1.67
-        Vec3d offset = interpolatePlayerLocator(tick);
+        // Get the animated offset from keyframes
+        Vec3d animOffset = interpolatePlayerLocator(tick);
 
-        // Convert from model units (1/16 blocks) to world units
-        double worldX = offset.x / 16.0;
-        double worldY = offset.y / 16.0;
-        double worldZ = offset.z / 16.0;
+        // Convert from model units (pixels) to world units (blocks)
+        // 16 pixels = 1 block in Blockbench
+        // NOTE: We negate X and Z because Blockbench model faces North (-Z), 
+        // but Minecraft entity facing South (+Z) requires 180 degree rotation.
+        double animX = -animOffset.x / 16.0;
+        double animY = animOffset.y / 16.0;
+        double animZ = -animOffset.z / 16.0;
 
-        // Apply Zulmak's rotation to the offset
+        // Apply Zulmak's rotation to the horizontal offset
+        // Note: Negative Z in model space is "in front of" the entity
         float yaw = this.getYaw() * (float) (Math.PI / 180.0);
-        double rotatedX = worldX * Math.cos(yaw) - worldZ * Math.sin(yaw);
-        double rotatedZ = worldX * Math.sin(yaw) + worldZ * Math.cos(yaw);
+        double rotatedX = animX * Math.cos(yaw) - animZ * Math.sin(yaw);
+        double rotatedZ = animX * Math.sin(yaw) + animZ * Math.cos(yaw);
 
-        // Calculate final position relative to Zulmak
+        // Calculate final position relative to Zulmak's feet
+        // Animation Y values are absolute heights (93 model units = ~5.8 blocks at peak)
         double finalX = this.getX() + rotatedX;
-        double finalY = this.getY() + worldY;
+        double finalY = this.getY() + animY;
         double finalZ = this.getZ() + rotatedZ;
 
         // Teleport the player to the calculated position
@@ -1608,7 +2006,14 @@ public class ZulmakEntity extends HostileEntity implements GeoEntity {
 
     @Override
     protected SoundEvent getDeathSound() {
-        return ModSounds.ZULMAK_DEATH;
+        // Return null - we play the death sound manually for more control
+        return null;
+    }
+    
+    @Override
+    protected float getSoundVolume() {
+        // Louder sounds for boss entity
+        return 1.5f;
     }
 
     /**
@@ -1720,10 +2125,12 @@ public class ZulmakEntity extends HostileEntity implements GeoEntity {
 
     /**
      * Plays cursed earth attack sound when spreading cursed earth
+     * VERY LOUD - this is a major boss attack with earth rising/rumbling
      */
     public void playCursedEarthAttackSound() {
         if (this.getWorld().isClient) return;
-        this.playSound(ModSounds.ZULMAK_CURSED_EARTH_ATTACK, 1.5f, 1.0f);
+        // Play at 3.0 volume for dramatic effect - earth is rising and rumbling!
+        this.playSound(ModSounds.ZULMAK_CURSED_EARTH_ATTACK, 3.0f, 1.0f);
     }
 
     /* ---------- LIFECYCLE - BOSS BAR CLEANUP ---------- */
@@ -1733,6 +2140,9 @@ public class ZulmakEntity extends HostileEntity implements GeoEntity {
         if (!playingDeathAnimation) {
             playingDeathAnimation = true;
             deathAnimationTicks = 0;
+
+            // Play dramatic death scream (louder and lower pitch)
+            this.playSound(ModSounds.ZULMAK_SUMMON_SCREAM, 2.5f, 0.6f);
 
             // Clean up boss bar on death
             if (!this.getWorld().isClient) {
@@ -1782,20 +2192,63 @@ public class ZulmakEntity extends HostileEntity implements GeoEntity {
                         2, 0.3, 0.3, 0.3, 0.01);
             }
 
-            // After death animation finishes, actually remove the entity
+            // After death animation finishes, check if this is 40% fake death or real death
             if (deathAnimationTicks >= DEATH_ANIMATION_DURATION) {
-                // Final burst of particles
-                if (this.getWorld() instanceof ServerWorld serverWorld) {
-                    serverWorld.spawnParticles(ParticleTypes.POOF,
-                            this.getX(), this.getY() + this.getHeight() * 0.5, this.getZ(),
-                            20, 0.5, 0.5, 0.5, 0.05);
-                    serverWorld.spawnParticles(ParticleTypes.SOUL,
-                            this.getX(), this.getY() + 1.0, this.getZ(),
-                            10, 0.3, 0.5, 0.3, 0.1);
-                }
+                // Check if this was the 40% "fake" death or real death
+                if (hasPlayed40PercentDeathAnimation && !this.isDead()) {
+                    // 40% health "death" - Zulmak rises again with godlike power!
+                    if (this.getWorld() instanceof ServerWorld serverWorld) {
+                        // Epic resurrection burst
+                        serverWorld.spawnParticles(ParticleTypes.EXPLOSION_EMITTER,
+                                this.getX(), this.getY() + 1.0, this.getZ(),
+                                1, 0, 0, 0, 0);
 
-                // Now actually die
-                this.remove(Entity.RemovalReason.KILLED);
+                        // 30 soul fire particles burst upward
+                        for (int i = 0; i < 30; i++) {
+                            double offsetX = (this.random.nextDouble() - 0.5) * 2.0;
+                            double offsetZ = (this.random.nextDouble() - 0.5) * 2.0;
+                            serverWorld.spawnParticles(ParticleTypes.SOUL_FIRE_FLAME,
+                                    this.getX() + offsetX,
+                                    this.getY() + 0.2,
+                                    this.getZ() + offsetZ,
+                                    1, 0, 0.5, 0, 0.15);
+                        }
+
+                        // Flash of power
+                        serverWorld.spawnParticles(ParticleTypes.FLASH,
+                                this.getX(), this.getY() + 1.5, this.getZ(),
+                                1, 0, 0, 0, 0);
+
+                        // Resurrection sounds
+                        this.playSound(SoundEvents.ENTITY_EVOKER_CAST_SPELL, 2.0f, 0.5f);
+                        this.playSound(SoundEvents.ENTITY_VEX_CHARGE, 1.5f, 0.6f);
+                        this.playSound(SoundEvents.ENTITY_WITHER_SPAWN, 1.0f, 0.7f);
+                    }
+
+                    // Reset death animation state
+                    playingDeathAnimation = false;
+                    deathAnimationTicks = 0;
+                    setAttackState(ATTACK_NONE);
+
+                    // Heal 10% of max health
+                    float healAmount = this.getMaxHealth() * 0.1f;
+                    this.setHealth(this.getHealth() + healAmount);
+
+                } else {
+                    // Real death - remove the entity
+                    // Final burst of particles
+                    if (this.getWorld() instanceof ServerWorld serverWorld) {
+                        serverWorld.spawnParticles(ParticleTypes.POOF,
+                                this.getX(), this.getY() + this.getHeight() * 0.5, this.getZ(),
+                                20, 0.5, 0.5, 0.5, 0.05);
+                        serverWorld.spawnParticles(ParticleTypes.SOUL,
+                                this.getX(), this.getY() + 1.0, this.getZ(),
+                                10, 0.3, 0.5, 0.3, 0.1);
+                    }
+
+                    // Now actually die
+                    this.remove(Entity.RemovalReason.KILLED);
+                }
             }
         }
     }
@@ -1872,11 +2325,11 @@ public class ZulmakEntity extends HostileEntity implements GeoEntity {
             return PlayState.CONTINUE;
         }
 
-        // While blocking, summoning, wind attack, pickup, or locust swarm, stay idle (no walking)
+        // While blocking, summoning, wind attack, pickup, locust swarm, or cursed earth, stay idle (no walking)
         int attackState = getAttackState();
         if (attackState == STATE_BLOCKING || attackState == ATTACK_SUMMON ||
             attackState == ATTACK_WIND || attackState == ATTACK_PICKUP ||
-            attackState == ATTACK_LOCUST_SWARM) {
+            attackState == ATTACK_LOCUST_SWARM || attackState == ATTACK_CURSED_EARTH) {
             state.getController().setAnimation(ANIM_IDLE);
             return PlayState.CONTINUE;
         }
@@ -1966,7 +2419,17 @@ public class ZulmakEntity extends HostileEntity implements GeoEntity {
             return PlayState.CONTINUE;
         }
 
-        // No attack, blocking, summon, wind, pickup, or locust swarm - update last state
+        if (attackState == ATTACK_CURSED_EARTH) {
+            // Cursed earth attack - uses attack_2 animation (arms raised channeling)
+            if (lastAttackState != ATTACK_CURSED_EARTH) {
+                state.getController().forceAnimationReset();
+                state.getController().setAnimation(ANIM_SUMMON); // Uses same animation as summon
+            }
+            lastAttackState = attackState;
+            return PlayState.CONTINUE;
+        }
+
+        // No active attack animation - update last state
         lastAttackState = attackState;
         return PlayState.STOP;
     }
@@ -2175,6 +2638,7 @@ public class ZulmakEntity extends HostileEntity implements GeoEntity {
             if (pharaoh != null) {
                 pharaoh.refreshPositionAndAngles(spawnX, spawnY, spawnZ, this.getYaw() + (180 / DOWNED_PHARAOH_SPAWN_COUNT * i), 0);
                 pharaoh.initialize(serverWorld, serverWorld.getLocalDifficulty(pharaoh.getBlockPos()), SpawnReason.MOB_SUMMONED, null, null);
+                pharaoh.setSummoner(this); // Set summoner for AI coordination
 
                 serverWorld.spawnEntity(pharaoh);
 

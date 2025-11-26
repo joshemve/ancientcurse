@@ -117,7 +117,7 @@ public class KhamsinOrbEntity extends ProjectileEntity implements GeoEntity {
 
         if (entity instanceof LivingEntity livingEntity) {
             // Damage player and apply curse effect
-            livingEntity.damage(this.getDamageSources().magic(), 8.0f); // Increased damage
+            livingEntity.damage(this.getDamageSources().magic(), 4.0f); // Moderate damage
 
             // Create impact particles
             if (this.getWorld() instanceof ServerWorld serverWorld) {

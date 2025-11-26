@@ -47,9 +47,9 @@ public class LocusEntity extends HostileEntity implements GeoEntity {
             DataTracker.registerData(LocusEntity.class, TrackedDataHandlerRegistry.INTEGER);
 
     /* ---------- CONSTANTS ---------- */
-    private static final int MAX_ATTACK_COOLDOWN = 20;          // 1 s between dives
-    private static final float ORBIT_RADIUS = 4.0F;             // metres
-    private static final int ORBIT_RECALC_TICKS = 10;           // 0.5 s
+    private static final int MAX_ATTACK_COOLDOWN = 10;          // 0.5s between dives (faster attacks)
+    private static final float ORBIT_RADIUS = 2.0F;             // 2 blocks - swarm closer to player
+    private static final int ORBIT_RECALC_TICKS = 5;            // 0.25s - more responsive tracking
 
     /* ---------- FIELDS ---------- */
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
@@ -69,11 +69,11 @@ public class LocusEntity extends HostileEntity implements GeoEntity {
     /* ---------- ATTRIBUTES ---------- */
     public static DefaultAttributeContainer.Builder createAttributes() {
         return HostileEntity.createHostileAttributes()
-                .add(EntityAttributes.GENERIC_MAX_HEALTH, 20)
-                .add(EntityAttributes.GENERIC_FLYING_SPEED, 0.9)
-                .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.6)
+                .add(EntityAttributes.GENERIC_MAX_HEALTH, 2)  // One-shot with any weapon
+                .add(EntityAttributes.GENERIC_FLYING_SPEED, 1.2)  // Faster flying
+                .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.8)  // Faster movement
                 .add(EntityAttributes.GENERIC_FOLLOW_RANGE, 48)
-                .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 3);
+                .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 2);  // Light damage but frequent
     }
 
     /* ---------- NAVIGATION ---------- */
@@ -142,27 +142,47 @@ public class LocusEntity extends HostileEntity implements GeoEntity {
         }
     }
 
-    /** Dive straight at the target's eye position once in range. */
+    /** Dive straight at the target's eye position once in range - aggressive swarming. */
     private static class DiveAttackGoal extends Goal {
         private final LocusEntity mob;
+        private int diveTicks = 0;
         DiveAttackGoal(LocusEntity m) { this.mob = m; setControls(EnumSet.of(Control.MOVE)); }
         @Override public boolean canStart() {
             LivingEntity tgt = mob.getTarget();
             return tgt != null && tgt.isAlive()
                     && mob.dataTracker.get(ATTACK_COOLDOWN) == 0
-                    && mob.squaredDistanceTo(tgt) < 16; // <4 blocks
+                    && mob.squaredDistanceTo(tgt) < 25; // <5 blocks (increased range)
         }
         @Override public void start() {
             LivingEntity tgt = mob.getTarget();
             if (tgt == null) return;
-            Vec3d diveVec = tgt.getEyePos().subtract(mob.getPos()).normalize().multiply(1.5);
+            // Dive faster and more aggressively
+            Vec3d diveVec = tgt.getEyePos().subtract(mob.getPos()).normalize().multiply(2.0);
             mob.setVelocity(diveVec);
+            diveTicks = 15; // Max dive duration
+            mob.dataTracker.set(ATTACKING, true);
+        }
+        @Override public boolean shouldContinue() {
+            return diveTicks > 0 && !mob.horizontalCollision;
         }
         @Override public void tick() {
-            if (mob.horizontalCollision) stop();
+            diveTicks--;
+            // Keep diving toward target
+            LivingEntity tgt = mob.getTarget();
+            if (tgt != null && diveTicks > 10) {
+                Vec3d diveVec = tgt.getEyePos().subtract(mob.getPos()).normalize().multiply(1.8);
+                mob.setVelocity(diveVec);
+            }
+            // Deal damage on contact
+            if (tgt != null && mob.squaredDistanceTo(tgt) < 2.25) { // 1.5 block contact
+                mob.tryAttack(tgt);
+                diveTicks = 0; // End dive after hit
+            }
         }
         @Override public void stop() {
             mob.dataTracker.set(ATTACK_COOLDOWN, MAX_ATTACK_COOLDOWN);
+            mob.dataTracker.set(ATTACKING, false);
+            diveTicks = 0;
         }
     }
 

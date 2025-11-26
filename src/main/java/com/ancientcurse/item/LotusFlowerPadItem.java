@@ -33,13 +33,22 @@ public class LotusFlowerPadItem extends BlockItem {
     
     @Override
     public ActionResult useOnBlock(ItemUsageContext context) {
-        // First try normal block placement
-        ActionResult result = super.useOnBlock(context);
-        if (result != ActionResult.PASS) {
-            return result;
+        World world = context.getWorld();
+        BlockPos pos = context.getBlockPos();
+
+        // Get the placement state safely - if null, skip super call to prevent crash
+        ItemPlacementContext placementContext = new ItemPlacementContext(context);
+        BlockState placementState = this.getBlock().getPlacementState(placementContext);
+
+        // Only call super if we have a valid placement state
+        if (placementState != null && placementState.canPlaceAt(world, placementContext.getBlockPos())) {
+            ActionResult result = super.useOnBlock(context);
+            if (result != ActionResult.PASS) {
+                return result;
+            }
         }
-        
-        // If normal placement failed, try water surface placement
+
+        // If normal placement failed or wasn't possible, try water surface placement
         return tryWaterPlacement(context);
     }
     

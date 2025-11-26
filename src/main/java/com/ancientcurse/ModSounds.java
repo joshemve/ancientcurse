@@ -96,6 +96,10 @@ public class ModSounds {
     // Zulmak - Ambient Loop (spinning blocks vortex)
     public static final SoundEvent ZULMAK_VORTEX_WIND_LOOP = registerSoundEvent("zulmak_vortex_wind_loop");
 
+    // Withered Pharaoh Sound Events
+    public static final SoundEvent WITHERED_PHARAOH_SUSPENSE = registerSoundEvent("withered_pharaoh_suspense");
+    public static final SoundEvent WITHERED_PHARAOH_GRUMBLE = registerSoundEvent("withered_pharaoh_grumble");
+
     private static SoundEvent registerSoundEvent(String name) {
         Identifier id = new Identifier(AncientCurse.MOD_ID, name);
         return Registry.register(Registries.SOUND_EVENT, id, SoundEvent.of(id));

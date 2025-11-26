@@ -679,5 +679,45 @@
         "pitch": 1.1
       }
     ]
+  },
+  "withered_pharaoh_suspense": {
+    "subtitle": "subtitles.ancientcurse.withered_pharaoh_suspense",
+    "sounds": [
+      {
+        "name": "ancientcurse:withered_pharaoh/suspense_drone",
+        "volume": 1.0,
+        "pitch": 1.0
+      }
+    ]
+  },
+  "withered_pharaoh_grumble": {
+    "subtitle": "subtitles.ancientcurse.withered_pharaoh_grumble",
+    "sounds": [
+      {
+        "name": "ancientcurse:withered_pharaoh/withered_pharaoh_grumble",
+        "volume": 1.0,
+        "pitch": 0.9
+      },
+      {
+        "name": "ancientcurse:withered_pharaoh/withered_pharaoh_grumble",
+        "volume": 1.0,
+        "pitch": 0.95
+      },
+      {
+        "name": "ancientcurse:withered_pharaoh/withered_pharaoh_grumble",
+        "volume": 1.0,
+        "pitch": 1.0
+      },
+      {
+        "name": "ancientcurse:withered_pharaoh/withered_pharaoh_grumble",
+        "volume": 1.0,
+        "pitch": 1.05
+      },
+      {
+        "name": "ancientcurse:withered_pharaoh/withered_pharaoh_grumble",
+        "volume": 1.0,
+        "pitch": 1.1
+      }
+    ]
   }
 }

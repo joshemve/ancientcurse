@@ -87,7 +87,7 @@ public class KhamsinSpreadSmallEntity extends MobEntity implements GeoEntity {
     /* ---------- ATTRIBUTES ---------- */
     public static DefaultAttributeContainer.Builder createKhamsinSpreadSmallAttributes() {
         return MobEntity.createMobAttributes()
-                .add(EntityAttributes.GENERIC_MAX_HEALTH, 20.0) // Moderate health
+                .add(EntityAttributes.GENERIC_MAX_HEALTH, 10.0) // Low health - easy to clear
                 .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.0) // No movement - stays in place
                 .add(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE, 1.0) // Immune to knockback
                 .add(EntityAttributes.GENERIC_FLYING_SPEED, 0.0); // No flying movement

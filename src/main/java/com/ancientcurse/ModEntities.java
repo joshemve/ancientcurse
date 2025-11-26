@@ -153,7 +153,7 @@ public class ModEntities {
         Registries.ENTITY_TYPE,
         new Identifier(AncientCurse.MOD_ID, "zulmak"),
         FabricEntityTypeBuilder.create(SpawnGroup.MONSTER, ZulmakEntity::new)
-            .dimensions(EntityDimensions.fixed(1.0f, 2.0f)) // Adjust based on model size
+            .dimensions(EntityDimensions.fixed(2.0f, 4.0f)) // Large boss hitbox matching model size
             .trackRangeBlocks(64)
             .trackedUpdateRate(3)
             .build()

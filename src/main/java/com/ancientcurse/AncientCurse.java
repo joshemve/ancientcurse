@@ -120,7 +120,10 @@ public class AncientCurse implements ModInitializer {
         // Note: We've modified PotteryBlocks.java to avoid re-registering OFFERING_POT
         com.ancientcurse.block.registry.BlockRegistry.registerAll();
         com.ancientcurse.block.registry.BlockRegistry.registerBlockItems();
-        
+
+        // Register flammable blocks (must be after all blocks are registered)
+        ModBlocks.registerFlammableBlocks();
+
         // Register mod items
         // ModBlocks.registerBlocks(); // REMOVED: Blocks are now registered through BlockRegistry system
         ModItems.registerItems();
