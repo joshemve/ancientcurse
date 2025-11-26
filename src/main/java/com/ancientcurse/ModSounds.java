@@ -73,6 +73,29 @@ public class ModSounds {
     public static final SoundEvent ANUBIS_MAGIC_SHIMMER = registerSoundEvent("anubis_magic_shimmer");
     public static final SoundEvent ANUBIS_JUDGEMENT_LOOP = registerSoundEvent("anubis_judgement_loop");
 
+    // Zulmak Sound Events - Ambient/Idle
+    public static final SoundEvent ZULMAK_AWAKENED = registerSoundEvent("zulmak_awakened");
+    
+    // Zulmak - Combat
+    public static final SoundEvent ZULMAK_BLOCKING = registerSoundEvent("zulmak_blocking");
+    public static final SoundEvent ZULMAK_FIRST_HIT = registerSoundEvent("zulmak_first_hit");
+    public static final SoundEvent ZULMAK_HURT = registerSoundEvent("zulmak_hurt");
+    public static final SoundEvent ZULMAK_DEATH = registerSoundEvent("zulmak_death");
+    public static final SoundEvent ZULMAK_PLAYER_ZAP = registerSoundEvent("zulmak_player_zap");
+    public static final SoundEvent ZULMAK_WIND_HIT = registerSoundEvent("zulmak_wind_hit");
+    
+    // Zulmak - Special Attacks
+    public static final SoundEvent ZULMAK_CURSE_ATTACK = registerSoundEvent("zulmak_curse_attack");
+    public static final SoundEvent ZULMAK_CURSED_EARTH_ATTACK = registerSoundEvent("zulmak_cursed_earth_attack");
+    public static final SoundEvent ZULMAK_LOCUST_SWARM = registerSoundEvent("zulmak_locust_swarm");
+    
+    // Zulmak - Summon
+    public static final SoundEvent ZULMAK_SUMMON = registerSoundEvent("zulmak_summon");
+    public static final SoundEvent ZULMAK_SUMMON_SCREAM = registerSoundEvent("zulmak_summon_scream");
+    
+    // Zulmak - Ambient Loop (spinning blocks vortex)
+    public static final SoundEvent ZULMAK_VORTEX_WIND_LOOP = registerSoundEvent("zulmak_vortex_wind_loop");
+
     private static SoundEvent registerSoundEvent(String name) {
         Identifier id = new Identifier(AncientCurse.MOD_ID, name);
         return Registry.register(Registries.SOUND_EVENT, id, SoundEvent.of(id));

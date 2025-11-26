@@ -1,5 +1,6 @@
 package com.ancientcurse.mixin;
 
+import com.ancientcurse.entity.ZulmakEntity;
 import com.ancientcurse.item.armor.JackelBindsItem;
 import com.ancientcurse.system.JackelBindsBreakoutManager;
 import net.minecraft.entity.EquipmentSlot;
@@ -19,7 +20,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import java.util.OptionalInt;
 
 /**
- * Server-side mixin to block bound players from opening containers and handle breakout punching
+ * Server-side mixin to block bound/grabbed players from opening containers and handle breakout punching
  */
 @Mixin(ServerPlayerEntity.class)
 public class JackelBindsServerMixin {
@@ -28,13 +29,20 @@ public class JackelBindsServerMixin {
     private long ancientcurse$lastSwingTime = 0;
 
     /**
-     * Block opening screen handlers (chests, crafting tables, etc.) when bound
+     * Block opening screen handlers (chests, crafting tables, etc.) when bound or grabbed
      */
     @Inject(method = "openHandledScreen", at = @At("HEAD"), cancellable = true)
     private void ancientcurse$preventScreenOpenWhenBound(NamedScreenHandlerFactory factory, CallbackInfoReturnable<OptionalInt> cir) {
         ServerPlayerEntity player = (ServerPlayerEntity) (Object) this;
-        ItemStack chestpiece = player.getEquippedStack(EquipmentSlot.CHEST);
 
+        // Silently block when grabbed by Zulmak
+        if (ZulmakEntity.isPlayerGrabbed(player)) {
+            cir.setReturnValue(OptionalInt.empty());
+            return;
+        }
+
+        // For Jackel Binds, show message
+        ItemStack chestpiece = player.getEquippedStack(EquipmentSlot.CHEST);
         if (chestpiece.getItem() instanceof JackelBindsItem) {
             player.sendMessage(Text.literal("You cannot open containers while bound!").formatted(Formatting.RED), true);
             cir.setReturnValue(OptionalInt.empty());

@@ -167,9 +167,12 @@ public class AncientCurse implements ModInitializer {
         // Register player join handler for curse zone syncing
         PlayerJoinHandler.register();
 
-        // Register player disconnect handler to clean up breakout progress
+        // Register player disconnect handler to clean up breakout progress and Zulmak grabs
         net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
             com.ancientcurse.system.JackelBindsBreakoutManager.getInstance().resetProgress(handler.player.getUuid());
+
+            // Release player from any Zulmak grab on disconnect
+            com.ancientcurse.entity.ZulmakEntity.releaseGrabbedPlayer(handler.player);
         });
 
         // Register path creation handler for sand/sandstone paths

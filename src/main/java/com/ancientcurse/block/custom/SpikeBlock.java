@@ -20,9 +20,10 @@ import net.minecraft.world.WorldView;
 
 /**
  * Spike Block - Wooden spikes that damage entities walking over them.
- * 
+ *
  * Features:
  * - Damages entities that walk on it
+ * - Extra damage when falling onto spikes (like dripstone)
  * - Breaks if the block below is removed (like sand falling)
  * - Transparent rendering to see block below
  * - Craftable with sticks
@@ -30,12 +31,18 @@ import net.minecraft.world.WorldView;
 public class SpikeBlock extends Block {
     // Collision shape - slightly taller than visual to catch entities
     protected static final VoxelShape SHAPE = Block.createCuboidShape(0.0D, 0.0D, 0.0D, 16.0D, 6.0D, 16.0D);
-    
+
     // Outline shape for selection - matches the visual appearance
     protected static final VoxelShape OUTLINE_SHAPE = Block.createCuboidShape(0.0D, 0.0D, 0.0D, 16.0D, 7.0D, 16.0D);
-    
+
     // Damage dealt to entities walking on spikes
     private static final float SPIKE_DAMAGE = 2.0f;
+
+    // Fall damage multiplier (dripstone uses 2.0, we use slightly less for balance)
+    private static final float FALL_DAMAGE_MULTIPLIER = 2.0f;
+
+    // Minimum fall distance to trigger extra spike damage
+    private static final float MIN_FALL_DISTANCE_FOR_EXTRA_DAMAGE = 1.0f;
 
     public SpikeBlock(Settings settings) {
         super(settings);
@@ -138,25 +145,17 @@ public class SpikeBlock extends Block {
 
     /**
      * Also damage entities that land on spikes (from falling).
+     * Like dripstone, falling onto spikes deals extra damage based on fall distance.
      */
     @Override
     public void onLandedUpon(World world, BlockState state, BlockPos pos, Entity entity, float fallDistance) {
-        if (!world.isClient && entity instanceof LivingEntity livingEntity) {
-            // Don't damage creative/spectator players
-            if (livingEntity instanceof net.minecraft.entity.player.PlayerEntity player) {
-                if (player.isCreative() || player.isSpectator()) {
-                    super.onLandedUpon(world, state, pos, entity, fallDistance);
-                    return;
-                }
-            }
-            
-            // Create spike damage source
-            DamageSource damageSource = world.getDamageSources().create(DamageTypes.CACTUS);
-            
-            // Deal extra damage based on fall distance (minimum spike damage)
-            float damage = Math.max(SPIKE_DAMAGE, fallDistance * 0.5f);
-            livingEntity.damage(damageSource, damage);
+        if (fallDistance >= MIN_FALL_DISTANCE_FOR_EXTRA_DAMAGE) {
+            // Calculate spike fall damage similar to dripstone
+            // Dripstone multiplies fall damage by 2 and bypasses some protection
+            entity.handleFallDamage(fallDistance, FALL_DAMAGE_MULTIPLIER, world.getDamageSources().stalagmite());
+        } else {
+            // For short falls, just apply normal fall damage
+            super.onLandedUpon(world, state, pos, entity, fallDistance);
         }
-        super.onLandedUpon(world, state, pos, entity, fallDistance);
     }
 }

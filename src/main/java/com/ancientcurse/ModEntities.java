@@ -73,7 +73,7 @@ public class ModEntities {
         Registries.ENTITY_TYPE,
         new Identifier(AncientCurse.MOD_ID, "anubis"),
         FabricEntityTypeBuilder.create(SpawnGroup.MONSTER, AnubisEntity::new)
-            .dimensions(EntityDimensions.fixed(1.5f, 3.0f)) // Larger hitbox for easier targeting
+            .dimensions(EntityDimensions.fixed(1.8f, 3.2f)) // Larger hitbox to better match model size
             .trackRangeBlocks(128) // Larger tracking range for boss
             .build()
     );

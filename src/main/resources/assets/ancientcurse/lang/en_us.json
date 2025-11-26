@@ -465,5 +465,19 @@
   "subtitles.ancientcurse.thoth_spawn": "Thoth manifests",
   "subtitles.ancientcurse.thoth_death": "Thoth fades from existence",
   "subtitles.ancientcurse.thoth_hurt": "Thoth grunts in pain",
-  "subtitles.ancientcurse.thoth_summon": "Thoth summons servants"
+  "subtitles.ancientcurse.thoth_summon": "Thoth summons servants",
+
+  "subtitles.ancientcurse.zulmak_awakened": "Zulmak stirs",
+  "subtitles.ancientcurse.zulmak_blocking": "Zulmak blocks",
+  "subtitles.ancientcurse.zulmak_curse_attack": "Zulmak curses",
+  "subtitles.ancientcurse.zulmak_cursed_earth": "Cursed earth spreads",
+  "subtitles.ancientcurse.zulmak_death": "Zulmak falls",
+  "subtitles.ancientcurse.zulmak_first_hit": "Zulmak awakens to battle",
+  "subtitles.ancientcurse.zulmak_hurt": "Zulmak grunts",
+  "subtitles.ancientcurse.zulmak_locust_swarm": "Locusts swarm",
+  "subtitles.ancientcurse.zulmak_player_zap": "Zulmak strikes",
+  "subtitles.ancientcurse.zulmak_summon": "Zulmak summons",
+  "subtitles.ancientcurse.zulmak_summon_scream": "Zulmak screams",
+  "subtitles.ancientcurse.zulmak_vortex": "Vortex winds howl",
+  "subtitles.ancientcurse.zulmak_wind_hit": "Wind strikes"
 }

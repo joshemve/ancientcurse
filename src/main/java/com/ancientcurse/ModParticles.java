@@ -11,8 +11,11 @@ import net.minecraft.util.Identifier;
  */
 public class ModParticles {
 
-    // Zulmak spinning particle - orbits around Zulmak's spinning blocks
+    // Zulmak spinning particle - orbits around Zulmak's spinning blocks (purple)
     public static final DefaultParticleType ZULMAK_PARTICLE = FabricParticleTypes.simple();
+
+    // Zulmak shield particle - cyan/teal particles when blocking (greenish-blue)
+    public static final DefaultParticleType ZULMAK_SHIELD_PARTICLE = FabricParticleTypes.simple();
 
     /**
      * Registers all mod particles
@@ -21,6 +24,7 @@ public class ModParticles {
         AncientCurse.LOGGER.info("Registering particles for " + AncientCurse.MOD_ID);
 
         Registry.register(Registries.PARTICLE_TYPE, new Identifier(AncientCurse.MOD_ID, "zulmak_particle"), ZULMAK_PARTICLE);
+        Registry.register(Registries.PARTICLE_TYPE, new Identifier(AncientCurse.MOD_ID, "zulmak_shield_particle"), ZULMAK_SHIELD_PARTICLE);
 
         AncientCurse.LOGGER.info("Particles registered");
     }

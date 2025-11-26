@@ -197,8 +197,11 @@ public class AncientCurseClient implements ClientModInitializer {
     private void registerParticleFactories() {
         AncientCurse.LOGGER.info("Registering particle factories for " + AncientCurse.MOD_ID);
 
-        // Register Zulmak particle factory - spinning particles around Zulmak's blocks
+        // Register Zulmak particle factory - spinning particles around Zulmak's blocks (purple)
         ParticleFactoryRegistry.getInstance().register(ModParticles.ZULMAK_PARTICLE, ZulmakParticle.Factory::new);
+
+        // Register Zulmak shield particle factory - cyan/teal particles when blocking
+        ParticleFactoryRegistry.getInstance().register(ModParticles.ZULMAK_SHIELD_PARTICLE, ZulmakParticle.Factory::new);
 
         AncientCurse.LOGGER.info("Particle factories registered");
     }

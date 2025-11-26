@@ -483,5 +483,201 @@
         "pitch": 0.5
       }
     ]
+  },
+  "zulmak_awakened": {
+    "subtitle": "subtitles.ancientcurse.zulmak_awakened",
+    "sounds": [
+      {
+        "name": "ancientcurse:zulmak/awakened",
+        "volume": 1.5,
+        "pitch": 1.0
+      }
+    ]
+  },
+  "zulmak_blocking": {
+    "subtitle": "subtitles.ancientcurse.zulmak_blocking",
+    "sounds": [
+      {
+        "name": "ancientcurse:zulmak/blocking",
+        "volume": 1.2,
+        "pitch": 1.0
+      }
+    ]
+  },
+  "zulmak_curse_attack": {
+    "subtitle": "subtitles.ancientcurse.zulmak_curse_attack",
+    "sounds": [
+      {
+        "name": "ancientcurse:zulmak/curse_attack",
+        "volume": 1.3,
+        "pitch": 1.0
+      }
+    ]
+  },
+  "zulmak_cursed_earth_attack": {
+    "subtitle": "subtitles.ancientcurse.zulmak_cursed_earth",
+    "sounds": [
+      {
+        "name": "ancientcurse:zulmak/cursed_earth_attack",
+        "volume": 1.5,
+        "pitch": 1.0
+      }
+    ]
+  },
+  "zulmak_death": {
+    "subtitle": "subtitles.ancientcurse.zulmak_death",
+    "sounds": [
+      {
+        "name": "ancientcurse:zulmak/death",
+        "volume": 2.0,
+        "pitch": 1.0
+      }
+    ]
+  },
+  "zulmak_first_hit": {
+    "subtitle": "subtitles.ancientcurse.zulmak_first_hit",
+    "sounds": [
+      {
+        "name": "ancientcurse:zulmak/first_hit",
+        "volume": 1.5,
+        "pitch": 1.0
+      }
+    ]
+  },
+  "zulmak_hurt": {
+    "subtitle": "subtitles.ancientcurse.zulmak_hurt",
+    "sounds": [
+      {
+        "name": "ancientcurse:zulmak/hurt_1",
+        "volume": 1.0,
+        "pitch": 0.9
+      },
+      {
+        "name": "ancientcurse:zulmak/hurt_1",
+        "volume": 1.0,
+        "pitch": 1.0
+      },
+      {
+        "name": "ancientcurse:zulmak/hurt_1",
+        "volume": 1.0,
+        "pitch": 1.1
+      },
+      {
+        "name": "ancientcurse:zulmak/hurt_2",
+        "volume": 1.0,
+        "pitch": 0.9
+      },
+      {
+        "name": "ancientcurse:zulmak/hurt_2",
+        "volume": 1.0,
+        "pitch": 1.0
+      },
+      {
+        "name": "ancientcurse:zulmak/hurt_2",
+        "volume": 1.0,
+        "pitch": 1.1
+      }
+    ]
+  },
+  "zulmak_locust_swarm": {
+    "subtitle": "subtitles.ancientcurse.zulmak_locust_swarm",
+    "sounds": [
+      {
+        "name": "ancientcurse:zulmak/locus_swarm_attack",
+        "volume": 1.5,
+        "pitch": 1.0
+      }
+    ]
+  },
+  "zulmak_player_zap": {
+    "subtitle": "subtitles.ancientcurse.zulmak_player_zap",
+    "sounds": [
+      {
+        "name": "ancientcurse:zulmak/player_zap",
+        "volume": 1.2,
+        "pitch": 1.0
+      }
+    ]
+  },
+  "zulmak_summon": {
+    "subtitle": "subtitles.ancientcurse.zulmak_summon",
+    "sounds": [
+      {
+        "name": "ancientcurse:zulmak/summon_1",
+        "volume": 1.3,
+        "pitch": 0.95
+      },
+      {
+        "name": "ancientcurse:zulmak/summon_1",
+        "volume": 1.3,
+        "pitch": 1.0
+      },
+      {
+        "name": "ancientcurse:zulmak/summon_2",
+        "volume": 1.3,
+        "pitch": 0.95
+      },
+      {
+        "name": "ancientcurse:zulmak/summon_2",
+        "volume": 1.3,
+        "pitch": 1.0
+      }
+    ]
+  },
+  "zulmak_summon_scream": {
+    "subtitle": "subtitles.ancientcurse.zulmak_summon_scream",
+    "sounds": [
+      {
+        "name": "ancientcurse:zulmak/summon_scream",
+        "volume": 1.8,
+        "pitch": 1.0
+      }
+    ]
+  },
+  "zulmak_vortex_wind_loop": {
+    "subtitle": "subtitles.ancientcurse.zulmak_vortex",
+    "sounds": [
+      {
+        "name": "ancientcurse:zulmak/vortex_wind_loop",
+        "volume": 0.8,
+        "pitch": 1.0,
+        "stream": true
+      }
+    ]
+  },
+  "zulmak_wind_hit": {
+    "subtitle": "subtitles.ancientcurse.zulmak_wind_hit",
+    "sounds": [
+      {
+        "name": "ancientcurse:zulmak/wind_hit_1",
+        "volume": 1.0,
+        "pitch": 0.9
+      },
+      {
+        "name": "ancientcurse:zulmak/wind_hit_1",
+        "volume": 1.0,
+        "pitch": 1.0
+      },
+      {
+        "name": "ancientcurse:zulmak/wind_hit_1",
+        "volume": 1.0,
+        "pitch": 1.1
+      },
+      {
+        "name": "ancientcurse:zulmak/wind_hit_2",
+        "volume": 1.0,
+        "pitch": 0.9
+      },
+      {
+        "name": "ancientcurse:zulmak/wind_hit_2",
+        "volume": 1.0,
+        "pitch": 1.0
+      },
+      {
+        "name": "ancientcurse:zulmak/wind_hit_2",
+        "volume": 1.0,
+        "pitch": 1.1
+      }
+    ]
   }
 }
