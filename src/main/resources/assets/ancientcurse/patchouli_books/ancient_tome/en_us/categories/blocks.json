@@ -1,6 +1,6 @@
 {
   "name": "Blocks & Building",
   "description": "Discover the $(egyptian)building materials$() of ancient Egypt. From ornate pillars to $(curse)cursed stone$(), learn about the blocks that make up temples, tombs, and monuments.",
-  "icon": "ancientcurse:limestone_bricks",
+  "icon": "ancientcurse:sandstone_bricks",
   "sortnum": 2
 }
