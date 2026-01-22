@@ -12,19 +12,19 @@
     {
       "type": "patchouli:text",
       "title": "Curse Stages",
-      "text": "$(li)$(l)Stage I:$() Minor fatigue$(li)$(l)Stage II:$() Reduced strength$(li)$(l)Stage III:$() Hunger and weakness$(li)$(l)Stage IV:$() Severe debilitation$(li)$(l)Stage V:$() Near death$(br2)Remove the curse with $(item)Scroll of Unbinding$() or $(item)Tablet of Thoth$()."
+      "text": "$(li)$(l)Stage I:$() Minor fatigue$(li)$(l)Stage II:$() Reduced strength$(li)$(l)Stage III:$() Hunger and weakness$(li)$(l)Stage IV:$() Severe debilitation$(li)$(l)Stage V:$() Near death$(br2)Remove the curse with $(item)Ancient Script of Wisdom$() or the $(item)Feather of Ma'at$()."
     },
     {
       "type": "patchouli:spotlight",
       "item": "ancientcurse:scroll_of_unbinding",
-      "title": "Scroll of Unbinding",
-      "text": "Reduces Khamsin curse by one stage. Useful for managing the affliction when a full cure is unavailable."
+      "title": "Ancient Script of Wisdom",
+      "text": "A scroll inscribed by $(deity)Thoth$() himself. Reduces Khamsin curse by one stage. Useful for managing the affliction when a full cure is unavailable."
     },
     {
       "type": "patchouli:spotlight",
-      "item": "ancientcurse:tablet_of_thoth",
-      "title": "Tablet of Thoth",
-      "text": "The divine wisdom of $(deity)Thoth$() completely removes all Khamsin curse effects. A powerful but rare artifact."
+      "item": "ancientcurse:feather_of_maat",
+      "title": "Feather of Ma'at",
+      "text": "The sacred feather of $(deity)Ma'at$(), goddess of truth and justice. Its divine power can cleanse the Khamsin curse from your soul."
     }
   ]
 }

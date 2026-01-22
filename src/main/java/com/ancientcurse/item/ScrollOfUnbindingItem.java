@@ -19,7 +19,7 @@ import net.minecraft.util.UseAction;
 import net.minecraft.world.World;
 
 /**
- * Scroll of Unbinding - Reverts khamsin curse by 1 stage
+ * Ancient Script of Wisdom - Divine scroll that reduces khamsin curse by 1 stage
  * Only reduces curse down to stage 1, does not clear stage 1
  */
 public class ScrollOfUnbindingItem extends Item {

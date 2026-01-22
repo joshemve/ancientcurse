@@ -31,51 +31,35 @@
   "item.ancientcurse.spinach.tooltip": "Nutritious leafy greens",
   "item.ancientcurse.rope": "Rope",
   "item.ancientcurse.rope.tooltip": "Strong rope woven from plant fibers",
-
   "entity.ancientcurse.djeserhath": "Djeserhath",
   "item.ancientcurse.djeserhath_spawn_egg": "Djeserhath Spawn Egg",
   "item.ancientcurse.djeserhath_spawn_egg.tooltip": "Summon a powerful ancient guardian with divine protection",
-  
   "entity.ancientcurse.locus": "Locus",
   "item.ancientcurse.locus_spawn_egg": "Locus Spawn Egg",
   "item.ancientcurse.locus_spawn_egg.tooltip": "Summon a mystical desert locust",
-  
   "entity.ancientcurse.baby_locus": "Baby Locus",
-  
   "entity.ancientcurse.scarab_beetle": "Scarab Beetle",
   "item.ancientcurse.scarab_beetle_spawn_egg": "Scarab Beetle Spawn Egg",
   "item.ancientcurse.scarab_beetle_spawn_egg.tooltip": "Summon an ancient scarab beetle",
-  
   "entity.ancientcurse.thoth": "Thoth, the God of Wisdom",
   "item.ancientcurse.thoth_spawn_egg": "Thoth Spawn Egg",
   "item.ancientcurse.thoth_spawn_egg.tooltip": "Summon the Egyptian god of wisdom and magic",
-  
   "entity.ancientcurse.khamsin_spread_small": "Khamsin Spread (Small)",
   "item.ancientcurse.khamsin_spread_small_spawn_egg": "Khamsin Spread Small Spawn Egg",
   "item.ancientcurse.khamsin_spread_small_spawn_egg.tooltip": "Summon a mystical floating rock that's part of the curse system",
-
   "entity.ancientcurse.zulmak": "Zulmak",
   "item.ancientcurse.zulmak_spawn_egg": "Zulmak Spawn Egg",
   "item.ancientcurse.zulmak_spawn_egg.tooltip": "Summon a Zulmak",
-
   "entity.ancientcurse.snake_head_projectile": "Snake Head Projectile",
-  
   "entity.ancientcurse.anubis": "Anubis, the Jackal-Headed God",
   "item.ancientcurse.anubis_spawn_egg": "Anubis Spawn Egg",
   "item.ancientcurse.anubis_spawn_egg.tooltip": "Summon the god of death and judgment",
   "message.ancientcurse.anubis.mercy": "Anubis has judged you worthy. You are under his protection.",
-  
   "item.ancientcurse.bronze_blend": "Bronze Blend",
-
   "item.ancientcurse.raw_bronze_nugget": "Raw Bronze Nugget",
-
   "item.ancientcurse.bronze_ingot": "Bronze Ingot",
-
   "item.ancientcurse.bronze_nugget": "Bronze Nugget",
-
   "item.ancientcurse.bronze_plate": "Bronze Plate",
-
-  
   "item.ancientcurse.bronze_sword": "Bronze Sword",
   "item.ancientcurse.bronze_sword.tooltip": "Ancient Egyptian weapon crafted from durable bronze",
   "item.ancientcurse.bronze_khopesh": "Bronze Khopesh",
@@ -97,31 +81,24 @@
   "item.ancientcurse.horus_mace.tooltip3": "Divine Protection: May blind your attackers",
   "item.ancientcurse.horus_mace.tooltip4": "Aerial Supremacy: +50% damage to airborne foes",
   "item.ancientcurse.waraxe_of_abydos": "War Axe of Abydos",
-  
   "item.ancientcurse.bronze_helmet": "Bronze Helmet",
-
   "item.ancientcurse.bronze_chestplate": "Bronze Chestplate",
-
   "item.ancientcurse.bronze_leggings": "Bronze Leggings",
-
   "item.ancientcurse.bronze_boots": "Bronze Boots",
-
   "item.ancientcurse.veil_of_anubis": "Veil of Anubis",
   "item.ancientcurse.veil_of_anubis.tooltip": "Sacred headpiece of the death god",
-  
   "item.ancientcurse.ceremonial_chestwrap": "Ceremonial Chestwrap",
   "item.ancientcurse.ceremonial_chestwrap.tooltip": "Ancient Egyptian ceremonial armor",
-  
   "item.ancientcurse.scarab_mask": "Scarab Mask",
   "item.ancientcurse.scarab_mask.tooltip": "Sacred mask of the divine scarab",
-
   "item.ancientcurse.jackel_binds": "Jackal Binds",
   "item.ancientcurse.jackel_binds.tooltip": "Ancient restraints",
-
   "item.ancientcurse.the_broken_crook": "The Broken Crook",
   "item.ancientcurse.the_broken_crook.tooltip": "Fragment of a pharaoh's ceremonial staff",
   "item.ancientcurse.canopic_heart_jar": "Canopic Heart Jar",
   "item.ancientcurse.canopic_heart_jar.tooltip": "Sacred vessel containing preserved organs",
+  "item.ancientcurse.feather_of_maat": "Feather of Maat",
+  "item.ancientcurse.feather_of_maat.tooltip": "A sacred feather used to weigh the hearts of the deceased",
   "item.ancientcurse.eye_of_apophis": "Eye Of Apophis",
   "item.ancientcurse.eye_of_apophis.tooltip": "The malevolent gaze of the chaos serpent",
   "item.ancientcurse.scarab_talisman": "Scarab Talisman",
@@ -130,7 +107,6 @@
   "item.ancientcurse.vessel_of_the_duat.tooltip": "Container holding essence from the underworld",
   "item.ancientcurse.anubus__glyph": "Anubus Glyph",
   "item.ancientcurse.anubus__glyph.tooltip": "Sacred hieroglyphs of the death god",
-  
   "item.ancientcurse.phial_of_lotus_essence": "Phial of Lotus Essence",
   "item.ancientcurse.phial_of_lotus_essence.tooltip": "Grants water breathing, night vision, and dolphin's grace",
   "item.ancientcurse.elixir_of_ras_spark": "Elixir of Ra's Spark",
@@ -156,20 +132,17 @@
   "item.ancientcurse.salt.tooltip": "Pure salt crystals used to create protective circles against cursed earth",
   "item.ancientcurse.ankh_wand": "Ankh Wand",
   "item.ancientcurse.ankh_wand.tooltip": "Divine administrative tool for managing curse zones (OP only)",
-  
   "gui.ancientcurse.curse_zone_menu.title": "Curse Zone Wand",
   "gui.ancientcurse.curse_zone_menu.create": "Create Zone from Selection",
   "gui.ancientcurse.curse_zone_menu.clear": "Clear Selection",
   "gui.ancientcurse.curse_zone_menu.manage": "Manage All Zones",
   "gui.ancientcurse.curse_zone_menu.current_selection": "Current Selection:",
   "gui.ancientcurse.curse_zone_menu.show_all_borders": "Show All Zone Borders",
-  
   "gui.ancientcurse.curse_zone_manager.title": "Curse Zone Manager",
   "gui.ancientcurse.curse_zone_manager.edit": "Edit",
   "gui.ancientcurse.curse_zone_manager.delete": "Delete",
   "gui.ancientcurse.curse_zone_manager.teleport": "Teleport",
   "gui.ancientcurse.curse_zone_manager.unnamed": "Unnamed Zone",
-  
   "gui.ancientcurse.curse_zone_editor.title": "Curse Zone Editor",
   "gui.ancientcurse.curse_zone_editor.edit_title": "Edit Curse Zone",
   "gui.ancientcurse.curse_zone_editor.zone_name": "Zone Name:",
@@ -181,39 +154,31 @@
   "gui.ancientcurse.curse_zone_editor.area_info": "Area: %s to %s",
   "gui.ancientcurse.curse_zone_editor.total_blocks": "Total blocks: %d",
   "gui.ancientcurse.common.close": "Close",
-  
   "item.ancientcurse.scarab_serum": "Scarab Serum",
   "item.ancientcurse.scarab_serum.tooltip": "Mystical serum that restores 50 Ankh points",
   "item.ancientcurse.scarab_serum.used": "Restored %d Ankh (Total: %d)",
   "item.ancientcurse.scarab_serum.full": "Your Ankh is already at maximum",
-  
   "item.ancientcurse.pharaohs_blood": "Pharaoh's Blood",
   "item.ancientcurse.pharaohs_blood.tooltip": "Divine elixir that fully restores all Ankh",
   "item.ancientcurse.pharaohs_blood.used": "Fully restored %d Ankh",
   "item.ancientcurse.pharaohs_blood.full": "Your Ankh is already at maximum",
   "item.ancientcurse.scarab_serum.restored": "§bAnkh restored by %s points! §a(Now at %s/100)§r",
   "item.ancientcurse.pharaohs_blood.restored": "§6Divine power flows through you! §aAnkh fully restored to 100!§r",
-  
   "item.ancientcurse.mummy_heart": "Mummy Heart",
   "item.ancientcurse.mummy_heart.tooltip": "Preserved heart of an ancient mummy",
-  
   "block.ancientcurse.blood_lotus": "Blood Lotus",
   "block.ancientcurse.blood_lotus.tooltip": "Rare crimson lotus with mystical properties",
-  
-  "item.ancientcurse.scroll_of_unbinding": "Scroll of Unbinding",
-  "item.ancientcurse.scroll_of_unbinding.tooltip": "Ancient scroll that reduces Khamsin curse by one stage",
+  "item.ancientcurse.scroll_of_unbinding": "Ancient Script of Wisdom",
+  "item.ancientcurse.scroll_of_unbinding.tooltip": "Divine scroll of Thoth that reduces Khamsin curse by one stage",
   "item.ancientcurse.scroll_of_unbinding.no_curse": "§cYou have no curse to unbind§r",
   "item.ancientcurse.scroll_of_unbinding.minimum_stage": "§eThe curse is at its weakest stage§r",
   "item.ancientcurse.scroll_of_unbinding.used": "§aKhamsin curse reduced from stage %s to stage %s§r",
-  
   "item.ancientcurse.tablet_of_thoth": "Tablet of Thoth",
   "item.ancientcurse.tablet_of_thoth.tooltip": "Divine tablet that completely removes all Khamsin curse effects",
   "item.ancientcurse.tablet_of_thoth.no_curse": "§cYou have no curse to remove§r",
   "item.ancientcurse.tablet_of_thoth.used": "§6The divine wisdom of Thoth cleanses your soul!§r",
-  
   "item.ancientcurse.hieroglyph_fragment": "Hieroglyph Fragment",
   "item.ancientcurse.hieroglyph_fragment.tooltip": "Ancient piece of sacred text",
-  
   "item.ancientcurse.purification_staff": "Purification Staff",
   "item.ancientcurse.purification_staff.tooltip": "Channels limited divine energy to cleanse small areas",
   "item.ancientcurse.purification_staff.tooltip1": "Requires a salt circle to activate",
@@ -222,7 +187,6 @@
   "item.ancientcurse.purification_staff.no_salt_circle": "You must stand in a salt circle to use this!",
   "item.ancientcurse.purification_staff.interrupted": "Cleansing ritual interrupted!",
   "item.ancientcurse.purification_staff.wave_started": "Cleansing wave initiated!",
-  
   "block.ancientcurse.salt_dust": "Salt Dust",
   "block.ancientcurse.sandstone_torch": "Sandstone Torch",
   "block.ancientcurse.sandstone_bricks": "Sandstone Bricks",
@@ -232,13 +196,11 @@
   "block.ancientcurse.sandstone_pillar": "Sandstone Pillar",
   "block.ancientcurse.pitfall_trap": "Pitfall Trap",
   "block.ancientcurse.spike": "Wooden Spikes",
-
   "block.ancientcurse.anubus__glyph": "Anubus Glyph",
   "block.ancientcurse.anubus__glyph.tooltip": "Sacred hieroglyphic block",
   "block.ancientcurse.sarcophagus": "Ancient Sarcophagus",
   "block.ancientcurse.sarcophagus.teleport_to_egypt": "The ancient powers pull you into another realm...",
   "block.ancientcurse.sarcophagus.teleport_to_overworld": "You escape from the ancient realm...",
-
   "block.ancientcurse.sycamore_fig_log": "Sycamore Fig Log",
   "block.ancientcurse.sycamore_fig_log.tooltip": "Wood from the sacred sycamore tree",
   "block.ancientcurse.sycamore_planks": "Sycamore Planks",
@@ -310,6 +272,9 @@
   "block.ancientcurse.sandstone_brick_tiles_wall": "Sandstone Brick Tiles Wall",
   "block.ancientcurse.sand_path": "Sand Path",
   "block.ancientcurse.sandstone_path": "Sandstone Path",
+  "block.ancientcurse.deshret_path": "Deshret Path",
+  "block.ancientcurse.desert_path": "Desert Path",
+  "block.ancientcurse.black_sand_path": "Black Sand Path",
   "block.ancientcurse.polished_bronze": "Polished Bronze",
   "block.ancientcurse.deshret_wavy_sand": "Deshret Wavy Sand",
   "block.ancientcurse.hardened_deshret_stone": "Hardened Deshret Stone",
@@ -342,13 +307,11 @@
   "block.ancientcurse.menfet_sprig": "Menfet Sprig",
   "block.ancientcurse.reed_of_sekhem": "Reed of Sekhem",
   "block.ancientcurse.sutekh_coil": "Sutekh Coil",
-  
   "block.ancientcurse.bronze_block": "Bronze Block",
   "block.ancientcurse.bronze_block.tooltip": "Solid block of ancient bronze alloy",
   "block.ancientcurse.black_stone_torch": "Black Stone Torch",
   "block.ancientcurse.bronze_plate": "Bronze Plate",
   "block.ancientcurse.bronze_plate.tooltip": "Decorative bronze plating",
-  
   "block.ancientcurse.small_rock": "Small Rock",
   "block.ancientcurse.medium_rock": "Medium Rock",
   "block.ancientcurse.large_rock": "Large Rock",
@@ -365,7 +328,6 @@
   "block.ancientcurse.scarab_sealed_urn": "Scarab Sealed Urn",
   "block.ancientcurse.scarab_sealed_urn.tooltip": "Urn sealed with protective scarab magic",
   "block.ancientcurse.serpent_vessel_of_wadjet": "Serpent Vessel of Wadjet",
-  
   "entity.ancientcurse.withered_pharaoh": "Withered Pharaoh",
   "item.ancientcurse.withered_pharaoh_spawn_egg": "Withered Pharaoh Spawn Egg",
   "item.ancientcurse.withered_pharaoh_spawn_egg.tooltip": "Summon an ancient undead pharaoh with dark magic powers",
@@ -381,7 +343,6 @@
   "block.ancientcurse.wind_swept_blackstone": "Wind-Swept Blackstone",
   "block.ancientcurse.wind_swept_blackstone_stairs": "Wind-Swept Blackstone Stairs",
   "block.ancientcurse.wind_swept_blackstone_slab": "Wind-Swept Blackstone Slab",
-
   "block.ancientcurse.necrostone_brick": "Necrostone Brick",
   "block.ancientcurse.necrostone_cracked": "Cracked Necrostone",
   "block.ancientcurse.necrostone_rough": "Rough Necrostone",
@@ -397,7 +358,6 @@
   "block.ancientcurse.necrostone_carved": "Carved Necrostone",
   "block.ancientcurse.necrostone_chiseled": "Chiseled Necrostone",
   "block.ancientcurse.necrostone_smooth": "Smooth Necrostone",
-  
   "block.ancientcurse.deshret_scale": "Deshret Scale",
   "block.ancientcurse.deshret_pillar": "Deshret Pillar",
   "block.ancientcurse.deshret_pillar.tooltip": "Pillar made from red desert stone",
@@ -407,14 +367,12 @@
   "block.ancientcurse.mudstone_pillar.tooltip": "Pillar crafted from dried Nile mud",
   "block.ancientcurse.stacked_pillar": "Stacked Pillar",
   "block.ancientcurse.stacked_pillar.tooltip": "Decorative stacked stone pillar",
-  
   "block.ancientcurse.blue_head_stone": "Blue Headstone",
   "block.ancientcurse.blue_head_stone.tooltip": "Decorative stone with blue hieroglyphs",
   "block.ancientcurse.gold_headstone": "Gold Headstone",
   "block.ancientcurse.gold_headstone.tooltip": "Gilded memorial stone",
   "block.ancientcurse.green_head_stone": "Green Headstone",
   "block.ancientcurse.green_head_stone.tooltip": "Jade-colored ceremonial marker",
-  
   "block.ancientcurse.scroll_shelf": "Scroll Shelf",
   "block.ancientcurse.scroll_shelf.tooltip": "Storage for ancient papyrus scrolls",
   "block.ancientcurse.wooden_crate": "Wooden Crate",
@@ -423,13 +381,10 @@
   "block.ancientcurse.ancient_wood.tooltip": "Preserved wood from ancient times",
   "block.ancientcurse.ancient_udjat": "Ancient Udjat",
   "block.ancientcurse.ancient_udjat.tooltip": "The protective Eye of Horus",
-
   "itemgroup.ancientcurse": "Ancient Curse",
-  
   "generator.ancientcurse.ancient_world": "World Type: Ancient Curse",
   "generator.ancientcurse.ancient_world.info": "Experience the world of Ancient Egypt with unique biomes, structures, and vegetation",
   "world.preset.ancientcurse.ancient_egypt": "World Type: Ancient Curse",
-  
   "biome.ancientcurse.ancient_desert": "Ancient Desert",
   "biome.ancientcurse.nile_river": "Nile River",
   "biome.ancientcurse.golden_dunes": "Golden Dunes",
@@ -438,25 +393,20 @@
   "biome.ancientcurse.valley_of_kings": "Valley of Kings",
   "biome.ancientcurse.desert_volcanic_fields": "Desert Volcanic Fields",
   "biome.ancientcurse.mirage_sands": "Mirage Sands",
-  
   "preset.ancientcurse.ancient_curse": "Ancient Curse",
   "worldPreset.ancientcurse.ancient_curse": "Ancient Curse",
   "worldPreset.ancientcurse.nile_river_single_biome": "Nile River World",
   "preset.ancientcurse.nile_river": "Nile River",
   "generator.ancientcurse.ancient_curse": "Ancient Curse",
   "generator.ancientcurse.ancient_desert": "Ancient Desert",
-  
   "effect.ancientcurse.khamsin_curse_stage_1": "Khamsin Curse I",
   "effect.ancientcurse.khamsin_curse_stage_2": "Khamsin Curse II",
   "effect.ancientcurse.khamsin_curse_stage_3": "Khamsin Curse III",
   "effect.ancientcurse.khamsin_curse_stage_4": "Khamsin Curse IV",
   "effect.ancientcurse.khamsin_curse_stage_5": "Khamsin Curse V",
-  
   "commands.khamsin.success.single": "Applied Khamsin Curse (Stage %d) to %s",
   "commands.khamsin.success.multiple": "Applied Khamsin Curse (Stage %d) to %d players",
-
   "tooltip.ancientcurse.ancient_curse": "Ancient Curse",
-
   "subtitles.ancientcurse.thoth_ambient": "Thoth whispers ancient words",
   "subtitles.ancientcurse.thoth_attack_magic_ball": "Thoth casts magic ball",
   "subtitles.ancientcurse.thoth_attack_melee": "Thoth strikes with staff",
@@ -466,7 +416,6 @@
   "subtitles.ancientcurse.thoth_death": "Thoth fades from existence",
   "subtitles.ancientcurse.thoth_hurt": "Thoth grunts in pain",
   "subtitles.ancientcurse.thoth_summon": "Thoth summons servants",
-
   "subtitles.ancientcurse.zulmak_awakened": "Zulmak stirs",
   "subtitles.ancientcurse.zulmak_blocking": "Zulmak blocks",
   "subtitles.ancientcurse.zulmak_curse_attack": "Zulmak curses",
@@ -481,5 +430,14 @@
   "subtitles.ancientcurse.zulmak_vortex": "Vortex winds howl",
   "subtitles.ancientcurse.zulmak_wind_hit": "Wind strikes",
   "subtitles.ancientcurse.withered_pharaoh_suspense": "Ominous presence",
-  "subtitles.ancientcurse.withered_pharaoh_grumble": "Withered Pharaoh grumbles"
+  "subtitles.ancientcurse.withered_pharaoh_grumble": "Withered Pharaoh grumbles",
+  "block.ancientcurse.soul_lava": "Soul Lava",
+  "item.ancientcurse.soul_lava_bucket": "Soul Lava Bucket",
+  "block.ancientcurse.soulbloom_bush": "Soulbloom Bush",
+  "block.ancientcurse.desert_shrub": "Desert Shrub",
+  "block.ancientcurse.dead_desert_shrub": "Dead Desert Shrub",
+  "block.ancientcurse.deshret_brush": "Deshret Brush",
+  "block.ancientcurse.deshret_thorn_bush": "Deshret Thorn Bush",
+  "block.ancientcurse.desert_cactus_plant": "Desert Cactus Plant",
+  "block.ancientcurse.sekhem_cactus": "Sekhem Cactus"
 }
