@@ -1,0 +1,18 @@
+{
+  "name": "The Nile River",
+  "icon": "ancientcurse:fertile_nile_silt",
+  "category": "ancientcurse:world_generation",
+  "sortnum": 1,
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "title": "Life-Giving Waters",
+      "text": "The $(nile)Nile River$() is the source of all life in the desert. Its banks provide $(item)Fertile Nile Silt$() for farming and $(item)Papyrus Reeds$() for crafting.$(br2)Look for $(item)Lotus Flowers$(), $(item)Algae$(), and $(item)Water Lettuce$() in and around the water."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Nile Resources",
+      "text": "$(li)$(item)Fertile Nile Silt$(): Best farmland$(li)$(item)Nile Mud$(): Building material$(li)$(item)Riverbed Clay$(): Pottery$(li)$(item)Papyrus Reed$(): Paper$(li)$(item)Gold-Flaked Riverbed$(): Gold source$(li)$(item)Lotus Flower$(): Magical item"
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "name": "Building Materials",
+  "icon": "ancientcurse:sandstone_bricks",
+  "category": "ancientcurse:blocks",
+  "sortnum": 0,
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "title": "Egyptian Construction",
+      "text": "Ancient Egypt was renowned for its monumental architecture. These $(egyptian)building materials$() allow you to recreate temples, tombs, and pyramids.$(br2)Most blocks have matching stairs, slabs, and walls."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Stone Blocks",
+      "text": "$(li)$(item)Sandstone Bricks$(): Classic$(li)$(item)Sandstone Brick Tiles$(): Decorative$(li)$(item)Limestone Bricks$(): White stone$(li)$(item)Nile Mud Brick$(): Adobe-style$(li)$(item)Obelisk Stone$(): Monument stone$(li)$(item)Sunbaked Clay$(): Terracotta"
+    },
+    {
+      "type": "patchouli:spotlight",
+      "item": "ancientcurse:sandstone_pillar",
+      "title": "Sandstone Pillar",
+      "text": "Classic Egyptian column. Rotates when placed. Use for temple entrances and ceremonial halls."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Wood Types",
+      "text": "Two native wood types are available:$(br2)$(li)$(item)Sycamore$(): Sacred tree wood$(li)$(item)Date Palm$(): Desert palm wood$(br2)Both provide full block sets: logs, planks, stairs, slabs, fences, and gates."
+    }
+  ]
+}

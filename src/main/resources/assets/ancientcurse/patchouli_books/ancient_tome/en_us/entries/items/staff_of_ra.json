@@ -1,0 +1,24 @@
+{
+  "name": "Staff of Ra",
+  "icon": "ancientcurse:staff_of_ra",
+  "category": "ancientcurse:items",
+  "sortnum": 0,
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "ancientcurse:staff_of_ra",
+      "title": "Divine Staff",
+      "text": "The $(gold)Staff of Ra$() is the legendary weapon blessed by the sun god himself. It channels devastating solar energy against your enemies."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Using the Staff",
+      "text": "$(l)Sun Beam Attack:$()$(br)Hold right-click to charge. The longer you charge, the more powerful the attack.$(br2)$(l)Effects:$()$(br)$(li)Sets enemies on fire$(li)Bonus damage to undead$(li)Creates light when held"
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Tips",
+      "text": "$(tip)The Staff of Ra is particularly effective against $(curse)cursed creatures$() and undead enemies.$(br2)The ambient warmth protects against cold effects. Use it to light your way through dark tombs."
+    }
+  ]
+}

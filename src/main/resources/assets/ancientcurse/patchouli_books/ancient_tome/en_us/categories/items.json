@@ -1,0 +1,6 @@
+{
+  "name": "Items & Tools",
+  "description": "Master the $(egyptian)artifacts$() and tools of the ancient world. From the legendary $(gold)Staff of Ra$() to bronze weaponry and protective amulets, these items will aid your survival.",
+  "icon": "ancientcurse:staff_of_ra",
+  "sortnum": 3
+}

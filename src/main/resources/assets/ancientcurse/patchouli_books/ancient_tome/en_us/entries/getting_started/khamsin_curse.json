@@ -1,0 +1,30 @@
+{
+  "name": "The Khamsin Curse",
+  "icon": "ancientcurse:cursed_earth",
+  "category": "ancientcurse:getting_started",
+  "sortnum": 1,
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "title": "Understanding the Curse",
+      "text": "The $(curse)Khamsin Curse$() is an ancient affliction that spreads through cursed zones. It progresses through $(l)five stages$(), each more debilitating than the last.$(br2)Your $(gold)Ankh$() meter protects you. When it depletes in cursed areas, the curse takes hold."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Curse Stages",
+      "text": "$(li)$(l)Stage I:$() Minor fatigue$(li)$(l)Stage II:$() Reduced strength$(li)$(l)Stage III:$() Hunger and weakness$(li)$(l)Stage IV:$() Severe debilitation$(li)$(l)Stage V:$() Near death$(br2)Remove the curse with $(item)Scroll of Unbinding$() or $(item)Tablet of Thoth$()."
+    },
+    {
+      "type": "patchouli:spotlight",
+      "item": "ancientcurse:scroll_of_unbinding",
+      "title": "Scroll of Unbinding",
+      "text": "Reduces Khamsin curse by one stage. Useful for managing the affliction when a full cure is unavailable."
+    },
+    {
+      "type": "patchouli:spotlight",
+      "item": "ancientcurse:tablet_of_thoth",
+      "title": "Tablet of Thoth",
+      "text": "The divine wisdom of $(deity)Thoth$() completely removes all Khamsin curse effects. A powerful but rare artifact."
+    }
+  ]
+}

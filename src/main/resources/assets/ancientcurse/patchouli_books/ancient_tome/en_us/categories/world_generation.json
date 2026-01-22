@@ -1,0 +1,6 @@
+{
+  "name": "World & Biomes",
+  "description": "Explore the unique landscapes of the $(egyptian)Ancient Curse$() world. From the scorching $(sand)Deshret Desert$() to the life-giving $(nile)Nile River$(), each biome holds its own secrets and resources.",
+  "icon": "ancientcurse:deshret_sand",
+  "sortnum": 1
+}

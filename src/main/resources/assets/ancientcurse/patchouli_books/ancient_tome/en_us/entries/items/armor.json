@@ -1,0 +1,30 @@
+{
+  "name": "Armor Sets",
+  "icon": "ancientcurse:ceremonial_chestwrap",
+  "category": "ancientcurse:items",
+  "sortnum": 3,
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "title": "Egyptian Armor",
+      "text": "Several armor sets offer protection in the ancient lands. Each provides different benefits and aesthetics.$(br2)All armor features animated 3D models."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Bronze Armor",
+      "text": "Standard protective gear:$(br2)$(li)$(item)Bronze Helmet$()$(li)$(item)Bronze Chestplate$()$(li)$(item)Bronze Leggings$()$(li)$(item)Bronze Boots$()$(br2)Provides solid protection comparable to iron."
+    },
+    {
+      "type": "patchouli:spotlight",
+      "item": "ancientcurse:veil_of_anubis",
+      "title": "Veil of Anubis",
+      "text": "Sacred headpiece of the death god. Provides special protection and an intimidating appearance."
+    },
+    {
+      "type": "patchouli:spotlight",
+      "item": "ancientcurse:ceremonial_chestwrap",
+      "title": "Ceremonial Chestwrap",
+      "text": "Ancient Egyptian ceremonial armor. Lighter than bronze but imbued with protective magic."
+    }
+  ]
+}

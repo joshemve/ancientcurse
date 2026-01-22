@@ -1,0 +1,31 @@
+{
+  "name": "Food & Potions",
+  "icon": "ancientcurse:sycamore_fig",
+  "category": "ancientcurse:items",
+  "sortnum": 5,
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "title": "Egyptian Cuisine",
+      "text": "The fertile Nile provides abundant food. Grow crops on $(item)Fertile Nile Silt$() for best yields.$(br2)$(li)$(item)Sycamore Fig$(): Sweet fruit$(li)$(item)Golden Sycamore Fig$(): Divine$(li)$(item)Sekhem Date$(): Nutritious$(li)$(item)Spinach$(): Leafy greens$(li)$(item)Barley$(): Grain"
+    },
+    {
+      "type": "patchouli:spotlight",
+      "item": "ancientcurse:phial_of_lotus_essence",
+      "title": "Phial of Lotus Essence",
+      "text": "Grants water breathing, night vision, and dolphin's grace. Essential for exploring underwater areas."
+    },
+    {
+      "type": "patchouli:spotlight",
+      "item": "ancientcurse:elixir_of_ras_spark",
+      "title": "Elixir of Ra's Spark",
+      "text": "Provides fire resistance and strength. Use before facing fire-based enemies or traversing lava."
+    },
+    {
+      "type": "patchouli:spotlight",
+      "item": "ancientcurse:scarab_talisman",
+      "title": "Scarab Talisman",
+      "text": "Grants temporary protection and regeneration when activated. A reusable defensive item."
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "name": "Cursed Blocks",
+  "icon": "ancientcurse:cursed_earth",
+  "category": "ancientcurse:blocks",
+  "sortnum": 2,
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "title": "Corruption Spreads",
+      "text": "$(curse)Cursed blocks$() are the physical manifestation of the Khamsin Curse. They spread slowly, corrupting the land around them.$(br2)Standing on cursed ground drains your $(gold)Ankh$() rapidly."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Cursed Block Types",
+      "text": "$(li)$(item)Cursed Earth$(): Corrupted soil$(li)$(item)Cursed Stone$(): Tainted rock$(li)$(item)Cursed Sand$(): Dark sand$(li)$(item)Cursed Log$(): Dead wood$(li)$(item)Cursed Wood Plank$(): Warped planks"
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Cursed Plants",
+      "text": "Unnatural vegetation grows on cursed ground:$(br2)$(li)$(item)Bloodshade Thicket$()$(li)$(item)Cursed Sprig$()$(li)$(item)Duat Fern$()$(li)$(item)Vine of Apep$()$(li)$(item)Isfet Frond$()$(li)$(item)Sutekh Coil$()"
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Cleansing",
+      "text": "Remove cursed blocks using:$(br2)$(li)$(item)Purification Staff$() + salt circle$(li)$(item)Solar Spire$() activation$(li)$(item)Eternal Sigil$() divine power$(br2)See $(l:getting_started/purification)Purifying the Land$(/l)."
+    }
+  ]
+}

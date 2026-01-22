@@ -1,0 +1,30 @@
+{
+  "name": "The Ankh System",
+  "icon": "ancientcurse:pharaohs_blood",
+  "category": "ancientcurse:getting_started",
+  "sortnum": 2,
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "title": "Your Ankh",
+      "text": "The $(gold)Ankh$() is your spiritual protection against the $(curse)Khamsin Curse$(). It appears as a meter that drains when you enter cursed zones.$(br2)When your Ankh reaches zero, the curse begins to take hold. Keep it restored to stay protected."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Restoration Items",
+      "text": "Several items can restore your Ankh:$(br2)$(li)$(item)Pharaoh's Blood$(): Full restoration$(li)$(item)Scarab Incense$(): Gradual recovery$(li)$(item)Eternal Sigil$(): Divine protection$(li)$(item)Mummy Heart$(): Crafting material"
+    },
+    {
+      "type": "patchouli:spotlight",
+      "item": "ancientcurse:pharaohs_blood",
+      "title": "Pharaoh's Blood",
+      "text": "Divine elixir of the pharaohs. Fully restores all Ankh instantly. One of the most valuable items for curse survival."
+    },
+    {
+      "type": "patchouli:spotlight",
+      "item": "ancientcurse:scarab_incense_item",
+      "title": "Scarab Incense",
+      "text": "When burned, restores Ankh gradually and provides protection. A renewable option for Ankh management."
+    }
+  ]
+}

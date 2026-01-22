@@ -1,0 +1,8 @@
+{
+  "type": "patchouli:shapeless_book_recipe",
+  "ingredients": [
+    { "item": "minecraft:book" },
+    { "item": "ancientcurse:papyrus_paper" }
+  ],
+  "book": "ancientcurse:ancient_tome"
+}

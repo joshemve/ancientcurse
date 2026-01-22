@@ -1,0 +1,23 @@
+{
+  "name": "Necrostone Blocks",
+  "icon": "ancientcurse:necrostone_brick",
+  "category": "ancientcurse:blocks",
+  "sortnum": 1,
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "title": "Stone of the Dead",
+      "text": "$(curse)Necrostone$() is found in tombs and places of death. Its dark surface absorbs light, creating an ominous atmosphere.$(br2)$(warning)Warning:$() Extended contact may attract unwanted attention from the underworld."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Necrostone Variants",
+      "text": "$(li)$(item)Necrostone Brick$(): Standard$(li)$(item)Cracked Necrostone$(): Weathered$(li)$(item)Rough Necrostone$(): Unworked$(li)$(item)Smooth Necrostone$(): Polished$(li)$(item)Carved Necrostone$(): Decorated$(li)$(item)Chiseled Necrostone$(): Detailed"
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Decorative Pieces",
+      "text": "Special necrostone decorations:$(br2)$(li)$(item)Necrostone Pillar$(): Column$(li)$(item)Necrostone Eye$(): Eye motif$(li)$(item)Necrostone Ankh$(): Life symbol$(li)$(item)Necrostone Fork$(): Ritual fork$(li)$(item)Necrostone Chain$(): Links$(li)$(item)Decorative Necrostone$(): Ornate"
+    }
+  ]
+}

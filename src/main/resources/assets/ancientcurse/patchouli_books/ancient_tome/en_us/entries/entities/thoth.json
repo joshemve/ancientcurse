@@ -1,0 +1,28 @@
+{
+  "name": "Thoth",
+  "icon": "ancientcurse:thoth_spawn_egg",
+  "category": "ancientcurse:entities",
+  "sortnum": 1,
+  "pages": [
+    {
+      "type": "patchouli:entity",
+      "entity": "ancientcurse:thoth",
+      "scale": 0.35,
+      "offset": 0.0,
+      "rotate": true,
+      "default_rotation": -45,
+      "name": "Thoth",
+      "text": "The $(deity)God of Wisdom$() and magic."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Master of Magic",
+      "text": "$(deity)Thoth$() commands powerful magical abilities. He can cast magic projectiles, unleash scroll blasts of forbidden knowledge, and even bend time itself.$(br2)Approach with caution and respect."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Abilities",
+      "text": "$(li)$(l)Magic Ball$(): Ranged attack$(li)$(l)Staff Strike$(): Melee attack$(li)$(l)Scroll Blast$(): Area attack$(li)$(l)Time Bend$(): Temporal magic$(li)$(l)Summon$(): Calls servants$(br2)$(warning)Do not engage unprepared!"
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "name": "Solar Spire",
+  "icon": "ancientcurse:solar_spire",
+  "category": "ancientcurse:blocks",
+  "sortnum": 3,
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "title": "Channel of Ra",
+      "text": "The $(gold)Solar Spire$() is a sacred structure that channels the power of $(deity)Ra$() to cleanse cursed land. When activated, it purifies a large area and provides lasting protection."
+    },
+    {
+      "type": "patchouli:spotlight",
+      "item": "ancientcurse:solar_spire_plinth",
+      "title": "Solar Spire Plinth",
+      "text": "The base of the spire. Place this first. It anchors the structure to the earth."
+    },
+    {
+      "type": "patchouli:spotlight",
+      "item": "ancientcurse:solar_spire_crucible",
+      "title": "Solar Spire Crucible",
+      "text": "The middle section. Place atop the plinth. Holds the sacred fire of Ra."
+    },
+    {
+      "type": "patchouli:spotlight",
+      "item": "ancientcurse:solar_spire_pyramidion",
+      "title": "Solar Spire Pyramidion",
+      "text": "The capstone. Place atop the crucible. Focuses solar energy to initiate cleansing. Right-click to activate."
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "name": "Boss Encounters",
+  "icon": "ancientcurse:djeserhath_spawn_egg",
+  "category": "ancientcurse:entities",
+  "sortnum": 3,
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "title": "Ancient Guardians",
+      "text": "$(curse)Boss entities$() are powerful beings that guard the greatest treasures. They require preparation, strategy, and powerful equipment to defeat.$(br2)$(warning)Do not engage without proper gear!"
+    },
+    {
+      "type": "patchouli:entity",
+      "entity": "ancientcurse:djeserhath",
+      "scale": 0.25,
+      "rotate": true,
+      "name": "Djeserhath",
+      "text": "Ancient guardian with divine protection. A formidable opponent."
+    },
+    {
+      "type": "patchouli:entity",
+      "entity": "ancientcurse:withered_pharaoh",
+      "scale": 0.3,
+      "rotate": true,
+      "name": "Withered Pharaoh",
+      "text": "Undead pharaoh with dark magic. Commands wither effects."
+    },
+    {
+      "type": "patchouli:entity",
+      "entity": "ancientcurse:zulmak",
+      "scale": 0.25,
+      "rotate": true,
+      "name": "Zulmak",
+      "text": "Controls locusts and cursed earth. Summons minions and creates vortexes."
+    }
+  ]
+}

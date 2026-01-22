@@ -1,0 +1,34 @@
+{
+  "name": "Hostile Creatures",
+  "icon": "ancientcurse:scarab_beetle_spawn_egg",
+  "category": "ancientcurse:entities",
+  "sortnum": 2,
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "title": "Desert Dangers",
+      "text": "The desert harbors many threats. These creatures attack on sight and can overwhelm the unprepared.$(br2)$(warning)Travel with weapons ready and keep an eye on your surroundings."
+    },
+    {
+      "type": "patchouli:entity",
+      "entity": "ancientcurse:scarab_beetle",
+      "scale": 0.8,
+      "rotate": true,
+      "name": "Scarab Beetle",
+      "text": "Ancient beetles that swarm from tombs. Drop $(item)Scarab Shell$() fragments."
+    },
+    {
+      "type": "patchouli:entity",
+      "entity": "ancientcurse:locus",
+      "scale": 0.5,
+      "rotate": true,
+      "name": "Locus",
+      "text": "Desert locusts that devour crops and attack travelers. Often found in swarms."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Combat Tips",
+      "text": "$(li)Scarabs are weak individually$(li)Locusts are fast but fragile$(li)Use area attacks against swarms$(li)Fire is effective$(li)$(item)Staff of Ra$() excels here"
+    }
+  ]
+}

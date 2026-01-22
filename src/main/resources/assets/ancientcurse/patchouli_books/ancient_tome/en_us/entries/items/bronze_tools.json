@@ -1,0 +1,28 @@
+{
+  "name": "Bronze Tools",
+  "icon": "ancientcurse:bronze_pickaxe",
+  "category": "ancientcurse:items",
+  "sortnum": 1,
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "title": "Bronze Age",
+      "text": "$(egyptian)Bronze$() was the metal of choice in ancient Egypt. Craft tools and weapons from bronze ingots for reliable equipment.$(br2)Bronze sits between iron and stone in durability and effectiveness."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Crafting Bronze",
+      "text": "$(l)Bronze Blend$() is created by combining copper and tin. Smelt it to create $(item)Bronze Ingots$().$(br2)$(li)$(item)Bronze Blend$() -> Furnace$(li)= $(item)Bronze Ingot$()"
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Tool Set",
+      "text": "$(li)$(item)Bronze Sword$(): Standard weapon$(li)$(item)Bronze Pickaxe$(): Mining tool$(li)$(item)Bronze Axe$(): Woodcutting$(li)$(item)Bronze Shovel$(): Digging$(li)$(item)Bronze Hoe$(): Farming"
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Special Weapons",
+      "text": "$(li)$(item)Bronze Khopesh$(): Curved sword with superior slashing$(li)$(item)Bronze Ceremonial Axe$(): Ornate ritual weapon$(br2)These deal more damage than standard bronze tools."
+    }
+  ]
+}

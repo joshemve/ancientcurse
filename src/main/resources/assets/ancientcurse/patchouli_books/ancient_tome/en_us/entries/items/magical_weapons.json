@@ -1,0 +1,32 @@
+{
+  "name": "Magical Weapons",
+  "icon": "ancientcurse:horus_mace",
+  "category": "ancientcurse:items",
+  "sortnum": 2,
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "ancientcurse:horus_mace",
+      "title": "Mace of Horus",
+      "text": "Divine weapon blessed by the falcon god. Grants night vision when held and may blind attackers. Deals +50% damage to airborne foes."
+    },
+    {
+      "type": "patchouli:spotlight",
+      "item": "ancientcurse:serpent_staff",
+      "title": "Serpent Staff",
+      "text": "Ancient staff that fires poisonous snake projectiles. Right-click to fire, sneak + right-click for targeted attack. Applies Poison II."
+    },
+    {
+      "type": "patchouli:spotlight",
+      "item": "ancientcurse:withered_staff",
+      "title": "Withered Staff",
+      "text": "Launches wither skulls when charged. A weapon of $(curse)dark power$() that should be used with caution."
+    },
+    {
+      "type": "patchouli:spotlight",
+      "item": "ancientcurse:ancient_pick",
+      "title": "Ancient Pick",
+      "text": "Mystical pickaxe with a chance to preserve durability and grant haste when mining. Efficient for extended excavations."
+    }
+  ]
+}

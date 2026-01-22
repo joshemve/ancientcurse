@@ -1,0 +1,28 @@
+{
+  "name": "Anubis",
+  "icon": "ancientcurse:anubis_spawn_egg",
+  "category": "ancientcurse:entities",
+  "sortnum": 0,
+  "pages": [
+    {
+      "type": "patchouli:entity",
+      "entity": "ancientcurse:anubis",
+      "scale": 0.4,
+      "offset": 0.0,
+      "rotate": true,
+      "default_rotation": -45,
+      "name": "Anubis",
+      "text": "The $(deity)Jackal-Headed God$() of death and judgment."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Guardian of Tombs",
+      "text": "$(deity)Anubis$() is a neutral entity who guards sacred tombs. He will not attack unless provoked, but his judgment is swift and merciless.$(br2)If you prove yourself worthy, he may grant you his protection."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Anubis's Mercy",
+      "text": "$(tip)\"Anubis has judged you worthy. You are under his protection.\"$(br2)When granted mercy, Anubis will not attack you and may even assist against other threats. Maintain respect for the dead to keep his favor."
+    }
+  ]
+}

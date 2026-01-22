@@ -1,0 +1,18 @@
+{
+  "name": "Biomes Overview",
+  "icon": "ancientcurse:deshret_sand",
+  "category": "ancientcurse:world_generation",
+  "sortnum": 0,
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "title": "The Ancient Lands",
+      "text": "The $(egyptian)Ancient Curse$() world features unique biomes inspired by ancient Egypt. Each offers different resources and challenges.$(br2)Use $(l)/locate biome ancientcurse:$() commands to find specific biomes."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Available Biomes",
+      "text": "$(li)$(l)Ancient Desert$(): Standard desert$(li)$(l)Deshret Desert$(): Red sand dunes$(li)$(l)Nile River$(): Fertile riverbanks$(li)$(l)Nile Floodplains$(): Rich farmland$(li)$(l)Valley of Kings$(): Tomb region$(li)$(l)Oasis$(): Water sources"
+    }
+  ]
+}

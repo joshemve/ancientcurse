@@ -1,0 +1,31 @@
+{
+  "name": "Artifacts",
+  "icon": "ancientcurse:eye_of_apophis",
+  "category": "ancientcurse:items",
+  "sortnum": 4,
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "title": "Ancient Relics",
+      "text": "$(egyptian)Artifacts$() are powerful relics discovered in tombs and ruins. Each holds unique magical properties that can aid or harm.$(br2)$(warning)Handle with care.$() Some artifacts carry curses."
+    },
+    {
+      "type": "patchouli:spotlight",
+      "item": "ancientcurse:eye_of_apophis",
+      "title": "Eye of Apophis",
+      "text": "The malevolent gaze of the chaos serpent. A $(curse)dangerous artifact$() that channels dark power."
+    },
+    {
+      "type": "patchouli:spotlight",
+      "item": "ancientcurse:canopic_heart_jar",
+      "title": "Canopic Heart Jar",
+      "text": "Sacred vessel containing preserved organs. Essential for certain rituals and crafting recipes."
+    },
+    {
+      "type": "patchouli:spotlight",
+      "item": "ancientcurse:eternal_sigil",
+      "title": "Eternal Sigil",
+      "text": "Divine artifact that cleanses curses and grants powerful protection. One of the most valuable items."
+    }
+  ]
+}

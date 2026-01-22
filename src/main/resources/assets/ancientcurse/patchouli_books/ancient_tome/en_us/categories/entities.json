@@ -1,0 +1,6 @@
+{
+  "name": "Entities & Bosses",
+  "description": "Learn about the $(deity)divine guardians$() and $(curse)cursed creatures$() that inhabit these lands. From the jackal-headed $(deity)Anubis$() to the fearsome pharaoh bosses, knowledge is your greatest weapon.",
+  "icon": "ancientcurse:anubis_spawn_egg",
+  "sortnum": 4
+}

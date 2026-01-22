@@ -1,0 +1,32 @@
+{
+  "name": "Ancient Tome",
+  "landing_text": "Welcome, seeker of ancient knowledge. This $(egyptian)tome$() contains the wisdom of the $(deity)Egyptian gods$() and the secrets of the $(curse)cursed lands$().$(br2)Within these pages, you will discover how to survive the harsh deserts, craft powerful artifacts, and face the guardians that protect the tombs of the pharaohs.",
+  "subtitle": "A Guide to the Ancient Curse",
+  "version": "1",
+  "use_resource_pack": true,
+  "creative_tab": "ancientcurse:main",
+  "book_texture": "patchouli:textures/gui/book_brown.png",
+  "text_color": "000000",
+  "header_color": "8B4513",
+  "nameplate_color": "C19A6B",
+  "link_color": "DAA520",
+  "link_hover_color": "FFD700",
+  "progress_bar_color": "FFD700",
+  "progress_bar_background": "3D2B1F",
+  "show_progress": false,
+  "show_toasts": true,
+  "use_blocky_font": false,
+  "i18n": false,
+  "pause_game": false,
+  "index_icon": "ancientcurse:staff_of_ra",
+  "macros": {
+    "$(egyptian)": "$(#C19A6B)",
+    "$(gold)": "$(#FFD700)",
+    "$(curse)": "$(#8B0000)$(o)",
+    "$(deity)": "$(#4169E1)$(l)",
+    "$(warning)": "$(#FF0000)$(l)",
+    "$(tip)": "$(#228B22)$(o)",
+    "$(nile)": "$(#1E90FF)",
+    "$(sand)": "$(#D2B48C)"
+  }
+}

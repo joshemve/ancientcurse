@@ -1,0 +1,30 @@
+{
+  "name": "Purifying the Land",
+  "icon": "ancientcurse:salt",
+  "category": "ancientcurse:getting_started",
+  "sortnum": 3,
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "title": "Cleansing Methods",
+      "text": "The $(curse)cursed earth$() can be cleansed through several methods. The most accessible is creating a $(item)salt circle$() and using a $(item)Purification Staff$().$(br2)For larger areas, construct a $(gold)Solar Spire$() to channel $(deity)Ra's$() light."
+    },
+    {
+      "type": "patchouli:spotlight",
+      "item": "ancientcurse:salt",
+      "title": "Salt",
+      "text": "Pure salt crystals used to create protective circles. Place salt dust on the ground in a circle pattern to form a ritual boundary."
+    },
+    {
+      "type": "patchouli:spotlight",
+      "item": "ancientcurse:purification_staff",
+      "title": "Purification Staff",
+      "text": "Channels divine energy to cleanse cursed earth. Stand within a salt circle and hold right-click for 3 seconds to purify up to 8 blocks."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Solar Spire",
+      "text": "The $(gold)Solar Spire$() is a multi-block structure that cleanses large areas when activated. Build the plinth, crucible, and pyramidion in sequence.$(br2)See the $(l:blocks/solar_spire)Solar Spire entry$(/l) for details."
+    }
+  ]
+}
