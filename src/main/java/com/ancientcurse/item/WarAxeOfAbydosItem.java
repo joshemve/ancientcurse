@@ -1,6 +1,7 @@
 package com.ancientcurse.item;
 
 import com.ancientcurse.AncientCurse;
+import com.ancientcurse.network.CurseZonePackets;
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffectInstance;
@@ -43,7 +44,7 @@ import java.util.List;
 public class WarAxeOfAbydosItem extends AxeItem implements GeoItem {
     private AnimatableInstanceCache cache = new SingletonAnimatableInstanceCache(this);
     private final java.util.function.Supplier<Object> renderProvider = GeoItem.makeRenderer(this);
-    private static final int EXECUTIONER_STRIKE_COOLDOWN = 300; // 15 seconds
+    private static final int EXECUTIONER_STRIKE_COOLDOWN = 1; // 1 tick for testing (was 300 = 15 seconds)
     private static final float SPIN_ATTACK_DAMAGE = 15.0F;
     private static final float UNDEAD_DAMAGE_MULTIPLIER = 1.75F;
     
@@ -88,11 +89,14 @@ public class WarAxeOfAbydosItem extends AxeItem implements GeoItem {
     
     private void performExecutionerStrike(World world, PlayerEntity player) {
         ServerWorld serverWorld = (ServerWorld) world;
-        
+
+        // Trigger 360 spin attack animation on player (broadcasts to all nearby clients)
+        CurseZonePackets.sendPlayerAnimation(serverWorld, player, "waraxe_spin_attack");
+
         // Grant temporary strength and resistance
         player.addStatusEffect(new StatusEffectInstance(StatusEffects.STRENGTH, 60, 2));
         player.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, 60, 1));
-        
+
         // Spin attack visual effect
         for (int i = 0; i < 360; i += 10) {
             double angle = Math.toRadians(i);

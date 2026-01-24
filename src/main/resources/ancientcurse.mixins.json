@@ -15,7 +15,8 @@
     "client.SafeEntityRenderMixin",
     "client.JackelBindsScreenMixin",
     "client.JackelBindsFirstPersonMixin",
-    "client.JackelBindsArmMixin"
+    "client.JackelBindsArmMixin",
+    "client.PlayerAnimationMixin"
   ],
   "injectors": {
     "defaultRequire": 1

@@ -12,7 +12,7 @@
     {
       "type": "patchouli:text",
       "title": "Restoration Items",
-      "text": "Several items can restore your Ankh:$(br2)$(li)$(item)Pharaoh's Blood$(): Full restoration$(li)$(item)Scarab Incense$(): Gradual recovery$(li)$(item)Eternal Sigil$(): Divine protection$(li)$(item)Mummy Heart$(): Crafting material"
+      "text": "Several items can restore your Ankh:$(br2)$(li)$(item)Pharaoh's Blood$(): Instantly restores Ankh to 100$(li)$(item)Scarab Incense$(): Gradually restores Ankh over time$(li)$(item)Eternal Sigil$(): Removes curse effects + grants protection$(br2)Use $(item)Pharaoh's Blood$() for emergency recovery."
     },
     {
       "type": "patchouli:spotlight",

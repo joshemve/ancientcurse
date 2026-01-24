@@ -4,6 +4,13 @@
     "ancientcurse:smooth_sand",
     "ancientcurse:nile_river_sand",
     "ancientcurse:deshret_sand",
-    "ancientcurse:deshret_wavy_sand"
+    "ancientcurse:deshret_wavy_sand",
+    "ancientcurse:black_sand",
+    "ancientcurse:cursed_sand",
+    "ancientcurse:sand_path",
+    "ancientcurse:sandstone_path",
+    "ancientcurse:deshret_path",
+    "ancientcurse:desert_path",
+    "ancientcurse:black_sand_path"
   ]
 }

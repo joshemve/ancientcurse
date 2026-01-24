@@ -51,9 +51,9 @@ public class DateBlock extends Block {
 
     @Override
     public boolean canPlaceAt(BlockState state, WorldView world, BlockPos pos) {
-        // The FACING direction points TOWARD the log, so we need to check in that direction
+        // The FACING direction points TOWARD the supporting block, so we need to check in that direction
         BlockState blockState = world.getBlockState(pos.offset(state.get(FACING)));
-        return blockState.isOf(ModBlocks.DATE_PALM_LOG);
+        return blockState.isOf(ModBlocks.DATE_PALM_LOG) || blockState.isOf(ModBlocks.SEKHEM_CACTUS);
     }
 
     @Override

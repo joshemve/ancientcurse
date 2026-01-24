@@ -25,7 +25,12 @@
       "type": "patchouli:spotlight",
       "item": "ancientcurse:eternal_sigil",
       "title": "Eternal Sigil",
-      "text": "Divine artifact that cleanses curses and grants powerful protection. One of the most valuable items."
+      "text": "Divine artifact that removes all status effects and grants Regeneration II, Fire Resistance, and Resistance. A one-time use artifact perfect for emergency curse removal."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "The Eye of Apophis",
+      "text": "Though dangerous, the $(item)Eye of Apophis$() is required to activate the $(gold)Solar Spire$(). Use it to click the pyramidion and unleash Ra's purifying power across the land."
     }
   ]
 }

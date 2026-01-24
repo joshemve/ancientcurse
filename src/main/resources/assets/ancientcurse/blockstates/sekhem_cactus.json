@@ -1,0 +1,16 @@
+{
+    "variants": {
+        "position=bottom": {
+            "model": "ancientcurse:block/sekhem_cactus"
+        },
+        "position=middle": {
+            "model": "ancientcurse:block/sekhem_cactus"
+        },
+        "position=middle2": {
+            "model": "ancientcurse:block/sekhem_cactus"
+        },
+        "position=top": {
+            "model": "ancientcurse:block/sekhem_cactus"
+        }
+    }
+}

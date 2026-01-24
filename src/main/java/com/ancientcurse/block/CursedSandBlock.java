@@ -11,6 +11,7 @@ import net.minecraft.block.Blocks;
 import net.minecraft.block.FallingBlock;
 import net.minecraft.block.SandBlock;
 import net.minecraft.client.item.TooltipContext;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.world.ServerWorld;
@@ -46,7 +47,40 @@ public class CursedSandBlock extends SandBlock {
         // No tooltip needed - the mod name shows automatically
         super.appendTooltip(stack, world, tooltip, options);
     }
-    
+
+    /**
+     * Called when an entity steps on this block.
+     * This method triggers immediately and reliably when a player steps on cursed sand,
+     * unlike randomTick which is called infrequently.
+     */
+    @Override
+    public void onSteppedOn(World world, BlockPos pos, BlockState state, Entity entity) {
+        super.onSteppedOn(world, pos, state, entity);
+
+        if (!world.isClient && entity instanceof PlayerEntity player) {
+            // Skip creative/spectator players
+            if (player.isCreative() || player.isSpectator()) {
+                return;
+            }
+
+            // Check if we're in an active cleansing zone - if so, do nothing
+            if (SolarSpireBlock.isInActiveCleansingZone(pos)) {
+                return;
+            }
+
+            // Decrease ankh value when standing on cursed sand (moderate rate)
+            // Using world time modulo to rate-limit the effect (every 3.75 seconds = 75 ticks)
+            if (world.getTime() % 75 == 0) {
+                int newAnkh = AnkhDataManager.decreaseAnkhValue(player, 1);
+
+                // Handle Ankh depletion when standing on cursed blocks
+                if (newAnkh <= 0) {
+                    handleAnkhDepletionOnCursedBlock(player, (ServerWorld) world, pos);
+                }
+            }
+        }
+    }
+
     @Override
     public void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved) {
         // Only handle removal if the block is actually being replaced with a different type

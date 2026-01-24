@@ -33,46 +33,57 @@ import com.ancientcurse.ModBlockEntities;
  * IMPORTANT MOD ARCHITECTURE GUIDELINES:
  * 
  * 1. REGISTRY SYSTEM:
- *    - All blocks are organized into specialized registry classes in com.ancientcurse.block.registry
- *    - Each registry class handles a specific type of block (e.g., CursedPlantBlocks, EgyptianPlantBlocks)
- *    - New blocks should be added to the appropriate registry class, NOT directly in ModBlocks
- *    - The BlockRegistry class coordinates all block registrations
+ * - All blocks are organized into specialized registry classes in
+ * com.ancientcurse.block.registry
+ * - Each registry class handles a specific type of block (e.g.,
+ * CursedPlantBlocks, EgyptianPlantBlocks)
+ * - New blocks should be added to the appropriate registry class, NOT directly
+ * in ModBlocks
+ * - The BlockRegistry class coordinates all block registrations
  * 
  * 2. BLOCK REGISTRATION PROCESS:
- *    - Blocks are defined as public static final fields in their registry class
- *    - Blocks are registered to the game in the registerBlocks() method of their registry class
- *    - Block items are registered in the registerBlockItems() method of their registry class
- *    - All registry classes are called from BlockRegistry.registerAll() and BlockRegistry.registerBlockItems()
+ * - Blocks are defined as public static final fields in their registry class
+ * - Blocks are registered to the game in the registerBlocks() method of their
+ * registry class
+ * - Block items are registered in the registerBlockItems() method of their
+ * registry class
+ * - All registry classes are called from BlockRegistry.registerAll() and
+ * BlockRegistry.registerBlockItems()
  * 
  * 3. CREATIVE MENU:
- *    - All blocks must be added to the creative menu in ModItemGroup
- *    - Blocks from registry classes should be referenced using their full path
- *    - Related blocks should be grouped together with appropriate comments
+ * - All blocks must be added to the creative menu in ModItemGroup
+ * - Blocks from registry classes should be referenced using their full path
+ * - Related blocks should be grouped together with appropriate comments
  * 
  * 4. CLIENT INITIALIZATION:
- *    - The ONLY client initializer is com.ancientcurse.client.AncientCurseClient
- *    - All client-side registrations (render layers, HUD elements, etc.) should be done there
- *    - NEVER create multiple classes implementing ClientModInitializer
- *    - Duplicate client initializers cause transparency issues and duplicate tooltips
+ * - The ONLY client initializer is com.ancientcurse.client.AncientCurseClient
+ * - All client-side registrations (render layers, HUD elements, etc.) should be
+ * done there
+ * - NEVER create multiple classes implementing ClientModInitializer
+ * - Duplicate client initializers cause transparency issues and duplicate
+ * tooltips
  * 
  * 5. TRANSPARENCY RENDERING:
- *    - For transparent blocks, use BOTH .nonOpaque() AND .notSolid() in block settings
- *    - Register transparent blocks with BlockRenderLayerMap.INSTANCE.putBlock(block, RenderLayer.getCutout())
- *    - Only register each block for render layers ONCE to avoid conflicts
+ * - For transparent blocks, use BOTH .nonOpaque() AND .notSolid() in block
+ * settings
+ * - Register transparent blocks with
+ * BlockRenderLayerMap.INSTANCE.putBlock(block, RenderLayer.getCutout())
+ * - Only register each block for render layers ONCE to avoid conflicts
  * 
- * Following these guidelines prevents registration conflicts and makes the codebase more maintainable.
- * See previous fixes for registration conflicts and transparency issues in the mod's history.
+ * Following these guidelines prevents registration conflicts and makes the
+ * codebase more maintainable.
+ * See previous fixes for registration conflicts and transparency issues in the
+ * mod's history.
  */
 public class AncientCurse implements ModInitializer {
     public static final String MOD_ID = "ancientcurse";
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
-    
+
     // Define our world preset key
     public static final RegistryKey<WorldPreset> ANCIENT_CURSE_PRESET = RegistryKey.of(
-        RegistryKeys.WORLD_PRESET, new Identifier(MOD_ID, "ancient_curse")
-    );
-    public static final RegistryKey<World> ANCIENT_EGYPT_DIMENSION =
-            RegistryKey.of(RegistryKeys.WORLD, new Identifier(MOD_ID, "ancient_egypt"));
+            RegistryKeys.WORLD_PRESET, new Identifier(MOD_ID, "ancient_curse"));
+    public static final RegistryKey<World> ANCIENT_EGYPT_DIMENSION = RegistryKey.of(RegistryKeys.WORLD,
+            new Identifier(MOD_ID, "ancient_egypt"));
 
     @Override
     public void onInitialize() {
@@ -104,18 +115,24 @@ public class AncientCurse implements ModInitializer {
 
         LOGGER.info("Ancient Curse Mod fully initialized");
     }
-    
+
     /**
      * Registers all mod content (blocks, items, etc.)
      */
     private void registerContent() {
         // Register mod item groups
         ModItemGroup.registerItemGroups();
-        
+
+        // Register mod fluids
+        com.ancientcurse.registry.ModFluids.registerFluids();
+
+        // Register cauldron behaviors
+        com.ancientcurse.registry.ModCauldronBehavior.registerBehaviors();
+
         // Register ModBlocks first to establish baseline registrations
         // This ensures that blocks like OFFERING_POT are registered first
         // ModBlocks.registerBlocks();
-        
+
         // Then register specialized block registries
         // Note: We've modified PotteryBlocks.java to avoid re-registering OFFERING_POT
         com.ancientcurse.block.registry.BlockRegistry.registerAll();
@@ -125,7 +142,8 @@ public class AncientCurse implements ModInitializer {
         ModBlocks.registerFlammableBlocks();
 
         // Register mod items
-        // ModBlocks.registerBlocks(); // REMOVED: Blocks are now registered through BlockRegistry system
+        // ModBlocks.registerBlocks(); // REMOVED: Blocks are now registered through
+        // BlockRegistry system
         ModItems.registerItems();
         ModSounds.registerSounds();
 
@@ -134,25 +152,28 @@ public class AncientCurse implements ModInitializer {
 
         // Register mod entities
         ModEntities.registerEntities();
-        
+
         // Register mod block entities
         ModBlockEntities.registerBlockEntities();
-        
+
         // Register mod screen handlers
         // ModScreenHandlers.registerScreenHandlers();
-        
+
         // Register mod entities
         ModEntities.registerEntities();
-        
+
         // Register mod commands
         ModCommands.registerCommands();
-        
+
         // Register structures
         ModStructures.registerStructures();
-        
+
+        // Register custom features
+        com.ancientcurse.world.gen.ModFeatures.registerFeatures();
+
         // Register status effects
         ModStatusEffects.registerStatusEffects();
-        
+
         // Register server tick event for tornado management and locust swarms
         ServerTickEvents.END_SERVER_TICK.register(server -> {
             com.ancientcurse.effect.TornadoManager.tick(server);
@@ -166,11 +187,12 @@ public class AncientCurse implements ModInitializer {
                 com.ancientcurse.item.armor.JackelBindsItem.applyBindEffects(player);
             }
         });
-        
+
         // Register player join handler for curse zone syncing
         PlayerJoinHandler.register();
 
-        // Register player disconnect handler to clean up breakout progress and Zulmak grabs
+        // Register player disconnect handler to clean up breakout progress and Zulmak
+        // grabs
         net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
             com.ancientcurse.system.JackelBindsBreakoutManager.getInstance().resetProgress(handler.player.getUuid());
 
@@ -184,16 +206,16 @@ public class AncientCurse implements ModInitializer {
         // Register animation debug handler for debug stick
         AnimationDebugHandler.register();
     }
-    
+
     /**
      * Registers all world generation components
      */
     private void registerWorldgenComponents() {
         // Enable world presets only - this will show the button
         com.ancientcurse.world.ModWorldPresets.register();
-        
+
         LOGGER.info("World presets registered - Ancient Curse world type available");
-        
+
         com.ancientcurse.world.biome.ModBiomes.registerBiomes();
         // TEMPORARILY DISABLED: com.ancientcurse.world.ModChunkGenerators.register();
     }
@@ -203,10 +225,10 @@ public class AncientCurse implements ModInitializer {
      */
     private void registerCommands() {
         LOGGER.info("Registering commands for " + MOD_ID);
-        
+
         // Register the Locus Swarm command
         CommandRegistrationCallback.EVENT.register(LocusSwarmCommand::register);
-        
+
         // Register the Cursed Earth command
         CommandRegistrationCallback.EVENT.register(CursedEarthCommand::register);
     }

@@ -19,12 +19,17 @@
       "type": "patchouli:spotlight",
       "item": "ancientcurse:purification_staff",
       "title": "Purification Staff",
-      "text": "Channels divine energy to cleanse cursed earth. Stand within a salt circle and hold right-click for 3 seconds to purify up to 8 blocks."
+      "text": "Channels divine energy to cleanse cursed earth. Stand within a salt circle and hold right-click for 3 seconds to purify up to 8 blocks. Costs 10 Ankh per use."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Status Effect Removal",
+      "text": "The $(item)Eternal Sigil$() removes all curses and status effects instantly, granting temporary protection buffs. Perfect for emergencies when the curse takes hold. One-time use only."
     },
     {
       "type": "patchouli:text",
       "title": "Solar Spire",
-      "text": "The $(gold)Solar Spire$() is a multi-block structure that cleanses large areas when activated. Build the plinth, crucible, and pyramidion in sequence.$(br2)See the $(l:blocks/solar_spire)Solar Spire entry$(/l) for details."
+      "text": "The $(gold)Solar Spire$() is the most powerful cleansing structure. It purifies large areas, removes cursed entities, and creates lasting protection zones. Build the plinth, crucible, and pyramidion in sequence.$(br2)See the $(l:blocks/solar_spire)Solar Spire entry$(/l) for details."
     }
   ]
 }

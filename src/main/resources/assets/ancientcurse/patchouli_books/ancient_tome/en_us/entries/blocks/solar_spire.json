@@ -25,7 +25,17 @@
       "type": "patchouli:spotlight",
       "item": "ancientcurse:solar_spire_pyramidion",
       "title": "Solar Spire Pyramidion",
-      "text": "The capstone. Place atop the crucible. Focuses solar energy to initiate cleansing. Right-click to activate."
+      "text": "The capstone. Place atop the crucible. Focuses solar energy to initiate cleansing. Right-click with $(item)Eye of Apophis$() to activate."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Activation & Purification",
+      "text": "Right-click the pyramidion with an $(item)Eye of Apophis$() to activate the spire. It will process blocks in waves, cleansing all cursed earth, stone, sand, and corrupted plants within a large radius.$(br2)The spire also removes cursed entities like the $(curse)Khamsin$() and restores original blocks."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Protection Zones",
+      "text": "When activated, the Solar Spire creates protection zones around itself that prevent curse from spreading. These zones persist even after cleansing completes, making the spire valuable for long-term land defense."
     }
   ]
 }

@@ -3,8 +3,6 @@ package com.ancientcurse.item;
 import com.ancientcurse.AncientCurse;
 import com.ancientcurse.ModBlocks;
 import com.ancientcurse.system.CursedEarthManager;
-import net.minecraft.block.Block;
-import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUsageContext;
@@ -19,8 +17,6 @@ import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
-
-import java.util.List;
 
 /**
  * Salt Item - Places salt dust blocks and can create protective Salt Circles
@@ -158,9 +154,4 @@ public class SaltItem extends BaseAncientCurseItem {
         }
     }
 
-    @Override
-    public void appendTooltip(ItemStack stack, World world, List<Text> tooltip, TooltipContext context) {
-        // Only show the dark purple "Ancient Curse" tooltip, no additional tooltips
-        tooltip.add(Text.translatable("tooltip.ancientcurse.ancient_curse").formatted(Formatting.DARK_PURPLE));
-    }
 } 

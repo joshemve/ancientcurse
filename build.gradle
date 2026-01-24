@@ -3,7 +3,7 @@ plugins {
     id 'maven-publish'
 }
 
-version = '1.0.6'
+version = '1.0.7'
 group = 'com.ancientcurse'
 archivesBaseName = 'ancientcurse'
 
@@ -16,6 +16,7 @@ repositories {
     maven { url "https://maven.minecraftforge.net/" }
     maven { url "https://plugins.gradle.org/m2/" }
     maven { url 'https://maven.blamejared.com' }  // Patchouli
+    maven { url 'https://maven.kosmx.dev/' }  // PlayerAnimator
 }
 
 configurations.all {
@@ -38,6 +39,10 @@ dependencies {
     // GeckoLib
     modImplementation 'software.bernie.geckolib:geckolib-fabric-1.20.1:4.2.3'
     include 'software.bernie.geckolib:geckolib-fabric-1.20.1:4.2.3'
+
+    // PlayerAnimator (for player combat animations)
+    modImplementation "dev.kosmx.player-anim:player-animation-lib-fabric:1.0.2-rc1+1.20"
+    include "dev.kosmx.player-anim:player-animation-lib-fabric:1.0.2-rc1+1.20"
 
     // Patchouli (Guidebook)
     modImplementation "vazkii.patchouli:Patchouli:1.20.1-84-FABRIC"

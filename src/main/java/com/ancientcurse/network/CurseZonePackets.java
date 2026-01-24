@@ -36,7 +36,8 @@ public class CurseZonePackets {
     public static final Identifier SYNC_WAND_SELECTION = new Identifier(AncientCurse.MOD_ID, "sync_wand_selection");
     public static final Identifier CLEAR_WAND_SELECTION = new Identifier(AncientCurse.MOD_ID, "clear_wand_selection");
     public static final Identifier SYNC_ANKH_VALUE = new Identifier(AncientCurse.MOD_ID, "sync_ankh_value");
-    
+    public static final Identifier PLAY_PLAYER_ANIMATION = new Identifier(AncientCurse.MOD_ID, "play_player_animation");
+
     public static void registerServerPackets() {
         ServerPlayNetworking.registerGlobalReceiver(UPDATE_ZONE, CurseZonePackets::handleUpdateZone);
         ServerPlayNetworking.registerGlobalReceiver(UPDATE_BOX_ZONE, CurseZonePackets::handleUpdateBoxZone);
@@ -51,6 +52,7 @@ public class CurseZonePackets {
         ClientPlayNetworking.registerGlobalReceiver(SYNC_WAND_SELECTION, CurseZonePackets::handleSyncWandSelection);
         ClientPlayNetworking.registerGlobalReceiver(CLEAR_WAND_SELECTION, CurseZonePackets::handleClearWandSelection);
         ClientPlayNetworking.registerGlobalReceiver(SYNC_ANKH_VALUE, CurseZonePackets::handleSyncAnkhValue);
+        ClientPlayNetworking.registerGlobalReceiver(PLAY_PLAYER_ANIMATION, CurseZonePackets::handlePlayPlayerAnimation);
     }
     
     // Client -> Server: Update zone data
@@ -422,12 +424,65 @@ public class CurseZonePackets {
     private static void handleSyncAnkhValue(MinecraftClient client, ClientPlayNetworkHandler handler,
                                            PacketByteBuf buf, PacketSender responseSender) {
         int ankhValue = buf.readInt();
-        
+
         // Execute on client thread
         client.execute(() -> {
             if (client.player != null) {
                 // Update the client-side ankh value for HUD display
                 com.ancientcurse.player.AnkhDataManager.setClientAnkhValue(ankhValue);
+            }
+        });
+    }
+
+    /**
+     * Server -> Client: Send player animation to all nearby clients
+     * This broadcasts an animation to be played on a specific player
+     *
+     * @param world The server world
+     * @param player The player performing the animation
+     * @param animationId The animation identifier (e.g., "waraxe_spin_attack")
+     */
+    public static void sendPlayerAnimation(ServerWorld world, PlayerEntity player, String animationId) {
+        AncientCurse.LOGGER.info("[PlayerAnimation] Server sending animation packet: " + animationId + " for player: " + player.getName().getString());
+
+        // Send to all players within 64 blocks
+        int sentCount = 0;
+        for (ServerPlayerEntity otherPlayer : world.getPlayers()) {
+            if (otherPlayer.squaredDistanceTo(player) <= 64 * 64) {
+                // Create a fresh buffer for each send
+                PacketByteBuf buf = PacketByteBufs.create();
+                buf.writeUuid(player.getUuid());
+                buf.writeString(animationId);
+                ServerPlayNetworking.send(otherPlayer, PLAY_PLAYER_ANIMATION, buf);
+                sentCount++;
+            }
+        }
+        AncientCurse.LOGGER.info("[PlayerAnimation] Sent animation packet to " + sentCount + " players");
+    }
+
+    // Client packet handler for player animation
+    private static void handlePlayPlayerAnimation(MinecraftClient client, ClientPlayNetworkHandler handler,
+                                                  PacketByteBuf buf, PacketSender responseSender) {
+        UUID playerUuid = buf.readUuid();
+        String animationId = buf.readString();
+
+        AncientCurse.LOGGER.info("[PlayerAnimation] Client received animation packet: " + animationId + " for player UUID: " + playerUuid);
+
+        // Execute on client thread
+        client.execute(() -> {
+            if (client.world != null) {
+                PlayerEntity player = client.world.getPlayerByUuid(playerUuid);
+                AncientCurse.LOGGER.info("[PlayerAnimation] Looking up player by UUID, found: " + (player != null ? player.getName().getString() : "NULL"));
+                if (player instanceof net.minecraft.client.network.AbstractClientPlayerEntity clientPlayer) {
+                    // Play the animation using PlayerAnimationHandler
+                    Identifier animId = new Identifier(AncientCurse.MOD_ID, animationId);
+                    AncientCurse.LOGGER.info("[PlayerAnimation] Calling PlayerAnimationHandler.playAnimation with ID: " + animId);
+                    com.ancientcurse.client.animation.PlayerAnimationHandler.playAnimation(clientPlayer, animId);
+                } else {
+                    AncientCurse.LOGGER.warn("[PlayerAnimation] Player is not AbstractClientPlayerEntity: " + (player != null ? player.getClass().getName() : "null"));
+                }
+            } else {
+                AncientCurse.LOGGER.warn("[PlayerAnimation] Client world is null!");
             }
         });
     }

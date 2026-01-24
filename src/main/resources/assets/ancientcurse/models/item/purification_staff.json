@@ -1,6 +1,73 @@
 {
-  "parent": "item/handheld",
+  "credit": "Made with Blockbench",
+  "parent": "builtin/entity",
+  "texture_size": [
+    32,
+    32
+  ],
+  "display": {
+    "firstperson_lefthand": {
+      "translation": [
+        1.25,
+        0,
+        0
+      ]
+    },
+    "ground": {
+      "rotation": [
+        45,
+        0,
+        0
+      ],
+      "translation": [
+        0,
+        6.5,
+        0
+      ],
+      "scale": [
+        0.34,
+        0.34,
+        0.34
+      ]
+    },
+    "gui": {
+      "rotation": [
+        0,
+        -27,
+        -45
+      ],
+      "translation": [
+        -1.25,
+        -1,
+        0
+      ],
+      "scale": [
+        0.45,
+        0.45,
+        0.45
+      ]
+    },
+    "fixed": {
+      "translation": [
+        0,
+        0,
+        -0.75
+      ],
+      "scale": [
+        0.54,
+        0.54,
+        0.54
+      ]
+    },
+    "on_shelf": {
+      "scale": [
+        0.5,
+        0.5,
+        0.5
+      ]
+    }
+  },
   "textures": {
-    "layer0": "ancientcurse:item/purification_staff"
+    "particle": "ancientcurse:item/purification_staff"
   }
 }

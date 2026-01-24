@@ -23,6 +23,8 @@ public class ScarabMaskRenderer extends GeoArmorRenderer<ScarabMaskItem> {
                                boolean isReRender, float partialTick, int packedLight, int packedOverlay, float red, float green, float blue, float alpha) {
         // Scale down the mask before rendering (65% size to fit better on player head)
         poseStack.push();
+        // Move mask forward slightly so player skin outer layer doesn't clip through
+        poseStack.translate(0.0f, 0.0f, -0.1f);
         poseStack.scale(0.65f, 0.65f, 0.65f);
 
         super.actuallyRender(poseStack, animatable, model, renderType, bufferSource, buffer, isReRender, partialTick, packedLight, packedOverlay, red, green, blue, alpha);

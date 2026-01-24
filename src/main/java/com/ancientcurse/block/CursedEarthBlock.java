@@ -17,6 +17,7 @@ import net.minecraft.block.LeavesBlock;
 import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.registry.tag.TagKey;
 import net.minecraft.registry.Registries;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
@@ -96,7 +97,40 @@ public class CursedEarthBlock extends BaseAncientCurseBlock {
         // Don't add the base Ancient Curse tooltip for cursed earth
         // If you want a specific tooltip, add it here instead
     }
-    
+
+    /**
+     * Called when an entity steps on this block.
+     * This method triggers immediately and reliably when a player steps on cursed earth,
+     * unlike randomTick which is called infrequently.
+     */
+    @Override
+    public void onSteppedOn(World world, BlockPos pos, BlockState state, Entity entity) {
+        super.onSteppedOn(world, pos, state, entity);
+
+        if (!world.isClient && entity instanceof PlayerEntity player) {
+            // Skip creative/spectator players
+            if (player.isCreative() || player.isSpectator()) {
+                return;
+            }
+
+            // Check if we're in an active cleansing zone - if so, do nothing
+            if (SolarSpireBlock.isInActiveCleansingZone(pos)) {
+                return;
+            }
+
+            // Decrease ankh value when standing on cursed earth
+            // Using world time modulo to rate-limit the effect (every 2.5 seconds = 50 ticks)
+            if (world.getTime() % 50 == 0) {
+                int newAnkh = AnkhDataManager.decreaseAnkhValue(player, 1);
+
+                // Handle Ankh depletion when standing on cursed blocks
+                if (newAnkh <= 0) {
+                    handleAnkhDepletionOnCursedBlock(player, (ServerWorld) world, pos);
+                }
+            }
+        }
+    }
+
     @Override
     public void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved) {
         // Only handle removal if the block is actually being replaced with a different type

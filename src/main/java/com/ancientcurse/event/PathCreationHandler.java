@@ -16,7 +16,8 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 /**
- * Handles the creation of sand and sandstone paths when right-clicking with a shovel
+ * Handles the creation of sand and sandstone paths when right-clicking with a
+ * shovel
  */
 public class PathCreationHandler {
 
@@ -49,7 +50,8 @@ public class PathCreationHandler {
 
             // Don't convert if there's a solid block above
             BlockState stateAbove = world.getBlockState(pos.up());
-            if (stateAbove.isSolid() && stateAbove.isSideSolidFullSquare(world, pos.up(), net.minecraft.util.math.Direction.DOWN)) {
+            if (stateAbove.isSolid()
+                    && stateAbove.isSideSolidFullSquare(world, pos.up(), net.minecraft.util.math.Direction.DOWN)) {
                 return ActionResult.PASS;
             }
 
@@ -60,13 +62,12 @@ public class PathCreationHandler {
 
                 // Play sound
                 world.playSound(
-                    null,
-                    pos,
-                    SoundEvents.ITEM_SHOVEL_FLATTEN,
-                    SoundCategory.BLOCKS,
-                    1.0f,
-                    1.0f
-                );
+                        null,
+                        pos,
+                        SoundEvents.ITEM_SHOVEL_FLATTEN,
+                        SoundCategory.BLOCKS,
+                        1.0f,
+                        1.0f);
 
                 // Damage the shovel
                 itemStack.damage(1, player, (p) -> p.sendToolBreakStatus(hand));
@@ -77,12 +78,13 @@ public class PathCreationHandler {
     }
 
     /**
-     * Returns the appropriate path state for a given block, or null if no path variant exists
+     * Returns the appropriate path state for a given block, or null if no path
+     * variant exists
      */
     private static BlockState getPathState(Block block) {
-        // Sand -> Sand Path
-        if (block == Blocks.SAND) {
-            return ConstructionBlocks.SAND_PATH.getDefaultState();
+        // Sand -> Desert Path
+        if (block == Blocks.SAND || block == com.ancientcurse.ModBlocks.SMOOTH_SAND) {
+            return ConstructionBlocks.DESERT_PATH.getDefaultState();
         }
 
         // Red Sand -> Sand Path (using same sand path for red sand too)
@@ -90,20 +92,31 @@ public class PathCreationHandler {
             return ConstructionBlocks.SAND_PATH.getDefaultState();
         }
 
+        // Black Sand -> Black Sand Path
+        if (block == com.ancientcurse.ModBlocks.BLACK_SAND) {
+            return ConstructionBlocks.BLACK_SAND_PATH.getDefaultState();
+        }
+
         // Sandstone -> Sandstone Path
         if (block == Blocks.SANDSTONE ||
-            block == Blocks.SMOOTH_SANDSTONE ||
-            block == Blocks.CUT_SANDSTONE ||
-            block == Blocks.CHISELED_SANDSTONE) {
+                block == Blocks.SMOOTH_SANDSTONE ||
+                block == Blocks.CUT_SANDSTONE ||
+                block == Blocks.CHISELED_SANDSTONE) {
             return ConstructionBlocks.SANDSTONE_PATH.getDefaultState();
         }
 
         // Red Sandstone -> Sandstone Path (using same sandstone path)
         if (block == Blocks.RED_SANDSTONE ||
-            block == Blocks.SMOOTH_RED_SANDSTONE ||
-            block == Blocks.CUT_RED_SANDSTONE ||
-            block == Blocks.CHISELED_RED_SANDSTONE) {
+                block == Blocks.SMOOTH_RED_SANDSTONE ||
+                block == Blocks.CUT_RED_SANDSTONE ||
+                block == Blocks.CHISELED_RED_SANDSTONE) {
             return ConstructionBlocks.SANDSTONE_PATH.getDefaultState();
+        }
+
+        // Deshret Sand -> Deshret Path
+        if (block == com.ancientcurse.ModBlocks.DESHRET_SAND ||
+                block == com.ancientcurse.ModBlocks.DESHRET_WAVY_SAND) {
+            return ConstructionBlocks.DESHRET_PATH.getDefaultState();
         }
 
         return null;

@@ -199,6 +199,7 @@ public class SaltDustBlock extends Block {
 
     /**
      * Finds all salt blocks connected to the given position using flood-fill
+     * Only checks horizontal connections (no vertical jumping)
      */
     private Set<BlockPos> findConnectedSalt(World world, BlockPos startPos) {
         Set<BlockPos> connected = new HashSet<>();
@@ -217,25 +218,13 @@ public class SaltDustBlock extends Block {
 
             connected.add(current);
 
-            // Check all 4 horizontal directions + up/down for stair-stepping
+            // Check all 4 horizontal directions only (same level)
             for (Direction dir : Direction.Type.HORIZONTAL) {
                 BlockPos neighbor = current.offset(dir);
 
-                // Same level
+                // Only add if not already checked
                 if (!connected.contains(neighbor)) {
                     toCheck.add(neighbor);
-                }
-
-                // Up one block (for stairs)
-                BlockPos upNeighbor = neighbor.up();
-                if (!connected.contains(upNeighbor)) {
-                    toCheck.add(upNeighbor);
-                }
-
-                // Down one block (for stairs)
-                BlockPos downNeighbor = neighbor.down();
-                if (!connected.contains(downNeighbor)) {
-                    toCheck.add(downNeighbor);
                 }
             }
         }
