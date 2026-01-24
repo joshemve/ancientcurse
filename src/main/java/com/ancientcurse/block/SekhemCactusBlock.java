@@ -28,9 +28,6 @@ import net.minecraft.world.WorldAccess;
 import net.minecraft.world.WorldView;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.ancientcurse.ModItems;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
@@ -159,64 +156,70 @@ public class SekhemCactusBlock extends BlockWithEntity {
     }
 
     private void growDate(ServerWorld world, BlockPos pos, Random random) {
-        // Find all segments in the current cactus stack
-        List<BlockPos> segments = new ArrayList<>();
-        BlockPos current = pos;
-        // Go down to the bottom
+        // Use mutable pos to avoid allocations
+        BlockPos.Mutable current = pos.mutableCopy();
+
+        // Go down to the bottom of the cactus stack
         while (world.getBlockState(current.down()).isOf(this)) {
-            current = current.down();
+            current.move(Direction.DOWN);
         }
-        // Go up and collect all segments
-        while (world.getBlockState(current).isOf(this)) {
-            segments.add(current);
-            current = current.up();
-        }
+        BlockPos bottomPos = current.toImmutable();
 
-        // Count total dates across the whole cactus
+        // Count dates and empty slots in a single pass (no list allocation)
         int totalDates = 0;
-        List<SlotInfo> emptySlots = new ArrayList<>();
+        int emptySlotCount = 0;
+        int segmentIndex = 0;
 
-        // Skip the bottom segment (index 0) for date growth
-        // Start loop from index 1 (middle segments and up)
-        for (int i = 1; i < segments.size(); i++) {
-            BlockPos p = segments.get(i);
-            BlockEntity be = world.getBlockEntity(p);
+        current.set(bottomPos);
+        while (world.getBlockState(current).isOf(this)) {
+            BlockEntity be = world.getBlockEntity(current);
             if (be instanceof SekhemCactusBlockEntity cactusBe) {
-                if (cactusBe.isDateGrown(1))
+                if (cactusBe.isDateGrown(1)) {
                     totalDates++;
-                else
-                    emptySlots.add(new SlotInfo(p, 1));
-                if (cactusBe.isDateGrown(2))
+                } else if (segmentIndex > 0) {
+                    // Only count empty slots on non-bottom segments
+                    emptySlotCount++;
+                }
+                if (cactusBe.isDateGrown(2)) {
                     totalDates++;
-                else
-                    emptySlots.add(new SlotInfo(p, 2));
+                } else if (segmentIndex > 0) {
+                    emptySlotCount++;
+                }
             }
+            current.move(Direction.UP);
+            segmentIndex++;
         }
 
-        // Also ensure we count dates on the bottom block even if we don't add new ones
-        // there
-        // (in case some grew before this update or were placed)
-        if (!segments.isEmpty()) {
-            BlockEntity bottomBe = world.getBlockEntity(segments.get(0));
-            if (bottomBe instanceof SekhemCactusBlockEntity cactusBe) {
-                if (cactusBe.isDateGrown(1))
-                    totalDates++;
-                if (cactusBe.isDateGrown(2))
-                    totalDates++;
-            }
+        // Limit to 2 dates per entire cactus stack
+        if (totalDates >= 2 || emptySlotCount == 0) {
+            return;
         }
 
-        // Limit to 2 dates per entire cactus stack (modified from 3)
-        if (totalDates < 2 && !emptySlots.isEmpty()) {
-            SlotInfo slot = emptySlots.get(random.nextInt(emptySlots.size()));
-            BlockEntity be = world.getBlockEntity(slot.pos);
+        // Pick a random empty slot and find it in a second pass
+        int targetSlot = random.nextInt(emptySlotCount);
+        int currentSlot = 0;
+
+        current.set(bottomPos).move(Direction.UP); // Start from first non-bottom segment
+        while (world.getBlockState(current).isOf(this)) {
+            BlockEntity be = world.getBlockEntity(current);
             if (be instanceof SekhemCactusBlockEntity cactusBe) {
-                cactusBe.setDateGrown(slot.num, true);
+                if (!cactusBe.isDateGrown(1)) {
+                    if (currentSlot == targetSlot) {
+                        cactusBe.setDateGrown(1, true);
+                        return;
+                    }
+                    currentSlot++;
+                }
+                if (!cactusBe.isDateGrown(2)) {
+                    if (currentSlot == targetSlot) {
+                        cactusBe.setDateGrown(2, true);
+                        return;
+                    }
+                    currentSlot++;
+                }
             }
+            current.move(Direction.UP);
         }
-    }
-
-    private record SlotInfo(BlockPos pos, int num) {
     }
 
     @Override

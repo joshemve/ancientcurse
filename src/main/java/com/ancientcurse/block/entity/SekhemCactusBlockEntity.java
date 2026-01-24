@@ -19,6 +19,9 @@ import net.minecraft.server.world.ServerWorld;
 import org.jetbrains.annotations.Nullable;
 
 public class SekhemCactusBlockEntity extends BlockEntity implements GeoBlockEntity {
+    // Cache the idle animation to avoid creating new RawAnimation objects every frame
+    private static final RawAnimation IDLE_ANIMATION = RawAnimation.begin().thenLoop("animation.sekhem_cactus.idle");
+
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
     private boolean dateGrown1 = false;
     private boolean dateGrown2 = false;
@@ -73,9 +76,7 @@ public class SekhemCactusBlockEntity extends BlockEntity implements GeoBlockEnti
 
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
-        controllers.add(new AnimationController<>(this, "controller", 0, state -> {
-            return state.setAndContinue(RawAnimation.begin().thenLoop("animation.sekhem_cactus.idle"));
-        }));
+        controllers.add(new AnimationController<>(this, "controller", 0, state -> state.setAndContinue(IDLE_ANIMATION)));
     }
 
     @Override
