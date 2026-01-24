@@ -644,8 +644,8 @@ public class RaRenderer extends GeoEntityRenderer<RaEntity> {
                 // Calculate time-based animation values
                 float time = entity.age + partialTick;
 
-                // === RENDER 4-LAYER GLOW SYSTEM ===
-                renderGlowLayers(poseStack, entity, bakedModel, bufferSource, partialTick, packedOverlay, time);
+                // === RENDER ORB-SPECIFIC GLOW SPHERES ===
+                renderOrbGlowSpheres(poseStack, bufferSource, entity, orbWorldPos, time, entityX, entityY, entityZ);
 
                 // === RENDER RADIAL LIGHT RAYS ===
                 renderRadialLightRays(poseStack, bufferSource, entity, orbWorldPos, time, entityX, entityY, entityZ);
@@ -653,55 +653,80 @@ public class RaRenderer extends GeoEntityRenderer<RaEntity> {
         }
 
         /**
-         * Render 4 additive glow layers for the sun orb
+         * Render glowing spheres at the orb position only (not the whole entity)
          */
-        private void renderGlowLayers(MatrixStack poseStack, RaEntity entity, BakedGeoModel bakedModel,
-                VertexConsumerProvider bufferSource, float partialTick, int packedOverlay, float time) {
+        private void renderOrbGlowSpheres(MatrixStack poseStack, VertexConsumerProvider bufferSource,
+                RaEntity entity, Vec3d orbWorldPos, float time, double entityX, double entityY, double entityZ) {
 
-            // Layer 1: Bright white-yellow core (1.0x scale)
-            float coreAlpha = 0.85f + MathHelper.sin(time * 0.15f) * 0.1f;
-            VertexConsumer coreBuffer = bufferSource.getBuffer(
-                    RenderLayer.getEyes(getTextureLocation(entity)));
-            getRenderer().reRender(bakedModel, poseStack, bufferSource, entity,
-                    RenderLayer.getEyes(getTextureLocation(entity)),
-                    coreBuffer, partialTick, 15728880, packedOverlay,
-                    1.0f, 1.0f, 0.8f, coreAlpha);
+            // Get emissive vertex consumer for glow effect
+            VertexConsumer glowBuffer = bufferSource.getBuffer(
+                    RenderLayer.getBeaconBeam(BEACON_TEXTURE, true));
 
-            // Layer 2: Golden inner corona (1.3x scale, offset pulse timing)
-            float innerCoronaAlpha = 0.45f + MathHelper.sin(time * 0.12f + 0.5f) * 0.15f;
+            // Translate to orb position
             poseStack.push();
-            poseStack.scale(1.3f, 1.3f, 1.3f);
-            VertexConsumer innerCoronaBuffer = bufferSource.getBuffer(
-                    RenderLayer.getEntityTranslucentEmissive(getTextureLocation(entity), true));
-            getRenderer().reRender(bakedModel, poseStack, bufferSource, entity,
-                    RenderLayer.getEntityTranslucentEmissive(getTextureLocation(entity), true),
-                    innerCoronaBuffer, partialTick, 15728880, packedOverlay,
-                    1.0f, 0.8f, 0.2f, innerCoronaAlpha);
-            poseStack.pop();
+            poseStack.translate(
+                    orbWorldPos.x - entityX,
+                    orbWorldPos.y - entityY,
+                    orbWorldPos.z - entityZ);
 
-            // Layer 3: Orange outer corona (1.6x scale, different timing)
-            float outerCoronaAlpha = 0.22f + MathHelper.sin(time * 0.08f + 1.2f) * 0.08f;
-            poseStack.push();
-            poseStack.scale(1.6f, 1.6f, 1.6f);
-            VertexConsumer outerCoronaBuffer = bufferSource.getBuffer(
-                    RenderLayer.getEntityTranslucentEmissive(getTextureLocation(entity), true));
-            getRenderer().reRender(bakedModel, poseStack, bufferSource, entity,
-                    RenderLayer.getEntityTranslucentEmissive(getTextureLocation(entity), true),
-                    outerCoronaBuffer, partialTick, 15728880, packedOverlay,
-                    1.0f, 0.5f, 0.1f, outerCoronaAlpha);
-            poseStack.pop();
+            // Render multiple glow layers as billboard quads
+            // Layer 1: Bright core
+            float coreAlpha = 0.9f + MathHelper.sin(time * 0.15f) * 0.1f;
+            renderGlowQuad(poseStack, glowBuffer, 0.25f, 1.0f, 1.0f, 0.7f, coreAlpha);
 
-            // Layer 4: Red-orange heat shimmer (2.0x scale, slow pulse)
-            float shimmerAlpha = 0.08f + MathHelper.sin(time * 0.05f + 2.0f) * 0.04f;
-            poseStack.push();
-            poseStack.scale(2.0f, 2.0f, 2.0f);
-            VertexConsumer shimmerBuffer = bufferSource.getBuffer(
-                    RenderLayer.getEntityTranslucentEmissive(getTextureLocation(entity), true));
-            getRenderer().reRender(bakedModel, poseStack, bufferSource, entity,
-                    RenderLayer.getEntityTranslucentEmissive(getTextureLocation(entity), true),
-                    shimmerBuffer, partialTick, 15728880, packedOverlay,
-                    1.0f, 0.3f, 0.05f, shimmerAlpha);
+            // Layer 2: Inner corona
+            float innerAlpha = 0.5f + MathHelper.sin(time * 0.12f + 0.5f) * 0.15f;
+            renderGlowQuad(poseStack, glowBuffer, 0.4f, 1.0f, 0.8f, 0.2f, innerAlpha);
+
+            // Layer 3: Outer corona
+            float outerAlpha = 0.25f + MathHelper.sin(time * 0.08f + 1.2f) * 0.1f;
+            renderGlowQuad(poseStack, glowBuffer, 0.6f, 1.0f, 0.5f, 0.1f, outerAlpha);
+
+            // Layer 4: Heat shimmer
+            float shimmerAlpha = 0.12f + MathHelper.sin(time * 0.05f + 2.0f) * 0.05f;
+            renderGlowQuad(poseStack, glowBuffer, 0.9f, 1.0f, 0.3f, 0.05f, shimmerAlpha);
+
             poseStack.pop();
+        }
+
+        /**
+         * Render a billboard glow quad at current position
+         */
+        private void renderGlowQuad(MatrixStack poseStack, VertexConsumer buffer,
+                float size, float red, float green, float blue, float alpha) {
+
+            MatrixStack.Entry entry = poseStack.peek();
+            Matrix4f matrix = entry.getPositionMatrix();
+            Matrix3f normal = entry.getNormalMatrix();
+
+            // Render a simple quad facing the camera (billboard style)
+            // Front face
+            buffer.vertex(matrix, -size, -size, 0).color(red, green, blue, alpha)
+                    .texture(0, 0).overlay(OverlayTexture.DEFAULT_UV).light(15728880)
+                    .normal(normal, 0, 0, 1).next();
+            buffer.vertex(matrix, -size, size, 0).color(red, green, blue, alpha)
+                    .texture(0, 1).overlay(OverlayTexture.DEFAULT_UV).light(15728880)
+                    .normal(normal, 0, 0, 1).next();
+            buffer.vertex(matrix, size, size, 0).color(red, green, blue, alpha)
+                    .texture(1, 1).overlay(OverlayTexture.DEFAULT_UV).light(15728880)
+                    .normal(normal, 0, 0, 1).next();
+            buffer.vertex(matrix, size, -size, 0).color(red, green, blue, alpha)
+                    .texture(1, 0).overlay(OverlayTexture.DEFAULT_UV).light(15728880)
+                    .normal(normal, 0, 0, 1).next();
+
+            // Back face (so it's visible from all angles)
+            buffer.vertex(matrix, size, -size, 0).color(red, green, blue, alpha)
+                    .texture(0, 0).overlay(OverlayTexture.DEFAULT_UV).light(15728880)
+                    .normal(normal, 0, 0, -1).next();
+            buffer.vertex(matrix, size, size, 0).color(red, green, blue, alpha)
+                    .texture(0, 1).overlay(OverlayTexture.DEFAULT_UV).light(15728880)
+                    .normal(normal, 0, 0, -1).next();
+            buffer.vertex(matrix, -size, size, 0).color(red, green, blue, alpha)
+                    .texture(1, 1).overlay(OverlayTexture.DEFAULT_UV).light(15728880)
+                    .normal(normal, 0, 0, -1).next();
+            buffer.vertex(matrix, -size, -size, 0).color(red, green, blue, alpha)
+                    .texture(1, 0).overlay(OverlayTexture.DEFAULT_UV).light(15728880)
+                    .normal(normal, 0, 0, -1).next();
         }
 
         /**

@@ -47,7 +47,20 @@ public class PlayerAnimationHandler {
                     KeyframeAnimation animation = PlayerAnimationRegistry.getAnimation(animationId);
                     if (animation != null) {
                         AncientCurse.LOGGER.info("[PlayerAnimation] Animation found! Setting animation on layer...");
-                        animationLayer.setAnimation(new KeyframeAnimationPlayer(animation));
+                        // Create animation player and immediately reset layer when done to prevent reverse spin
+                        KeyframeAnimationPlayer animPlayer = new KeyframeAnimationPlayer(animation) {
+                            @Override
+                            public boolean isActive() {
+                                boolean active = super.isActive();
+                                // When animation becomes inactive, immediately clear to prevent fade-out reverse spin
+                                if (!active && animationLayer.getAnimation() == this) {
+                                    animationLayer.setAnimation(null);
+                                }
+                                return active;
+                            }
+                        };
+                        animPlayer.setFirstPersonMode(dev.kosmx.playerAnim.api.firstPerson.FirstPersonMode.DISABLED);
+                        animationLayer.setAnimation(animPlayer);
                         AncientCurse.LOGGER.info("[PlayerAnimation] SUCCESS - Animation " + animationId + " is now playing on " + player.getName().getString());
                         return true;
                     } else {

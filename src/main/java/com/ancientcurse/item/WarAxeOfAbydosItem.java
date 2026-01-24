@@ -97,36 +97,14 @@ public class WarAxeOfAbydosItem extends AxeItem implements GeoItem {
         player.addStatusEffect(new StatusEffectInstance(StatusEffects.STRENGTH, 60, 2));
         player.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, 60, 1));
 
-        // Spin attack visual effect
-        for (int i = 0; i < 360; i += 10) {
-            double angle = Math.toRadians(i);
-            double x = player.getX() + Math.cos(angle) * 2.5;
-            double z = player.getZ() + Math.sin(angle) * 2.5;
-            
-            serverWorld.spawnParticles(
-                ParticleTypes.SWEEP_ATTACK,
-                x, player.getY() + 1, z,
-                1, 0, 0, 0, 0
-            );
-            
-            if (i % 30 == 0) {
-                serverWorld.spawnParticles(
-                    ParticleTypes.CRIT,
-                    x, player.getY() + 1, z,
-                    5, 0.1, 0.1, 0.1, 0.1
-                );
-            }
-        }
-        
-        // Sound effects
-        world.playSound(null, player.getX(), player.getY(), player.getZ(),
-            SoundEvents.ENTITY_PLAYER_ATTACK_SWEEP, SoundCategory.PLAYERS,
-            1.5F, 0.8F);
-        world.playSound(null, player.getX(), player.getY(), player.getZ(),
-            SoundEvents.ITEM_TRIDENT_RIPTIDE_1, SoundCategory.PLAYERS,
-            1.0F, 1.2F);
-        
-        // Damage entities in area
+        // Immediate particles and sounds - compensate for player movement
+        // Offset slightly forward based on velocity to keep particles centered during movement
+        Vec3d velocity = player.getVelocity();
+        double offsetX = velocity.x * 3; // Predict 3 ticks ahead
+        double offsetZ = velocity.z * 3;
+        spawnSpinEffects(serverWorld, player.getX() + offsetX, player.getY(), player.getZ() + offsetZ);
+
+        // Damage entities in area (also delayed to match spin)
         Box damageBox = new Box(
             player.getX() - 3, player.getY() - 1, player.getZ() - 3,
             player.getX() + 3, player.getY() + 2, player.getZ() + 3
@@ -157,7 +135,41 @@ public class WarAxeOfAbydosItem extends AxeItem implements GeoItem {
             }
         }
     }
-    
+
+    /**
+     * Spawn immediate spin attack particles and sounds.
+     */
+    private void spawnSpinEffects(ServerWorld serverWorld, double x, double y, double z) {
+        // Spawn particles in a circle
+        for (int i = 0; i < 360; i += 10) {
+            double angle = Math.toRadians(i);
+            double px = x + Math.cos(angle) * 2.5;
+            double pz = z + Math.sin(angle) * 2.5;
+
+            serverWorld.spawnParticles(
+                ParticleTypes.SWEEP_ATTACK,
+                px, y + 1, pz,
+                1, 0, 0, 0, 0
+            );
+
+            if (i % 30 == 0) {
+                serverWorld.spawnParticles(
+                    ParticleTypes.CRIT,
+                    px, y + 1, pz,
+                    5, 0.1, 0.1, 0.1, 0.1
+                );
+            }
+        }
+
+        // Play sounds
+        serverWorld.playSound(null, x, y, z,
+            SoundEvents.ENTITY_PLAYER_ATTACK_SWEEP, SoundCategory.PLAYERS,
+            1.5F, 0.8F);
+        serverWorld.playSound(null, x, y, z,
+            SoundEvents.ITEM_TRIDENT_RIPTIDE_1, SoundCategory.PLAYERS,
+            1.0F, 1.2F);
+    }
+
     @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
         // Ancient Fury - chance to inflict Wither

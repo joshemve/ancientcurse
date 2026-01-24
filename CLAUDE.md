@@ -70,6 +70,65 @@ The mod uses a sophisticated registry system to organize content:
 - **Textures**: PNG files in `assets/ancientcurse/textures/item/` or `/entity/`
 - **Staff of Ra**: Flagship animated item with rotating sun element
 
+### Player Animation System (PlayerAnimator)
+The mod uses the PlayerAnimator library for player body animations (spin attacks, emotes, etc.).
+
+**Dependencies** (in build.gradle):
+```gradle
+repositories {
+    maven { url 'https://maven.kosmx.dev/' }
+}
+dependencies {
+    modImplementation "dev.kosmx.player-anim:player-animation-lib-fabric:1.0.2-rc1+1.20"
+    include "dev.kosmx.player-anim:player-animation-lib-fabric:1.0.2-rc1+1.20"
+}
+```
+
+**Animation Files**: Place in `assets/ancientcurse/player_animation/` folder
+- PlayerAnimator auto-loads all JSON files from this folder
+- Use **Bedrock animation format** with `format_version: "1.8.0"`
+- Animation name inside JSON must match the lookup key (e.g., `"waraxe_spin_attack"`)
+
+**Smooth Interpolation**: Use Catmull-Rom splines for smooth curves:
+```json
+{
+  "format_version": "1.8.0",
+  "animations": {
+    "your_animation_name": {
+      "loop": false,
+      "animation_length": 1.0,
+      "bones": {
+        "body": {
+          "rotation": {
+            "0.0": {"post": [0, 0, 0], "lerp_mode": "catmullrom"},
+            "0.5": {"post": [0, -180, 0], "lerp_mode": "catmullrom"},
+            "1.0": {"post": [0, -360, 0], "lerp_mode": "catmullrom"}
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+**Bone Names**: `body`, `head`, `rightArm`, `leftArm`, `rightLeg`, `leftLeg`
+
+**Key Components**:
+- `IAnimatedPlayer` - Interface for players with animation layer
+- `PlayerAnimationMixin` - Injects ModifierLayer into AbstractClientPlayerEntity
+- `PlayerAnimationHandler` - Plays animations via `PlayerAnimationRegistry.getAnimation()`
+- `CurseZonePackets` - Network sync for server→client animation broadcast
+
+**Playing Animations from Server**:
+```java
+CurseZonePackets.sendPlayerAnimation(serverWorld, player, "animation_name");
+```
+
+**Common Issues**:
+- Animation NOT FOUND: Check animation name in JSON matches lookup key
+- Choppy animation: Use `lerp_mode: "catmullrom"` instead of linear interpolation
+- Reverse spin at end: End at final rotation (e.g., -360) not 0 to avoid snap-back
+
 ### Entity System
 - **Boss Entities**: `DjeserhathEntity`, `WitheredPharaohEntity`
 - **Hostile Mobs**: `LocusEntity`, `BabyLocusEntity`, `ScarabBeetleEntity`
@@ -131,7 +190,8 @@ com.ancientcurse/
 - **Minecraft**: 1.20.1
 - **Fabric Loader**: 0.14.21+
 - **Fabric API**: 0.87.0+1.20.1
-- **GeckoLib**: 4.2.3 (critical for animations)
+- **GeckoLib**: 4.2.3 (entity/item 3D animations)
+- **PlayerAnimator**: 1.0.2-rc1+1.20 (player body animations)
 
 ## Testing and Validation
 - **World Generation**: Create new "Ancient Curse" world type
