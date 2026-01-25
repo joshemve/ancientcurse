@@ -68,6 +68,9 @@ public class AncientCurseClient implements ClientModInitializer {
     public void onInitializeClient() {
         AncientCurse.LOGGER.info("Initializing Ancient Curse Client");
 
+        // Register custom shaders (must be done early, before renderers that use them)
+        SunBeamShaderLoader.register();
+
         // Register entity renderers FIRST before anything else
         registerEntityRenderers();
 
@@ -119,7 +122,8 @@ public class AncientCurseClient implements ClientModInitializer {
         // Register network packets
         CurseZonePackets.registerClientPackets();
 
-        // Register player animations (PlayerAnimator auto-loads from player_animation folder)
+        // Register player animations (PlayerAnimator auto-loads from player_animation
+        // folder)
         ModAnimations.register();
 
         // Note: Player animation layers are registered via PlayerAnimationMixin
@@ -194,6 +198,9 @@ public class AncientCurseClient implements ClientModInitializer {
 
         // Register the Ra renderer
         EntityRendererRegistry.register(ModEntities.RA, RaRenderer::new);
+
+        // Register the Sun Shard projectile renderer
+        EntityRendererRegistry.register(ModEntities.SUN_SHARD_PROJECTILE, SunShardProjectileRenderer::new);
     }
 
     /**

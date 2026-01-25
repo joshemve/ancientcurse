@@ -59,7 +59,7 @@ public class RaGroundSmackGoal extends Goal {
      * and note the timestamp. Multiply by 20 to get ticks.
      */
     private static final int GROUND_SMACK_DURATION = 60; // 3 seconds - matches animation_length
-    private static final int DAMAGE_FRAME = 20; // 1.0s - when slam impacts (per user feedback)
+    private static final int DAMAGE_FRAME = 23; // 1.15s - when slam impacts (per user feedback)
 
     public RaGroundSmackGoal(RaEntity ra) {
         this.ra = ra;
@@ -102,6 +102,10 @@ public class RaGroundSmackGoal extends Goal {
         animationTicks = GROUND_SMACK_DURATION;
         hasDealtDamage = false;
 
+        // Stop all movement - Ra should be stationary during ground smack
+        ra.setVelocity(0, 0, 0);
+        ra.getNavigation().stop();
+
         // Look at target
         if (ra.getTarget() != null) {
             ra.getLookControl().lookAt(ra.getTarget(), 30.0f, 30.0f);
@@ -136,16 +140,21 @@ public class RaGroundSmackGoal extends Goal {
     public void tick() {
         animationTicks--;
 
+        // Ensure Ra stays still during animation
+        ra.setVelocity(0, ra.getVelocity().y, 0); // Preserve gravity, stop horizontal movement
+
         // Deal damage at the slam frame
         int frameInAnimation = GROUND_SMACK_DURATION - animationTicks;
 
-        // Track target and update beam direction during buildup phase (first 1s)
-        LivingEntity target = ra.getTarget();
-        if (target != null && target.isAlive()) {
-            ra.getLookControl().lookAt(target, 30.0f, 30.0f);
+        // Track target and update beam direction ONLY during buildup phase (before impact)
+        // After DAMAGE_FRAME, Ra locks facing direction and beam direction
+        if (frameInAnimation < DAMAGE_FRAME) {
+            LivingEntity target = ra.getTarget();
+            if (target != null && target.isAlive()) {
+                // Track target with look control
+                ra.getLookControl().lookAt(target, 30.0f, 30.0f);
 
-            // Sync beam direction until the impact point (DAMAGE_FRAME)
-            if (frameInAnimation < DAMAGE_FRAME) {
+                // Sync beam direction toward target
                 net.minecraft.util.math.Vec3d startPos = ra.getPos().add(0, 3.0, 0);
                 net.minecraft.util.math.Vec3d targetPos = target.getPos().add(0, target.getHeight() * 0.5, 0);
                 net.minecraft.util.math.Vec3d direction = targetPos.subtract(startPos).normalize();
@@ -157,6 +166,7 @@ public class RaGroundSmackGoal extends Goal {
                 ra.setSunBeamDirection(direction);
             }
         }
+        // After DAMAGE_FRAME: Ra is locked in position and facing - no more tracking
 
         if (frameInAnimation == DAMAGE_FRAME && !hasDealtDamage) {
             dealAreaDamage();
@@ -224,53 +234,92 @@ public class RaGroundSmackGoal extends Goal {
 
     /**
      * Spawn solar-themed particles for the ground impact effect.
-     * Uses golden/yellow particles to match the sun beam visual.
+     * Creates radiating light rays shooting outward for a "woosh" effect.
      */
     private void spawnSolarImpactParticles(double radius) {
         if (!(ra.getWorld() instanceof ServerWorld serverWorld))
             return;
 
-        // Ring of golden flame particles
-        for (int i = 0; i < 36; i++) {
-            double angle = Math.toRadians(i * 10);
-            double x = ra.getX() + Math.cos(angle) * radius;
-            double z = ra.getZ() + Math.sin(angle) * radius;
+        // === RADIATING LIGHT RAYS (the "woosh" effect) ===
+        // 16 rays shooting outward from center like a starburst
+        for (int i = 0; i < 16; i++) {
+            double angle = Math.toRadians(i * 22.5); // 360/16 = 22.5 degrees apart
+            double dirX = Math.cos(angle);
+            double dirZ = Math.sin(angle);
 
+            // Each ray is a stream of fast-moving flame particles
+            for (int j = 0; j < 6; j++) {
+                double distance = 0.3 + j * 0.4; // Staggered along the ray
+                double speed = 0.15 + j * 0.03;  // Faster particles further out
+
+                serverWorld.spawnParticles(
+                        ParticleTypes.FLAME,
+                        ra.getX() + dirX * distance,
+                        ra.getY() + 0.2 + j * 0.05,
+                        ra.getZ() + dirZ * distance,
+                        1,
+                        0.05, 0.02, 0.05,
+                        speed);
+            }
+
+            // Small flame trail along each ray for extra "woosh"
+            serverWorld.spawnParticles(
+                    ParticleTypes.SMALL_FLAME,
+                    ra.getX() + dirX * radius * 0.5,
+                    ra.getY() + 0.3,
+                    ra.getZ() + dirZ * radius * 0.5,
+                    4,
+                    0.1, 0.05, 0.1,
+                    0.12);
+        }
+
+        // === RISING LIGHT PILLAR (vertical beam at impact) ===
+        for (int i = 0; i < 12; i++) {
+            double height = 0.5 + i * 0.3;
             serverWorld.spawnParticles(
                     ParticleTypes.FLAME,
-                    x, ra.getY() + 0.1, z,
-                    3, // count
-                    0.2, 0.1, 0.2, // spread
-                    0.05 // speed
-            );
-
-            // Add end rod particles for golden shimmer
-            serverWorld.spawnParticles(
-                    ParticleTypes.END_ROD,
-                    x, ra.getY() + 0.3, z,
-                    1,
-                    0.1, 0.2, 0.1,
+                    ra.getX(), ra.getY() + height, ra.getZ(),
+                    2,
+                    0.15, 0.1, 0.15,
                     0.02);
         }
 
-        // Central solar burst (lava + end rods instead of explosion)
+        // Electric sparks shooting upward (divine energy)
+        serverWorld.spawnParticles(
+                ParticleTypes.ELECTRIC_SPARK,
+                ra.getX(), ra.getY() + 0.5, ra.getZ(),
+                20,
+                0.3, 0.5, 0.3,
+                0.15);
+
+        // === EXPANDING RING of flames (ground shockwave) ===
+        for (int i = 0; i < 24; i++) {
+            double angle = Math.toRadians(i * 15);
+            double x = ra.getX() + Math.cos(angle) * radius;
+            double z = ra.getZ() + Math.sin(angle) * radius;
+
+            // Fast outward-moving flames
+            serverWorld.spawnParticles(
+                    ParticleTypes.FLAME,
+                    x, ra.getY() + 0.15, z,
+                    2,
+                    0.1, 0.05, 0.1,
+                    0.08);
+        }
+
+        // Central lava burst (intense heat core)
         serverWorld.spawnParticles(
                 ParticleTypes.LAVA,
-                ra.getX(), ra.getY() + 0.3, ra.getZ(),
-                8, 0.3, 0.1, 0.3, 0);
+                ra.getX(), ra.getY() + 0.2, ra.getZ(),
+                6, 0.2, 0.1, 0.2, 0);
 
-        serverWorld.spawnParticles(
-                ParticleTypes.END_ROD,
-                ra.getX(), ra.getY() + 0.5, ra.getZ(),
-                12, 0.5, 0.3, 0.5, 0.05);
-
-        // Warm dust cloud
+        // Light dust cloud (warm golden feel)
         serverWorld.spawnParticles(
                 ParticleTypes.CAMPFIRE_COSY_SMOKE,
-                ra.getX(), ra.getY() + 0.2, ra.getZ(),
-                15,
-                radius * 0.4, 0.2, radius * 0.4,
-                0.01);
+                ra.getX(), ra.getY() + 0.1, ra.getZ(),
+                8,
+                radius * 0.3, 0.1, radius * 0.3,
+                0.005);
     }
 
     /**

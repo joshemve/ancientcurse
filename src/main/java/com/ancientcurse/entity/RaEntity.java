@@ -3,6 +3,7 @@ package com.ancientcurse.entity;
 import com.ancientcurse.ModItems;
 import com.ancientcurse.entity.ai.RaFlightGoal;
 import com.ancientcurse.entity.ai.RaGroundSmackGoal;
+import com.ancientcurse.entity.ai.RaShardAttackGoal;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.ai.goal.*;
 import net.minecraft.entity.attribute.DefaultAttributeContainer;
@@ -151,6 +152,8 @@ public class RaEntity extends HostileEntity implements GeoEntity {
             RaEntity.class, TrackedDataHandlerRegistry.FLOAT);
     private static final TrackedData<Float> SUN_BEAM_DIR_Z = DataTracker.registerData(
             RaEntity.class, TrackedDataHandlerRegistry.FLOAT);
+    private static final TrackedData<Integer> SHARD_ATTACK_TICKS = DataTracker.registerData(
+            RaEntity.class, TrackedDataHandlerRegistry.INTEGER);
 
     /* ========== FIELDS ========== */
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
@@ -159,6 +162,7 @@ public class RaEntity extends HostileEntity implements GeoEntity {
     // AI Goals (server-side only, kept as references for tick updates)
     private RaFlightGoal flightGoal;
     private RaGroundSmackGoal groundSmackGoal;
+    private RaShardAttackGoal shardAttackGoal;
 
     // Phase tracking
     private RaPhase currentPhase = RaPhase.PHASE_1_AWAKENED;
@@ -224,8 +228,10 @@ public class RaEntity extends HostileEntity implements GeoEntity {
         // Priority 1: Ra-specific combat goals (server-side AI)
         this.flightGoal = new RaFlightGoal(this);
         this.groundSmackGoal = new RaGroundSmackGoal(this);
+        this.shardAttackGoal = new RaShardAttackGoal(this);
         this.goalSelector.add(1, this.groundSmackGoal); // Ground smack takes priority over melee
-        this.goalSelector.add(2, this.flightGoal); // Flight behavior
+        this.goalSelector.add(2, this.shardAttackGoal); // Shard attack
+        this.goalSelector.add(3, this.flightGoal); // Flight behavior
 
         // Priority 3: Standard melee when in range
         this.goalSelector.add(3, new MeleeAttackGoal(this, 1.2D, false));
@@ -249,6 +255,7 @@ public class RaEntity extends HostileEntity implements GeoEntity {
         this.dataTracker.startTracking(SUN_BEAM_DIR_X, 0.0f);
         this.dataTracker.startTracking(SUN_BEAM_DIR_Y, -1.0f);
         this.dataTracker.startTracking(SUN_BEAM_DIR_Z, 0.0f);
+        this.dataTracker.startTracking(SHARD_ATTACK_TICKS, 0);
     }
 
     /* ========== ATTRIBUTES ========== */
@@ -306,6 +313,14 @@ public class RaEntity extends HostileEntity implements GeoEntity {
         this.dataTracker.set(COMBAT_STATE, state.getId());
     }
 
+    /**
+     * Trigger a combat action with a specified duration.
+     */
+    public void triggerAction(RaCombatState state, int duration) {
+        setCombatState(state);
+        this.actionAnimationTicks = duration;
+    }
+
     public boolean isFlying() {
         return this.dataTracker.get(FLYING);
     }
@@ -343,8 +358,8 @@ public class RaEntity extends HostileEntity implements GeoEntity {
             if (this.groundSmackGoal != null) {
                 this.groundSmackGoal.tickCooldown();
             }
-            if (this.groundSmackGoal != null) {
-                this.groundSmackGoal.tickCooldown();
+            if (this.shardAttackGoal != null) {
+                this.shardAttackGoal.tickCooldown();
             }
 
             // Update sun beam slice ticks for client-side rendering
@@ -489,13 +504,6 @@ public class RaEntity extends HostileEntity implements GeoEntity {
         this.actionAnimationTicks = FLYING_STAFF_ATTACK_DURATION;
     }
 
-    /**
-     * Trigger sun beam slice attack - divine vertical light beam
-     */
-    public void triggerSunBeamSlice() {
-        // Obsolete separate attack, handled by Ground Smack
-    }
-
     public void setSunBeamDirection(Vec3d dir) {
         this.dataTracker.set(SUN_BEAM_DIR_X, (float) dir.x);
         this.dataTracker.set(SUN_BEAM_DIR_Y, (float) dir.y);
@@ -515,6 +523,25 @@ public class RaEntity extends HostileEntity implements GeoEntity {
     public boolean isPerformingSunBeamSlice() {
         return getCombatState() == RaCombatState.GROUND_SMACK
                 && this.dataTracker.get(SUN_BEAM_SLICE_TICKS) > 0;
+    }
+
+    /**
+     * Check if currently performing shard attack
+     */
+    public boolean isPerformingShardAttack() {
+        return getCombatState() == RaCombatState.SHARD_ATTACK
+                && this.dataTracker.get(SHARD_ATTACK_TICKS) > 0;
+    }
+
+    /**
+     * Get remaining shard attack ticks (for client-side rendering)
+     */
+    public int getShardAttackTicks() {
+        return this.dataTracker.get(SHARD_ATTACK_TICKS);
+    }
+
+    public void setShardAttackTicks(int ticks) {
+        this.dataTracker.set(SHARD_ATTACK_TICKS, ticks);
     }
 
     /**
@@ -593,6 +620,9 @@ public class RaEntity extends HostileEntity implements GeoEntity {
         if (targetState == RaCombatState.GROUND_SMACK && this.groundSmackGoal != null) {
             setCombatState(RaCombatState.IDLE);
             this.groundSmackGoal.forceStart();
+        } else if (targetState == RaCombatState.SHARD_ATTACK && this.shardAttackGoal != null) {
+            setCombatState(RaCombatState.IDLE);
+            this.shardAttackGoal.forceStart();
         } else {
             setCombatState(targetState);
             this.actionAnimationTicks = duration;
@@ -666,6 +696,9 @@ public class RaEntity extends HostileEntity implements GeoEntity {
         msg.append("\n§7Flying: §f").append(isFlying());
         msg.append("\n§7Performing Action: §f").append(isPerformingAction());
         msg.append("\n§7Action Ticks Left: §f").append(actionAnimationTicks);
+        if (getShardAttackTicks() > 0) {
+            msg.append("\n§7Shard Ticks: §f").append(getShardAttackTicks());
+        }
         msg.append("\n§7---");
         msg.append("\n§7Movement Controller: §b").append(movementAnim);
         msg.append("\n§7Attack Controller: §b").append(attackAnim);
