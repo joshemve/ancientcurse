@@ -2,6 +2,7 @@ package com.ancientcurse;
 
 import com.ancientcurse.item.AnimationDebugStick;
 import com.ancientcurse.item.AncientPickItem;
+import com.ancientcurse.item.BindingCrossbowItem;
 import com.ancientcurse.item.CurseZoneAdminWand;
 import com.ancientcurse.item.CustomAnimatedItem;
 import com.ancientcurse.item.ElixirOfRasSparkItem;
@@ -291,6 +292,10 @@ public class ModItems {
 
         // Jackel Binds - Restraining handcuffs
         public static final Item JACKEL_BINDS = new com.ancientcurse.item.armor.JackelBindsItem();
+
+        // Binding Crossbow - Used to stun Ra by shooting binding bolts
+        public static final BindingCrossbowItem BINDING_CROSSBOW = new BindingCrossbowItem(
+                        new FabricItemSettings().maxCount(1).maxDamage(384));
 
         // Soul Lava Bucket
         public static final Item SOUL_LAVA_BUCKET = new net.minecraft.item.BucketItem(
@@ -668,5 +673,11 @@ public class ModItems {
                                 Registries.ITEM,
                                 new Identifier(AncientCurse.MOD_ID, "soul_lava_bucket"),
                                 SOUL_LAVA_BUCKET);
+
+                // Register Binding Crossbow (used to stun Ra)
+                Registry.register(
+                                Registries.ITEM,
+                                new Identifier(AncientCurse.MOD_ID, "binding_crossbow"),
+                                BINDING_CROSSBOW);
         }
 }

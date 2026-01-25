@@ -43,15 +43,14 @@ public class RaRenderer extends GeoEntityRenderer<RaEntity> {
         // Boss-appropriate shadow size
         this.shadowRadius = 1.2f;
 
-        // Add glowing render layers for divine fire aura
-        addRenderLayer(new DivineFireAuraLayer(this));
-        addRenderLayer(new SolarCoronaLayer(this));
+        // Note: DivineFireAuraLayer, SolarCoronaLayer, and SunOrbGlowLayer removed -
+        // they applied glow effects that caused unwanted layering
 
         // Add wing fire particle layer - spawns particles from animated bone positions
         addRenderLayer(new WingFireParticleLayer(this));
 
-        // Add sun orb specific multi-layer glow with radial light rays
-        addRenderLayer(new SunOrbGlowLayer(this));
+        // Add sun beam slice attack layer - divine vertical light beam
+        addRenderLayer(new SunBeamSliceLayer(this));
     }
 
     @Override
@@ -66,49 +65,11 @@ public class RaRenderer extends GeoEntityRenderer<RaEntity> {
     }
 
     /**
-     * Spawn fire and flame particles from all locator points
+     * Spawn fire and flame particles - DISABLED for now
+     * Wing particles are handled by WingFireParticleLayer
      */
     private void spawnParticles(RaEntity entity, float partialTick) {
-        particleTick++;
-
-        // Get the model to access bone positions
-        BakedGeoModel model = this.getGeoModel().getBakedModel(this.getGeoModel().getModelResource(entity));
-        if (model == null)
-            return;
-
-        // Entity position and rotation (interpolated for smoothness)
-        double entityX = MathHelper.lerp(partialTick, entity.prevX, entity.getX());
-        double entityY = MathHelper.lerp(partialTick, entity.prevY, entity.getY());
-        double entityZ = MathHelper.lerp(partialTick, entity.prevZ, entity.getZ());
-        float bodyYaw = MathHelper.lerpAngleDegrees(partialTick, entity.prevBodyYaw, entity.bodyYaw);
-
-        // Wing fire particles are now handled by WingFireParticleLayer for proper bone
-        // tracking
-
-        // Sun orb particles - constant solar energy
-        if (particleTick % 3 == 0) {
-            spawnSunOrbParticles(entity, model, entityX, entityY, entityZ, bodyYaw);
-        }
-
-        // Sun crown fire particles
-        if (particleTick % 4 == 0) {
-            spawnSunCrownParticles(entity, model, entityX, entityY, entityZ, bodyYaw);
-        }
-
-        // Eye glow particles - occasional divine sparks
-        if (particleTick % 8 == 0) {
-            spawnEyeParticles(entity, model, entityX, entityY, entityZ, bodyYaw);
-        }
-
-        // Chest glow particles
-        if (particleTick % 6 == 0) {
-            spawnChestGlowParticles(entity, model, entityX, entityY, entityZ, bodyYaw);
-        }
-
-        // Occasional fire breath
-        if (particleTick % 10 == 0 && entity.getRandom().nextFloat() < 0.3f) {
-            spawnFireBreathParticles(entity, model, entityX, entityY, entityZ, bodyYaw);
-        }
+        // All particles disabled - wing flames handled by WingFireParticleLayer
     }
 
     /**
@@ -426,84 +387,16 @@ public class RaRenderer extends GeoEntityRenderer<RaEntity> {
     }
 
     /**
-     * Divine fire aura render layer - creates a pulsing emissive glow around Ra
-     * Uses the main texture with additive blending for a sun god radiance effect
-     */
-    private class DivineFireAuraLayer extends GeoRenderLayer<RaEntity> {
-        public DivineFireAuraLayer(GeoEntityRenderer<RaEntity> entityRenderer) {
-            super(entityRenderer);
-        }
-
-        @Override
-        public void render(MatrixStack poseStack, RaEntity entity, BakedGeoModel bakedModel,
-                RenderLayer renderType, VertexConsumerProvider bufferSource, VertexConsumer buffer,
-                float partialTick, int packedLight, int packedOverlay) {
-
-            // Calculate pulsing divine aura effect
-            float time = entity.age + partialTick;
-            float pulse = 0.15f + MathHelper.sin(time * 0.1f) * 0.05f;
-            float warmth = 0.9f + MathHelper.sin(time * 0.08f) * 0.1f;
-
-            // Use emissive render layer with the main texture for divine glow
-            // RenderLayer.getEyes ignores lighting, creating true emissive effect
-            VertexConsumer emissiveBuffer = bufferSource.getBuffer(
-                    RenderLayer.getEyes(getTextureLocation(entity)));
-
-            // Render with warm golden-orange tint at low alpha for subtle divine radiance
-            // This creates a sun-like aura without overpowering the main texture
-            getRenderer().reRender(bakedModel, poseStack, bufferSource, entity, renderType,
-                    emissiveBuffer, partialTick, 15728880, OverlayTexture.DEFAULT_UV,
-                    1.0f * warmth, 0.7f * warmth, 0.2f, pulse);
-        }
-    }
-
-    /**
-     * Solar corona render layer - secondary glow with different timing for depth
-     */
-    private class SolarCoronaLayer extends GeoRenderLayer<RaEntity> {
-        public SolarCoronaLayer(GeoEntityRenderer<RaEntity> entityRenderer) {
-            super(entityRenderer);
-        }
-
-        @Override
-        public void render(MatrixStack poseStack, RaEntity entity, BakedGeoModel bakedModel,
-                RenderLayer renderType, VertexConsumerProvider bufferSource, VertexConsumer buffer,
-                float partialTick, int packedLight, int packedOverlay) {
-
-            // Calculate secondary pulse with offset timing for layered glow effect
-            float time = entity.age + partialTick;
-            float pulse = 0.08f + MathHelper.sin(time * 0.15f + 1.5f) * 0.04f;
-
-            // Use translucent emissive for softer outer glow
-            VertexConsumer emissiveBuffer = bufferSource.getBuffer(
-                    RenderLayer.getEntityTranslucentEmissive(getTextureLocation(entity), true));
-
-            // Render with slightly cooler orange for corona effect
-            getRenderer().reRender(bakedModel, poseStack, bufferSource, entity, renderType,
-                    emissiveBuffer, partialTick, 15728880, OverlayTexture.DEFAULT_UV,
-                    1.0f, 0.5f, 0.15f, pulse);
-        }
-    }
-
-    /**
-     * Wing fire particle layer - spawns elegant trailing fire from wing positions
-     * Uses model locator coordinates for accurate placement
+     * Wing fire particle layer - spawns a few flame particles at wing anchor points
      */
     private class WingFireParticleLayer extends GeoRenderLayer<RaEntity> {
-        // Wing tip locator positions (from ra.geo.json, in pixels)
-        // These are the actual fire_wing_particles locators at the wing tips
-        private static final float[][] WING_TIP_LOCATORS = {
-                { 77f, 52f, 10.75f }, // fire_wing_particles10 - left wing tip
-                { -77f, 51f, 10.75f } // fire_wing_particles9 - right wing tip
-        };
-
-        // Mid-wing locator positions for subtle embers
-        private static final float[][] WING_MID_LOCATORS = {
-                { 51f, 33f, 10.75f }, // fire_wing_particles6 - left mid
-                { -47f, 31f, 10.75f } // fire_wing_particles3 - right mid
-        };
-
         private int tickCounter = 0;
+
+        // Only use wing tip anchors for minimal particles
+        private static final String[] WING_ANCHORS = {
+                "fire_wing_particles9",  // right wing tip
+                "fire_wing_particles10"  // left wing tip
+        };
 
         public WingFireParticleLayer(GeoEntityRenderer<RaEntity> entityRenderer) {
             super(entityRenderer);
@@ -519,313 +412,26 @@ public class RaRenderer extends GeoEntityRenderer<RaEntity> {
 
             tickCounter++;
 
-            float bodyYaw = entity.bodyYaw;
+            // Spawn flames every 4 ticks (reduced frequency)
+            if (tickCounter % 4 == 0) {
+                float bodyYaw = entity.bodyYaw;
 
-            // Enhanced Wing Fire - Using all 10 locators for full coverage
-            if (tickCounter % 2 == 0) { // Faster spawning for higher density
-                String[] allWingBones = {
-                        "fire_wing_particles", "fire_wing_particles2", "fire_wing_particles3",
-                        "fire_wing_particles4", "fire_wing_particles5", "fire_wing_particles6",
-                        "fire_wing_particles7", "fire_wing_particles8", "fire_wing_particles9",
-                        "fire_wing_particles10"
-                };
-
-                for (String boneName : allWingBones) {
+                for (String boneName : WING_ANCHORS) {
                     Vec3d worldPos = ((RaRenderer) getRenderer()).getBoneWorldPos(entity, boneName, bakedModel,
                             entity.getX(), entity.getY(), entity.getZ(), bodyYaw);
 
-                    // Multiple particles per locator with jitter to fill the gaps
-                    for (int i = 0; i < 2; i++) {
-                        double jitterX = (entity.getRandom().nextFloat() - 0.5) * 0.6;
-                        double jitterY = (entity.getRandom().nextFloat() - 0.5) * 0.4;
-                        double jitterZ = (entity.getRandom().nextFloat() - 0.5) * 0.6;
-
-                        Vec3d jitterPos = worldPos.add(jitterX, jitterY, jitterZ);
-                        spawnTrailingFlame(entity, jitterPos, boneName.contains("10") || boneName.contains("9"));
-
-                        // Occasional large smoke for intensity
-                        if (entity.getRandom().nextFloat() < 0.15f) {
-                            entity.getWorld().addParticle(
-                                    ParticleTypes.LARGE_SMOKE,
-                                    jitterPos.x, jitterPos.y, jitterPos.z,
-                                    0, 0.02, 0);
-                        }
-                    }
+                    // Single flame particle per anchor
+                    entity.getWorld().addParticle(
+                            ParticleTypes.FLAME,
+                            worldPos.x,
+                            worldPos.y,
+                            worldPos.z,
+                            (entity.getRandom().nextFloat() - 0.5) * 0.01,
+                            0.02 + entity.getRandom().nextFloat() * 0.01,
+                            (entity.getRandom().nextFloat() - 0.5) * 0.01);
                 }
             }
         }
-
-        // locatorToWorld removed as it's replaced by getBoneWorldPos in the parent
-        // renderer
-
-        /**
-         * Spawn trailing flame - elegant fire streaming from wing tips
-         */
-        private void spawnTrailingFlame(RaEntity entity, Vec3d pos, boolean isTip) {
-            double offsetX = (entity.getRandom().nextFloat() - 0.5) * 0.15;
-            double offsetY = (entity.getRandom().nextFloat() - 0.5) * 0.1;
-            double offsetZ = (entity.getRandom().nextFloat() - 0.5) * 0.15;
-
-            // Main flame - gentle upward drift
-            entity.getWorld().addParticle(
-                    ParticleTypes.FLAME,
-                    pos.x + offsetX,
-                    pos.y + offsetY,
-                    pos.z + offsetZ,
-                    (entity.getRandom().nextFloat() - 0.5) * 0.01,
-                    0.025 + entity.getRandom().nextFloat() * 0.02,
-                    (entity.getRandom().nextFloat() - 0.5) * 0.01);
-
-            // Rare lava drip for intensity
-            if (isTip && entity.getRandom().nextFloat() < 0.1f) {
-                entity.getWorld().addParticle(
-                        ParticleTypes.LAVA,
-                        pos.x, pos.y, pos.z,
-                        0, 0, 0);
-            }
-        }
-
-        /**
-         * Spawn subtle ember
-         */
-        private void spawnEmber(RaEntity entity, Vec3d pos) {
-            double offsetX = (entity.getRandom().nextFloat() - 0.5) * 0.25;
-            double offsetY = (entity.getRandom().nextFloat() - 0.5) * 0.15;
-            double offsetZ = (entity.getRandom().nextFloat() - 0.5) * 0.25;
-
-            entity.getWorld().addParticle(
-                    ParticleTypes.SMALL_FLAME,
-                    pos.x + offsetX,
-                    pos.y + offsetY,
-                    pos.z + offsetZ,
-                    (entity.getRandom().nextFloat() - 0.5) * 0.005,
-                    0.015 + entity.getRandom().nextFloat() * 0.01,
-                    (entity.getRandom().nextFloat() - 0.5) * 0.005);
-        }
     }
 
-    /**
-     * Sun Orb Glow Layer - Multi-layered additive glow with radial light rays
-     * Creates a realistic glowing sun effect with:
-     * - 4 additive glow layers (core, inner corona, outer corona, heat shimmer)
-     * - 8 radial light ray beams emanating outward
-     */
-    private class SunOrbGlowLayer extends GeoRenderLayer<RaEntity> {
-        // Beacon texture for light rays
-        private static final Identifier BEACON_TEXTURE =
-                new Identifier("textures/entity/beacon_beam.png");
-
-        // Number of light rays emanating from the orb
-        private static final int RAY_COUNT = 8;
-
-        public SunOrbGlowLayer(GeoEntityRenderer<RaEntity> entityRenderer) {
-            super(entityRenderer);
-        }
-
-        @Override
-        public void render(MatrixStack poseStack, RaEntity entity, BakedGeoModel bakedModel,
-                RenderLayer renderType, VertexConsumerProvider bufferSource, VertexConsumer buffer,
-                float partialTick, int packedLight, int packedOverlay) {
-
-            // Find the sun_orb bone to render glow layers
-            bakedModel.getBone("sun_orb").ifPresent(sunOrbBone -> {
-                // Get bone world position for light rays
-                BakedGeoModel model = getGeoModel().getBakedModel(getGeoModel().getModelResource(entity));
-                if (model == null) return;
-
-                double entityX = MathHelper.lerp(partialTick, entity.prevX, entity.getX());
-                double entityY = MathHelper.lerp(partialTick, entity.prevY, entity.getY());
-                double entityZ = MathHelper.lerp(partialTick, entity.prevZ, entity.getZ());
-                float bodyYaw = MathHelper.lerpAngleDegrees(partialTick, entity.prevBodyYaw, entity.bodyYaw);
-
-                Vec3d orbWorldPos = ((RaRenderer) getRenderer()).getBoneWorldPos(
-                        entity, "sun_orb", model, entityX, entityY, entityZ, bodyYaw);
-
-                // Calculate time-based animation values
-                float time = entity.age + partialTick;
-
-                // === RENDER ORB-SPECIFIC GLOW SPHERES ===
-                renderOrbGlowSpheres(poseStack, bufferSource, entity, orbWorldPos, time, entityX, entityY, entityZ);
-
-                // === RENDER RADIAL LIGHT RAYS ===
-                renderRadialLightRays(poseStack, bufferSource, entity, orbWorldPos, time, entityX, entityY, entityZ);
-            });
-        }
-
-        /**
-         * Render glowing spheres at the orb position only (not the whole entity)
-         */
-        private void renderOrbGlowSpheres(MatrixStack poseStack, VertexConsumerProvider bufferSource,
-                RaEntity entity, Vec3d orbWorldPos, float time, double entityX, double entityY, double entityZ) {
-
-            // Get emissive vertex consumer for glow effect
-            VertexConsumer glowBuffer = bufferSource.getBuffer(
-                    RenderLayer.getBeaconBeam(BEACON_TEXTURE, true));
-
-            // Translate to orb position
-            poseStack.push();
-            poseStack.translate(
-                    orbWorldPos.x - entityX,
-                    orbWorldPos.y - entityY,
-                    orbWorldPos.z - entityZ);
-
-            // Render multiple glow layers as billboard quads
-            // Layer 1: Bright core
-            float coreAlpha = 0.9f + MathHelper.sin(time * 0.15f) * 0.1f;
-            renderGlowQuad(poseStack, glowBuffer, 0.25f, 1.0f, 1.0f, 0.7f, coreAlpha);
-
-            // Layer 2: Inner corona
-            float innerAlpha = 0.5f + MathHelper.sin(time * 0.12f + 0.5f) * 0.15f;
-            renderGlowQuad(poseStack, glowBuffer, 0.4f, 1.0f, 0.8f, 0.2f, innerAlpha);
-
-            // Layer 3: Outer corona
-            float outerAlpha = 0.25f + MathHelper.sin(time * 0.08f + 1.2f) * 0.1f;
-            renderGlowQuad(poseStack, glowBuffer, 0.6f, 1.0f, 0.5f, 0.1f, outerAlpha);
-
-            // Layer 4: Heat shimmer
-            float shimmerAlpha = 0.12f + MathHelper.sin(time * 0.05f + 2.0f) * 0.05f;
-            renderGlowQuad(poseStack, glowBuffer, 0.9f, 1.0f, 0.3f, 0.05f, shimmerAlpha);
-
-            poseStack.pop();
-        }
-
-        /**
-         * Render a billboard glow quad at current position
-         */
-        private void renderGlowQuad(MatrixStack poseStack, VertexConsumer buffer,
-                float size, float red, float green, float blue, float alpha) {
-
-            MatrixStack.Entry entry = poseStack.peek();
-            Matrix4f matrix = entry.getPositionMatrix();
-            Matrix3f normal = entry.getNormalMatrix();
-
-            // Render a simple quad facing the camera (billboard style)
-            // Front face
-            buffer.vertex(matrix, -size, -size, 0).color(red, green, blue, alpha)
-                    .texture(0, 0).overlay(OverlayTexture.DEFAULT_UV).light(15728880)
-                    .normal(normal, 0, 0, 1).next();
-            buffer.vertex(matrix, -size, size, 0).color(red, green, blue, alpha)
-                    .texture(0, 1).overlay(OverlayTexture.DEFAULT_UV).light(15728880)
-                    .normal(normal, 0, 0, 1).next();
-            buffer.vertex(matrix, size, size, 0).color(red, green, blue, alpha)
-                    .texture(1, 1).overlay(OverlayTexture.DEFAULT_UV).light(15728880)
-                    .normal(normal, 0, 0, 1).next();
-            buffer.vertex(matrix, size, -size, 0).color(red, green, blue, alpha)
-                    .texture(1, 0).overlay(OverlayTexture.DEFAULT_UV).light(15728880)
-                    .normal(normal, 0, 0, 1).next();
-
-            // Back face (so it's visible from all angles)
-            buffer.vertex(matrix, size, -size, 0).color(red, green, blue, alpha)
-                    .texture(0, 0).overlay(OverlayTexture.DEFAULT_UV).light(15728880)
-                    .normal(normal, 0, 0, -1).next();
-            buffer.vertex(matrix, size, size, 0).color(red, green, blue, alpha)
-                    .texture(0, 1).overlay(OverlayTexture.DEFAULT_UV).light(15728880)
-                    .normal(normal, 0, 0, -1).next();
-            buffer.vertex(matrix, -size, size, 0).color(red, green, blue, alpha)
-                    .texture(1, 1).overlay(OverlayTexture.DEFAULT_UV).light(15728880)
-                    .normal(normal, 0, 0, -1).next();
-            buffer.vertex(matrix, -size, -size, 0).color(red, green, blue, alpha)
-                    .texture(1, 0).overlay(OverlayTexture.DEFAULT_UV).light(15728880)
-                    .normal(normal, 0, 0, -1).next();
-        }
-
-        /**
-         * Render radial light ray beams emanating from the sun orb
-         */
-        private void renderRadialLightRays(MatrixStack poseStack, VertexConsumerProvider bufferSource,
-                RaEntity entity, Vec3d orbWorldPos, float time, double entityX, double entityY, double entityZ) {
-
-            VertexConsumer beaconBuffer = bufferSource.getBuffer(
-                    RenderLayer.getBeaconBeam(BEACON_TEXTURE, true));
-
-            // Calculate ray properties with pulsing
-            float basePulse = 0.7f + MathHelper.sin(time * 0.1f) * 0.3f;
-
-            for (int i = 0; i < RAY_COUNT; i++) {
-                // Evenly distribute rays around the orb
-                double horizontalAngle = (i * (Math.PI * 2 / RAY_COUNT)) + (time * 0.02);
-                // Alternate elevation for 3D distribution
-                double elevationAngle = (i % 2 == 0 ? 0.3 : -0.3) + Math.sin(time * 0.05 + i) * 0.2;
-
-                // Calculate ray direction
-                double dirX = Math.cos(horizontalAngle) * Math.cos(elevationAngle);
-                double dirY = Math.sin(elevationAngle);
-                double dirZ = Math.sin(horizontalAngle) * Math.cos(elevationAngle);
-
-                // Ray length varies with individual pulse timing
-                float rayPulse = basePulse + MathHelper.sin(time * 0.15f + i * 0.5f) * 0.2f;
-                float rayLength = 0.5f + rayPulse * 1.0f; // 0.5 to 1.5 blocks
-                float rayAlpha = 0.4f * rayPulse;
-
-                // Render this ray
-                poseStack.push();
-
-                // Translate to orb position (relative to entity)
-                poseStack.translate(
-                        orbWorldPos.x - entityX,
-                        orbWorldPos.y - entityY,
-                        orbWorldPos.z - entityZ);
-
-                // Rotate to face ray direction
-                // Calculate rotation angles
-                double yaw = Math.atan2(dirX, dirZ);
-                double pitch = Math.asin(dirY);
-
-                poseStack.multiply(net.minecraft.util.math.RotationAxis.POSITIVE_Y.rotation((float) yaw));
-                poseStack.multiply(net.minecraft.util.math.RotationAxis.POSITIVE_X.rotation((float) -pitch));
-
-                // Render the beam segment
-                float beamRadius = 0.03f; // Thin rays
-                renderBeamSegment(poseStack, beaconBuffer,
-                        1.0f, 0.7f, 0.2f, rayAlpha, // Orange-yellow color
-                        0.0f, rayLength, beamRadius);
-
-                poseStack.pop();
-            }
-        }
-
-        /**
-         * Render a single beam segment for light rays
-         */
-        private void renderBeamSegment(MatrixStack matrices, VertexConsumer vertices,
-                float red, float green, float blue, float alpha,
-                float yOffset, float height, float radius) {
-
-            MatrixStack.Entry entry = matrices.peek();
-            Matrix4f positionMatrix = entry.getPositionMatrix();
-            Matrix3f normalMatrix = entry.getNormalMatrix();
-
-            // Draw the four sides of the beam (aligned along Z axis after rotation)
-            renderBeamFace(positionMatrix, normalMatrix, vertices, red, green, blue, alpha, yOffset, height,
-                    -radius, -radius, radius, -radius);
-            renderBeamFace(positionMatrix, normalMatrix, vertices, red, green, blue, alpha, yOffset, height,
-                    radius, -radius, radius, radius);
-            renderBeamFace(positionMatrix, normalMatrix, vertices, red, green, blue, alpha, yOffset, height,
-                    radius, radius, -radius, radius);
-            renderBeamFace(positionMatrix, normalMatrix, vertices, red, green, blue, alpha, yOffset, height,
-                    -radius, radius, -radius, -radius);
-        }
-
-        private void renderBeamFace(Matrix4f positionMatrix, Matrix3f normalMatrix, VertexConsumer vertices,
-                float red, float green, float blue, float alpha, float yOffset, float height,
-                float x1, float y1, float x2, float y2) {
-
-            // Near face
-            addBeamVertex(positionMatrix, normalMatrix, vertices, red, green, blue, alpha, x1, y1, yOffset, 0, 0);
-            addBeamVertex(positionMatrix, normalMatrix, vertices, red, green, blue, alpha, x1, y1, yOffset + height, 0, 1);
-            addBeamVertex(positionMatrix, normalMatrix, vertices, red, green, blue, alpha, x2, y2, yOffset + height, 1, 1);
-            addBeamVertex(positionMatrix, normalMatrix, vertices, red, green, blue, alpha, x2, y2, yOffset, 1, 0);
-        }
-
-        private void addBeamVertex(Matrix4f positionMatrix, Matrix3f normalMatrix, VertexConsumer vertices,
-                float red, float green, float blue, float alpha, float x, float y, float z, float u, float v) {
-            vertices.vertex(positionMatrix, x, y, z)
-                    .color(red, green, blue, alpha)
-                    .texture(u, v)
-                    .overlay(OverlayTexture.DEFAULT_UV)
-                    .light(15728880) // Full bright
-                    .normal(normalMatrix, 0.0F, 0.0F, 1.0F)
-                    .next();
-        }
-    }
 }

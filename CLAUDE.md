@@ -70,6 +70,48 @@ The mod uses a sophisticated registry system to organize content:
 - **Textures**: PNG files in `assets/ancientcurse/textures/item/` or `/entity/`
 - **Staff of Ra**: Flagship animated item with rotating sun element
 
+### Animation Timing Synchronization (CRITICAL)
+
+**The Problem**: Animation durations in Java code must EXACTLY match the `animation_length` in JSON files. Mismatches cause damage to occur at wrong times, animations to cut off early, or visual desyncs.
+
+**The Rule**: The animation JSON file is the **source of truth**. Java constants must be derived from it.
+
+**Formula**: `duration_ticks = animation_length_seconds * 20`
+
+**When modifying entity animations**:
+1. Open the `.animation.json` file in Blockbench
+2. Note the `animation_length` value (in seconds)
+3. Multiply by 20 to get ticks
+4. Update the corresponding Java constant
+
+**Ra Entity Animation Timing** (example pattern to follow):
+```
+Animation JSON (source)     →  Java Constant
+ra.melee: 3.0s             →  MELEE_DURATION = 60
+ra.flying_ground_smack: 3.0s →  GROUND_SMACK_DURATION = 60
+ra.sun_beam_slice: 2.0s    →  SUN_BEAM_SLICE_DURATION = 40
+```
+
+**Finding Damage Frames**:
+1. Open animation in Blockbench
+2. Scrub timeline to the frame where impact/damage should occur visually
+3. Note the timestamp (e.g., 2.25 seconds)
+4. Convert to ticks: `2.25 * 20 = 45`
+5. Set `DAMAGE_FRAME = 45` in the AI goal
+
+**Files that must stay in sync for Ra**:
+- `ra.animation.json` - Source of truth for animation lengths
+- `RaEntity.java` - Duration constants for animation state management
+- `RaGroundSmackGoal.java` - Duration and damage frame for ground smack
+- `RaSunBeamGoal.java` - Beam timing phases
+- `SunBeamSliceLayer.java` - Client-side beam rendering timing
+
+**Verification Checklist**:
+- [ ] Animation JSON `animation_length` matches Java duration constant
+- [ ] `DAMAGE_FRAME` corresponds to visual impact in animation
+- [ ] All files referencing the same animation have matching timing values
+- [ ] Comments in code reference the source JSON file
+
 ### Player Animation System (PlayerAnimator)
 The mod uses the PlayerAnimator library for player body animations (spin attacks, emotes, etc.).
 

@@ -13,25 +13,49 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.PersistentState;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Efficiently tracks original block states before cursed earth conversion
  * Optimized for 100+ player servers with memory-conscious design
+ *
+ * Performance features:
+ * - Global cap of 50,000 blocks to prevent unbounded growth
+ * - LRU-style eviction of oldest chunks when cap is reached
+ * - Lazy loading of chunk data to reduce startup lag
  */
 public class OriginalBlockTracker extends PersistentState {
     private static final String DATA_NAME = "ancient_curse_original_blocks";
-    
+
+    // === PERFORMANCE LIMITS ===
+    private static final int MAX_TOTAL_BLOCKS = 20000; // Global cap to prevent lag (reduced from 50k)
+    private static final int BLOCKS_PER_TICK = 500; // Load this many blocks per server tick (no lag)
+    private static final int CLEANUP_THRESHOLD = 15000; // Start cleanup when approaching cap
+
     // Store full positions for accuracy - memory usage is acceptable for tracking cursed earth
     // Key: ChunkPos, Value: Map of BlockPos to block ID
     private final Map<ChunkPos, Map<BlockPos, Short>> chunkData = new ConcurrentHashMap<>();
-    
+
+    // Track chunk access times for LRU eviction
+    private final Map<ChunkPos, Long> chunkAccessTimes = new ConcurrentHashMap<>();
+
+    // Incremental loading state
+    private NbtCompound pendingNbtData = null;
+    private List<String> pendingChunkKeys = null;
+    private int pendingChunkIndex = 0;
+    private boolean incrementalLoadComplete = true;
+
     // Cache for block ID lookups to avoid repeated registry lookups
     private static final Map<Block, Short> blockToId = new ConcurrentHashMap<>();
     private static final Map<Short, Block> idToBlock = new ConcurrentHashMap<>();
     private static volatile short nextBlockId = 0;
+
+    // Track total blocks for cap enforcement
+    private volatile int totalBlockCount = 0;
     
     public OriginalBlockTracker() {
         super();
@@ -72,55 +96,201 @@ public class OriginalBlockTracker extends PersistentState {
             AncientCurse.LOGGER.warn("Attempted to track cursed earth as original block at {} - ignoring", pos);
             return;
         }
-        
+
+        // Enforce global cap - evict old data if approaching limit
+        if (totalBlockCount >= CLEANUP_THRESHOLD) {
+            evictOldestChunks();
+        }
+
+        // Hard cap - don't track if at maximum
+        if (totalBlockCount >= MAX_TOTAL_BLOCKS) {
+            AncientCurse.LOGGER.warn("Original block tracker at capacity ({} blocks), skipping tracking at {}",
+                MAX_TOTAL_BLOCKS, pos);
+            return;
+        }
+
         Block block = originalState.getBlock();
         short blockId = getOrCreateBlockId(block);
-        
+
         ChunkPos chunkPos = new ChunkPos(pos);
         Map<BlockPos, Short> chunk = chunkData.computeIfAbsent(chunkPos, k -> new HashMap<>());
-        
+
         // Only track if not already tracked (prevent overwriting valid data)
         if (!chunk.containsKey(pos)) {
             chunk.put(pos, blockId);
+            totalBlockCount++;
+            chunkAccessTimes.put(chunkPos, System.currentTimeMillis());
             markDirty();
-            
-            // Debug logging
-            TrackerStats stats = getStats();
-            if (stats.blocksTracked % 100 == 0) {
-                AncientCurse.LOGGER.debug("Tracked block {} at {} (total tracked: {})", 
-                    block.getTranslationKey(), pos, stats.blocksTracked);
+
+            // Debug logging (less frequent to reduce spam)
+            if (totalBlockCount % 1000 == 0) {
+                AncientCurse.LOGGER.debug("Tracking progress: {} blocks in {} chunks",
+                    totalBlockCount, chunkData.size());
             }
-        } else {
-            AncientCurse.LOGGER.debug("Position {} already tracked, not overwriting", pos);
         }
+    }
+
+    /**
+     * Evict oldest chunks to make room for new data
+     */
+    private void evictOldestChunks() {
+        if (chunkAccessTimes.isEmpty()) return;
+
+        // Find chunks not accessed in the last 10 minutes
+        long cutoffTime = System.currentTimeMillis() - (10 * 60 * 1000);
+        List<ChunkPos> toEvict = new ArrayList<>();
+
+        for (Map.Entry<ChunkPos, Long> entry : chunkAccessTimes.entrySet()) {
+            if (entry.getValue() < cutoffTime) {
+                toEvict.add(entry.getKey());
+            }
+        }
+
+        // If not enough old chunks, evict the oldest ones
+        if (toEvict.isEmpty() && totalBlockCount >= MAX_TOTAL_BLOCKS) {
+            // Sort by access time and evict oldest 10%
+            List<Map.Entry<ChunkPos, Long>> sorted = new ArrayList<>(chunkAccessTimes.entrySet());
+            sorted.sort(Map.Entry.comparingByValue());
+            int toRemove = Math.max(1, sorted.size() / 10);
+            for (int i = 0; i < toRemove && i < sorted.size(); i++) {
+                toEvict.add(sorted.get(i).getKey());
+            }
+        }
+
+        // Evict the chunks
+        int blocksRemoved = 0;
+        for (ChunkPos chunk : toEvict) {
+            Map<BlockPos, Short> removed = chunkData.remove(chunk);
+            chunkAccessTimes.remove(chunk);
+            if (removed != null) {
+                blocksRemoved += removed.size();
+            }
+        }
+
+        totalBlockCount -= blocksRemoved;
+        if (blocksRemoved > 0) {
+            AncientCurse.LOGGER.info("Evicted {} blocks from {} old chunks (total now: {})",
+                blocksRemoved, toEvict.size(), totalBlockCount);
+            markDirty();
+        }
+    }
+
+    /**
+     * Check if incremental loading is still in progress
+     */
+    public boolean isLoadingInProgress() {
+        return !incrementalLoadComplete && pendingNbtData != null;
+    }
+
+    /**
+     * Called every server tick to incrementally load data without causing lag.
+     * Should be called from CursedEarthManager's server tick handler.
+     */
+    public void tickIncrementalLoad() {
+        if (incrementalLoadComplete || pendingNbtData == null) return;
+
+        NbtCompound chunks = pendingNbtData.getCompound("chunks");
+        int blocksLoadedThisTick = 0;
+
+        while (pendingChunkIndex < pendingChunkKeys.size() && blocksLoadedThisTick < BLOCKS_PER_TICK) {
+            // Stop if we hit the global cap
+            if (totalBlockCount >= MAX_TOTAL_BLOCKS) {
+                AncientCurse.LOGGER.warn("Truncating loaded data at {} blocks (cap reached)", MAX_TOTAL_BLOCKS);
+                finishIncrementalLoad();
+                return;
+            }
+
+            String chunkKey = pendingChunkKeys.get(pendingChunkIndex);
+            String[] parts = chunkKey.split(",");
+            ChunkPos chunkPos = new ChunkPos(Integer.parseInt(parts[0]), Integer.parseInt(parts[1]));
+
+            NbtList blockList = chunks.getList(chunkKey, 10);
+            Map<BlockPos, Short> chunkDataMap = new HashMap<>();
+
+            for (int i = 0; i < blockList.size() && totalBlockCount < MAX_TOTAL_BLOCKS; i++) {
+                NbtCompound blockData = blockList.getCompound(i);
+                BlockPos pos = new BlockPos(
+                    blockData.getInt("x"),
+                    blockData.getInt("y"),
+                    blockData.getInt("z")
+                );
+                chunkDataMap.put(pos, blockData.getShort("id"));
+                blocksLoadedThisTick++;
+                totalBlockCount++;
+            }
+
+            if (!chunkDataMap.isEmpty()) {
+                this.chunkData.put(chunkPos, chunkDataMap);
+                this.chunkAccessTimes.put(chunkPos, System.currentTimeMillis());
+            }
+
+            pendingChunkIndex++;
+        }
+
+        // Check if we're done
+        if (pendingChunkIndex >= pendingChunkKeys.size()) {
+            finishIncrementalLoad();
+        }
+    }
+
+    /**
+     * Complete the incremental loading process
+     */
+    private void finishIncrementalLoad() {
+        AncientCurse.LOGGER.info("Incremental load complete: {} blocks in {} chunks",
+            totalBlockCount, chunkData.size());
+        pendingNbtData = null;
+        pendingChunkKeys = null;
+        pendingChunkIndex = 0;
+        incrementalLoadComplete = true;
+        markDirty();
+    }
+
+    /**
+     * Start incremental loading from NBT data
+     */
+    private void startIncrementalLoad(NbtCompound nbt) {
+        pendingNbtData = nbt.copy();
+        NbtCompound chunks = nbt.getCompound("chunks");
+        pendingChunkKeys = new ArrayList<>(chunks.getKeys());
+        pendingChunkIndex = 0;
+        incrementalLoadComplete = false;
+
+        int totalBlocksInNbt = 0;
+        for (String chunkKey : pendingChunkKeys) {
+            totalBlocksInNbt += chunks.getList(chunkKey, 10).size();
+        }
+
+        AncientCurse.LOGGER.info("Starting incremental load of {} blocks across {} chunks ({} blocks/tick)",
+            totalBlocksInNbt, pendingChunkKeys.size(), BLOCKS_PER_TICK);
     }
     
     /**
-     * Get the original block state at a position
+     * Get the original block state at a position.
+     * Returns null if position is not tracked or if data is still loading.
      */
     public BlockState getOriginalBlock(BlockPos pos) {
         ChunkPos chunkPos = new ChunkPos(pos);
         Map<BlockPos, Short> chunk = chunkData.get(chunkPos);
-        
+
         if (chunk == null) {
-            AncientCurse.LOGGER.debug("No chunk data found for chunk {} when looking up {}", chunkPos, pos);
-            return null;
+            return null; // Not tracked yet, or chunk not loaded yet
         }
-        
+
+        // Update access time for LRU tracking
+        chunkAccessTimes.put(chunkPos, System.currentTimeMillis());
+
         Short blockId = chunk.get(pos);
-        
+
         if (blockId == null) {
-            AncientCurse.LOGGER.debug("No tracking data found for position {} in chunk {} (chunk has {} entries)", 
-                pos, chunkPos, chunk.size());
             return null;
         }
-        
+
         Block block = idToBlock.get(blockId);
         if (block == null) {
-            AncientCurse.LOGGER.error("Block ID {} not found in idToBlock map for position {}", blockId, pos);
-            return null;
+            return null; // Block mapping not loaded yet
         }
-        
+
         return block.getDefaultState();
     }
     
@@ -130,15 +300,18 @@ public class OriginalBlockTracker extends PersistentState {
     public void clearTracking(BlockPos pos) {
         ChunkPos chunkPos = new ChunkPos(pos);
         Map<BlockPos, Short> chunk = chunkData.get(chunkPos);
-        
+
         if (chunk != null) {
-            chunk.remove(pos);
-            
+            if (chunk.remove(pos) != null) {
+                totalBlockCount--;
+            }
+
             // Remove empty chunks to save memory
             if (chunk.isEmpty()) {
                 chunkData.remove(chunkPos);
+                chunkAccessTimes.remove(chunkPos);
             }
-            
+
             markDirty();
         }
     }
@@ -147,25 +320,39 @@ public class OriginalBlockTracker extends PersistentState {
      * Clear all tracking data for a chunk
      */
     public void clearChunk(ChunkPos chunkPos) {
-        chunkData.remove(chunkPos);
+        Map<BlockPos, Short> removed = chunkData.remove(chunkPos);
+        chunkAccessTimes.remove(chunkPos);
+        if (removed != null) {
+            totalBlockCount -= removed.size();
+        }
         markDirty();
     }
-    
+
     /**
      * Get statistics for monitoring
      */
     public TrackerStats getStats() {
-        int totalBlocks = 0;
-        for (Map<BlockPos, Short> chunk : chunkData.values()) {
-            totalBlocks += chunk.size();
-        }
-        
         return new TrackerStats(
             chunkData.size(),
-            totalBlocks,
+            totalBlockCount,
             blockToId.size(),
             getEstimatedMemoryUsage()
         );
+    }
+
+    /**
+     * Force clear all tracking data (for manual cleanup)
+     */
+    public void clearAll() {
+        chunkData.clear();
+        chunkAccessTimes.clear();
+        totalBlockCount = 0;
+        pendingNbtData = null;
+        pendingChunkKeys = null;
+        pendingChunkIndex = 0;
+        incrementalLoadComplete = true;
+        markDirty();
+        AncientCurse.LOGGER.info("Cleared all original block tracking data");
     }
     
     
@@ -240,21 +427,21 @@ public class OriginalBlockTracker extends PersistentState {
     
     public static OriginalBlockTracker fromNbt(NbtCompound nbt) {
         OriginalBlockTracker tracker = new OriginalBlockTracker();
-        
+
         // Note: Static maps are shared across all worlds/dimensions
         // We need to be careful about clearing them
-        
+
         // Only clear if we're loading fresh data
         if (nbt.contains("blockMappings")) {
             blockToId.clear();
             idToBlock.clear();
             nextBlockId = 0;
-            
+
             // Re-initialize common blocks
             tracker.initializeCommonBlocks();
         }
-        
-        // Load block mappings
+
+        // Load block mappings immediately (they're small)
         NbtCompound blockMappings = nbt.getCompound("blockMappings");
         for (String blockIdStr : blockMappings.getKeys()) {
             short id = blockMappings.getShort(blockIdStr);
@@ -265,35 +452,24 @@ public class OriginalBlockTracker extends PersistentState {
                 nextBlockId = (short) Math.max(nextBlockId, id + 1);
             }
         }
-        
+
         AncientCurse.LOGGER.info("Loaded {} block mappings from NBT", blockToId.size());
-        
-        // Load chunk data
+
+        // Count how many blocks we would load
         NbtCompound chunks = nbt.getCompound("chunks");
-        int totalBlocksLoaded = 0;
+        int totalBlocksInNbt = 0;
         for (String chunkKey : chunks.getKeys()) {
-            String[] parts = chunkKey.split(",");
-            ChunkPos chunkPos = new ChunkPos(Integer.parseInt(parts[0]), Integer.parseInt(parts[1]));
-            
-            Map<BlockPos, Short> chunkData = new HashMap<>();
-            NbtList blockList = chunks.getList(chunkKey, 10); // 10 = Compound tag
-            
-            for (int i = 0; i < blockList.size(); i++) {
-                NbtCompound blockData = blockList.getCompound(i);
-                BlockPos pos = new BlockPos(
-                    blockData.getInt("x"),
-                    blockData.getInt("y"),
-                    blockData.getInt("z")
-                );
-                chunkData.put(pos, blockData.getShort("id"));
-                totalBlocksLoaded++;
-            }
-            
-            tracker.chunkData.put(chunkPos, chunkData);
+            NbtList blockList = chunks.getList(chunkKey, 10);
+            totalBlocksInNbt += blockList.size();
         }
-        
-        AncientCurse.LOGGER.info("Loaded {} blocks in {} chunks from NBT", totalBlocksLoaded, tracker.chunkData.size());
-        
+
+        // Always use incremental loading to prevent lag spikes
+        if (totalBlocksInNbt > 0) {
+            tracker.startIncrementalLoad(nbt);
+        } else {
+            tracker.incrementalLoadComplete = true;
+        }
+
         return tracker;
     }
     

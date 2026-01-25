@@ -40,6 +40,8 @@ public class CursedEarthCommand {
                     .executes(CursedEarthCommand::clearCursedEarth)))
             .then(CommandManager.literal("stats")
                 .executes(CursedEarthCommand::showStats))
+            .then(CommandManager.literal("purge")
+                .executes(CursedEarthCommand::purgeTrackingData))
             .then(CommandManager.literal("rollback")
                 .then(CommandManager.argument("minutes", IntegerArgumentType.integer(1, 1440))
                     .executes(CursedEarthCommand::rollbackCursedEarth)))
@@ -172,6 +174,27 @@ public class CursedEarthCommand {
         return 1;
     }
     
+    /**
+     * Purges all original block tracking data to fix lag from excessive NBT loading
+     */
+    private static int purgeTrackingData(CommandContext<ServerCommandSource> context) {
+        ServerCommandSource source = context.getSource();
+        ServerWorld world = source.getWorld();
+
+        OriginalBlockTracker tracker = OriginalBlockTracker.get(world);
+        OriginalBlockTracker.TrackerStats statsBefore = tracker.getStats();
+
+        source.sendMessage(Text.literal("§ePurging original block tracking data..."));
+        source.sendMessage(Text.literal("§7Before: " + statsBefore.blocksTracked + " blocks, " + statsBefore.getMemoryUsageString()));
+
+        tracker.clearAll();
+
+        source.sendMessage(Text.literal("§aAll tracking data purged!"));
+        source.sendMessage(Text.literal("§7Note: Cursed earth blocks will now restore to dirt instead of original blocks."));
+
+        return 1;
+    }
+
     /**
      * Rollback cursed earth (placeholder for future implementation)
      */

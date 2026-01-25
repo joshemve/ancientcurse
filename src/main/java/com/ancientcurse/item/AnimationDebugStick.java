@@ -1,6 +1,7 @@
 package com.ancientcurse.item;
 
 import com.ancientcurse.entity.AnubisEntity;
+import com.ancientcurse.entity.RaEntity;
 import com.ancientcurse.entity.ThothEntity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -36,6 +37,11 @@ public class AnimationDebugStick extends Item {
 
     @Override
     public ActionResult useOnEntity(ItemStack stack, PlayerEntity user, LivingEntity entity, Hand hand) {
+        // Only process main hand to prevent double-triggering
+        if (hand != Hand.MAIN_HAND) {
+            return ActionResult.PASS;
+        }
+
         if (user.getWorld().isClient) {
             return ActionResult.SUCCESS;
         }
@@ -43,6 +49,17 @@ public class AnimationDebugStick extends Item {
         // Check if entity is a GeckoLib animated entity
         if (!(entity instanceof GeoEntity)) {
             user.sendMessage(Text.literal("§c[Animation Debug] Entity is not animated (not a GeoEntity)"), false);
+            return ActionResult.SUCCESS;
+        }
+
+        // Check if entity type is supported
+        boolean supported = (entity instanceof ThothEntity) || (entity instanceof AnubisEntity)
+                || (entity instanceof RaEntity);
+        if (!supported) {
+            user.sendMessage(Text.literal(
+                    "§c[Animation Debug] Entity type not supported: §f" + entity.getType().getName().getString()),
+                    false);
+            user.sendMessage(Text.literal("§7Supported: Thoth, Anubis, Ra"), false);
             return ActionResult.SUCCESS;
         }
 
@@ -54,13 +71,17 @@ public class AnimationDebugStick extends Item {
             // Stop tracking
             playerTracking.remove(playerUUID);
             lastStates.remove(entityUUID);
-            user.sendMessage(Text.literal("§e[Animation Debug] §fStopped monitoring §6" + entity.getType().getName().getString()), false);
+            user.sendMessage(
+                    Text.literal(
+                            "§e[Animation Debug] §fStopped monitoring §6" + entity.getType().getName().getString()),
+                    false);
         } else {
             // Start tracking
             playerTracking.put(playerUUID, entityUUID);
             String entityName = entity.getType().getName().getString();
-            user.sendMessage(Text.literal("§e[Animation Debug] §fNow monitoring §6" + entityName + "§f. Keep the debug stick in your inventory."), false);
-            user.sendMessage(Text.literal("§7Animation changes will appear in chat. Right-click again to stop."), false);
+            user.sendMessage(Text.literal("§e[Animation Debug] §fNow monitoring §6" + entityName + "§f."), false);
+            user.sendMessage(Text.literal("§7Animation changes will appear in chat. Right-click again to stop."),
+                    false);
         }
 
         return ActionResult.SUCCESS;
@@ -101,6 +122,8 @@ public class AnimationDebugStick extends Item {
             checkThothStateChanges(player, thoth);
         } else if (entity instanceof AnubisEntity anubis) {
             checkAnubisStateChanges(player, anubis);
+        } else if (entity instanceof RaEntity ra) {
+            checkRaStateChanges(player, ra);
         }
     }
 
@@ -115,7 +138,8 @@ public class AnimationDebugStick extends Item {
     }
 
     private static LivingEntity findEntity(PlayerEntity player, UUID entityUUID) {
-        net.minecraft.entity.Entity entity = ((net.minecraft.server.world.ServerWorld) player.getWorld()).getEntity(entityUUID);
+        net.minecraft.entity.Entity entity = ((net.minecraft.server.world.ServerWorld) player.getWorld())
+                .getEntity(entityUUID);
         if (entity instanceof LivingEntity living) {
             return living;
         }
@@ -143,7 +167,8 @@ public class AnimationDebugStick extends Item {
             lastStates.put(entityUUID, lastState);
 
             // Print initial state
-            String animation = getThothAnimationName(currentAttackState, currentCasting, currentInCombat, currentSpawning, thoth);
+            String animation = getThothAnimationName(currentAttackState, currentCasting, currentInCombat,
+                    currentSpawning, thoth);
             player.sendMessage(Text.literal("§a[Animation] §bCurrent: §f" + animation), false);
             return;
         }
@@ -152,16 +177,20 @@ public class AnimationDebugStick extends Item {
         if (currentAttackState != lastState.thothAttackState) {
             String oldAttack = getThothAttackName(lastState.thothAttackState);
             String newAttack = getThothAttackName(currentAttackState);
-            String newAnimation = getThothAnimationName(currentAttackState, currentCasting, currentInCombat, currentSpawning, thoth);
+            String newAnimation = getThothAnimationName(currentAttackState, currentCasting, currentInCombat,
+                    currentSpawning, thoth);
 
-            player.sendMessage(Text.literal("§a[Animation] §e" + oldAttack + " §7-> §b" + newAttack + " §7| §f" + newAnimation), false);
+            player.sendMessage(
+                    Text.literal("§a[Animation] §e" + oldAttack + " §7-> §b" + newAttack + " §7| §f" + newAnimation),
+                    false);
             lastState.thothAttackState = currentAttackState;
         }
 
         // Check for casting state changes
         if (currentCasting != lastState.thothCasting) {
             if (currentCasting) {
-                player.sendMessage(Text.literal("§a[Animation] §bStarted Time Magic §7| §fanimation.thoth.time_bend"), false);
+                player.sendMessage(Text.literal("§a[Animation] §bStarted Time Magic §7| §fanimation.thoth.time_bend"),
+                        false);
             } else {
                 player.sendMessage(Text.literal("§a[Animation] §7Stopped Time Magic"), false);
             }
@@ -181,7 +210,8 @@ public class AnimationDebugStick extends Item {
         // Check for spawning state changes
         if (currentSpawning != lastState.thothSpawning) {
             if (currentSpawning) {
-                player.sendMessage(Text.literal("§a[Animation] §dSpawn Started §7| §fanimation.thoth.entity_spawn"), false);
+                player.sendMessage(Text.literal("§a[Animation] §dSpawn Started §7| §fanimation.thoth.entity_spawn"),
+                        false);
             } else {
                 player.sendMessage(Text.literal("§a[Animation] §7Spawn Complete"), false);
             }
@@ -219,17 +249,21 @@ public class AnimationDebugStick extends Item {
             lastStates.put(entityUUID, lastState);
 
             // Print initial state
-            String animation = getAnubisAnimationName(currentPhase, currentHovering, currentJudging, currentSkyYelling, currentPlayerSafe, anubis);
+            String animation = getAnubisAnimationName(currentPhase, currentHovering, currentJudging, currentSkyYelling,
+                    currentPlayerSafe, anubis);
             player.sendMessage(Text.literal("§a[Animation] §bCurrent: §f" + animation), false);
             player.sendMessage(Text.literal("§a[Animation] §bPhase: §f" + currentPhase.name()), false);
-            player.sendMessage(Text.literal("§7[Debug] Moving: " + currentMoving + " | Running: " + currentRunning + " | Attacking: " + currentAttacking), false);
+            player.sendMessage(Text.literal("§7[Debug] Moving: " + currentMoving + " | Running: " + currentRunning
+                    + " | Attacking: " + currentAttacking), false);
             return;
         }
 
         // Check for phase changes
         if (currentPhase != lastState.anubisPhase) {
-            String newAnimation = getAnubisAnimationName(currentPhase, currentHovering, currentJudging, currentSkyYelling, currentPlayerSafe, anubis);
-            player.sendMessage(Text.literal("§a[Animation] §ePhase: §7" + lastState.anubisPhase.name() + " §7-> §b" + currentPhase.name() + " §7| §f" + newAnimation), false);
+            String newAnimation = getAnubisAnimationName(currentPhase, currentHovering, currentJudging,
+                    currentSkyYelling, currentPlayerSafe, anubis);
+            player.sendMessage(Text.literal("§a[Animation] §ePhase: §7" + lastState.anubisPhase.name() + " §7-> §b"
+                    + currentPhase.name() + " §7| §f" + newAnimation), false);
             lastState.anubisPhase = currentPhase;
         }
 
@@ -246,7 +280,8 @@ public class AnimationDebugStick extends Item {
         // Check for judging state changes
         if (currentJudging != lastState.anubisJudging) {
             if (currentJudging) {
-                player.sendMessage(Text.literal("§a[Animation] §dStarted Judging §7| §fanimation.anubis.judgement_idle"), false);
+                player.sendMessage(
+                        Text.literal("§a[Animation] §dStarted Judging §7| §fanimation.anubis.judgement_idle"), false);
             } else {
                 player.sendMessage(Text.literal("§a[Animation] §7Stopped Judging"), false);
             }
@@ -256,7 +291,8 @@ public class AnimationDebugStick extends Item {
         // Check for sky yelling state changes
         if (currentSkyYelling != lastState.anubisSkyYelling) {
             if (currentSkyYelling) {
-                player.sendMessage(Text.literal("§a[Animation] §6Started Sky Yell §7| §fanimation.anubis.attack_2"), false);
+                player.sendMessage(Text.literal("§a[Animation] §6Started Sky Yell §7| §fanimation.anubis.attack_2"),
+                        false);
             } else {
                 player.sendMessage(Text.literal("§a[Animation] §7Stopped Sky Yell"), false);
             }
@@ -266,7 +302,9 @@ public class AnimationDebugStick extends Item {
         // Check for player safe state changes
         if (currentPlayerSafe != lastState.anubisPlayerSafe) {
             if (currentPlayerSafe) {
-                player.sendMessage(Text.literal("§a[Animation] §2Player Deemed Safe §7| §fanimation.anubis.judgement_safe"), false);
+                player.sendMessage(
+                        Text.literal("§a[Animation] §2Player Deemed Safe §7| §fanimation.anubis.judgement_safe"),
+                        false);
             } else {
                 player.sendMessage(Text.literal("§a[Animation] §7Player No Longer Safe"), false);
             }
@@ -276,7 +314,8 @@ public class AnimationDebugStick extends Item {
         // Check for attacking state changes (melee attack)
         if (currentAttacking != lastState.anubisAttacking) {
             if (currentAttacking) {
-                player.sendMessage(Text.literal("§a[Animation] §cStarted Melee Attack §7| §fanimation.anubis.attack_1"), false);
+                player.sendMessage(Text.literal("§a[Animation] §cStarted Melee Attack §7| §fanimation.anubis.attack_1"),
+                        false);
             } else {
                 player.sendMessage(Text.literal("§a[Animation] §7Stopped Melee Attack"), false);
             }
@@ -296,9 +335,11 @@ public class AnimationDebugStick extends Item {
         } else if (currentMoving && currentRunning != lastState.anubisRunning) {
             // Still moving but speed changed
             if (currentRunning) {
-                player.sendMessage(Text.literal("§a[Animation] §3Speed Up - Running §7| §fanimation.anubis.running"), false);
+                player.sendMessage(Text.literal("§a[Animation] §3Speed Up - Running §7| §fanimation.anubis.running"),
+                        false);
             } else {
-                player.sendMessage(Text.literal("§a[Animation] §3Slowed Down - Walking §7| §fanimation.anubis.walking"), false);
+                player.sendMessage(Text.literal("§a[Animation] §3Slowed Down - Walking §7| §fanimation.anubis.walking"),
+                        false);
             }
             lastState.anubisRunning = currentRunning;
         }
@@ -315,7 +356,8 @@ public class AnimationDebugStick extends Item {
         };
     }
 
-    private static String getThothAnimationName(int attackState, boolean isCasting, boolean inCombat, boolean spawning, ThothEntity thoth) {
+    private static String getThothAnimationName(int attackState, boolean isCasting, boolean inCombat, boolean spawning,
+            ThothEntity thoth) {
         if (spawning) {
             return "animation.thoth.entity_spawn";
         }
@@ -348,7 +390,8 @@ public class AnimationDebugStick extends Item {
         }
     }
 
-    private static String getAnubisAnimationName(AnubisEntity.BossPhase phase, boolean hovering, boolean judging, boolean skyYelling, boolean playerSafe, AnubisEntity anubis) {
+    private static String getAnubisAnimationName(AnubisEntity.BossPhase phase, boolean hovering, boolean judging,
+            boolean skyYelling, boolean playerSafe, AnubisEntity anubis) {
         // Death animation takes absolute priority
         if (phase == AnubisEntity.BossPhase.DEAD) {
             return "animation.anubis.death";
@@ -389,6 +432,184 @@ public class AnimationDebugStick extends Item {
         return "animation.anubis.idle";
     }
 
+    /* ========== RA ENTITY DEBUG ========== */
+
+    private static void checkRaStateChanges(PlayerEntity player, RaEntity ra) {
+        UUID entityUUID = ra.getUuid();
+        EntityDebugState lastState = lastStates.get(entityUUID);
+
+        // Current state
+        RaEntity.RaCombatState currentCombatState = ra.getCombatState();
+        RaEntity.RaPhase currentPhase = ra.getCurrentPhase();
+        boolean currentFlying = ra.isFlying();
+        boolean currentPerformingAction = ra.isPerformingAction();
+        boolean currentHibernating = ra.isHibernating();
+        boolean currentDead = ra.isDead();
+        double velocitySquared = ra.getVelocity().horizontalLengthSquared();
+        boolean currentMoving = velocitySquared > 0.003;
+
+        // Calculate expected animation based on state
+        String expectedAnimation = getRaExpectedAnimation(ra, currentCombatState, currentFlying,
+                currentPerformingAction, currentDead, currentMoving);
+
+        // First time tracking this entity
+        if (lastState == null) {
+            lastState = new EntityDebugState();
+            lastState.raCombatState = currentCombatState;
+            lastState.raPhase = currentPhase;
+            lastState.raFlying = currentFlying;
+            lastState.raPerformingAction = currentPerformingAction;
+            lastState.raHibernating = currentHibernating;
+            lastState.raMoving = currentMoving;
+            lastState.raDead = currentDead;
+            lastState.raExpectedAnimation = expectedAnimation;
+            lastStates.put(entityUUID, lastState);
+
+            // Print initial state summary
+            player.sendMessage(Text.literal("§6[Ra Debug] §eInitial State:"), false);
+            player.sendMessage(
+                    Text.literal("§7  Combat: §f" + currentCombatState.name() + " §7| Phase: §f" + currentPhase.name()),
+                    false);
+            player.sendMessage(
+                    Text.literal("§7  Flying: §f" + currentFlying + " §7| Action: §f" + currentPerformingAction),
+                    false);
+            player.sendMessage(Text.literal("§7  Health: §c" + String.format("%.0f", ra.getHealth()) + "§7/§c"
+                    + String.format("%.0f", ra.getMaxHealth())), false);
+            player.sendMessage(Text.literal("§a[Animation] §bExpected: §f" + expectedAnimation), false);
+            return;
+        }
+
+        // Check for death state change (highest priority)
+        if (currentDead != lastState.raDead) {
+            if (currentDead) {
+                player.sendMessage(Text.literal("§6[Ra Debug] §4DIED §7-> §fra.death"), false);
+            }
+            lastState.raDead = currentDead;
+        }
+
+        // Check for combat state changes
+        if (currentCombatState != lastState.raCombatState) {
+            String stateColor = getStateColor(currentCombatState);
+            player.sendMessage(Text.literal("§6[Ra Debug] §eCombat State: §7" + lastState.raCombatState.name()
+                    + " §7-> " + stateColor + currentCombatState.name()), false);
+
+            // Show which controller will handle this
+            String controller = currentPerformingAction ? "ATTACK" : "MOVEMENT";
+            player.sendMessage(Text.literal("§7  Controller: §f" + controller + " §7-> §b" + expectedAnimation), false);
+
+            lastState.raCombatState = currentCombatState;
+        }
+
+        // Check for phase changes
+        if (currentPhase != lastState.raPhase) {
+            String phaseColor = switch (currentPhase) {
+                case PHASE_1_AWAKENED -> "§a";
+                case PHASE_2_SOLAR_WRATH -> "§e";
+                case PHASE_3_DIVINE_FURY -> "§c";
+            };
+            player.sendMessage(Text.literal("§6[Ra Debug] §dPHASE CHANGE: §7" + lastState.raPhase.name() + " §7-> "
+                    + phaseColor + currentPhase.name()), false);
+            player.sendMessage(Text.literal("§7  Health: §c" + String.format("%.0f", ra.getHealth()) + " §7(§c"
+                    + String.format("%.0f%%", ra.getHealthPercent() * 100) + "§7)"), false);
+            lastState.raPhase = currentPhase;
+        }
+
+        // Check for flying state changes
+        if (currentFlying != lastState.raFlying) {
+            if (currentFlying) {
+                player.sendMessage(Text.literal("§6[Ra Debug] §bTOOK FLIGHT §7-> §fra.flying"), false);
+            } else {
+                player.sendMessage(Text.literal("§6[Ra Debug] §7LANDED §7-> §fra.idle"), false);
+            }
+            lastState.raFlying = currentFlying;
+        }
+
+        // Check for action state changes
+        if (currentPerformingAction != lastState.raPerformingAction) {
+            if (currentPerformingAction) {
+                player.sendMessage(Text.literal("§6[Ra Debug] §cACTION START §7(movement controller stopped)"), false);
+            } else {
+                player.sendMessage(Text.literal("§6[Ra Debug] §7ACTION END §7(movement controller resumed)"), false);
+            }
+            lastState.raPerformingAction = currentPerformingAction;
+        }
+
+        // Check for hibernation state changes
+        if (currentHibernating != lastState.raHibernating) {
+            if (currentHibernating) {
+                player.sendMessage(Text.literal("§6[Ra Debug] §5HIBERNATING (STUNNED) §7-> §fra.hibernation"), false);
+            } else {
+                player.sendMessage(Text.literal("§6[Ra Debug] §7Woke from hibernation"), false);
+            }
+            lastState.raHibernating = currentHibernating;
+        }
+
+        // Check for movement state changes (only when not in action)
+        if (!currentPerformingAction && currentMoving != lastState.raMoving) {
+            if (currentMoving) {
+                player.sendMessage(Text.literal("§6[Ra Debug] §3Started moving §7-> §fra.walking"), false);
+            } else {
+                player.sendMessage(Text.literal("§6[Ra Debug] §7Stopped moving §7-> §fra.idle"), false);
+            }
+            lastState.raMoving = currentMoving;
+        }
+
+        // Check if expected animation changed
+        if (!expectedAnimation.equals(lastState.raExpectedAnimation)) {
+            player.sendMessage(
+                    Text.literal("§a[Animation] §7" + lastState.raExpectedAnimation + " §7-> §b" + expectedAnimation),
+                    false);
+            lastState.raExpectedAnimation = expectedAnimation;
+        }
+    }
+
+    private static String getStateColor(RaEntity.RaCombatState state) {
+        return switch (state) {
+            case IDLE -> "§7";
+            case WALKING -> "§f";
+            case FLYING -> "§b";
+            case MELEE -> "§c";
+            case GROUND_SMACK -> "§6";
+            case SHARD_ATTACK -> "§e";
+            case FLYING_STAFF_ATTACK -> "§d";
+            case HIBERNATING -> "§5";
+        };
+    }
+
+    private static String getRaExpectedAnimation(RaEntity ra, RaEntity.RaCombatState combatState, boolean flying,
+            boolean performingAction, boolean dead, boolean moving) {
+        // Death takes absolute priority
+        if (dead) {
+            return "ra.death";
+        }
+
+        // Attack controller animations (when performing action)
+        if (performingAction) {
+            return switch (combatState) {
+                case MELEE -> "ra.melee";
+                case GROUND_SMACK -> "ra.flying_ground_smack";
+                case SHARD_ATTACK -> "ra.shard_attack";
+                case FLYING_STAFF_ATTACK -> "ra.flying_staff_attack";
+                default -> "§c(unexpected action state: " + combatState.name() + ")";
+            };
+        }
+
+        // Movement controller animations
+        if (combatState == RaEntity.RaCombatState.HIBERNATING) {
+            return "ra.hibernation";
+        }
+
+        if (flying) {
+            return "ra.flying";
+        }
+
+        if (moving) {
+            return "ra.walking";
+        }
+
+        return "ra.idle";
+    }
+
     /**
      * Clean up tracking when player disconnects
      */
@@ -416,5 +637,15 @@ public class AnimationDebugStick extends Item {
         boolean anubisAttacking = false;
         boolean anubisMoving = false;
         boolean anubisRunning = false;
+
+        // Ra state
+        RaEntity.RaCombatState raCombatState = RaEntity.RaCombatState.IDLE;
+        RaEntity.RaPhase raPhase = RaEntity.RaPhase.PHASE_1_AWAKENED;
+        boolean raFlying = false;
+        boolean raPerformingAction = false;
+        boolean raHibernating = false;
+        boolean raMoving = false;
+        boolean raDead = false;
+        String raExpectedAnimation = "";
     }
 }

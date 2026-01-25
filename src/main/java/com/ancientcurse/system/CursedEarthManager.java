@@ -78,24 +78,32 @@ public class CursedEarthManager {
     private void onServerTick(MinecraftServer server) {
         long currentTick = server.getTicks();
         int tickPhase = (int) (currentTick % 20);
-        
+
+        // Tick incremental loading for all worlds (lightweight, no lag)
+        for (ServerWorld world : server.getWorlds()) {
+            OriginalBlockTracker tracker = OriginalBlockTracker.get(world);
+            if (tracker.isLoadingInProgress()) {
+                tracker.tickIncrementalLoad();
+            }
+        }
+
         // Performance monitoring every 5 seconds
         if (currentTick % PERFORMANCE_CHECK_INTERVAL == 0) {
             updatePerformanceMetrics(server);
         }
-        
+
         // Only process cursed earth during designated ticks (6-8)
         if (Arrays.stream(CURSE_PROCESSING_TICKS).anyMatch(tick -> tick == tickPhase)) {
             processCursedEarthSpreads(server);
         }
-        
+
         // Clean up unloaded chunks every minute
         if (currentTick % 1200 == 0) {
             cleanupUnloadedChunks(server);
             cleanupExpiredSaltCircles(server);
             cleanupExpiredProtections(server);
         }
-        
+
         // Clean up old tracking data every 5 minutes
         if (currentTick % 6000 == 0) {
             cleanupOldTrackingData(server);

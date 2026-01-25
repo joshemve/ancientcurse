@@ -99,6 +99,8 @@ public class ThothEntity extends HostileEntity implements GeoEntity {
     private int attackAnimationTicks = 0;
     private boolean animationLocked = false; // Prevents animation interruptions
     private int lastAttackState = ATTACK_NONE; // Track last attack to prevent glitching
+    private int postAttackGraceTicks = 0; // Grace period to maintain walking after attacks end
+    private static final int POST_ATTACK_GRACE_DURATION = 5; // Ticks to maintain movement anim
 
     // Combat state management
     private int combatTimeout = 0;
@@ -274,6 +276,11 @@ public class ThothEntity extends HostileEntity implements GeoEntity {
                 dataTracker.set(IS_READING, false); // Reset reading state
                 animationLocked = false; // Unlock animation
 
+                // Start grace period to maintain walking animation if we have a target
+                if (this.getTarget() != null) {
+                    postAttackGraceTicks = POST_ATTACK_GRACE_DURATION;
+                }
+
                 // Clear lifted players when Time Bend ends
                 liftedPlayers.clear();
                 hasThrown = false;
@@ -284,6 +291,11 @@ public class ThothEntity extends HostileEntity implements GeoEntity {
             }
         } else {
             animationLocked = false; // Ensure animation is unlocked when not attacking
+        }
+
+        // Decrement post-attack grace period
+        if (postAttackGraceTicks > 0) {
+            postAttackGraceTicks--;
         }
         
         // Handle cooldowns
@@ -2564,12 +2576,16 @@ public class ThothEntity extends HostileEntity implements GeoEntity {
         double velocitySquared = this.getVelocity().horizontalLengthSquared();
         boolean isActuallyMoving = velocitySquared > 0.001; // Low threshold to catch slow movement (circling/strafing)
 
-        if (isActuallyMoving && attackAnimationTicks == 0 && !animationLocked && attackState == ATTACK_NONE) {
+        // FIX: Also continue walking during grace period after attacks if we have a target
+        // This prevents the jarring IDLE pause when velocity momentarily drops between pathfinding updates
+        boolean inGracePeriod = postAttackGraceTicks > 0 && this.getTarget() != null;
+
+        if ((isActuallyMoving || inGracePeriod) && attackAnimationTicks == 0 && !animationLocked && attackState == ATTACK_NONE) {
             // Walking/floating movement
             state.getController().setAnimation(RawAnimation.begin().then("animation.thoth.walking", Animation.LoopType.LOOP));
             return PlayState.CONTINUE;
         }
-        
+
         // Priority 6: Idle animations (default states)
         if (hasBeenInCombat || isInCombat) {
             // Combat idle - standing ready for battle

@@ -179,6 +179,7 @@ public class ModItemGroup {
                         safeAdd(entries, ModItems.BRONZE_KHOPESH);
                         safeAdd(entries, ModItems.HORUS_MACE);
                         safeAdd(entries, ModItems.WAR_AXE_OF_ABYDOS);
+                        safeAdd(entries, ModItems.BINDING_CROSSBOW);
 
                         // Bronze Armor
                         safeAdd(entries, ModItems.BRONZE_HELMET);

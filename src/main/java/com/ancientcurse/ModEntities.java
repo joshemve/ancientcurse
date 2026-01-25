@@ -1,6 +1,7 @@
 package com.ancientcurse;
 
 import com.ancientcurse.entity.AnubisEntity;
+import com.ancientcurse.entity.BindingBoltEntity;
 import com.ancientcurse.entity.DjeserhathEntity;
 import com.ancientcurse.entity.KhamsinSpreadSmallEntity;
 import com.ancientcurse.entity.LocusEntity;
@@ -159,6 +160,16 @@ public class ModEntities {
                     .dimensions(EntityDimensions.fixed(1.8f, 4.0f)) // Large boss hitbox with wings
                     .trackRangeBlocks(128) // Large tracking range for boss
                     .trackedUpdateRate(1) // Frequent updates for smooth boss movement
+                    .build());
+
+    // Register the Binding Bolt projectile (used by Binding Crossbow to stun Ra)
+    public static final EntityType<BindingBoltEntity> BINDING_BOLT = Registry.register(
+            Registries.ENTITY_TYPE,
+            new Identifier(AncientCurse.MOD_ID, "binding_bolt"),
+            FabricEntityTypeBuilder.<BindingBoltEntity>create(SpawnGroup.MISC, BindingBoltEntity::new)
+                    .dimensions(EntityDimensions.fixed(0.5f, 0.5f))
+                    .trackRangeBlocks(64)
+                    .trackedUpdateRate(10) // Smooth projectile movement
                     .build());
 
     /**
