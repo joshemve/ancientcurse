@@ -573,6 +573,7 @@ public class AnimationDebugStick extends Item {
             case SHARD_ATTACK -> "§e";
             case FLYING_STAFF_ATTACK -> "§d";
             case HIBERNATING -> "§5";
+            case DYING -> "§4";
         };
     }
 

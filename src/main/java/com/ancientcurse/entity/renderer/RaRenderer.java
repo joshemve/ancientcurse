@@ -45,7 +45,11 @@ public class RaRenderer extends GeoEntityRenderer<RaEntity> {
         addRenderLayer(new SunBeamSliceLayer(this));
 
         // Add sun shard attack layer - orbiting divine crystals
+        // Add sun shard attack layer - orbiting divine crystals
         addRenderLayer(new SunShardLayer(this));
+
+        // Add proper rope overlay for hibernation state
+        addRenderLayer(new com.ancientcurse.entity.renderer.layer.RaRopeLayer(this));
     }
 
     @Override

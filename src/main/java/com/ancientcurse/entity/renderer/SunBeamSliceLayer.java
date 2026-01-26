@@ -1,13 +1,12 @@
 package com.ancientcurse.entity.renderer;
 
-import com.ancientcurse.client.render.SunBeamRenderLayer;
+import com.ancientcurse.client.render.CrescentRayRenderLayer;
 import com.ancientcurse.entity.RaEntity;
 import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.particle.DustParticleEffect;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
@@ -23,45 +22,44 @@ import software.bernie.geckolib.renderer.GeoEntityRenderer;
 import software.bernie.geckolib.renderer.layer.GeoRenderLayer;
 
 /**
- * Crescent Moon Slash Render Layer - Anime-style growing light slash for Ra
+ * Sun Ray Slice Render Layer - Directional crescent beam shooting toward target
  *
- * Creates a stunning visual effect with:
- * - Growing crescent that expands as it travels
- * - Trailing afterimage slashes for motion blur effect
- * - Multi-layer glow (core, corona, bloom)
- * - Particle trail with sparkles
- * - Divine light emission
+ * Creates a divine light beam attack:
+ * - Crescent ray shoots from Ra toward the target
+ * - Orange outer glow with white hot core
+ * - Grows as it travels with trailing afterimages
+ * - Dramatic "lightbeam slash" visual
  */
 public class SunBeamSliceLayer extends GeoRenderLayer<RaEntity> {
 
-    // Textures for rendering
-    private static final Identifier MIRAGE_SLICE_TEXTURE = new Identifier("ancientcurse",
-            "textures/entity/mirage_slice.png");
+    // Textures for the crescent rays
+    private static final Identifier SUN_RAY_ORANGE = new Identifier("ancientcurse",
+            "textures/entity/sun_ray_orange.png");
+    private static final Identifier SUN_RAY_WHITE = new Identifier("ancientcurse",
+            "textures/entity/sun_ray_white.png");
 
-    // Sun beam configuration - EPIC divine attack
-    private static final float MIN_SCALE = 3.0f;      // Starting size (already impressive)
-    private static final float MAX_SCALE = 7.0f;      // Grows to massive divine light
-    private static final int TRAIL_COUNT = 3;         // Light trail for motion
-    private static final float TRAIL_SPACING = 0.06f; // Tight for smooth light streak
+    // Beam configuration - 3x BOOST for testing
+    private static final float MIN_SCALE = 12.0f; // Starting size (4 -> 12)
+    private static final float MAX_SCALE = 24.0f; // Max size as beam travels (8 -> 24)
+    private static final double MAX_DISTANCE = 40.0; // Travel distance (20 -> 40)
+    private static final int TRAIL_COUNT = 4; // Afterimage trail count
+    private static final float TRAIL_SPACING = 0.08f; // Spacing between trail images
 
-    // Color definitions (sun/divine colors)
-    private static final Vector3f CORE_COLOR = new Vector3f(1.0f, 1.0f, 0.95f);    // White core
-    private static final Vector3f INNER_COLOR = new Vector3f(1.0f, 0.95f, 0.7f);   // Pale yellow
-    private static final Vector3f OUTER_COLOR = new Vector3f(1.0f, 0.85f, 0.4f);   // Golden
-    private static final Vector3f BLOOM_COLOR = new Vector3f(1.0f, 0.7f, 0.2f);    // Orange bloom
+    // Color definitions
+    private static final Vector3f ORANGE_TINT = new Vector3f(1.0f, 0.85f, 0.5f); // Warm orange
+    private static final Vector3f WHITE_TINT = new Vector3f(1.0f, 1.0f, 0.95f); // Hot white core
 
-    // Ground Smack Timing (Matches RaEntity & Goal)
+    // Ground Smack Timing (Matches RaEntity & RaGroundSmackGoal)
     private static final int GROUND_SMACK_DURATION = 60; // 3.0s total
-    private static final int GROUND_SMACK_DELAY = 23;    // Firing point at 1.15s
-    private static final int GROUND_SMACK_FADE = 10;     // Fade out at end
-
-    // Particle colors
-    private static final DustParticleEffect CORE_DUST = new DustParticleEffect(
-            new Vector3f(1.0f, 1.0f, 0.9f), 1.2f);
+    private static final int GROUND_SMACK_DELAY = 23; // Firing point at 1.15s (damage frame)
+    private static final int BEAM_DURATION = 30; // How long beam is visible (ticks)
 
     public SunBeamSliceLayer(GeoEntityRenderer<RaEntity> entityRenderer) {
         super(entityRenderer);
     }
+
+    // Debug flag - set to true to see console output
+    private static boolean debugLogged = false;
 
     @Override
     public void render(MatrixStack poseStack, RaEntity entity, BakedGeoModel bakedModel,
@@ -70,6 +68,7 @@ public class SunBeamSliceLayer extends GeoRenderLayer<RaEntity> {
 
         // Only render during Ground Smack
         if (entity.getCombatState() != RaEntity.RaCombatState.GROUND_SMACK) {
+            debugLogged = false; // Reset for next attack
             return;
         }
 
@@ -80,150 +79,121 @@ public class SunBeamSliceLayer extends GeoRenderLayer<RaEntity> {
         float smoothTicks = beamTicks - partialTick;
         float elapsed = GROUND_SMACK_DURATION - smoothTicks;
 
+        // Don't render until the damage frame (1.15s / 23 ticks)
         if (elapsed < GROUND_SMACK_DELAY) {
-            return; // Don't render until 1s mark
+            return;
         }
 
-        // --- MIRAGE SLICE PROJECTILE (Triggered during Ground Smack) ---
-        // Calculate progress (0.0 to 1.0) from DELAY (tick 20) to end (tick 60)
+        // Calculate progress of the beam (0.0 to 1.0)
         float activeElapsed = elapsed - GROUND_SMACK_DELAY;
-        float activeDuration = GROUND_SMACK_DURATION - GROUND_SMACK_DELAY;
-        float travelProgress = MathHelper.clamp(activeElapsed / activeDuration, 0.0f, 1.0f);
+        if (activeElapsed > BEAM_DURATION) {
+            return; // Beam has finished
+        }
 
-        // Intensity: Fades in quickly, fades out at end
+        float travelProgress = MathHelper.clamp(activeElapsed / BEAM_DURATION, 0.0f, 1.0f);
+
+        // Intensity: Quick fade in, gradual fade out
         float intensity;
-        if (activeElapsed < 5) {
-            intensity = activeElapsed / 5.0f;
-        } else if (smoothTicks < GROUND_SMACK_FADE) {
-            intensity = smoothTicks / (float) GROUND_SMACK_FADE;
+        if (activeElapsed < 3) {
+            intensity = activeElapsed / 3.0f; // Fade in over 3 ticks
+        } else if (activeElapsed > BEAM_DURATION - 10) {
+            intensity = (BEAM_DURATION - activeElapsed) / 10.0f; // Fade out over last 10 ticks
         } else {
             intensity = 1.0f;
         }
 
-        // Get sun orb world position
-        Vec3d orbPos = getOrbWorldPosition(entity, bakedModel, partialTick);
-        Vec3d startPos = orbPos;
+        // Get the beam direction (toward target)
         Vec3d direction = entity.getSunBeamDirection();
-        double maxDist = 24.0;
+
+        // Validate direction - if zero or pointing straight down, use entity facing
+        if (direction.lengthSquared() < 0.01 || (direction.x == 0 && direction.z == 0)) {
+            // Use entity's facing direction instead
+            float yawRad = (float) Math.toRadians(-entity.getYaw());
+            direction = new Vec3d(Math.sin(yawRad), -0.2, Math.cos(yawRad)).normalize();
+        }
+
+        // Get sun orb world position as start point
+        Vec3d startPos = getOrbWorldPosition(entity, bakedModel, partialTick);
 
         // Entity position for offset calculation
         double entityX = MathHelper.lerp(partialTick, entity.prevX, entity.getX());
         double entityY = MathHelper.lerp(partialTick, entity.prevY, entity.getY());
         double entityZ = MathHelper.lerp(partialTick, entity.prevZ, entity.getZ());
 
-        // Calculate yaw once
+        // Calculate current beam world position for rendering and logging
+        Vec3d currentPos = startPos.add(direction.multiply(MAX_DISTANCE * travelProgress));
+        Vec3d localOffset = currentPos.subtract(entityX, entityY, entityZ);
+
+        // Debug logging (every 20 frames to avoid spam, but confirm execution)
+        if (entity.age % 20 == 0) {
+            System.out.println("[SunBeamSlice] Framed Log - age=" + entity.age + ", travel=" + travelProgress
+                    + ", currentPos=" + currentPos + ", offset=" + localOffset);
+        }
+
+        // Calculate yaw to face the direction
         float yaw = (float) Math.atan2(direction.x, direction.z);
 
-        // === RENDER LIGHT TRAIL (subtle afterglow) ===
+        // === RENDER TRAILING AFTERIMAGES ===
         for (int i = TRAIL_COUNT - 1; i >= 0; i--) {
             float trailProgress = travelProgress - (i + 1) * TRAIL_SPACING;
-            if (trailProgress <= 0.0f) continue;
+            if (trailProgress <= 0.0f)
+                continue;
 
-            Vec3d trailPos = startPos.add(direction.multiply(maxDist * trailProgress));
+            Vec3d trailPos = startPos.add(direction.multiply(MAX_DISTANCE * trailProgress));
             Vec3d trailOffset = trailPos.subtract(entityX, entityY, entityZ);
 
-            // Trail matches main scale at its position
+            // Trail scale matches position
             float trailScale = MIN_SCALE + (MAX_SCALE - MIN_SCALE) * trailProgress;
 
             // Trail fades with distance from main beam
-            float trailAlpha = intensity * (0.4f - (i * 0.15f));
+            float trailAlpha = intensity * (0.5f - (i * 0.12f));
 
+            // Render orange trail
             poseStack.push();
             poseStack.translate(trailOffset.x, trailOffset.y, trailOffset.z);
             poseStack.multiply(RotationAxis.POSITIVE_Y.rotation(yaw));
-            poseStack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(90));
-            poseStack.scale(trailScale, trailScale, trailScale);
+            poseStack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(90)); // Face perpendicular to travel
+            poseStack.scale(trailScale * 1.1f, trailScale * 0.5f, trailScale);
 
-            renderSunBeam(poseStack, bufferSource, trailAlpha, false);
+            renderRay(poseStack, bufferSource, SUN_RAY_ORANGE, ORANGE_TINT, trailAlpha * 0.6f);
             poseStack.pop();
         }
 
-        // === RENDER MAIN SUN BEAM ===
-        Vec3d currentPos = startPos.add(direction.multiply(maxDist * travelProgress));
-        Vec3d localOffset = currentPos.subtract(entityX, entityY, entityZ);
-
-        // Subtle growth as it travels
+        // === RENDER MAIN BEAM ===
+        // Scale grows as beam travels
         float scale = MIN_SCALE + (MAX_SCALE - MIN_SCALE) * travelProgress;
-        // Gentle pulse
-        scale += MathHelper.sin(entity.age * 0.4f) * 0.2f;
+        // Add subtle pulse
+        scale += MathHelper.sin(entity.age * 0.5f + activeElapsed * 0.4f) * 0.2f;
 
+        // Render the orange outer beam
         poseStack.push();
         poseStack.translate(localOffset.x, localOffset.y, localOffset.z);
         poseStack.multiply(RotationAxis.POSITIVE_Y.rotation(yaw));
         poseStack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(90));
-        poseStack.scale(scale, scale, scale);
+        poseStack.scale(scale * 1.3f, scale * 0.6f, scale);
 
-        renderSunBeam(poseStack, bufferSource, intensity, true);
+        renderRay(poseStack, bufferSource, SUN_RAY_ORANGE, ORANGE_TINT, intensity * 1.0f); // Boosted alpha
         poseStack.pop();
 
-        // === SIMPLE PARTICLE TRAIL ===
-        if (entity.getWorld().isClient && travelProgress > 0.05f) {
-            spawnSunBeamParticles(entity, currentPos, direction, intensity, scale);
+        // Render the white hot core (smaller, brighter, slightly ahead)
+        poseStack.push();
+        poseStack.translate(localOffset.x, localOffset.y, localOffset.z);
+        poseStack.multiply(RotationAxis.POSITIVE_Y.rotation(yaw));
+        poseStack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(90));
+        poseStack.scale(scale * 0.9f, scale * 0.4f, scale * 0.8f);
+
+        renderRay(poseStack, bufferSource, SUN_RAY_WHITE, WHITE_TINT, intensity);
+        poseStack.pop();
+
+        // === SPAWN PARTICLES ===
+        if (entity.getWorld().isClient && travelProgress > 0.05f && travelProgress < 0.95f) {
+            spawnBeamParticles(entity, currentPos, direction, intensity, scale);
         }
     }
 
     /**
-     * Spawn epic sun beam particles - divine light radiating outward
+     * Get the world position of Ra's sun orb bone
      */
-    private void spawnSunBeamParticles(RaEntity entity, Vec3d pos, Vec3d direction,
-            float intensity, float scale) {
-
-        // Radiant sparkles shooting outward from the beam
-        for (int i = 0; i < 2; i++) {
-            if (entity.getRandom().nextFloat() > 0.6f) continue;
-
-            double angle = entity.getRandom().nextDouble() * Math.PI * 2;
-            double radius = scale * 0.4;
-            double offsetX = Math.cos(angle) * radius;
-            double offsetY = (entity.getRandom().nextDouble() - 0.5) * scale * 0.5;
-            double offsetZ = Math.sin(angle) * radius;
-
-            // END_ROD for bright divine sparkles
-            entity.getWorld().addParticle(
-                    ParticleTypes.END_ROD,
-                    pos.x + offsetX * 0.5,
-                    pos.y + offsetY,
-                    pos.z + offsetZ * 0.5,
-                    offsetX * 0.08,
-                    entity.getRandom().nextFloat() * 0.03,
-                    offsetZ * 0.08);
-        }
-
-        // Core golden dust (leaving a trail)
-        if (entity.getRandom().nextFloat() < 0.5f) {
-            entity.getWorld().addParticle(
-                    CORE_DUST,
-                    pos.x + (entity.getRandom().nextDouble() - 0.5) * 0.3,
-                    pos.y + (entity.getRandom().nextDouble() - 0.5) * 0.3,
-                    pos.z + (entity.getRandom().nextDouble() - 0.5) * 0.3,
-                    -direction.x * 0.02,
-                    0.01,
-                    -direction.z * 0.02);
-        }
-
-        // Flame particles for heat/power
-        if (entity.getRandom().nextFloat() < 0.35f * intensity) {
-            entity.getWorld().addParticle(
-                    ParticleTypes.FLAME,
-                    pos.x + (entity.getRandom().nextDouble() - 0.5) * scale * 0.3,
-                    pos.y + (entity.getRandom().nextDouble() - 0.5) * scale * 0.3,
-                    pos.z + (entity.getRandom().nextDouble() - 0.5) * scale * 0.3,
-                    (entity.getRandom().nextFloat() - 0.5f) * 0.03,
-                    0.02,
-                    (entity.getRandom().nextFloat() - 0.5f) * 0.03);
-        }
-
-        // Electric divine energy
-        if (entity.getRandom().nextFloat() < 0.2f) {
-            entity.getWorld().addParticle(
-                    ParticleTypes.ELECTRIC_SPARK,
-                    pos.x, pos.y, pos.z,
-                    (entity.getRandom().nextFloat() - 0.5f) * 0.2,
-                    entity.getRandom().nextFloat() * 0.1,
-                    (entity.getRandom().nextFloat() - 0.5f) * 0.2);
-        }
-    }
-
     private Vec3d getOrbWorldPosition(RaEntity entity, BakedGeoModel model, float partialTick) {
         double entityX = MathHelper.lerp(partialTick, entity.prevX, entity.getX());
         double entityY = MathHelper.lerp(partialTick, entity.prevY, entity.getY());
@@ -262,80 +232,106 @@ public class SunBeamSliceLayer extends GeoRenderLayer<RaEntity> {
     }
 
     /**
-     * Render the divine sun beam with epic multi-layer glow effect
-     *
-     * Uses 6 additive layers to create intense bloom without shaders:
-     * - Outer bloom (massive, faint orange)
-     * - Corona (golden halo)
-     * - Inner glow (bright yellow)
-     * - Core (near-white, texture)
-     * - Hot center (pure white highlight)
-     * - Divine spark (intense white point)
+     * Render a single crescent ray with glow layers
      */
-    private void renderSunBeam(MatrixStack poseStack, VertexConsumerProvider bufferSource,
-            float intensity, boolean isMainBeam) {
+    private void renderRay(MatrixStack poseStack, VertexConsumerProvider bufferSource,
+            Identifier texture, Vector3f tint, float intensity) {
 
-        // Use custom sun beam shader for animated energy flow and divine sparkles
-        VertexConsumer vertices = bufferSource.getBuffer(SunBeamRenderLayer.getSunBeamLayer(MIRAGE_SLICE_TEXTURE));
+        // Switching to standard Translucent layer to rule out custom layer issues
+        VertexConsumer vertices = bufferSource.getBuffer(RenderLayer.getEntityTranslucent(texture));
         MatrixStack.Entry entry = poseStack.peek();
         Matrix4f posMatrix = entry.getPositionMatrix();
         Matrix3f normMatrix = entry.getNormalMatrix();
 
-        // Base dimensions (crescent shape: wide, not too tall)
-        float baseW = 1.0f;
-        float baseH = 0.55f;
+        // Base dimensions (larger for visible crescent)
+        float baseW = 1.5f;
+        float baseH = 0.8f;
 
-        if (isMainBeam) {
-            // === LAYER 1: Massive outer bloom ===
-            drawQuad(posMatrix, normMatrix, vertices,
-                    baseW * 2.0f, baseH * 2.0f, -0.04f,
-                    1.0f, 0.5f, 0.1f, intensity * 0.1f);  // Deep orange, very faint
+        // Outer glow layer
+        drawQuad(posMatrix, normMatrix, vertices,
+                baseW * 1.5f, baseH * 1.5f, -0.03f,
+                tint.x * 0.7f, tint.y * 0.5f, tint.z * 0.2f, intensity * 0.25f);
 
-            // === LAYER 2: Outer bloom ===
-            drawQuad(posMatrix, normMatrix, vertices,
-                    baseW * 1.7f, baseH * 1.7f, -0.03f,
-                    BLOOM_COLOR.x, BLOOM_COLOR.y, BLOOM_COLOR.z, intensity * 0.15f);
+        // Mid glow layer
+        drawQuad(posMatrix, normMatrix, vertices,
+                baseW * 1.2f, baseH * 1.2f, -0.015f,
+                tint.x * 0.9f, tint.y * 0.7f, tint.z * 0.4f, intensity * 0.4f);
 
-            // === LAYER 3: Golden corona ===
-            drawQuad(posMatrix, normMatrix, vertices,
-                    baseW * 1.4f, baseH * 1.4f, -0.02f,
-                    OUTER_COLOR.x, OUTER_COLOR.y, OUTER_COLOR.z, intensity * 0.25f);
+        // Main ray layer
+        drawQuad(posMatrix, normMatrix, vertices,
+                baseW, baseH, 0f,
+                tint.x, tint.y, tint.z, intensity * 0.9f);
 
-            // === LAYER 4: Inner glow (bright yellow) ===
-            drawQuad(posMatrix, normMatrix, vertices,
-                    baseW * 1.2f, baseH * 1.2f, -0.01f,
-                    INNER_COLOR.x, INNER_COLOR.y, INNER_COLOR.z, intensity * 0.4f);
+        // Bright core layer
+        drawQuad(posMatrix, normMatrix, vertices,
+                baseW * 0.65f, baseH * 0.65f, 0.015f,
+                1.0f, 1.0f, 1.0f, intensity * 0.6f);
 
-            // === LAYER 5: Core (near-white, main texture) ===
-            drawQuad(posMatrix, normMatrix, vertices,
-                    baseW, baseH, 0f,
-                    CORE_COLOR.x, CORE_COLOR.y, CORE_COLOR.z, intensity * 0.85f);
+        // Hot center
+        drawQuad(posMatrix, normMatrix, vertices,
+                baseW * 0.35f, baseH * 0.35f, 0.03f,
+                1.0f, 1.0f, 1.0f, intensity * 0.8f);
+    }
 
-            // === LAYER 6: Hot center (bright white) ===
-            drawQuad(posMatrix, normMatrix, vertices,
-                    baseW * 0.75f, baseH * 0.75f, 0.01f,
-                    1.0f, 1.0f, 1.0f, intensity * 0.5f);
+    /**
+     * Spawn particles along the beam path
+     */
+    private void spawnBeamParticles(RaEntity entity, Vec3d pos, Vec3d direction,
+            float intensity, float scale) {
 
-            // === LAYER 7: Divine spark (intense white point) ===
-            drawQuad(posMatrix, normMatrix, vertices,
-                    baseW * 0.4f, baseH * 0.4f, 0.02f,
-                    1.0f, 1.0f, 1.0f, intensity * 0.7f);
-        } else {
-            // Trail rendering (3 layers for smooth fade)
-            // Outer glow
-            drawQuad(posMatrix, normMatrix, vertices,
-                    baseW * 1.3f, baseH * 1.3f, -0.01f,
-                    OUTER_COLOR.x, OUTER_COLOR.y, OUTER_COLOR.z, intensity * 0.25f);
+        // Spawn more frequently for better effect
+        if (entity.getRandom().nextFloat() > 0.7f * intensity) {
+            return;
+        }
 
-            // Inner
-            drawQuad(posMatrix, normMatrix, vertices,
-                    baseW * 1.1f, baseH * 1.1f, 0f,
-                    INNER_COLOR.x, INNER_COLOR.y, INNER_COLOR.z, intensity * 0.4f);
+        // Flame particles radiating outward from beam (more particles, bigger spread)
+        for (int i = 0; i < 4; i++) {
+            double angle = entity.getRandom().nextDouble() * Math.PI * 2;
+            double radius = scale * 0.4;
+            double offsetX = Math.cos(angle) * radius;
+            double offsetZ = Math.sin(angle) * radius;
 
-            // Core
-            drawQuad(posMatrix, normMatrix, vertices,
-                    baseW, baseH, 0.01f,
-                    CORE_COLOR.x, CORE_COLOR.y, CORE_COLOR.z, intensity * 0.5f);
+            entity.getWorld().addParticle(
+                    ParticleTypes.FLAME,
+                    pos.x + offsetX * 0.5,
+                    pos.y + (entity.getRandom().nextDouble() - 0.5) * scale * 0.3,
+                    pos.z + offsetZ * 0.5,
+                    offsetX * 0.12 + direction.x * 0.03,
+                    entity.getRandom().nextFloat() * 0.03,
+                    offsetZ * 0.12 + direction.z * 0.03);
+        }
+
+        // Trail particles behind (more of them)
+        for (int i = 0; i < 2; i++) {
+            if (entity.getRandom().nextFloat() < 0.6f) {
+                double spread = (entity.getRandom().nextDouble() - 0.5) * 0.5;
+                entity.getWorld().addParticle(
+                        ParticleTypes.SMALL_FLAME,
+                        pos.x - direction.x * 0.8 + spread,
+                        pos.y + spread * 0.5,
+                        pos.z - direction.z * 0.8 + spread,
+                        -direction.x * 0.05,
+                        0.02,
+                        -direction.z * 0.05);
+            }
+        }
+
+        // Electric sparks (more visible)
+        if (entity.getRandom().nextFloat() < 0.35f) {
+            entity.getWorld().addParticle(
+                    ParticleTypes.ELECTRIC_SPARK,
+                    pos.x, pos.y, pos.z,
+                    (entity.getRandom().nextFloat() - 0.5f) * 0.18,
+                    entity.getRandom().nextFloat() * 0.1,
+                    (entity.getRandom().nextFloat() - 0.5f) * 0.18);
+        }
+
+        // Occasional lava drip for divine heat
+        if (entity.getRandom().nextFloat() < 0.15f) {
+            entity.getWorld().addParticle(
+                    ParticleTypes.LAVA,
+                    pos.x, pos.y, pos.z,
+                    0, 0, 0);
         }
     }
 
@@ -346,15 +342,15 @@ public class SunBeamSliceLayer extends GeoRenderLayer<RaEntity> {
             float w, float h, float z, float r, float g, float b, float a) {
         // Front face
         addVertex(posMatrix, normMatrix, vertices, -w, -h, z, r, g, b, a, 0, 1);
-        addVertex(posMatrix, normMatrix, vertices,  w, -h, z, r, g, b, a, 1, 1);
-        addVertex(posMatrix, normMatrix, vertices,  w,  h, z, r, g, b, a, 1, 0);
-        addVertex(posMatrix, normMatrix, vertices, -w,  h, z, r, g, b, a, 0, 0);
+        addVertex(posMatrix, normMatrix, vertices, w, -h, z, r, g, b, a, 1, 1);
+        addVertex(posMatrix, normMatrix, vertices, w, h, z, r, g, b, a, 1, 0);
+        addVertex(posMatrix, normMatrix, vertices, -w, h, z, r, g, b, a, 0, 0);
 
         // Back face
-        addVertex(posMatrix, normMatrix, vertices,  w, -h, z, r, g, b, a, 1, 1);
+        addVertex(posMatrix, normMatrix, vertices, w, -h, z, r, g, b, a, 1, 1);
         addVertex(posMatrix, normMatrix, vertices, -w, -h, z, r, g, b, a, 0, 1);
-        addVertex(posMatrix, normMatrix, vertices, -w,  h, z, r, g, b, a, 0, 0);
-        addVertex(posMatrix, normMatrix, vertices,  w,  h, z, r, g, b, a, 1, 0);
+        addVertex(posMatrix, normMatrix, vertices, -w, h, z, r, g, b, a, 0, 0);
+        addVertex(posMatrix, normMatrix, vertices, w, h, z, r, g, b, a, 1, 0);
     }
 
     private void addVertex(Matrix4f posMatrix, Matrix3f normMatrix, VertexConsumer vertices,

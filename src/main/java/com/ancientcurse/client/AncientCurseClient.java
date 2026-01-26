@@ -25,6 +25,7 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.particle.v1.ParticleFactoryRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry;
@@ -122,6 +123,11 @@ public class AncientCurseClient implements ClientModInitializer {
         // Register network packets
         CurseZonePackets.registerClientPackets();
 
+        // Register client tick event for screen shake
+        ClientTickEvents.END_CLIENT_TICK.register(client -> {
+            ScreenShakeManager.tick();
+        });
+
         // Register player animations (PlayerAnimator auto-loads from player_animation
         // folder)
         ModAnimations.register();
@@ -201,6 +207,9 @@ public class AncientCurseClient implements ClientModInitializer {
 
         // Register the Sun Shard projectile renderer
         EntityRendererRegistry.register(ModEntities.SUN_SHARD_PROJECTILE, SunShardProjectileRenderer::new);
+
+        // Register the Binding Bolt projectile renderer
+        EntityRendererRegistry.register(ModEntities.BINDING_BOLT, BindingBoltRenderer::new);
     }
 
     /**

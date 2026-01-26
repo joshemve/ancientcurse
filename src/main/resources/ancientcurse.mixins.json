@@ -16,7 +16,8 @@
     "client.JackelBindsScreenMixin",
     "client.JackelBindsFirstPersonMixin",
     "client.JackelBindsArmMixin",
-    "client.PlayerAnimationMixin"
+    "client.PlayerAnimationMixin",
+    "client.GameRendererScreenShakeMixin"
   ],
   "injectors": {
     "defaultRequire": 1

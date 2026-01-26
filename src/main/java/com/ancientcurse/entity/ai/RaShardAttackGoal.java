@@ -23,7 +23,8 @@ public class RaShardAttackGoal extends Goal {
     private int cooldown = 0;
 
     private static final int BUILDUP_TICKS = 30;
-    private static final int TOTAL_TICKS = 60; // 3.0s animation
+    private static final int TOTAL_TICKS = 120; // 6.0s - Ra's animation loops twice
+    private static final int VISUAL_SHARD_TICKS = 60; // Visual crystals only show for first loop
     private static final int SHARD_COUNT = 5;
 
     // Cooldown between uses (in ticks)
@@ -47,11 +48,13 @@ public class RaShardAttackGoal extends Goal {
         }
 
         // Don't start if already performing an action
+        // This prevents Shard Attack from interrupting other active skills (like ground
+        // smack)
         if (this.ra.isPerformingAction() || this.ra.isHibernating()) {
             return false;
         }
 
-        // Only use while on ground (as requested)
+        // Shard attack is ground-only - use Flying Staff Attack when airborne
         if (this.ra.isFlying()) {
             return false;
         }
@@ -69,8 +72,13 @@ public class RaShardAttackGoal extends Goal {
     @Override
     public void start() {
         this.attackTime = 0;
-        this.ra.setCombatState(RaEntity.RaCombatState.SHARD_ATTACK);
-        this.ra.setShardAttackTicks(TOTAL_TICKS);
+        // Use triggerAction to properly set both combatState AND actionAnimationTicks
+        // This is critical for the animation system to work correctly
+        this.ra.triggerAction(RaEntity.RaCombatState.SHARD_ATTACK, TOTAL_TICKS);
+        // Visual crystals use shorter timing (first loop only)
+        this.ra.setShardAttackTicks(VISUAL_SHARD_TICKS);
+
+        System.out.println("[Ra DEBUG] ShardAttackGoal.start() - triggered SHARD_ATTACK, ticks=" + TOTAL_TICKS);
     }
 
     @Override
@@ -95,15 +103,21 @@ public class RaShardAttackGoal extends Goal {
     @Override
     public void tick() {
         this.attackTime++;
-        this.ra.setShardAttackTicks(TOTAL_TICKS - this.attackTime);
+
+        // Visual crystals only show during first 60 ticks, then disappear
+        if (this.attackTime <= VISUAL_SHARD_TICKS) {
+            this.ra.setShardAttackTicks(VISUAL_SHARD_TICKS - this.attackTime);
+        } else {
+            this.ra.setShardAttackTicks(0);
+        }
 
         LivingEntity target = this.ra.getTarget();
         if (target != null) {
             this.ra.getLookControl().lookAt(target, 30.0F, 30.0F);
         }
 
-        // Phase 2: Firing sequence
-        if (this.attackTime > BUILDUP_TICKS && this.attackTime % 6 == 0 && target != null) {
+        // Phase 2: Firing sequence - only during first loop (ticks 31-60)
+        if (this.attackTime > BUILDUP_TICKS && this.attackTime <= VISUAL_SHARD_TICKS && this.attackTime % 6 == 0 && target != null) {
             fireShard(target);
         }
     }

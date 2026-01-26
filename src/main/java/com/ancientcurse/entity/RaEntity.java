@@ -2,8 +2,10 @@ package com.ancientcurse.entity;
 
 import com.ancientcurse.ModItems;
 import com.ancientcurse.entity.ai.RaFlightGoal;
+import com.ancientcurse.entity.ai.RaFlyingStaffAttackGoal;
 import com.ancientcurse.entity.ai.RaGroundSmackGoal;
 import com.ancientcurse.entity.ai.RaShardAttackGoal;
+import com.ancientcurse.entity.ai.RaSunBeamAttackGoal;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.ai.goal.*;
 import net.minecraft.entity.attribute.DefaultAttributeContainer;
@@ -96,7 +98,8 @@ public class RaEntity extends HostileEntity implements GeoEntity {
         GROUND_SMACK(4),
         SHARD_ATTACK(5),
         FLYING_STAFF_ATTACK(6),
-        HIBERNATING(7);
+        HIBERNATING(7),
+        DYING(8);
 
         private final int id;
 
@@ -154,6 +157,10 @@ public class RaEntity extends HostileEntity implements GeoEntity {
             RaEntity.class, TrackedDataHandlerRegistry.FLOAT);
     private static final TrackedData<Integer> SHARD_ATTACK_TICKS = DataTracker.registerData(
             RaEntity.class, TrackedDataHandlerRegistry.INTEGER);
+    // Synced action ticks so client-side animation controllers know when actions
+    // are playing
+    private static final TrackedData<Integer> ACTION_TICKS = DataTracker.registerData(
+            RaEntity.class, TrackedDataHandlerRegistry.INTEGER);
 
     /* ========== FIELDS ========== */
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
@@ -163,6 +170,8 @@ public class RaEntity extends HostileEntity implements GeoEntity {
     private RaFlightGoal flightGoal;
     private RaGroundSmackGoal groundSmackGoal;
     private RaShardAttackGoal shardAttackGoal;
+    private RaFlyingStaffAttackGoal flyingStaffAttackGoal;
+    private RaSunBeamAttackGoal sunBeamAttackGoal;
 
     // Phase tracking
     private RaPhase currentPhase = RaPhase.PHASE_1_AWAKENED;
@@ -178,7 +187,7 @@ public class RaEntity extends HostileEntity implements GeoEntity {
 
     // Hibernation (stun) state
     private int hibernationTicks = 0;
-    private static final int BASE_HIBERNATION_DURATION = 60; // 3 seconds base
+    private static final int BASE_HIBERNATION_DURATION = 400; // 20 seconds base
 
     /*
      * ========== ANIMATION DURATIONS ==========
@@ -196,7 +205,7 @@ public class RaEntity extends HostileEntity implements GeoEntity {
      */
     private static final int MELEE_DURATION = 60; // ra.melee: 3.0s
     private static final int GROUND_SMACK_DURATION = 60; // ra.flying_ground_smack: 3.0s
-    private static final int SHARD_ATTACK_DURATION = 60; // ra.shard_attack: 3.0s
+    private static final int SHARD_ATTACK_DURATION = 120; // Loops ra.shard_attack twice (2 * 3.0s)
     private static final int FLYING_STAFF_ATTACK_DURATION = 60; // ra.flying_staff_attack: 3.0s
     public static final int SUN_BEAM_SLICE_DURATION = 40; // Projectile duration (merged into ground smack)
 
@@ -226,15 +235,22 @@ public class RaEntity extends HostileEntity implements GeoEntity {
         this.goalSelector.add(0, new SwimGoal(this));
 
         // Priority 1: Ra-specific combat goals (server-side AI)
-        this.flightGoal = new RaFlightGoal(this);
-        this.groundSmackGoal = new RaGroundSmackGoal(this);
+        // Shard attack (ground) and Flying attacks (air) are mutually exclusive
+        // Sun beam is longer range, flying staff is medium range
         this.shardAttackGoal = new RaShardAttackGoal(this);
-        this.goalSelector.add(1, this.groundSmackGoal); // Ground smack takes priority over melee
-        this.goalSelector.add(2, this.shardAttackGoal); // Shard attack
-        this.goalSelector.add(3, this.flightGoal); // Flight behavior
+        this.sunBeamAttackGoal = new RaSunBeamAttackGoal(this);
+        this.flyingStaffAttackGoal = new RaFlyingStaffAttackGoal(this);
+        this.groundSmackGoal = new RaGroundSmackGoal(this);
+        this.flightGoal = new RaFlightGoal(this);
 
-        // Priority 3: Standard melee when in range
-        this.goalSelector.add(3, new MeleeAttackGoal(this, 1.2D, false));
+        this.goalSelector.add(1, this.shardAttackGoal); // Ground ranged attack (5-24 blocks)
+        this.goalSelector.add(1, this.sunBeamAttackGoal); // Air long-range beam (8-24 blocks) - fire damage
+        this.goalSelector.add(1, this.flyingStaffAttackGoal); // Air medium-range (5-30 blocks)
+        this.goalSelector.add(2, this.groundSmackGoal);
+        this.goalSelector.add(3, this.flightGoal);
+
+        // Priority 4: Standard melee when in range
+        this.goalSelector.add(4, new MeleeAttackGoal(this, 1.2D, false));
 
         // Priority 4-5: Movement
         this.goalSelector.add(4, new WanderAroundFarGoal(this, 1.0D));
@@ -256,6 +272,7 @@ public class RaEntity extends HostileEntity implements GeoEntity {
         this.dataTracker.startTracking(SUN_BEAM_DIR_Y, -1.0f);
         this.dataTracker.startTracking(SUN_BEAM_DIR_Z, 0.0f);
         this.dataTracker.startTracking(SHARD_ATTACK_TICKS, 0);
+        this.dataTracker.startTracking(ACTION_TICKS, 0);
     }
 
     /* ========== ATTRIBUTES ========== */
@@ -318,7 +335,16 @@ public class RaEntity extends HostileEntity implements GeoEntity {
      */
     public void triggerAction(RaCombatState state, int duration) {
         setCombatState(state);
-        this.actionAnimationTicks = duration;
+        setActionTicks(duration);
+    }
+
+    /**
+     * Set action animation ticks - syncs to DataTracker for client-side animation
+     * control
+     */
+    private void setActionTicks(int ticks) {
+        this.actionAnimationTicks = ticks;
+        this.dataTracker.set(ACTION_TICKS, ticks);
     }
 
     public boolean isFlying() {
@@ -335,6 +361,11 @@ public class RaEntity extends HostileEntity implements GeoEntity {
     }
 
     public boolean isPerformingAction() {
+        // Check synced action ticks first - this is reliable on both client and server
+        if (this.dataTracker.get(ACTION_TICKS) > 0) {
+            return true;
+        }
+        // Also check combat state as backup
         RaCombatState state = getCombatState();
         return state == RaCombatState.MELEE ||
                 state == RaCombatState.GROUND_SMACK ||
@@ -361,6 +392,12 @@ public class RaEntity extends HostileEntity implements GeoEntity {
             if (this.shardAttackGoal != null) {
                 this.shardAttackGoal.tickCooldown();
             }
+            if (this.flyingStaffAttackGoal != null) {
+                this.flyingStaffAttackGoal.tickCooldown();
+            }
+            if (this.sunBeamAttackGoal != null) {
+                this.sunBeamAttackGoal.tickCooldown();
+            }
 
             // Update sun beam slice ticks for client-side rendering
             int beamTicks = this.dataTracker.get(SUN_BEAM_SLICE_TICKS);
@@ -377,12 +414,21 @@ public class RaEntity extends HostileEntity implements GeoEntity {
                 return; // Skip other logic while stunned
             }
 
-            // Handle action animation timers
+            // Handle action animation timers (sync to DataTracker for client)
             if (this.actionAnimationTicks > 0) {
                 this.actionAnimationTicks--;
+                this.dataTracker.set(ACTION_TICKS, this.actionAnimationTicks);
                 if (this.actionAnimationTicks == 0) {
                     onActionComplete();
                 }
+            }
+
+            // Keep immobile and disable AI while dying
+            if (getCombatState() == RaCombatState.DYING) {
+                this.setVelocity(0, 0, 0);
+                this.velocityModified = true;
+                this.getNavigation().stop();
+                return; // skip flight and other logic
             }
 
             // Decrement post-action grace period
@@ -422,8 +468,10 @@ public class RaEntity extends HostileEntity implements GeoEntity {
         // Fix rotation: Sync body yaw to head yaw while flying
         // Since RaFlightGoal makes him face the target with LookControl,
         // we need to ensure his body turns with his head while hovering.
-        this.bodyYaw = this.headYaw;
-        this.setYaw(this.headYaw);
+        if (!isHibernating()) {
+            this.bodyYaw = this.headYaw;
+            this.setYaw(this.headYaw);
+        }
     }
 
     /**
@@ -447,6 +495,11 @@ public class RaEntity extends HostileEntity implements GeoEntity {
         RaCombatState currentState = getCombatState();
 
         // Return to appropriate idle state
+        if (currentState == RaCombatState.DYING) {
+            this.kill();
+            return;
+        }
+
         if (isFlying()) {
             setCombatState(RaCombatState.FLYING);
         } else {
@@ -462,7 +515,11 @@ public class RaEntity extends HostileEntity implements GeoEntity {
     /* ========== COMBAT ACTIONS ========== */
     @Override
     public boolean tryAttack(net.minecraft.entity.Entity target) {
+        System.out.println("[Ra DEBUG] tryAttack() called! hibernating=" + isHibernating() +
+                ", performingAction=" + isPerformingAction() + ", flying=" + isFlying());
+
         if (isHibernating() || isPerformingAction()) {
+            System.out.println("[Ra DEBUG] tryAttack() returning false - blocked");
             return false;
         }
 
@@ -477,8 +534,9 @@ public class RaEntity extends HostileEntity implements GeoEntity {
     }
 
     public void triggerMeleeAttack() {
+        System.out.println("[Ra DEBUG] triggerMeleeAttack() called! Setting MELEE state, duration=" + MELEE_DURATION);
         setCombatState(RaCombatState.MELEE);
-        this.actionAnimationTicks = MELEE_DURATION;
+        setActionTicks(MELEE_DURATION);
     }
 
     public void triggerGroundSmack() {
@@ -486,7 +544,7 @@ public class RaEntity extends HostileEntity implements GeoEntity {
             setFlying(false);
         }
         setCombatState(RaCombatState.GROUND_SMACK);
-        this.actionAnimationTicks = GROUND_SMACK_DURATION;
+        setActionTicks(GROUND_SMACK_DURATION);
         this.dataTracker.set(SUN_BEAM_SLICE_TICKS, GROUND_SMACK_DURATION);
     }
 
@@ -494,14 +552,14 @@ public class RaEntity extends HostileEntity implements GeoEntity {
         if (isPerformingAction())
             return;
         setCombatState(RaCombatState.SHARD_ATTACK);
-        this.actionAnimationTicks = SHARD_ATTACK_DURATION;
+        setActionTicks(SHARD_ATTACK_DURATION);
     }
 
     public void triggerFlyingStaffAttack() {
         if (!isFlying() || isPerformingAction())
             return;
         setCombatState(RaCombatState.FLYING_STAFF_ATTACK);
-        this.actionAnimationTicks = FLYING_STAFF_ATTACK_DURATION;
+        setActionTicks(FLYING_STAFF_ATTACK_DURATION);
     }
 
     public void setSunBeamDirection(Vec3d dir) {
@@ -623,9 +681,12 @@ public class RaEntity extends HostileEntity implements GeoEntity {
         } else if (targetState == RaCombatState.SHARD_ATTACK && this.shardAttackGoal != null) {
             setCombatState(RaCombatState.IDLE);
             this.shardAttackGoal.forceStart();
+        } else if (targetState == RaCombatState.FLYING_STAFF_ATTACK && this.flyingStaffAttackGoal != null) {
+            setCombatState(RaCombatState.IDLE);
+            this.flyingStaffAttackGoal.forceStart();
         } else {
             setCombatState(targetState);
-            this.actionAnimationTicks = duration;
+            setActionTicks(duration);
         }
 
         // Build detailed debug output
@@ -728,6 +789,7 @@ public class RaEntity extends HostileEntity implements GeoEntity {
             case SHARD_ATTACK -> ANIM_SHARD_ATTACK;
             case FLYING_STAFF_ATTACK -> ANIM_FLYING_STAFF_ATTACK;
             case HIBERNATING -> ANIM_HIBERNATION;
+            case DYING -> ANIM_DEATH;
         };
     }
 
@@ -741,6 +803,7 @@ public class RaEntity extends HostileEntity implements GeoEntity {
             case GROUND_SMACK -> GROUND_SMACK_DURATION;
             case SHARD_ATTACK -> SHARD_ATTACK_DURATION;
             case FLYING_STAFF_ATTACK -> FLYING_STAFF_ATTACK_DURATION;
+            case DYING -> 60; // 3.0s death animation
         };
     }
 
@@ -789,10 +852,63 @@ public class RaEntity extends HostileEntity implements GeoEntity {
         this.hibernationTicks = duration;
         setCombatState(RaCombatState.HIBERNATING);
 
+        // Force stop movement
+        this.setVelocity(0, this.getVelocity().y, 0);
+        this.getNavigation().stop();
+
         // Force landing if flying
         if (isFlying()) {
             setFlying(false);
+            // Give a small downward nudge to ensure he starts falling immediately
+            this.setVelocity(0, -0.2, 0);
         }
+
+        // Heavy impact sound
+        this.getWorld().playSound(null, this.getX(), this.getY(), this.getZ(),
+                SoundEvents.ENTITY_GENERIC_BIG_FALL, this.getSoundCategory(), 1.5f, 0.5f);
+    }
+
+    @Override
+    public void travel(Vec3d movementInput) {
+        if (isHibernating()) {
+            // If hibernating, we ignore movement input (WSAD)
+            // super.travel(Vec3d.ZERO) will still apply gravity if noGravity is false
+            super.travel(Vec3d.ZERO);
+
+            // Force zero horizontal velocity AFTER gravity/movement but keep the vertical
+            // fall
+            this.setVelocity(0, this.getVelocity().y, 0);
+            return;
+        }
+        super.travel(movementInput);
+    }
+
+    @Override
+    public void setYaw(float yaw) {
+        if (isHibernating())
+            return;
+        super.setYaw(yaw);
+    }
+
+    @Override
+    public void setHeadYaw(float headYaw) {
+        if (isHibernating())
+            return;
+        super.setHeadYaw(headYaw);
+    }
+
+    @Override
+    public void setPitch(float pitch) {
+        if (isHibernating())
+            return;
+        super.setPitch(pitch);
+    }
+
+    @Override
+    public void setBodyYaw(float bodyYaw) {
+        if (isHibernating())
+            return;
+        super.setBodyYaw(bodyYaw);
     }
 
     /**
@@ -849,6 +965,26 @@ public class RaEntity extends HostileEntity implements GeoEntity {
 
     @Override
     public void onDeath(DamageSource damageSource) {
+        // Start death animation sequence instead of dying immediately
+        // Custom animation is 3.0s (60 ticks)
+        if (getCombatState() != RaCombatState.DYING) {
+            triggerAction(RaCombatState.DYING, 60);
+
+            // Prevent actual death - keep at 1 HP to avoid immediate removal
+            this.setHealth(1.0f);
+
+            // Make invulnerable and immobile during death animation
+            this.setInvulnerable(true);
+            this.setNoGravity(true);
+
+            // Stop all movement
+            this.setVelocity(0, 0, 0);
+            this.getNavigation().stop();
+
+            // Note: actual kill() is called in onActionComplete() after 60 ticks
+            return;
+        }
+
         super.onDeath(damageSource);
     }
 
@@ -921,9 +1057,10 @@ public class RaEntity extends HostileEntity implements GeoEntity {
 
         RaCombatState combatState = getCombatState();
 
-        // Stop movement animation during attacks - let attack controller handle it
-        if (isPerformingAction()) {
-            logAnimationChange("movement", "(STOPPED - action playing)");
+        // Stop movement animation during attacks or death - let corresponding
+        // controller handle it
+        if (isPerformingAction() || combatState == RaCombatState.DYING) {
+            logAnimationChange("movement", "(STOPPED - action/death playing)");
             return PlayState.STOP;
         }
 
@@ -966,18 +1103,23 @@ public class RaEntity extends HostileEntity implements GeoEntity {
         return PlayState.CONTINUE;
     }
 
+    // Track when we last started an attack animation to allow re-triggering same
+    // attack type
+    private int lastAttackStartTick = -1;
+    private RaCombatState lastAttackState = null;
+
     /**
      * Attack controller - handles all attack animations.
      * Plays once per attack, then stops.
      */
     private PlayState attackController(AnimationState<RaEntity> state) {
-        // Stop attack animation when dead - let death controller handle it
-        if (this.isDead()) {
-            logAnimationChange("attack", "(STOPPED - dead)");
+        RaCombatState combatState = getCombatState();
+
+        // Stop attack animation when dead or dying - let death controller handle it
+        if (this.isDead() || combatState == RaCombatState.DYING) {
+            logAnimationChange("attack", "(STOPPED - dead/dying)");
             return PlayState.STOP;
         }
-
-        RaCombatState combatState = getCombatState();
 
         String animation = switch (combatState) {
             case MELEE -> ANIM_MELEE;
@@ -988,17 +1130,40 @@ public class RaEntity extends HostileEntity implements GeoEntity {
         };
 
         if (animation != null) {
-            // Only set the animation if it's not already playing to prevent restarting it
-            // every tick
-            if (state.getController().getCurrentAnimation() == null ||
-                    !state.getController().getCurrentAnimation().animation().name().equals(animation)) {
+            // Check if this is a NEW attack instance by looking at ACTION_TICKS
+            // When an attack starts, actionTicks is set to max duration
+            // So if we're in an attack state AND (different attack type OR action just
+            // started), trigger animation
+            int currentActionTicks = this.dataTracker.get(ACTION_TICKS);
+            boolean isNewAttack = (combatState != lastAttackState) ||
+                    (this.age != lastAttackStartTick && currentActionTicks > 0 &&
+                            state.getController().getCurrentAnimation() == null);
 
-                state.getController().setAnimation(RawAnimation.begin().thenPlay(animation));
-                logAnimationChange("attack", animation);
+            // Also trigger if controller has no animation (e.g., after STOP)
+            boolean needsAnimation = state.getController().getCurrentAnimation() == null;
+
+            // Track when we start this attack
+            if (isNewAttack || needsAnimation) {
+                lastAttackState = combatState;
+                lastAttackStartTick = this.age;
+
+                RawAnimation rawAnimation = RawAnimation.begin().thenPlay(animation);
+
+                // If it's the Shard Attack, loop it exactly twice to match the 120-tick
+                // duration
+                if (combatState == RaCombatState.SHARD_ATTACK) {
+                    rawAnimation.thenPlay(animation);
+                }
+
+                state.getController().setAnimation(rawAnimation);
+                logAnimationChange("attack",
+                        animation + (combatState == RaCombatState.SHARD_ATTACK ? " (looped 2x)" : ""));
             }
             return PlayState.CONTINUE;
         }
 
+        // Reset tracking when not in attack state
+        lastAttackState = null;
         logAnimationChange("attack", "(STOPPED - no attack)");
         return PlayState.STOP;
     }
@@ -1007,7 +1172,7 @@ public class RaEntity extends HostileEntity implements GeoEntity {
      * Death controller - highest priority, overrides everything.
      */
     private PlayState deathController(AnimationState<RaEntity> state) {
-        if (this.isDead()) {
+        if (getCombatState() == RaCombatState.DYING || this.isDead()) {
             state.getController().setAnimation(
                     RawAnimation.begin().thenPlayAndHold(ANIM_DEATH));
             logAnimationChange("death", ANIM_DEATH);

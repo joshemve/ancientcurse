@@ -56,11 +56,11 @@ public class SunShardLayer extends GeoRenderLayer<RaEntity> {
         for (int i = 0; i < shardsToRender; i++) {
             poseStack.push();
 
-            // Orbit math: 5 points evenly spread - made larger and higher as requested
+            // Orbit math: 5 points evenly spread
             float orbitAngle = (time * 0.15f) + (i * (float) (Math.PI * 2 / 5));
             float orbitRadius = 3.2f + MathHelper.sin(time * 0.1f + i) * 0.3f;
 
-            // Floating height oscillation - positioned higher up
+            // Floating height oscillation
             float verticalPos = (float) entity.getHeight() * 0.8f + MathHelper.cos(time * 0.12f + i) * 0.4f;
 
             double offsetX = MathHelper.cos(orbitAngle) * orbitRadius;
@@ -73,7 +73,7 @@ public class SunShardLayer extends GeoRenderLayer<RaEntity> {
             poseStack.multiply(RotationAxis.POSITIVE_Z.rotation(time * 0.04f));
 
             // Scale in/out
-            float scale = 0.8f;
+            float scale = 0.5f;
             if (shardTicks > 55) { // Scaling in at start
                 scale *= (60 - shardTicks) / 5.0f;
             }
@@ -129,10 +129,6 @@ public class SunShardLayer extends GeoRenderLayer<RaEntity> {
         drawBox(posMatrix, normMatrix, vertices, 0.03125f, 0.0625f, 0.03125f, 0, 0, r, g, b, a,
                 9, 8, 10, 10, texS);
         poseStack.pop();
-
-        // Add a soft glow Layer (Additive bloom effect) on the core
-        drawBox(posMatrix, normMatrix, vertices, 0.12f, 0.35f, 0.12f, 0, 0, r, g, b, a * 0.4f,
-                0, 0, 3, 8, texS);
     }
 
     private void drawBox(Matrix4f posMatrix, Matrix3f normMatrix, VertexConsumer vertices,

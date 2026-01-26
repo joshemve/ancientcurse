@@ -9,7 +9,10 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
+
+import com.ancientcurse.network.CurseZonePackets;
 
 import java.util.EnumSet;
 import java.util.List;
@@ -69,6 +72,8 @@ public class RaGroundSmackGoal extends Goal {
     @Override
     public boolean canStart() {
         // Don't start if hibernating, flying, or already performing action
+        // This check is critical: it prevents this goal from overriding an active Shard
+        // Attack
         if (ra.isHibernating() || ra.isFlying() || ra.isPerformingAction()) {
             return false;
         }
@@ -85,8 +90,9 @@ public class RaGroundSmackGoal extends Goal {
         }
 
         // Target must be within range (but not too close - melee handles that)
+        // Ground smack triggers at 3-6 blocks, leaving 0-3 blocks for melee attacks
         double distance = ra.squaredDistanceTo(target);
-        return distance >= 4.0 && distance <= 36.0; // 2-6 blocks
+        return distance >= 9.0 && distance <= 36.0; // 3-6 blocks (squared)
     }
 
     @Override
@@ -146,7 +152,8 @@ public class RaGroundSmackGoal extends Goal {
         // Deal damage at the slam frame
         int frameInAnimation = GROUND_SMACK_DURATION - animationTicks;
 
-        // Track target and update beam direction ONLY during buildup phase (before impact)
+        // Track target and update beam direction ONLY during buildup phase (before
+        // impact)
         // After DAMAGE_FRAME, Ra locks facing direction and beam direction
         if (frameInAnimation < DAMAGE_FRAME) {
             LivingEntity target = ra.getTarget();
@@ -169,6 +176,8 @@ public class RaGroundSmackGoal extends Goal {
         // After DAMAGE_FRAME: Ra is locked in position and facing - no more tracking
 
         if (frameInAnimation == DAMAGE_FRAME && !hasDealtDamage) {
+            System.out.println("[Ra DEBUG] DAMAGE_FRAME hit! Frame=" + frameInAnimation +
+                    " (tick " + (animationTicks) + " remaining), time=" + (frameInAnimation / 20.0f) + "s");
             dealAreaDamage();
             hasDealtDamage = true;
         }
@@ -221,8 +230,8 @@ public class RaGroundSmackGoal extends Goal {
             }
         }
 
-        // Trigger sun beam visual on impact (longer duration for ground smack)
-        ra.setSunBeamTicks(40);
+        // Sun beam visual disabled - using new rope/shockwave effect instead
+        // ra.setSunBeamTicks(40);
 
         // Play solar impact sound (beacon + blaze for divine feel)
         ra.playSound(SoundEvents.BLOCK_BEACON_ACTIVATE, 1.2f, 1.5f);
@@ -230,6 +239,34 @@ public class RaGroundSmackGoal extends Goal {
 
         // Spawn solar ground impact particles (flame ring only, no explosion)
         spawnSolarImpactParticles(radius);
+
+        // Screen shake for nearby players - intensity scales with phase
+        // CRAZY Testing Intensity: 5.0 -> 15.0+ to ensure visibility
+        float shakeIntensity = switch (phase) {
+            case PHASE_1_AWAKENED -> 15.0f;
+            case PHASE_2_SOLAR_WRATH -> 22.0f;
+            case PHASE_3_DIVINE_FURY -> 30.0f;
+        };
+
+        // Fix: Sample ground position for shake origin to ensure nearby players on
+        // ground feel it
+        // even if Ra is slamming from mid-air.
+        BlockPos shakeOrigin = ra.getBlockPos();
+        for (int y = shakeOrigin.getY(); y > ra.getWorld().getBottomY(); y--) {
+            BlockPos check = new BlockPos(shakeOrigin.getX(), y, shakeOrigin.getZ());
+            if (!ra.getWorld().getBlockState(check).isAir()) {
+                shakeOrigin = check.up();
+                break;
+            }
+        }
+
+        CurseZonePackets.sendScreenShake(
+                (ServerWorld) ra.getWorld(),
+                shakeOrigin,
+                shakeIntensity,
+                30, // Increased duration to 1.5 seconds (30 ticks)
+                64 // Increased range to 64 blocks
+        );
     }
 
     /**
@@ -241,24 +278,26 @@ public class RaGroundSmackGoal extends Goal {
             return;
 
         // === RADIATING LIGHT RAYS (the "woosh" effect) ===
-        // 16 rays shooting outward from center like a starburst
-        for (int i = 0; i < 16; i++) {
-            double angle = Math.toRadians(i * 22.5); // 360/16 = 22.5 degrees apart
+        // Increased to 32 rays for density
+        System.out.println("[RaDebug] Spawning shockwave particles at " + ra.getPos());
+        for (int i = 0; i < 32; i++) {
+            double angle = Math.toRadians(i * 11.25); // 360/32 = 11.25 degrees apart
             double dirX = Math.cos(angle);
             double dirZ = Math.sin(angle);
 
             // Each ray is a stream of fast-moving flame particles
-            for (int j = 0; j < 6; j++) {
-                double distance = 0.3 + j * 0.4; // Staggered along the ray
-                double speed = 0.15 + j * 0.03;  // Faster particles further out
+            for (int j = 0; j < 8; j++) {
+                double distance = 0.3 + j * 0.5; // Staggered along the ray
+                double speed = 0.2 + j * 0.04; // Faster particles further out
 
+                // Use the server-side broadcast method that can force particles
                 serverWorld.spawnParticles(
                         ParticleTypes.FLAME,
                         ra.getX() + dirX * distance,
                         ra.getY() + 0.2 + j * 0.05,
                         ra.getZ() + dirZ * distance,
-                        1,
-                        0.05, 0.02, 0.05,
+                        3, // Increased count
+                        0.1, 0.05, 0.1, // Increased delta
                         speed);
             }
 
