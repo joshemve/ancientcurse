@@ -56,7 +56,46 @@ public class RaRenderer extends GeoEntityRenderer<RaEntity> {
     public void render(RaEntity entity, float entityYaw, float partialTick, MatrixStack poseStack,
             VertexConsumerProvider bufferSource, int packedLight) {
         super.render(entity, entityYaw, partialTick, poseStack, bufferSource, packedLight);
-        // Note: Wing particle spawning handled by WingFireParticleLayer
+    }
+
+    @Override
+    public void renderRecursively(MatrixStack poseStack, RaEntity animatable, GeoBone bone, RenderLayer renderType,
+            VertexConsumerProvider bufferSource, VertexConsumer buffer, boolean isReRender, float partialTick,
+            int packedLight, int packedOverlay, float red, float green, float blue, float alpha) {
+
+        // Staff bones use staff_of_ra.png texture (imported with original UVs)
+        // All other bones use ra.png
+        boolean isStaffBone = isStaffOrDescendant(bone);
+
+        if (isStaffBone) {
+            net.minecraft.util.Identifier staffTexture = new net.minecraft.util.Identifier(
+                    com.ancientcurse.AncientCurse.MOD_ID, "textures/item/staff_of_ra.png");
+            renderType = RenderLayer.getEntityCutout(staffTexture);
+            buffer = bufferSource.getBuffer(renderType);
+        } else {
+            // Ensure Ra's main texture for non-staff bones
+            renderType = getRenderType(animatable, getTextureLocation(animatable), bufferSource, partialTick);
+            buffer = bufferSource.getBuffer(renderType);
+        }
+
+        super.renderRecursively(poseStack, animatable, bone, renderType, bufferSource, buffer, isReRender, partialTick,
+                packedLight, packedOverlay, red, green, blue, alpha);
+    }
+
+    /**
+     * Check if a bone is the staff_of_ra bone or a descendant of it.
+     */
+    private boolean isStaffOrDescendant(GeoBone bone) {
+        GeoBone current = bone;
+        while (current != null) {
+            String name = current.getName().toLowerCase();
+            // Match staff_of_ra or StaffofRa (the original bone name)
+            if (name.equals("staff_of_ra") || name.equals("staffofra")) {
+                return true;
+            }
+            current = current.getParent();
+        }
+        return false;
     }
 
     /**
@@ -161,5 +200,4 @@ public class RaRenderer extends GeoEntityRenderer<RaEntity> {
             }
         }
     }
-
 }

@@ -51,7 +51,7 @@ public class SunBeamSliceLayer extends GeoRenderLayer<RaEntity> {
 
     // Ground Smack Timing (Matches RaEntity & RaGroundSmackGoal)
     private static final int GROUND_SMACK_DURATION = 60; // 3.0s total
-    private static final int GROUND_SMACK_DELAY = 23; // Firing point at 1.15s (damage frame)
+    private static final int GROUND_SMACK_DELAY = 18; // Firing point at 0.9s (sync with visual slam)
     private static final int BEAM_DURATION = 30; // How long beam is visible (ticks)
 
     public SunBeamSliceLayer(GeoEntityRenderer<RaEntity> entityRenderer) {

@@ -62,7 +62,7 @@ public class RaGroundSmackGoal extends Goal {
      * and note the timestamp. Multiply by 20 to get ticks.
      */
     private static final int GROUND_SMACK_DURATION = 60; // 3 seconds - matches animation_length
-    private static final int DAMAGE_FRAME = 23; // 1.15s - when slam impacts (per user feedback)
+    private static final int DAMAGE_FRAME = 18; // 0.9s - earlier to sync with visual slam impact
 
     public RaGroundSmackGoal(RaEntity ra) {
         this.ra = ra;
