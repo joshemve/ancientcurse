@@ -16,6 +16,7 @@ import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.data.DataTracker;
 import net.minecraft.entity.data.TrackedData;
 import net.minecraft.entity.data.TrackedDataHandlerRegistry;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.mob.HostileEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
@@ -204,6 +205,10 @@ public class RaEntity extends HostileEntity implements GeoEntity {
      * Last verified against ra.animation.json: 2026-01-24
      */
     private static final int MELEE_DURATION = 60; // ra.melee: 3.0s
+    private static final int MELEE_DAMAGE_FRAME = 7; // Deal damage at 0.35s into animation
+    private static final float MELEE_DAMAGE = 8.0f; // Base melee damage
+    private static final double MELEE_RANGE = 4.0; // Range to hit target
+    private boolean meleeHasDealtDamage = false; // Track if current melee attack dealt damage
     private static final int GROUND_SMACK_DURATION = 60; // ra.flying_ground_smack: 3.0s
     private static final int SHARD_ATTACK_DURATION = 120; // Loops ra.shard_attack twice (2 * 3.0s)
     private static final int FLYING_STAFF_ATTACK_DURATION = 60; // ra.flying_staff_attack: 3.0s
@@ -422,6 +427,15 @@ public class RaEntity extends HostileEntity implements GeoEntity {
             if (this.actionAnimationTicks > 0) {
                 this.actionAnimationTicks--;
                 this.dataTracker.set(ACTION_TICKS, this.actionAnimationTicks);
+
+                // Handle melee damage at the correct frame
+                if (getCombatState() == RaCombatState.MELEE && !meleeHasDealtDamage) {
+                    int elapsedTicks = MELEE_DURATION - this.actionAnimationTicks;
+                    if (elapsedTicks == MELEE_DAMAGE_FRAME) {
+                        dealMeleeDamage();
+                    }
+                }
+
                 if (this.actionAnimationTicks == 0) {
                     onActionComplete();
                 }
@@ -507,12 +521,14 @@ public class RaEntity extends HostileEntity implements GeoEntity {
         if (isFlying()) {
             setCombatState(RaCombatState.FLYING);
         } else {
-            setCombatState(RaCombatState.IDLE);
-        }
-
-        // Start grace period to maintain walking animation if we have a target
-        if (this.getTarget() != null) {
-            this.postActionGraceTicks = POST_ACTION_GRACE_DURATION;
+            // If we have a target, go to WALKING to continue pursuit
+            // This prevents awkward IDLE pauses between attacks
+            if (this.getTarget() != null && this.getTarget().isAlive()) {
+                setCombatState(RaCombatState.WALKING);
+                this.postActionGraceTicks = POST_ACTION_GRACE_DURATION;
+            } else {
+                setCombatState(RaCombatState.IDLE);
+            }
         }
     }
 
@@ -527,16 +543,67 @@ public class RaEntity extends HostileEntity implements GeoEntity {
         // Choose attack based on phase and state
         if (isFlying()) {
             triggerFlyingStaffAttack();
+            return super.tryAttack(target); // Flying attack deals damage immediately
         } else {
             triggerMeleeAttack();
+            // Melee attack deals damage at MELEE_DAMAGE_FRAME, not immediately
+            // Return true to indicate we started an attack, but don't call super
+            return true;
         }
-
-        return super.tryAttack(target);
     }
 
     public void triggerMeleeAttack() {
         setCombatState(RaCombatState.MELEE);
         setActionTicks(MELEE_DURATION);
+        meleeHasDealtDamage = false; // Reset damage flag for new attack
+    }
+
+    /**
+     * Deal melee damage at the correct animation frame.
+     * Called from tick() when MELEE_DAMAGE_FRAME is reached.
+     */
+    private void dealMeleeDamage() {
+        if (this.getWorld().isClient || meleeHasDealtDamage) {
+            return;
+        }
+
+        meleeHasDealtDamage = true;
+
+        // Get target
+        LivingEntity target = this.getTarget();
+        if (target == null || !target.isAlive()) {
+            return;
+        }
+
+        // Check if target is in range
+        double distSq = this.squaredDistanceTo(target);
+        if (distSq > MELEE_RANGE * MELEE_RANGE) {
+            return; // Target moved out of range
+        }
+
+        // Calculate damage based on phase
+        float damage = switch (getCurrentPhase()) {
+            case PHASE_1_AWAKENED -> MELEE_DAMAGE;
+            case PHASE_2_SOLAR_WRATH -> MELEE_DAMAGE * 1.25f;
+            case PHASE_3_DIVINE_FURY -> MELEE_DAMAGE * 1.5f;
+        };
+
+        // Deal damage
+        target.damage(this.getWorld().getDamageSources().mobAttack(this), damage);
+
+        // Light knockback
+        double dx = target.getX() - this.getX();
+        double dz = target.getZ() - this.getZ();
+        double dist = Math.sqrt(dx * dx + dz * dz);
+        if (dist > 0) {
+            target.addVelocity(dx / dist * 0.5, 0.2, dz / dist * 0.5);
+            if (target instanceof net.minecraft.entity.player.PlayerEntity player) {
+                player.velocityModified = true;
+            }
+        }
+
+        // Play hit sound
+        this.playSound(net.minecraft.sound.SoundEvents.ENTITY_PLAYER_ATTACK_STRONG, 1.0f, 0.9f);
     }
 
     public void triggerGroundSmack() {
@@ -1108,12 +1175,20 @@ public class RaEntity extends HostileEntity implements GeoEntity {
     /**
      * Attack controller - handles all attack animations.
      * Plays once per attack, then stops.
+     *
+     * SIMPLIFIED LOGIC: Start animation when combat state differs from lastAttackState.
+     * This handles all cases:
+     * - First attack: null != MELEE → start
+     * - Same attack continuing: MELEE == MELEE → don't restart
+     * - Attack ends (go to IDLE/WALKING): reset lastAttackState to null
+     * - New attack: null != MELEE → start
      */
     private PlayState attackController(AnimationState<RaEntity> state) {
         RaCombatState combatState = getCombatState();
 
         // Stop attack animation when dead or dying - let death controller handle it
         if (this.isDead() || combatState == RaCombatState.DYING) {
+            lastAttackState = null;
             logAnimationChange("attack", "(STOPPED - dead/dying)");
             return PlayState.STOP;
         }
@@ -1127,26 +1202,15 @@ public class RaEntity extends HostileEntity implements GeoEntity {
         };
 
         if (animation != null) {
-            int currentActionTicks = this.dataTracker.get(ACTION_TICKS);
-
-            // Determine expected duration for this attack type
-            int expectedDuration = getAnimationDurationForState(combatState);
-
-            // Detect new attack: ACTION_TICKS equals max duration (just started)
-            // OR combat state changed from previous
-            // OR no animation is currently playing
-            boolean isNewAttack = (currentActionTicks == expectedDuration) ||
-                    (combatState != lastAttackState) ||
-                    (state.getController().getCurrentAnimation() == null);
-
-            if (isNewAttack) {
+            // Simple check: start animation if we haven't started it for THIS attack yet
+            // lastAttackState tracks what attack we've already triggered animation for
+            if (lastAttackState != combatState) {
                 lastAttackState = combatState;
                 lastAttackStartTick = this.age;
 
                 RawAnimation rawAnimation = RawAnimation.begin().thenPlay(animation);
 
-                // If it's the Shard Attack, loop it exactly twice to match the 120-tick
-                // duration
+                // If it's the Shard Attack, loop it exactly twice to match the 120-tick duration
                 if (combatState == RaCombatState.SHARD_ATTACK) {
                     rawAnimation.thenPlay(animation);
                 }
@@ -1158,7 +1222,7 @@ public class RaEntity extends HostileEntity implements GeoEntity {
             return PlayState.CONTINUE;
         }
 
-        // Reset tracking when not in attack state
+        // Not in attack state - reset tracking so next attack will trigger animation
         lastAttackState = null;
         logAnimationChange("attack", "(STOPPED - no attack)");
         return PlayState.STOP;
