@@ -996,9 +996,6 @@ public class RaEntity extends HostileEntity implements GeoEntity {
         hasDroppedLoot = true;
 
         super.dropLoot(source, causedByPlayer);
-        if (causedByPlayer && this.random.nextFloat() < 0.8f) {
-            this.dropStack(new ItemStack(ModItems.STAFF_OF_RA, 1));
-        }
     }
 
     @Override

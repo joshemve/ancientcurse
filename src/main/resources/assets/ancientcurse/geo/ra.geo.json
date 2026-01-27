@@ -2743,7 +2743,7 @@
 					]
 				},
 				{
-					"name": "shaft",
+					"name": "shaft2",
 					"parent": "staff_of_ra",
 					"pivot": [-17.425, 11.865, -3.41],
 					"cubes": [
