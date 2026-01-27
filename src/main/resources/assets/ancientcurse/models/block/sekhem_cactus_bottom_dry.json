@@ -1,0 +1,6 @@
+{
+	"parent": "ancientcurse:block/sekhem_cactus_bottom",
+	"textures": {
+		"cactus": "ancientcurse:block/sekhem_cactus_dry"
+	}
+}
