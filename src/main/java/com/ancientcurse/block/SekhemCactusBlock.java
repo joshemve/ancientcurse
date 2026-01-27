@@ -104,8 +104,14 @@ public class SekhemCactusBlock extends BlockWithEntity {
                 sizeVariant = stateBelow.get(SIZE_VARIANT); // Inherit from MIDDLE block
             } else {
                 // This will be the 2nd block - MIDDLE, randomly choose size variant
+                // Use position-seeded random so client and server get the same values
+                long seed = pos.asLong();
+                seed = seed ^ (seed >>> 33);
+                seed = seed * 0xff51afd7ed558ccdL;
+                seed = seed ^ (seed >>> 33);
+                java.util.Random posRandom = new java.util.Random(seed);
                 position = SekhemCactusPosition.MIDDLE;
-                sizeVariant = SekhemCactusSizeVariant.random(world.random);
+                sizeVariant = SekhemCactusSizeVariant.values()[posRandom.nextInt(SekhemCactusSizeVariant.values().length)];
             }
 
             return this.getDefaultState()
@@ -116,14 +122,23 @@ public class SekhemCactusBlock extends BlockWithEntity {
                     .with(MAX_HEIGHT, 4);
         } else {
             // First block - always BOTTOM
-            SekhemCactusModelVariant modelVariant = world.random.nextFloat() < 0.3f ? SekhemCactusModelVariant.MODEL_2
+            // Use position-seeded random so client and server get the same values
+            // This prevents texture flickering on placement
+            // Mix the seed bits for better distribution across nearby positions
+            long seed = pos.asLong();
+            seed = seed ^ (seed >>> 33);
+            seed = seed * 0xff51afd7ed558ccdL;
+            seed = seed ^ (seed >>> 33);
+            java.util.Random posRandom = new java.util.Random(seed);
+
+            SekhemCactusModelVariant modelVariant = posRandom.nextFloat() < 0.3f ? SekhemCactusModelVariant.MODEL_2
                     : SekhemCactusModelVariant.MODEL_1;
 
             SekhemCactusVariant variant;
             if (modelVariant == SekhemCactusModelVariant.MODEL_2) {
                 variant = SekhemCactusVariant.HEALTHY; // Model 2 is forced to Healthy
             } else {
-                float r = world.random.nextFloat();
+                float r = posRandom.nextFloat();
                 if (r < 0.4f)
                     variant = SekhemCactusVariant.DEFAULT; // sekhem_cactus_block.png
                 else if (r < 0.7f)

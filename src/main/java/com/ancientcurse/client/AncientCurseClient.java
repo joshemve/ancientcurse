@@ -363,7 +363,8 @@ public class AncientCurseClient implements ClientModInitializer {
         ColorProviderRegistry.ITEM.register((stack, tintIndex) -> -1,
                 ModItems.ZULMAK_SPAWN_EGG,
                 ModItems.ANUBIS_SPAWN_EGG,
-                ModItems.THOTH_SPAWN_EGG);
+                ModItems.THOTH_SPAWN_EGG,
+                ModItems.HYENA_SPAWN_EGG);
 
         AncientCurse.LOGGER.info("Registered color providers");
     }

@@ -367,9 +367,9 @@ public class HyenaEntity extends TameableEntity implements GeoEntity {
 
         // Priority 4: Movement animations
         if (state.isMoving()) {
-            // Use run animation if moving fast (sprinting/chasing)
-            double speed = this.getVelocity().horizontalLengthSquared();
-            if (speed > 0.04) { // Running threshold
+            // Use run animation if chasing a target OR moving fast
+            // Checking target is more reliable than velocity for chase detection
+            if (this.getTarget() != null) {
                 state.getController().setAnimation(ANIM_RUN);
             } else {
                 state.getController().setAnimation(ANIM_WALK);
