@@ -38,10 +38,10 @@ public class SunBeamSliceLayer extends GeoRenderLayer<RaEntity> {
     private static final Identifier SUN_RAY_WHITE = new Identifier("ancientcurse",
             "textures/entity/sun_ray_white.png");
 
-    // Beam configuration - 3x BOOST for testing
-    private static final float MIN_SCALE = 12.0f; // Starting size (4 -> 12)
-    private static final float MAX_SCALE = 24.0f; // Max size as beam travels (8 -> 24)
-    private static final double MAX_DISTANCE = 40.0; // Travel distance (20 -> 40)
+    // Beam configuration
+    private static final float MIN_SCALE = 4.0f; // Starting size
+    private static final float MAX_SCALE = 8.0f; // Max size as beam travels
+    private static final double MAX_DISTANCE = 20.0; // Travel distance
     private static final int TRAIL_COUNT = 4; // Afterimage trail count
     private static final float TRAIL_SPACING = 0.08f; // Spacing between trail images
 
@@ -51,15 +51,12 @@ public class SunBeamSliceLayer extends GeoRenderLayer<RaEntity> {
 
     // Ground Smack Timing (Matches RaEntity & RaGroundSmackGoal)
     private static final int GROUND_SMACK_DURATION = 60; // 3.0s total
-    private static final int GROUND_SMACK_DELAY = 18; // Firing point at 0.9s (sync with visual slam)
+    private static final int GROUND_SMACK_DELAY = 28; // Firing point at 1.4s (delayed to sync with visual slam)
     private static final int BEAM_DURATION = 30; // How long beam is visible (ticks)
 
     public SunBeamSliceLayer(GeoEntityRenderer<RaEntity> entityRenderer) {
         super(entityRenderer);
     }
-
-    // Debug flag - set to true to see console output
-    private static boolean debugLogged = false;
 
     @Override
     public void render(MatrixStack poseStack, RaEntity entity, BakedGeoModel bakedModel,
@@ -68,7 +65,6 @@ public class SunBeamSliceLayer extends GeoRenderLayer<RaEntity> {
 
         // Only render during Ground Smack
         if (entity.getCombatState() != RaEntity.RaCombatState.GROUND_SMACK) {
-            debugLogged = false; // Reset for next attack
             return;
         }
 
@@ -79,7 +75,7 @@ public class SunBeamSliceLayer extends GeoRenderLayer<RaEntity> {
         float smoothTicks = beamTicks - partialTick;
         float elapsed = GROUND_SMACK_DURATION - smoothTicks;
 
-        // Don't render until the damage frame (1.15s / 23 ticks)
+        // Don't render until the delayed firing point (1.4s / 28 ticks)
         if (elapsed < GROUND_SMACK_DELAY) {
             return;
         }
@@ -120,15 +116,9 @@ public class SunBeamSliceLayer extends GeoRenderLayer<RaEntity> {
         double entityY = MathHelper.lerp(partialTick, entity.prevY, entity.getY());
         double entityZ = MathHelper.lerp(partialTick, entity.prevZ, entity.getZ());
 
-        // Calculate current beam world position for rendering and logging
+        // Calculate current beam world position
         Vec3d currentPos = startPos.add(direction.multiply(MAX_DISTANCE * travelProgress));
         Vec3d localOffset = currentPos.subtract(entityX, entityY, entityZ);
-
-        // Debug logging (every 20 frames to avoid spam, but confirm execution)
-        if (entity.age % 20 == 0) {
-            System.out.println("[SunBeamSlice] Framed Log - age=" + entity.age + ", travel=" + travelProgress
-                    + ", currentPos=" + currentPos + ", offset=" + localOffset);
-        }
 
         // Calculate yaw to face the direction
         float yaw = (float) Math.atan2(direction.x, direction.z);
@@ -172,7 +162,7 @@ public class SunBeamSliceLayer extends GeoRenderLayer<RaEntity> {
         poseStack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(90));
         poseStack.scale(scale * 1.3f, scale * 0.6f, scale);
 
-        renderRay(poseStack, bufferSource, SUN_RAY_ORANGE, ORANGE_TINT, intensity * 1.0f); // Boosted alpha
+        renderRay(poseStack, bufferSource, SUN_RAY_ORANGE, ORANGE_TINT, intensity * 0.9f);
         poseStack.pop();
 
         // Render the white hot core (smaller, brighter, slightly ahead)
@@ -237,13 +227,12 @@ public class SunBeamSliceLayer extends GeoRenderLayer<RaEntity> {
     private void renderRay(MatrixStack poseStack, VertexConsumerProvider bufferSource,
             Identifier texture, Vector3f tint, float intensity) {
 
-        // Switching to standard Translucent layer to rule out custom layer issues
         VertexConsumer vertices = bufferSource.getBuffer(RenderLayer.getEntityTranslucent(texture));
         MatrixStack.Entry entry = poseStack.peek();
         Matrix4f posMatrix = entry.getPositionMatrix();
         Matrix3f normMatrix = entry.getNormalMatrix();
 
-        // Base dimensions (larger for visible crescent)
+        // Base dimensions
         float baseW = 1.5f;
         float baseH = 0.8f;
 
@@ -279,12 +268,10 @@ public class SunBeamSliceLayer extends GeoRenderLayer<RaEntity> {
     private void spawnBeamParticles(RaEntity entity, Vec3d pos, Vec3d direction,
             float intensity, float scale) {
 
-        // Spawn more frequently for better effect
         if (entity.getRandom().nextFloat() > 0.7f * intensity) {
             return;
         }
 
-        // Flame particles radiating outward from beam (more particles, bigger spread)
         for (int i = 0; i < 4; i++) {
             double angle = entity.getRandom().nextDouble() * Math.PI * 2;
             double radius = scale * 0.4;
@@ -301,7 +288,6 @@ public class SunBeamSliceLayer extends GeoRenderLayer<RaEntity> {
                     offsetZ * 0.12 + direction.z * 0.03);
         }
 
-        // Trail particles behind (more of them)
         for (int i = 0; i < 2; i++) {
             if (entity.getRandom().nextFloat() < 0.6f) {
                 double spread = (entity.getRandom().nextDouble() - 0.5) * 0.5;
@@ -316,7 +302,6 @@ public class SunBeamSliceLayer extends GeoRenderLayer<RaEntity> {
             }
         }
 
-        // Electric sparks (more visible)
         if (entity.getRandom().nextFloat() < 0.35f) {
             entity.getWorld().addParticle(
                     ParticleTypes.ELECTRIC_SPARK,
@@ -326,7 +311,6 @@ public class SunBeamSliceLayer extends GeoRenderLayer<RaEntity> {
                     (entity.getRandom().nextFloat() - 0.5f) * 0.18);
         }
 
-        // Occasional lava drip for divine heat
         if (entity.getRandom().nextFloat() < 0.15f) {
             entity.getWorld().addParticle(
                     ParticleTypes.LAVA,

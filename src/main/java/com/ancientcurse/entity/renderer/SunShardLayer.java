@@ -72,11 +72,8 @@ public class SunShardLayer extends GeoRenderLayer<RaEntity> {
             poseStack.multiply(RotationAxis.POSITIVE_Y.rotation(time * 0.08f + i));
             poseStack.multiply(RotationAxis.POSITIVE_Z.rotation(time * 0.04f));
 
-            // Scale in/out
-            float scale = 0.5f;
-            if (shardTicks > 55) { // Scaling in at start
-                scale *= (60 - shardTicks) / 5.0f;
-            }
+            // Constant scale (+45% bigger, no growth animation)
+            float scale = 1.45f;
             poseStack.scale(scale, scale, scale);
 
             renderCrystal(poseStack, vertices, 1.0f, 0.9f, 0.4f, 1.0f);

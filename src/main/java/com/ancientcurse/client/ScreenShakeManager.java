@@ -24,8 +24,6 @@ public class ScreenShakeManager {
      * @param durationTicks  Duration in ticks (20 ticks = 1 second)
      */
     public static void shake(float shakeIntensity, float durationTicks) {
-        System.out.println(
-                "[DEBUG SHAKE] shake() called - intensity: " + shakeIntensity + ", duration: " + durationTicks);
 
         // Calculate remaining intensity of current shake (avoid divide by zero)
         float remainingIntensity = 0;
@@ -39,8 +37,6 @@ public class ScreenShakeManager {
             duration = durationTicks;
             elapsed = 0;
             noiseSeed = RANDOM.nextLong(); // New shake pattern
-            System.out
-                    .println("[DEBUG SHAKE] Shake activated! New Intensity: " + intensity + ", Duration: " + duration);
         }
     }
 

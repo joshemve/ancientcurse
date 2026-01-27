@@ -44,7 +44,9 @@ public class RaRenderer extends GeoEntityRenderer<RaEntity> {
         // Add sun beam slice attack layer - divine vertical light beam
         addRenderLayer(new SunBeamSliceLayer(this));
 
-        // Add sun shard attack layer - orbiting divine crystals
+        // Add flying staff beam layer - sun beam from orb during flying attack
+        addRenderLayer(new FlyingStaffBeamLayer(this));
+
         // Add sun shard attack layer - orbiting divine crystals
         addRenderLayer(new SunShardLayer(this));
 
@@ -53,6 +55,9 @@ public class RaRenderer extends GeoEntityRenderer<RaEntity> {
 
         // Add emissive sun orb overlay - glows like a real sun
         addRenderLayer(new SunOrbGlowLayer(this));
+
+        // Add sun orb fire particles - follows the animated sun orb position
+        addRenderLayer(new SunOrbFireParticleLayer(this));
     }
 
     @Override
@@ -66,19 +71,24 @@ public class RaRenderer extends GeoEntityRenderer<RaEntity> {
             VertexConsumerProvider bufferSource, VertexConsumer buffer, boolean isReRender, float partialTick,
             int packedLight, int packedOverlay, float red, float green, float blue, float alpha) {
 
-        // Staff bones use staff_of_ra.png texture (imported with original UVs)
-        // All other bones use ra.png
-        boolean isStaffBone = isStaffOrDescendant(bone);
+        // Only override textures/layers during the main render pass
+        // This allows GeoRenderLayers to use their own layers during re-render passes
+        // (isReRender = true)
+        if (!isReRender) {
+            // Staff bones use staff_of_ra.png texture (imported with original UVs)
+            // All other bones use ra.png
+            boolean isStaffBone = isStaffOrDescendant(bone);
 
-        if (isStaffBone) {
-            net.minecraft.util.Identifier staffTexture = new net.minecraft.util.Identifier(
-                    com.ancientcurse.AncientCurse.MOD_ID, "textures/item/staff_of_ra.png");
-            renderType = RenderLayer.getEntityCutout(staffTexture);
-            buffer = bufferSource.getBuffer(renderType);
-        } else {
-            // Ensure Ra's main texture for non-staff bones
-            renderType = getRenderType(animatable, getTextureLocation(animatable), bufferSource, partialTick);
-            buffer = bufferSource.getBuffer(renderType);
+            if (isStaffBone) {
+                net.minecraft.util.Identifier staffTexture = new net.minecraft.util.Identifier(
+                        com.ancientcurse.AncientCurse.MOD_ID, "textures/item/staff_of_ra.png");
+                renderType = RenderLayer.getEntityCutout(staffTexture);
+                buffer = bufferSource.getBuffer(renderType);
+            } else {
+                // Ensure Ra's main texture for non-staff bones
+                renderType = getRenderType(animatable, getTextureLocation(animatable), bufferSource, partialTick);
+                buffer = bufferSource.getBuffer(renderType);
+            }
         }
 
         super.renderRecursively(poseStack, animatable, bone, renderType, bufferSource, buffer, isReRender, partialTick,
@@ -99,6 +109,28 @@ public class RaRenderer extends GeoEntityRenderer<RaEntity> {
             current = current.getParent();
         }
         return false;
+    }
+
+    /**
+     * Apply the full bone transformation hierarchy to the poseStack
+     * This includes all parent bone transforms so effects follow the bone exactly
+     */
+    protected void applyBoneTransform(MatrixStack poseStack, GeoBone bone) {
+        if (bone.getParent() != null) {
+            applyBoneTransform(poseStack, bone.getParent());
+        }
+
+        poseStack.translate(bone.getPivotX() / 16f, bone.getPivotY() / 16f, bone.getPivotZ() / 16f);
+
+        poseStack.multiply(net.minecraft.util.math.RotationAxis.POSITIVE_Z.rotation(bone.getRotZ()));
+        poseStack.multiply(net.minecraft.util.math.RotationAxis.POSITIVE_Y.rotation(bone.getRotY()));
+        poseStack.multiply(net.minecraft.util.math.RotationAxis.POSITIVE_X.rotation(bone.getRotX()));
+
+        poseStack.scale(bone.getScaleX(), bone.getScaleY(), bone.getScaleZ());
+
+        poseStack.translate(-bone.getPivotX() / 16f, -bone.getPivotY() / 16f, -bone.getPivotZ() / 16f);
+
+        poseStack.translate(bone.getPosX() / 16f, bone.getPosY() / 16f, bone.getPosZ() / 16f);
     }
 
     /**
@@ -157,20 +189,15 @@ public class RaRenderer extends GeoEntityRenderer<RaEntity> {
     }
 
     /**
-     * Sun orb glow layer with additive blending and light rays
-     * Creates a realistic glowing sun effect with god rays
+     * Sun orb glow layer with additive blending
+     * Creates a glowing sun effect on the sun_orb bone
      */
     private class SunOrbGlowLayer extends GeoRenderLayer<RaEntity> {
-        private static final net.minecraft.util.Identifier SUN_ORB_TEXTURE =
-            new net.minecraft.util.Identifier(com.ancientcurse.AncientCurse.MOD_ID, "textures/entity/sun_orb.png");
-        private static final net.minecraft.util.Identifier RAY_TEXTURE =
-            new net.minecraft.util.Identifier("minecraft", "textures/entity/beacon_beam.png");
+        private static final net.minecraft.util.Identifier SUN_ORB_TEXTURE = new net.minecraft.util.Identifier(
+                com.ancientcurse.AncientCurse.MOD_ID, "textures/entity/sun_orb.png");
 
         // Fullbright light value
         private static final int FULLBRIGHT = 15728880;
-
-        // Number of light rays
-        private static final int RAY_COUNT = 12;
 
         public SunOrbGlowLayer(GeoEntityRenderer<RaEntity> entityRenderer) {
             super(entityRenderer);
@@ -180,12 +207,6 @@ public class RaRenderer extends GeoEntityRenderer<RaEntity> {
         public void render(MatrixStack poseStack, RaEntity entity, BakedGeoModel bakedModel,
                 RenderLayer renderType, VertexConsumerProvider bufferSource, VertexConsumer buffer,
                 float partialTick, int packedLight, int packedOverlay) {
-
-            // Get sun_orb bone position for ray origin
-            Vec3d sunOrbPos = ((RaRenderer) getRenderer()).getBoneWorldPos(
-                entity, "sun_orb", bakedModel,
-                entity.getX(), entity.getY(), entity.getZ(), entity.bodyYaw
-            );
 
             // Render additive glow overlay on sun_orb bone
             RenderLayer glowLayer = RenderLayer.getEyes(SUN_ORB_TEXTURE); // Eyes layer = additive-like
@@ -211,73 +232,6 @@ public class RaRenderer extends GeoEntityRenderer<RaEntity> {
                     entry.getKey().setHidden(entry.getValue());
                 }
             });
-
-            // Render light leak rays
-            renderSunRays(poseStack, bufferSource, entity, sunOrbPos, partialTick);
-        }
-
-        /**
-         * Render sun rays emanating from the orb
-         */
-        private void renderSunRays(MatrixStack poseStack, VertexConsumerProvider bufferSource,
-                RaEntity entity, Vec3d sunOrbPos, float partialTick) {
-
-            poseStack.push();
-
-            // Translate to sun orb position (relative to entity)
-            poseStack.translate(
-                sunOrbPos.x - entity.getX(),
-                sunOrbPos.y - entity.getY(),
-                sunOrbPos.z - entity.getZ()
-            );
-
-            // Get vertex consumer for additive blending
-            RenderLayer rayLayer = RenderLayer.getEntityTranslucentEmissive(RAY_TEXTURE);
-            VertexConsumer rayBuffer = bufferSource.getBuffer(rayLayer);
-
-            float time = (entity.age + partialTick) * 0.02f;
-            Matrix4f matrix = poseStack.peek().getPositionMatrix();
-
-            // Render multiple rays at different angles
-            for (int i = 0; i < RAY_COUNT; i++) {
-                float angle = (float) (i * Math.PI * 2.0 / RAY_COUNT) + time;
-                float rayLength = 0.8f + (float) Math.sin(time * 3 + i) * 0.2f; // Pulsing length
-                float rayWidth = 0.05f;
-                float alpha = 0.4f + (float) Math.sin(time * 2 + i * 0.5f) * 0.2f; // Pulsing alpha
-
-                // Calculate ray direction
-                float dx = (float) Math.cos(angle) * rayLength;
-                float dy = (float) Math.sin(angle * 0.5f + time) * 0.3f; // Slight vertical wave
-                float dz = (float) Math.sin(angle) * rayLength;
-
-                // Render ray as a quad
-                renderRay(matrix, rayBuffer, dx, dy, dz, rayWidth, alpha);
-            }
-
-            poseStack.pop();
-        }
-
-        /**
-         * Render a single light ray quad
-         */
-        private void renderRay(Matrix4f matrix, VertexConsumer buffer,
-                float dx, float dy, float dz, float width, float alpha) {
-
-            // Golden sun color
-            float r = 1.0f, g = 0.9f, b = 0.5f;
-
-            // Calculate perpendicular for quad width
-            float length = (float) Math.sqrt(dx * dx + dz * dz);
-            if (length < 0.001f) return;
-
-            float perpX = -dz / length * width;
-            float perpZ = dx / length * width;
-
-            // Quad from center to ray end
-            buffer.vertex(matrix, -perpX, -width, -perpZ).color(r, g, b, alpha).texture(0, 0).overlay(0).light(FULLBRIGHT).normal(0, 1, 0).next();
-            buffer.vertex(matrix, perpX, width, perpZ).color(r, g, b, alpha).texture(0, 1).overlay(0).light(FULLBRIGHT).normal(0, 1, 0).next();
-            buffer.vertex(matrix, dx + perpX, dy + width, dz + perpZ).color(r, g, b, 0).texture(1, 1).overlay(0).light(FULLBRIGHT).normal(0, 1, 0).next();
-            buffer.vertex(matrix, dx - perpX, dy - width, dz - perpZ).color(r, g, b, 0).texture(1, 0).overlay(0).light(FULLBRIGHT).normal(0, 1, 0).next();
         }
 
         private void setVisibilityRecursive(GeoBone bone, boolean hidden) {
@@ -289,15 +243,25 @@ public class RaRenderer extends GeoEntityRenderer<RaEntity> {
     }
 
     /**
-     * Wing fire particle layer - spawns a few flame particles at wing anchor points
+     * Wing fire particle layer - spawns flame particles at wing anchor points
+     * Uses multiple anchors along the wings for a dramatic fire trail effect
      */
     private class WingFireParticleLayer extends GeoRenderLayer<RaEntity> {
         private int tickCounter = 0;
 
-        // Only use wing tip anchors for minimal particles
+        // Wing particle anchors - spread along both wings
+        // These should match locator bones in the Ra model
         private static final String[] WING_ANCHORS = {
-                "fire_wing_particles9", // right wing tip
-                "fire_wing_particles10" // left wing tip
+                "fire_wing_particles1",
+                "fire_wing_particles2",
+                "fire_wing_particles3",
+                "fire_wing_particles4",
+                "fire_wing_particles5",
+                "fire_wing_particles6",
+                "fire_wing_particles7",
+                "fire_wing_particles8",
+                "fire_wing_particles9",
+                "fire_wing_particles10"
         };
 
         public WingFireParticleLayer(GeoEntityRenderer<RaEntity> entityRenderer) {
@@ -314,22 +278,106 @@ public class RaRenderer extends GeoEntityRenderer<RaEntity> {
 
             tickCounter++;
 
-            // Spawn flames every 4 ticks (reduced frequency)
-            if (tickCounter % 4 == 0) {
+            // Spawn flames every 3 ticks for visible but not overwhelming particles
+            if (tickCounter % 3 == 0) {
                 float bodyYaw = entity.bodyYaw;
 
                 for (String boneName : WING_ANCHORS) {
                     Vec3d worldPos = ((RaRenderer) getRenderer()).getBoneWorldPos(entity, boneName, bakedModel,
                             entity.getX(), entity.getY(), entity.getZ(), bodyYaw);
 
-                    // Single flame particle per anchor
+                    // Check if bone was found (position won't equal entity base if bone exists)
+                    // Bones that don't exist return entity position, so skip those
+                    double distFromBase = worldPos.distanceTo(new Vec3d(entity.getX(), entity.getY(), entity.getZ()));
+                    if (distFromBase < 0.1) {
+                        continue; // Bone not found, skip
+                    }
+
+                    // Flame particle
                     entity.getWorld().addParticle(
                             ParticleTypes.FLAME,
                             worldPos.x,
                             worldPos.y,
                             worldPos.z,
+                            (entity.getRandom().nextFloat() - 0.5) * 0.02,
+                            0.03 + entity.getRandom().nextFloat() * 0.02,
+                            (entity.getRandom().nextFloat() - 0.5) * 0.02);
+
+                    // Occasional small flame for variety
+                    if (entity.getRandom().nextFloat() < 0.3f) {
+                        entity.getWorld().addParticle(
+                                ParticleTypes.SMALL_FLAME,
+                                worldPos.x + (entity.getRandom().nextFloat() - 0.5) * 0.2,
+                                worldPos.y + (entity.getRandom().nextFloat() - 0.5) * 0.2,
+                                worldPos.z + (entity.getRandom().nextFloat() - 0.5) * 0.2,
+                                (entity.getRandom().nextFloat() - 0.5) * 0.01,
+                                0.02,
+                                (entity.getRandom().nextFloat() - 0.5) * 0.01);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Sun orb fire particle layer - spawns fire particles from the sun_orb_particles_anchor bone
+     * Particles follow the animated sun orb position during all animations
+     */
+    private class SunOrbFireParticleLayer extends GeoRenderLayer<RaEntity> {
+        private int tickCounter = 0;
+
+        // The bone/locator name for sun orb particles
+        private static final String SUN_ORB_ANCHOR = "sun_orb_particles_anchor";
+
+        public SunOrbFireParticleLayer(GeoEntityRenderer<RaEntity> entityRenderer) {
+            super(entityRenderer);
+        }
+
+        @Override
+        public void render(MatrixStack poseStack, RaEntity entity, BakedGeoModel bakedModel,
+                RenderLayer renderType, VertexConsumerProvider bufferSource, VertexConsumer buffer,
+                float partialTick, int packedLight, int packedOverlay) {
+
+            if (!entity.getWorld().isClient)
+                return;
+
+            tickCounter++;
+
+            // Spawn fire particles every 2 ticks for a nice continuous effect
+            if (tickCounter % 2 == 0) {
+                float bodyYaw = entity.bodyYaw;
+
+                // Get the world position of the sun orb anchor bone
+                Vec3d worldPos = ((RaRenderer) getRenderer()).getBoneWorldPos(entity, SUN_ORB_ANCHOR, bakedModel,
+                        entity.getX(), entity.getY(), entity.getZ(), bodyYaw);
+
+                // Spawn multiple fire particles around the orb for a sun-like effect
+                for (int i = 0; i < 3; i++) {
+                    // Small random offset for particle spread
+                    double offsetX = (entity.getRandom().nextFloat() - 0.5) * 0.3;
+                    double offsetY = (entity.getRandom().nextFloat() - 0.5) * 0.3;
+                    double offsetZ = (entity.getRandom().nextFloat() - 0.5) * 0.3;
+
+                    // Flame particles
+                    entity.getWorld().addParticle(
+                            ParticleTypes.FLAME,
+                            worldPos.x + offsetX,
+                            worldPos.y + offsetY,
+                            worldPos.z + offsetZ,
+                            (entity.getRandom().nextFloat() - 0.5) * 0.02,
+                            0.03 + entity.getRandom().nextFloat() * 0.02,
+                            (entity.getRandom().nextFloat() - 0.5) * 0.02);
+                }
+
+                // Occasionally spawn a soul fire particle for variety (golden/divine look)
+                if (tickCounter % 6 == 0) {
+                    entity.getWorld().addParticle(
+                            ParticleTypes.SOUL_FIRE_FLAME,
+                            worldPos.x,
+                            worldPos.y,
+                            worldPos.z,
                             (entity.getRandom().nextFloat() - 0.5) * 0.01,
-                            0.02 + entity.getRandom().nextFloat() * 0.01,
+                            0.04 + entity.getRandom().nextFloat() * 0.02,
                             (entity.getRandom().nextFloat() - 0.5) * 0.01);
                 }
             }

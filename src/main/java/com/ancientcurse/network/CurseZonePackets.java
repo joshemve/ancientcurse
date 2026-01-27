@@ -511,18 +511,13 @@ public class CurseZonePackets {
      */
     public static void sendScreenShake(ServerWorld world, BlockPos origin, float intensity, float duration,
             double maxRange) {
-        System.out.println("[DEBUG] sendScreenShake called - origin: " + origin + ", intensity: " + intensity
-                + ", duration: " + duration + ", range: " + maxRange);
         for (ServerPlayerEntity player : world.getPlayers()) {
             double distance = Math.sqrt(player.squaredDistanceTo(origin.getX(), origin.getY(), origin.getZ()));
-            System.out.println("[DEBUG] Player " + player.getName().getString() + " distance: " + distance);
             if (distance <= maxRange) {
                 // Calculate distance-based falloff
                 float falloff = (float) Math.max(0, 1.0 - (distance / maxRange));
                 float adjustedIntensity = intensity * falloff;
 
-                System.out.println("[DEBUG] Sending shake to " + player.getName().getString() + " - adjustedIntensity: "
-                        + adjustedIntensity);
                 if (adjustedIntensity > 0.01f) {
                     PacketByteBuf buf = PacketByteBufs.create();
                     buf.writeFloat(adjustedIntensity);
@@ -544,7 +539,6 @@ public class CurseZonePackets {
 
         // Execute on client thread
         client.execute(() -> {
-            System.out.println("[DEBUG CLIENT] Applying shake to ScreenShakeManager");
             com.ancientcurse.client.ScreenShakeManager.shake(intensity, duration);
         });
     }

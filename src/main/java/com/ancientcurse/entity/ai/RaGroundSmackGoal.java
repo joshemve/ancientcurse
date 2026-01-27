@@ -46,9 +46,9 @@ public class RaGroundSmackGoal extends Goal {
     private static final float PHASE_2_DAMAGE = 10.0f;
     private static final float PHASE_3_DAMAGE = 14.0f;
 
-    private static final double PHASE_1_RADIUS = 3.0;
-    private static final double PHASE_2_RADIUS = 4.0;
-    private static final double PHASE_3_RADIUS = 5.0;
+    private static final double PHASE_1_RADIUS = 5.0;
+    private static final double PHASE_2_RADIUS = 7.0;
+    private static final double PHASE_3_RADIUS = 9.0;
 
     /*
      * Animation timing - MUST match ra.animation.json "ra.flying_ground_smack"!
@@ -176,8 +176,6 @@ public class RaGroundSmackGoal extends Goal {
         // After DAMAGE_FRAME: Ra is locked in position and facing - no more tracking
 
         if (frameInAnimation == DAMAGE_FRAME && !hasDealtDamage) {
-            System.out.println("[Ra DEBUG] DAMAGE_FRAME hit! Frame=" + frameInAnimation +
-                    " (tick " + (animationTicks) + " remaining), time=" + (frameInAnimation / 20.0f) + "s");
             dealAreaDamage();
             hasDealtDamage = true;
         }
@@ -204,10 +202,10 @@ public class RaGroundSmackGoal extends Goal {
             case PHASE_3_DIVINE_FURY -> PHASE_3_RADIUS;
         };
 
-        // Create damage area
+        // Create damage area - larger vertical range to catch jumping players
         Box damageBox = new Box(
                 ra.getX() - radius, ra.getY() - 1, ra.getZ() - radius,
-                ra.getX() + radius, ra.getY() + 2, ra.getZ() + radius);
+                ra.getX() + radius, ra.getY() + 4, ra.getZ() + radius);
 
         // Get all players in range
         List<PlayerEntity> targets = ra.getWorld().getEntitiesByClass(
@@ -220,13 +218,24 @@ public class RaGroundSmackGoal extends Goal {
         for (PlayerEntity player : targets) {
             player.damage(damageSource, damage);
 
-            // Knockback away from Ra
+            // Knockback away from Ra - stronger for more impactful feel
             double dx = player.getX() - ra.getX();
             double dz = player.getZ() - ra.getZ();
             double dist = Math.sqrt(dx * dx + dz * dz);
             if (dist > 0) {
-                double knockback = 1.5;
-                player.addVelocity(dx / dist * knockback, 0.4, dz / dist * knockback);
+                // Knockback scales with phase
+                double knockback = switch (phase) {
+                    case PHASE_1_AWAKENED -> 2.0;
+                    case PHASE_2_SOLAR_WRATH -> 2.5;
+                    case PHASE_3_DIVINE_FURY -> 3.0;
+                };
+                double verticalKnockback = switch (phase) {
+                    case PHASE_1_AWAKENED -> 0.5;
+                    case PHASE_2_SOLAR_WRATH -> 0.6;
+                    case PHASE_3_DIVINE_FURY -> 0.8;
+                };
+                player.addVelocity(dx / dist * knockback, verticalKnockback, dz / dist * knockback);
+                player.velocityModified = true; // Ensure velocity is synced to client
             }
         }
 
@@ -241,11 +250,10 @@ public class RaGroundSmackGoal extends Goal {
         spawnSolarImpactParticles(radius);
 
         // Screen shake for nearby players - intensity scales with phase
-        // CRAZY Testing Intensity: 5.0 -> 15.0+ to ensure visibility
         float shakeIntensity = switch (phase) {
-            case PHASE_1_AWAKENED -> 15.0f;
-            case PHASE_2_SOLAR_WRATH -> 22.0f;
-            case PHASE_3_DIVINE_FURY -> 30.0f;
+            case PHASE_1_AWAKENED -> 5.0f;
+            case PHASE_2_SOLAR_WRATH -> 7.5f;
+            case PHASE_3_DIVINE_FURY -> 10.0f;
         };
 
         // Fix: Sample ground position for shake origin to ensure nearby players on
@@ -264,8 +272,8 @@ public class RaGroundSmackGoal extends Goal {
                 (ServerWorld) ra.getWorld(),
                 shakeOrigin,
                 shakeIntensity,
-                30, // Increased duration to 1.5 seconds (30 ticks)
-                64 // Increased range to 64 blocks
+                20, // Duration 1.0 seconds
+                48 // Range 48 blocks
         );
     }
 
@@ -279,7 +287,6 @@ public class RaGroundSmackGoal extends Goal {
 
         // === RADIATING LIGHT RAYS (the "woosh" effect) ===
         // Increased to 32 rays for density
-        System.out.println("[RaDebug] Spawning shockwave particles at " + ra.getPos());
         for (int i = 0; i < 32; i++) {
             double angle = Math.toRadians(i * 11.25); // 360/32 = 11.25 degrees apart
             double dirX = Math.cos(angle);

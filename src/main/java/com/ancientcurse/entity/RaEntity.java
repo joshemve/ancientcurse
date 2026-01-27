@@ -347,6 +347,10 @@ public class RaEntity extends HostileEntity implements GeoEntity {
         this.dataTracker.set(ACTION_TICKS, ticks);
     }
 
+    public int getActionAnimationTicks() {
+        return this.dataTracker.get(ACTION_TICKS);
+    }
+
     public boolean isFlying() {
         return this.dataTracker.get(FLYING);
     }
@@ -515,11 +519,8 @@ public class RaEntity extends HostileEntity implements GeoEntity {
     /* ========== COMBAT ACTIONS ========== */
     @Override
     public boolean tryAttack(net.minecraft.entity.Entity target) {
-        System.out.println("[Ra DEBUG] tryAttack() called! hibernating=" + isHibernating() +
-                ", performingAction=" + isPerformingAction() + ", flying=" + isFlying());
 
         if (isHibernating() || isPerformingAction()) {
-            System.out.println("[Ra DEBUG] tryAttack() returning false - blocked");
             return false;
         }
 
@@ -534,7 +535,6 @@ public class RaEntity extends HostileEntity implements GeoEntity {
     }
 
     public void triggerMeleeAttack() {
-        System.out.println("[Ra DEBUG] triggerMeleeAttack() called! Setting MELEE state, duration=" + MELEE_DURATION);
         setCombatState(RaCombatState.MELEE);
         setActionTicks(MELEE_DURATION);
     }
@@ -1127,20 +1127,19 @@ public class RaEntity extends HostileEntity implements GeoEntity {
         };
 
         if (animation != null) {
-            // Check if this is a NEW attack instance by looking at ACTION_TICKS
-            // When an attack starts, actionTicks is set to max duration
-            // So if we're in an attack state AND (different attack type OR action just
-            // started), trigger animation
             int currentActionTicks = this.dataTracker.get(ACTION_TICKS);
-            boolean isNewAttack = (combatState != lastAttackState) ||
-                    (this.age != lastAttackStartTick && currentActionTicks > 0 &&
-                            state.getController().getCurrentAnimation() == null);
 
-            // Also trigger if controller has no animation (e.g., after STOP)
-            boolean needsAnimation = state.getController().getCurrentAnimation() == null;
+            // Determine expected duration for this attack type
+            int expectedDuration = getAnimationDurationForState(combatState);
 
-            // Track when we start this attack
-            if (isNewAttack || needsAnimation) {
+            // Detect new attack: ACTION_TICKS equals max duration (just started)
+            // OR combat state changed from previous
+            // OR no animation is currently playing
+            boolean isNewAttack = (currentActionTicks == expectedDuration) ||
+                    (combatState != lastAttackState) ||
+                    (state.getController().getCurrentAnimation() == null);
+
+            if (isNewAttack) {
                 lastAttackState = combatState;
                 lastAttackStartTick = this.age;
 
@@ -1198,10 +1197,6 @@ public class RaEntity extends HostileEntity implements GeoEntity {
         }
 
         if (changed) {
-            System.out.println("[Ra Animation] " + controller.toUpperCase() + " -> " + animation +
-                    " | State: " + getCombatState().name() +
-                    " | Flying: " + isFlying() +
-                    " | ActionTicks: " + actionAnimationTicks);
         }
     }
 

@@ -78,7 +78,6 @@ public class RaShardAttackGoal extends Goal {
         // Visual crystals use shorter timing (first loop only)
         this.ra.setShardAttackTicks(VISUAL_SHARD_TICKS);
 
-        System.out.println("[Ra DEBUG] ShardAttackGoal.start() - triggered SHARD_ATTACK, ticks=" + TOTAL_TICKS);
     }
 
     @Override

@@ -7,78 +7,37 @@
   ],
   "display": {
     "thirdperson_righthand": {
-      "translation": [
-        0,
-        -4.5,
-        0.5
-      ],
       "scale": [
-        0.8,
-        0.8,
-        0.8
+        0.81,
+        0.81,
+        0.81
       ]
     },
     "thirdperson_lefthand": {
-      "translation": [
-        0,
-        -4.5,
-        0.5
-      ],
       "scale": [
-        0.8,
-        0.8,
-        0.8
-      ]
-    },
-    "firstperson_righthand": {
-      "scale": [
-        0.62,
-        0.62,
-        0.62
-      ]
-    },
-    "firstperson_lefthand": {
-      "scale": [
-        0.62,
-        0.62,
-        0.62
+        0.81,
+        0.81,
+        0.81
       ]
     },
     "ground": {
       "rotation": [
-        45,
+        -45,
         0,
         0
       ],
       "translation": [
         0,
-        5,
-        -2.75
+        5.75,
+        0
       ],
       "scale": [
-        0.5,
-        0.5,
-        0.5
+        0.41,
+        0.41,
+        0.41
       ]
     },
     "gui": {
-      "rotation": [
-        0,
-        90,
-        0
-      ],
-      "translation": [
-        0,
-        -4,
-        0
-      ],
-      "scale": [
-        0.34,
-        0.34,
-        0.34
-      ]
-    },
-    "fixed": {
       "rotation": [
         0,
         -90,
@@ -86,13 +45,47 @@
       ],
       "translation": [
         0,
-        -4.5,
-        0
+        -3,
+        -0.5
       ],
       "scale": [
-        0.41,
-        0.41,
-        0.41
+        0.36,
+        0.36,
+        0.36
+      ]
+    },
+    "fixed": {
+      "rotation": [
+        0,
+        90,
+        0
+      ],
+      "translation": [
+        0,
+        -3.25,
+        -0.5
+      ],
+      "scale": [
+        0.45,
+        0.45,
+        0.45
+      ]
+    },
+    "on_shelf": {
+      "rotation": [
+        0,
+        90,
+        0
+      ],
+      "translation": [
+        0,
+        -3.25,
+        -0.5
+      ],
+      "scale": [
+        0.62,
+        0.62,
+        0.62
       ]
     }
   },

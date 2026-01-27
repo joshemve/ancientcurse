@@ -9,6 +9,8 @@ import com.ancientcurse.ModParticles;
 import com.ancientcurse.block.registry.PotteryBlocks;
 import com.ancientcurse.client.model.*;
 import com.ancientcurse.client.particle.ZulmakParticle;
+import com.ancientcurse.client.particle.OrbFireParticle;
+import com.ancientcurse.client.particle.OrbFlareParticle;
 import com.ancientcurse.client.render.*;
 import com.ancientcurse.client.render.entity.*;
 import com.ancientcurse.block.entity.SekhemCactusBlockEntity;
@@ -253,6 +255,10 @@ public class AncientCurseClient implements ClientModInitializer {
         // Register Zulmak shield particle factory - cyan/teal particles when blocking
         ParticleFactoryRegistry.getInstance().register(ModParticles.ZULMAK_SHIELD_PARTICLE,
                 ZulmakParticle.Factory::new);
+
+        // Register Ra sun orb particle factories
+        ParticleFactoryRegistry.getInstance().register(ModParticles.ORB_FIRE, OrbFireParticle.Factory::new);
+        ParticleFactoryRegistry.getInstance().register(ModParticles.ORB_FLARE, OrbFlareParticle.Factory::new);
 
         AncientCurse.LOGGER.info("Particle factories registered");
     }

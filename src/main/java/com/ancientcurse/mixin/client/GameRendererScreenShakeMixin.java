@@ -25,14 +25,8 @@ public class GameRendererScreenShakeMixin {
             float[] shake = ScreenShakeManager.getShakeOffset(tickDelta);
 
             // ENTRY LOG
-            if (System.currentTimeMillis() % 100 < 10) {
-                System.out.println("[DEBUG MIXIN] Shake Status: " + shake[0] + ", " + shake[1]);
-            }
 
             if (shake[0] != 0 || shake[1] != 0) {
-                if (System.currentTimeMillis() % 500 < 50) {
-                    System.out.println("[DEBUG MIXIN] Shake Multiplier: " + shake[0] + ", " + shake[1]);
-                }
 
                 // Apply pitch shake (up/down tilt)
                 matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(shake[0]));

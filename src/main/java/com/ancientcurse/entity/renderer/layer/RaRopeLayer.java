@@ -42,10 +42,28 @@ public class RaRopeLayer extends GeoRenderLayer<RaEntity> {
         float scale = 1.02f;
         poseStack.scale(scale, scale, scale);
 
+        // Hide staff bones during rope rendering to avoid broken UV issues
+        // (Staff has 8x upscaled UVs which don't match the rope texture)
+        boolean staffHidden = bakedModel.getBone("staff_of_ra").map(b -> {
+            boolean wasHidden = b.isHidden();
+            b.setHidden(true);
+            return wasHidden;
+        }).orElse(false);
+
+        boolean staff2Hidden = bakedModel.getBone("staffofra").map(b -> {
+            boolean wasHidden = b.isHidden();
+            b.setHidden(true);
+            return wasHidden;
+        }).orElse(false);
+
         // Re-render the model with the rope texture
         getRenderer().reRender(bakedModel, poseStack, bufferSource, entity, ropeLayer,
                 ropeBuffer, partialTick, packedLight, OverlayTexture.DEFAULT_UV,
                 1.0f, 1.0f, 1.0f, 1.0f);
+
+        // Restore staff visibility
+        bakedModel.getBone("staff_of_ra").ifPresent(b -> b.setHidden(staffHidden));
+        bakedModel.getBone("staffofra").ifPresent(b -> b.setHidden(staff2Hidden));
 
         poseStack.pop();
     }

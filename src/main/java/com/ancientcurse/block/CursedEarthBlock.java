@@ -39,6 +39,7 @@ import org.joml.Vector3f;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -67,6 +68,11 @@ public class CursedEarthBlock extends BaseAncientCurseBlock {
     private static final float MULTI_SPREAD_CHANCE = 0.25f; // Chance to spread to multiple blocks
     private static final float ROTATION_CHANCE = 0.35f; // Chance to rotate direction
     private static final Vector3f CURSED_PARTICLE_COLOR = new Vector3f(0.4f, 0.1f, 0.5f);
+
+    // PERFORMANCE LIMITS for tracking maps
+    private static final int MAX_TRACKED_COOLDOWNS = 2000; // Max entries in cooldown maps
+    private static final int MAX_TRACKED_DIRECTIONS = 1000; // Max entries in spread direction maps
+    private static final int CLEANUP_INTERVAL = 1200; // Clean up every 60 seconds instead of 10 minutes
     
     // Leaf decay constants
     private static final int LEAF_WITHER_TIME = 400; // 20 seconds to fully wither (faster to reduce tracking)
@@ -137,17 +143,27 @@ public class CursedEarthBlock extends BaseAncientCurseBlock {
         if (!state.isOf(newState.getBlock()) && !world.isClient) {
             // Notify CursedEarthManager that a cursed block was removed
             CursedEarthManager.getInstance().onCursedBlockRemoved((ServerWorld) world, pos);
+
+            // PERFORMANCE: Also clean up local tracking data immediately
+            spreadCooldowns.remove(pos);
+            spreadDirections.remove(pos);
+            branchLengths.remove(pos);
+            spreadOrigins.remove(pos);
         }
         super.onStateReplaced(state, world, pos, newState, moved);
     }
     
     @Override
     public void randomTick(BlockState state, ServerWorld world, BlockPos pos, Random random) {
+        // PERFORMANCE: Run cleanup on first random tick of each cleanup interval
+        // This ensures cleanup runs regularly even with many cursed blocks
+        cleanupStaleData(world);
+
         // FIRST check if we're in an active cleansing zone - if so, do NOTHING
         if (SolarSpireBlock.isInActiveCleansingZone(pos)) {
             return; // No spreading, no effects, nothing while cleansing is active
         }
-        
+
         // Attempt to spread the curse to nearby blocks
         if (CursedEarthCommand.isEnabled() && random.nextFloat() < 0.3f) {
             attemptSpread(world, pos, random);
@@ -1640,28 +1656,108 @@ public class CursedEarthBlock extends BaseAncientCurseBlock {
     }
     
     /**
-     * Clean up stale cooldowns and counts
+     * Clean up stale cooldowns and counts - PERFORMANCE CRITICAL
+     * Called frequently to prevent memory buildup
      */
     public static void cleanupStaleData(ServerWorld world) {
-        if (world.getTime() % 12000 == 0) { // Every 10 minutes
-            long currentTime = world.getTime();
-            
+        long currentTime = world.getTime();
+
+        // Run cleanup more frequently (every 60 seconds instead of 10 minutes)
+        if (currentTime % CLEANUP_INTERVAL == 0) {
+            int beforeCooldowns = spreadCooldowns.size();
+            int beforeDirections = spreadDirections.size();
+
             // Clean up spread cooldowns
-            spreadCooldowns.entrySet().removeIf(entry -> 
+            spreadCooldowns.entrySet().removeIf(entry ->
                 currentTime - entry.getValue() > SPREAD_COOLDOWN * 2);
-                
+
             // Clean up death burst cooldowns
-            deathBurstCooldowns.entrySet().removeIf(entry -> 
+            deathBurstCooldowns.entrySet().removeIf(entry ->
                 currentTime - entry.getValue() > DEATH_BURST_COOLDOWN * 2);
-                
+
             // Clean up withering leaves that are too old or no longer exist
             leafWitherStartTimes.entrySet().removeIf(entry -> {
                 long startTime = entry.getValue();
                 return currentTime - startTime > LEAF_WITHER_TIME * 2;
             });
-                
+
+            // Clean up spread tracking data (these never got cleaned before!)
+            // Only keep entries for positions that are still cursed earth
+            spreadDirections.entrySet().removeIf(entry -> {
+                BlockPos pos = entry.getKey();
+                return world.getBlockState(pos).getBlock() != ModBlocks.CURSED_EARTH;
+            });
+
+            branchLengths.entrySet().removeIf(entry -> {
+                BlockPos pos = entry.getKey();
+                return world.getBlockState(pos).getBlock() != ModBlocks.CURSED_EARTH;
+            });
+
+            spreadOrigins.entrySet().removeIf(entry -> {
+                BlockPos pos = entry.getKey();
+                return world.getBlockState(pos).getBlock() != ModBlocks.CURSED_EARTH;
+            });
+
             // Clear spread cache periodically to handle block changes
             spreadableBlockCache.clear();
+
+            // Log cleanup stats
+            int afterCooldowns = spreadCooldowns.size();
+            int afterDirections = spreadDirections.size();
+            if (beforeCooldowns - afterCooldowns > 100 || beforeDirections - afterDirections > 100) {
+                AncientCurse.LOGGER.debug("Cursed earth cleanup: cooldowns {} -> {}, directions {} -> {}",
+                    beforeCooldowns, afterCooldowns, beforeDirections, afterDirections);
+            }
+        }
+
+        // Force trim maps if they get too large (check every 100 ticks for responsiveness)
+        if (currentTime % 100 == 0) {
+            trimTrackingMapsIfNeeded();
+        }
+    }
+
+    /**
+     * Trim tracking maps if they exceed size limits - prevents memory bloat
+     */
+    private static void trimTrackingMapsIfNeeded() {
+        // Trim cooldowns map
+        if (spreadCooldowns.size() > MAX_TRACKED_COOLDOWNS) {
+            // Remove oldest 25% of entries
+            int toRemove = spreadCooldowns.size() / 4;
+            List<Map.Entry<BlockPos, Long>> sorted = new ArrayList<>(spreadCooldowns.entrySet());
+            sorted.sort(Map.Entry.comparingByValue());
+            for (int i = 0; i < toRemove && i < sorted.size(); i++) {
+                spreadCooldowns.remove(sorted.get(i).getKey());
+            }
+            AncientCurse.LOGGER.info("Trimmed spreadCooldowns map from {} to {} entries",
+                spreadCooldowns.size() + toRemove, spreadCooldowns.size());
+        }
+
+        // Trim direction tracking maps
+        if (spreadDirections.size() > MAX_TRACKED_DIRECTIONS) {
+            // Just clear the oldest entries - spread directions are less critical
+            int toRemove = spreadDirections.size() / 4;
+            int removed = 0;
+            Iterator<BlockPos> iter = spreadDirections.keySet().iterator();
+            while (iter.hasNext() && removed < toRemove) {
+                BlockPos pos = iter.next();
+                iter.remove();
+                branchLengths.remove(pos);
+                spreadOrigins.remove(pos);
+                removed++;
+            }
+            AncientCurse.LOGGER.info("Trimmed spread direction maps, removed {} entries", removed);
+        }
+
+        // Trim death burst cooldowns
+        if (deathBurstCooldowns.size() > 500) {
+            deathBurstCooldowns.clear();
+            AncientCurse.LOGGER.debug("Cleared death burst cooldowns map");
+        }
+
+        // Trim player exposure map
+        if (playerExposureTime.size() > 100) {
+            playerExposureTime.clear();
         }
     }
     

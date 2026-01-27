@@ -17,14 +17,24 @@ public class ModParticles {
     // Zulmak shield particle - cyan/teal particles when blocking (greenish-blue)
     public static final DefaultParticleType ZULMAK_SHIELD_PARTICLE = FabricParticleTypes.simple();
 
+    // Ra sun orb fire particle - base glow (golden/orange)
+    public static final DefaultParticleType ORB_FIRE = FabricParticleTypes.simple();
+
+    // Ra sun orb flare particle - high-speed escaping flares (golden/white)
+    public static final DefaultParticleType ORB_FLARE = FabricParticleTypes.simple();
+
     /**
      * Registers all mod particles
      */
     public static void registerParticles() {
         AncientCurse.LOGGER.info("Registering particles for " + AncientCurse.MOD_ID);
 
-        Registry.register(Registries.PARTICLE_TYPE, new Identifier(AncientCurse.MOD_ID, "zulmak_particle"), ZULMAK_PARTICLE);
-        Registry.register(Registries.PARTICLE_TYPE, new Identifier(AncientCurse.MOD_ID, "zulmak_shield_particle"), ZULMAK_SHIELD_PARTICLE);
+        Registry.register(Registries.PARTICLE_TYPE, new Identifier(AncientCurse.MOD_ID, "zulmak_particle"),
+                ZULMAK_PARTICLE);
+        Registry.register(Registries.PARTICLE_TYPE, new Identifier(AncientCurse.MOD_ID, "zulmak_shield_particle"),
+                ZULMAK_SHIELD_PARTICLE);
+        Registry.register(Registries.PARTICLE_TYPE, new Identifier(AncientCurse.MOD_ID, "orb_fire"), ORB_FIRE);
+        Registry.register(Registries.PARTICLE_TYPE, new Identifier(AncientCurse.MOD_ID, "orb_flare"), ORB_FLARE);
 
         AncientCurse.LOGGER.info("Particles registered");
     }
