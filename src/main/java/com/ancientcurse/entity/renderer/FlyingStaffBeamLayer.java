@@ -30,9 +30,9 @@ import software.bernie.geckolib.renderer.layer.GeoRenderLayer;
 public class FlyingStaffBeamLayer extends GeoRenderLayer<RaEntity> {
 
     // Timing constants - match RaFlyingStaffAttackGoal
-    private static final int TOTAL_TICKS = 60;    // 3.0s animation
-    private static final int BEAM_START = 20;     // Start firing beam (slightly later than damage)
-    private static final int BEAM_END = 45;       // Stop firing beam (earlier to match animation)
+    private static final int SINGLE_LOOP_TICKS = 60;  // 3.0s per animation loop
+    private static final int BEAM_START = 20;         // Start firing beam within each loop
+    private static final int BEAM_END = 45;           // Stop firing beam within each loop
 
     // Beam configuration - matches StaffOfRaItem
     private static final double BEAM_RANGE = 32.0D;
@@ -62,20 +62,27 @@ public class FlyingStaffBeamLayer extends GeoRenderLayer<RaEntity> {
             return;
         }
 
-        // Calculate elapsed time in the animation
-        int elapsed = TOTAL_TICKS - actionTicks;
+        // Get loop count to calculate total duration
+        int loopCount = entity.getFlyingStaffLoopCount();
+        int totalTicks = SINGLE_LOOP_TICKS * loopCount;
 
-        // Only render during beam phase
-        if (elapsed < BEAM_START || elapsed > BEAM_END) {
+        // Calculate elapsed time in the animation
+        int elapsed = totalTicks - actionTicks;
+
+        // Calculate position within the current loop (0-59 for each loop)
+        int localTick = elapsed % SINGLE_LOOP_TICKS;
+
+        // Only render during beam phase of any loop
+        if (localTick < BEAM_START || localTick > BEAM_END) {
             return;
         }
 
-        // Calculate beam intensity (fade in/out)
+        // Calculate beam intensity (fade in/out within each loop)
         float intensity = 1.0f;
-        if (elapsed < BEAM_START + 5) {
-            intensity = (elapsed - BEAM_START) / 5.0f;
-        } else if (elapsed > BEAM_END - 5) {
-            intensity = (BEAM_END - elapsed) / 5.0f;
+        if (localTick < BEAM_START + 5) {
+            intensity = (localTick - BEAM_START) / 5.0f;
+        } else if (localTick > BEAM_END - 5) {
+            intensity = (BEAM_END - localTick) / 5.0f;
         }
 
         // Get the staff sun world position (where the beam originates)

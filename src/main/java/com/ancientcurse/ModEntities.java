@@ -3,6 +3,7 @@ package com.ancientcurse;
 import com.ancientcurse.entity.AnubisEntity;
 import com.ancientcurse.entity.BindingBoltEntity;
 import com.ancientcurse.entity.DjeserhathEntity;
+import com.ancientcurse.entity.HyenaEntity;
 import com.ancientcurse.entity.KhamsinSpreadSmallEntity;
 import com.ancientcurse.entity.LocusEntity;
 import com.ancientcurse.entity.BabyLocusEntity;
@@ -192,6 +193,16 @@ public class ModEntities {
                                         .trackedUpdateRate(10) // Smooth projectile movement
                                         .build());
 
+        // Register the Hyena entity (tameable desert canine)
+        public static final EntityType<HyenaEntity> HYENA = Registry.register(
+                        Registries.ENTITY_TYPE,
+                        new Identifier(AncientCurse.MOD_ID, "hyena"),
+                        FabricEntityTypeBuilder.create(SpawnGroup.CREATURE, HyenaEntity::new)
+                                        .dimensions(EntityDimensions.fixed(0.9f, 0.9f))
+                                        .trackRangeBlocks(48)
+                                        .trackedUpdateRate(3)
+                                        .build());
+
         /**
          * Registers all mod entities
          */
@@ -212,6 +223,7 @@ public class ModEntities {
                                 KhamsinSpreadSmallEntity.createKhamsinSpreadSmallAttributes());
                 FabricDefaultAttributeRegistry.register(ZULMAK, ZulmakEntity.createZulmakAttributes());
                 FabricDefaultAttributeRegistry.register(RA, RaEntity.createRaAttributes());
+                FabricDefaultAttributeRegistry.register(HYENA, HyenaEntity.createHyenaAttributes());
 
         }
 

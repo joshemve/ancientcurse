@@ -1,6 +1,7 @@
 package com.ancientcurse.item;
 
 import com.ancientcurse.ModBlocks;
+import com.ancientcurse.network.CurseZonePackets;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffectInstance;
@@ -235,7 +236,9 @@ public class StaffOfRaItem extends CustomAnimatedItem {
                 target.setOnFireFor((int)(4 + 8 * chargeLevel));
                 
                 // Status effects
-                target.addStatusEffect(new StatusEffectInstance(StatusEffects.BLINDNESS, (int)(40 + 40 * chargeLevel), 0));
+                // Sun flash effect - blinding light of the sun god (scales with charge)
+                CurseZonePackets.sendSunFlash((ServerWorld) world, target.getBlockPos(),
+                        0.5f + 0.5f * chargeLevel, (int)(40 + 40 * chargeLevel), 32.0);
                 target.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, (int)(60 + 60 * chargeLevel), 1));
                 
                 // Bonus damage to undead

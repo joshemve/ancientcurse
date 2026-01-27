@@ -1,6 +1,7 @@
 package com.ancientcurse.entity.ai;
 
 import com.ancientcurse.entity.RaEntity;
+import com.ancientcurse.network.CurseZonePackets;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.goal.Goal;
 import net.minecraft.entity.effect.StatusEffectInstance;
@@ -33,10 +34,12 @@ public class RaFlyingStaffAttackGoal extends Goal {
     private final RaEntity ra;
     private int attackTime = 0;
     private int cooldown = 0;
+    private int loopCount = 1;     // Random 1-3 loops per attack
+    private int totalTicks = 60;   // Total duration based on loop count
 
-    private static final int TOTAL_TICKS = 60; // 3.0s animation
+    private static final int SINGLE_LOOP_TICKS = 60; // 3.0s per animation loop
 
-    // Beam phases (matching animation timing)
+    // Beam phases within each loop (matching animation timing)
     // Visual beam handled by FlyingStaffBeamLayer (client-side) from tick 20-45
     private static final int CHARGE_START = 0;
     private static final int BEAM_START = 20;    // Start firing beam (matches client layer)
@@ -88,14 +91,22 @@ public class RaFlyingStaffAttackGoal extends Goal {
 
     @Override
     public boolean shouldContinue() {
-        return this.attackTime < TOTAL_TICKS && this.ra.getTarget() != null && this.ra.getTarget().isAlive();
+        return this.attackTime < this.totalTicks && this.ra.getTarget() != null && this.ra.getTarget().isAlive();
     }
 
     @Override
     public void start() {
         this.attackTime = 0;
+
+        // Randomly select 1-3 loops for this attack
+        this.loopCount = 1 + this.ra.getRandom().nextInt(3); // 1, 2, or 3
+        this.totalTicks = SINGLE_LOOP_TICKS * this.loopCount;
+
+        // Sync loop count to client for beam rendering
+        this.ra.setFlyingStaffLoopCount(this.loopCount);
+
         // Use triggerAction to properly set both combatState AND actionAnimationTicks
-        this.ra.triggerAction(RaEntity.RaCombatState.FLYING_STAFF_ATTACK, TOTAL_TICKS);
+        this.ra.triggerAction(RaEntity.RaCombatState.FLYING_STAFF_ATTACK, this.totalTicks);
 
         // Initial power-up sound
         if (!this.ra.getWorld().isClient) {
@@ -110,6 +121,11 @@ public class RaFlyingStaffAttackGoal extends Goal {
         if (this.ra.getCombatState() == RaEntity.RaCombatState.FLYING_STAFF_ATTACK) {
             this.ra.setCombatState(RaEntity.RaCombatState.FLYING);
         }
+        // Explicitly reset action ticks to stop beam particles immediately
+        // This ensures the client-side beam layer stops rendering even with DataTracker sync delay
+        this.ra.setActionTicks(0);
+        // Clear beam direction to prevent stale direction being used
+        this.ra.setSunBeamDirection(Vec3d.ZERO);
         this.cooldown = COOLDOWN_TICKS;
 
         // Deactivation sound
@@ -147,7 +163,14 @@ public class RaFlyingStaffAttackGoal extends Goal {
         if (this.ra.getWorld().isClient) return;
         ServerWorld world = (ServerWorld) this.ra.getWorld();
 
-        // Charging phase - building energy particles around Ra
+        // Calculate position within the current loop (0-59 for each loop)
+        int localTick = this.attackTime % SINGLE_LOOP_TICKS;
+        // Handle edge case where attackTime is exactly on loop boundary
+        if (localTick == 0 && this.attackTime > 0) {
+            localTick = SINGLE_LOOP_TICKS; // Last tick of previous loop
+        }
+
+        // Charging phase - building energy particles around Ra (only first loop)
         if (this.attackTime >= CHARGE_START && this.attackTime < BEAM_START) {
             float chargeProgress = (float)(this.attackTime - CHARGE_START) / (BEAM_START - CHARGE_START);
             spawnChargingParticles(world, startPos, chargeProgress);
@@ -159,9 +182,10 @@ public class RaFlyingStaffAttackGoal extends Goal {
             }
         }
 
-        // Beam firing phase - visual particles handled by FlyingStaffBeamLayer (client-side)
+        // Beam firing phase - check if we're in the beam window of ANY loop
+        // Visual particles handled by FlyingStaffBeamLayer (client-side)
         // Server only handles sounds during beam phase
-        if (this.attackTime >= BEAM_START && this.attackTime <= BEAM_END) {
+        if (localTick >= BEAM_START && localTick <= BEAM_END) {
             // Continuous beam sound
             if (this.attackTime % 10 == 0) {
                 world.playSound(null, this.ra.getX(), this.ra.getY(), this.ra.getZ(),
@@ -169,13 +193,13 @@ public class RaFlyingStaffAttackGoal extends Goal {
             }
         }
 
-        // Deal damage at the damage tick
-        if (this.attackTime == DAMAGE_TICK) {
+        // Deal damage at DAMAGE_TICK of each loop iteration
+        if (localTick == DAMAGE_TICK) {
             fireStaffBeam(target, startPos, direction);
         }
 
-        // Continuous damage while beam is active (every 10 ticks after initial hit)
-        if (this.attackTime > DAMAGE_TICK && this.attackTime <= BEAM_END && this.attackTime % 10 == 0) {
+        // Continuous damage while beam is active (every 10 ticks after initial hit within each loop)
+        if (localTick > DAMAGE_TICK && localTick <= BEAM_END && this.attackTime % 10 == 0) {
             // Check if target is still in beam path
             double distToTarget = startPos.distanceTo(target.getPos().add(0, target.getHeight() * 0.5, 0));
             if (distToTarget <= BEAM_RANGE) {
@@ -248,7 +272,8 @@ public class RaFlyingStaffAttackGoal extends Goal {
 
         // Apply status effects - same as StaffOfRaItem
         target.setOnFireFor(6); // Set on fire
-        target.addStatusEffect(new StatusEffectInstance(StatusEffects.BLINDNESS, 60, 0)); // 3 seconds blindness
+        // Sun flash effect - blinding light of the sun god (replaces blindness)
+        CurseZonePackets.sendSunFlash(world, target.getBlockPos(), 1.0f, 60, 32.0);
         target.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 80, 1)); // 4 seconds slowness
 
         // Bonus damage to undead (just like the player's staff)

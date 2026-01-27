@@ -162,6 +162,9 @@ public class RaEntity extends HostileEntity implements GeoEntity {
     // are playing
     private static final TrackedData<Integer> ACTION_TICKS = DataTracker.registerData(
             RaEntity.class, TrackedDataHandlerRegistry.INTEGER);
+    // Flying staff attack loop count (1-3) - synced for client-side beam rendering
+    private static final TrackedData<Integer> FLYING_STAFF_LOOP_COUNT = DataTracker.registerData(
+            RaEntity.class, TrackedDataHandlerRegistry.INTEGER);
 
     /* ========== FIELDS ========== */
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
@@ -278,6 +281,7 @@ public class RaEntity extends HostileEntity implements GeoEntity {
         this.dataTracker.startTracking(SUN_BEAM_DIR_Z, 0.0f);
         this.dataTracker.startTracking(SHARD_ATTACK_TICKS, 0);
         this.dataTracker.startTracking(ACTION_TICKS, 0);
+        this.dataTracker.startTracking(FLYING_STAFF_LOOP_COUNT, 1);
     }
 
     /* ========== ATTRIBUTES ========== */
@@ -347,7 +351,7 @@ public class RaEntity extends HostileEntity implements GeoEntity {
      * Set action animation ticks - syncs to DataTracker for client-side animation
      * control
      */
-    private void setActionTicks(int ticks) {
+    public void setActionTicks(int ticks) {
         this.actionAnimationTicks = ticks;
         this.dataTracker.set(ACTION_TICKS, ticks);
     }
@@ -627,6 +631,20 @@ public class RaEntity extends HostileEntity implements GeoEntity {
             return;
         setCombatState(RaCombatState.FLYING_STAFF_ATTACK);
         setActionTicks(FLYING_STAFF_ATTACK_DURATION);
+    }
+
+    /**
+     * Get the flying staff attack loop count (1-3)
+     */
+    public int getFlyingStaffLoopCount() {
+        return this.dataTracker.get(FLYING_STAFF_LOOP_COUNT);
+    }
+
+    /**
+     * Set the flying staff attack loop count (1-3)
+     */
+    public void setFlyingStaffLoopCount(int count) {
+        this.dataTracker.set(FLYING_STAFF_LOOP_COUNT, Math.max(1, Math.min(3, count)));
     }
 
     public void setSunBeamDirection(Vec3d dir) {

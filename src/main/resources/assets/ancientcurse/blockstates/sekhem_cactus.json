@@ -1,16 +1,44 @@
 {
-    "variants": {
-        "position=bottom": {
-            "model": "ancientcurse:block/sekhem_cactus"
+    "multipart": [
+        {
+            "when": { "position": "bottom" },
+            "apply": { "model": "ancientcurse:block/sekhem_cactus_bottom" }
         },
-        "position=middle": {
-            "model": "ancientcurse:block/sekhem_cactus"
+        {
+            "when": { "position": "middle", "size_variant": "single" },
+            "apply": { "model": "ancientcurse:block/sekhem_cactus_middle_1_single" }
         },
-        "position=middle2": {
-            "model": "ancientcurse:block/sekhem_cactus"
+        {
+            "when": { "position": "middle", "size_variant": "double" },
+            "apply": { "model": "ancientcurse:block/sekhem_cactus_middle_1_double" }
         },
-        "position=top": {
-            "model": "ancientcurse:block/sekhem_cactus"
+        {
+            "when": { "position": "middle", "size_variant": "triple" },
+            "apply": { "model": "ancientcurse:block/sekhem_cactus_middle_1_triple" }
+        },
+        {
+            "when": { "position": "middle", "size_variant": "quadruple" },
+            "apply": { "model": "ancientcurse:block/sekhem_cactus_middle_1_quadruple" }
+        },
+        {
+            "when": { "position": "middle2", "size_variant": "single" },
+            "apply": { "model": "ancientcurse:block/sekhem_cactus_middle_2_single" }
+        },
+        {
+            "when": { "position": "middle2", "size_variant": "double" },
+            "apply": { "model": "ancientcurse:block/sekhem_cactus_middle_2_double" }
+        },
+        {
+            "when": { "position": "middle2", "size_variant": "triple" },
+            "apply": { "model": "ancientcurse:block/sekhem_cactus_middle_2_triple" }
+        },
+        {
+            "when": { "position": "middle2", "size_variant": "quadruple" },
+            "apply": { "model": "ancientcurse:block/sekhem_cactus_middle_2_quadruple" }
+        },
+        {
+            "when": { "position": "top" },
+            "apply": { "model": "ancientcurse:block/sekhem_cactus_middle_2_top" }
         }
-    }
+    ]
 }

@@ -234,6 +234,12 @@ public class ModItems {
                         0x8B008B, // Secondary color (dark magenta/purple)
                         new FabricItemSettings());
 
+        public static final SpawnEggItem HYENA_SPAWN_EGG = new SpawnEggItem(
+                        ModEntities.HYENA,
+                        0x8B8B8B, // Primary color (medium gray)
+                        0x4A4A4A, // Secondary color (dark gray)
+                        new FabricItemSettings());
+
         public static final Item SCARAB_SHELL = new Item(new FabricItemSettings());
         public static final Item SCARAB_SHELL_FRAGMENT = new Item(new FabricItemSettings());
 
@@ -661,6 +667,11 @@ public class ModItems {
                                 Registries.ITEM,
                                 new Identifier(AncientCurse.MOD_ID, "khamsin_spread_small_spawn_egg"),
                                 KHAMSIN_SPREAD_SMALL_SPAWN_EGG);
+
+                Registry.register(
+                                Registries.ITEM,
+                                new Identifier(AncientCurse.MOD_ID, "hyena_spawn_egg"),
+                                HYENA_SPAWN_EGG);
 
                 // Register Jackel Binds
                 Registry.register(

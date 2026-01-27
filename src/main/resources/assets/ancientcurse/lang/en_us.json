@@ -443,5 +443,8 @@
   "block.ancientcurse.deshret_brush": "Deshret Brush",
   "block.ancientcurse.deshret_thorn_bush": "Deshret Thorn Bush",
   "block.ancientcurse.desert_cactus_plant": "Desert Cactus Plant",
-  "block.ancientcurse.sekhem_cactus": "Sekhem Cactus"
+  "block.ancientcurse.sekhem_cactus": "Sekhem Cactus",
+  "entity.ancientcurse.hyena": "Hyena",
+  "item.ancientcurse.hyena_spawn_egg": "Hyena Spawn Egg",
+  "item.ancientcurse.hyena_spawn_egg.tooltip": "Summon a wild desert hyena - can be tamed with bones"
 }

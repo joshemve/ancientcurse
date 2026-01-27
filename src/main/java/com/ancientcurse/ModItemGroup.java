@@ -338,7 +338,7 @@ public class ModItemGroup {
                         safeAdd(entries, ModItems.LOCUS_SPAWN_EGG);
                         safeAdd(entries, ModItems.SCARAB_BEETLE_SPAWN_EGG);
                         safeAdd(entries, ModItems.KHAMSIN_SPREAD_SMALL_SPAWN_EGG);
-                        // Lotus spawn egg removed to fix conflicts
+                        safeAdd(entries, ModItems.HYENA_SPAWN_EGG);
                     })
                     .build());
 

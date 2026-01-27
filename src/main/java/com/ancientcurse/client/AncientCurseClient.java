@@ -13,13 +13,12 @@ import com.ancientcurse.client.particle.OrbFireParticle;
 import com.ancientcurse.client.particle.OrbFlareParticle;
 import com.ancientcurse.client.render.*;
 import com.ancientcurse.client.render.entity.*;
-import com.ancientcurse.block.entity.SekhemCactusBlockEntity;
-import com.ancientcurse.client.renderer.block.SekhemCactusRenderer;
 import com.ancientcurse.client.renderer.block.SolarSpireRenderer;
 import com.ancientcurse.client.render.item.SerpentStaffRenderer;
 import com.ancientcurse.client.color.RockColorProvider;
 import com.ancientcurse.entity.model.*;
 import com.ancientcurse.entity.renderer.*;
+import com.ancientcurse.entity.renderer.HyenaRenderer;
 import com.ancientcurse.entity.renderer.ZulmakRenderer;
 import com.ancientcurse.network.CurseZonePackets;
 import com.ancientcurse.client.animation.ModAnimations;
@@ -101,6 +100,9 @@ public class AncientCurseClient implements ClientModInitializer {
         // Register the Jackel Binds HUD renderer
         JackelBindsHudRenderer.register();
 
+        // Register the Sun Flash HUD renderer (Ra's flashbang effect)
+        SunFlashHudRenderer.register();
+
         // Register render layers for cursed plants
         CursedPlantRenderLayer.register();
 
@@ -125,9 +127,10 @@ public class AncientCurseClient implements ClientModInitializer {
         // Register network packets
         CurseZonePackets.registerClientPackets();
 
-        // Register client tick event for screen shake
+        // Register client tick event for screen shake and sun flash
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             ScreenShakeManager.tick();
+            SunFlashManager.tick();
         });
 
         // Register player animations (PlayerAnimator auto-loads from player_animation
@@ -137,9 +140,11 @@ public class AncientCurseClient implements ClientModInitializer {
         // Note: Player animation layers are registered via PlayerAnimationMixin
         // which adds a ModifierLayer to each AbstractClientPlayerEntity
 
-        // Register disconnect handler to clear client cache
+        // Register disconnect handler to clear client cache and effects
         ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
             CurseZoneClientCache.clear();
+            SunFlashManager.reset();
+            ScreenShakeManager.reset();
         });
 
         // Register world render events for curse zone visualization
@@ -212,6 +217,9 @@ public class AncientCurseClient implements ClientModInitializer {
 
         // Register the Binding Bolt projectile renderer
         EntityRendererRegistry.register(ModEntities.BINDING_BOLT, BindingBoltRenderer::new);
+
+        // Register the Hyena renderer (tameable desert canine)
+        EntityRendererRegistry.register(ModEntities.HYENA, HyenaRenderer::new);
     }
 
     /**
@@ -239,7 +247,7 @@ public class AncientCurseClient implements ClientModInitializer {
 
         // Register the Solar Spire renderer
         BlockEntityRendererRegistry.register(ModBlockEntities.SOLAR_SPIRE, SolarSpireRenderer::new);
-        BlockEntityRendererRegistry.register(ModBlockEntities.SEKHEM_CACTUS_BLOCK_ENTITY, SekhemCactusRenderer::new);
+        // SekhemCactus now uses standard block models instead of GeckoLib renderer
     }
 
     /**

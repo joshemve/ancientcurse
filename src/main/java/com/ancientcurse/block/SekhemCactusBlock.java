@@ -43,6 +43,8 @@ public class SekhemCactusBlock extends BlockWithEntity {
             SekhemCactusVariant.class);
     public static final EnumProperty<SekhemCactusModelVariant> MODEL_VARIANT = EnumProperty.of("model_variant",
             SekhemCactusModelVariant.class);
+    public static final EnumProperty<SekhemCactusSizeVariant> SIZE_VARIANT = EnumProperty.of("size_variant",
+            SekhemCactusSizeVariant.class);
 
     protected static final VoxelShape COLLISION_SHAPE = Block.createCuboidShape(1.0, 0.0, 1.0, 15.0, 15.0, 15.0);
     protected static final VoxelShape OUTLINE_SHAPE = Block.createCuboidShape(1.0, 0.0, 1.0, 15.0, 16.0, 15.0);
@@ -53,7 +55,8 @@ public class SekhemCactusBlock extends BlockWithEntity {
                 this.stateManager.getDefaultState().with(AGE, 0).with(POSITION, SekhemCactusPosition.BOTTOM)
                         .with(VARIANT, SekhemCactusVariant.DEFAULT)
                         .with(MODEL_VARIANT, SekhemCactusModelVariant.MODEL_1)
-                        .with(MAX_HEIGHT, 3));
+                        .with(SIZE_VARIANT, SekhemCactusSizeVariant.SINGLE)
+                        .with(MAX_HEIGHT, 4));
     }
 
     @Override
@@ -82,17 +85,37 @@ public class SekhemCactusBlock extends BlockWithEntity {
                 checkPos = checkPos.down();
             }
 
-            // Check if placing this block would exceed the max height
-            int maxHeight = stateBelow.get(MAX_HEIGHT);
-            if (currentHeight >= maxHeight) {
-                return null; // Prevent placement if it would exceed max height
+            // Max height is always 4 (BOTTOM + MIDDLE + MIDDLE2 + TOP)
+            if (currentHeight >= 4) {
+                return null; // Prevent placement if it would exceed max height of 4
+            }
+
+            // Determine the position and size variant for this new block
+            SekhemCactusPosition position;
+            SekhemCactusSizeVariant sizeVariant;
+
+            if (currentHeight == 3) {
+                // This will be the 4th block - always TOP
+                position = SekhemCactusPosition.TOP;
+                sizeVariant = stateBelow.get(SIZE_VARIANT); // Inherit from below
+            } else if (currentHeight == 2) {
+                // This will be the 3rd block - MIDDLE2, inherit size variant from MIDDLE below
+                position = SekhemCactusPosition.MIDDLE2;
+                sizeVariant = stateBelow.get(SIZE_VARIANT); // Inherit from MIDDLE block
+            } else {
+                // This will be the 2nd block - MIDDLE, randomly choose size variant
+                position = SekhemCactusPosition.MIDDLE;
+                sizeVariant = SekhemCactusSizeVariant.random(world.random);
             }
 
             return this.getDefaultState()
+                    .with(POSITION, position)
                     .with(VARIANT, stateBelow.get(VARIANT))
                     .with(MODEL_VARIANT, stateBelow.get(MODEL_VARIANT))
-                    .with(MAX_HEIGHT, stateBelow.get(MAX_HEIGHT));
+                    .with(SIZE_VARIANT, sizeVariant)
+                    .with(MAX_HEIGHT, 4);
         } else {
+            // First block - always BOTTOM
             SekhemCactusModelVariant modelVariant = world.random.nextFloat() < 0.3f ? SekhemCactusModelVariant.MODEL_2
                     : SekhemCactusModelVariant.MODEL_1;
 
@@ -109,12 +132,12 @@ public class SekhemCactusBlock extends BlockWithEntity {
                     variant = SekhemCactusVariant.HEALTHY; // sekhem_cactus_healthy.png
             }
 
-            int maxHeight = 2 + world.random.nextInt(3); // 2, 3, or 4
-
             return this.getDefaultState()
+                    .with(POSITION, SekhemCactusPosition.BOTTOM)
                     .with(VARIANT, variant)
                     .with(MODEL_VARIANT, modelVariant)
-                    .with(MAX_HEIGHT, maxHeight);
+                    .with(SIZE_VARIANT, SekhemCactusSizeVariant.SINGLE) // Default for bottom
+                    .with(MAX_HEIGHT, 4);
         }
     }
 
@@ -122,22 +145,43 @@ public class SekhemCactusBlock extends BlockWithEntity {
     public void randomTick(BlockState state, ServerWorld world, BlockPos pos, Random random) {
         BlockPos blockPos = pos.up();
         if (world.isAir(blockPos)) {
-            int i = 1;
-            while (world.getBlockState(pos.down(i)).isOf(this)) {
-                i++;
+            // Count current stack height (including this block)
+            int currentHeight = 1;
+            while (world.getBlockState(pos.down(currentHeight)).isOf(this)) {
+                currentHeight++;
             }
 
-            int cactusMaxHeight = state.get(MAX_HEIGHT);
-            if (i < cactusMaxHeight) { // respects randomized max height
+            // Max height is always 4
+            if (currentHeight < 4) {
                 int j = state.get(AGE);
                 if (j == 15) {
                     SekhemCactusVariant variant = state.get(VARIANT);
                     SekhemCactusModelVariant modelVariant = state.get(MODEL_VARIANT);
-                    int maxHeight = state.get(MAX_HEIGHT);
+
+                    // Determine position and size variant for the new block
+                    SekhemCactusPosition newPosition;
+                    SekhemCactusSizeVariant sizeVariant;
+
+                    if (currentHeight == 3) {
+                        // 4th block - TOP, inherit size from below
+                        newPosition = SekhemCactusPosition.TOP;
+                        sizeVariant = state.get(SIZE_VARIANT);
+                    } else if (currentHeight == 2) {
+                        // 3rd block - MIDDLE2, inherit size from MIDDLE below
+                        newPosition = SekhemCactusPosition.MIDDLE2;
+                        sizeVariant = state.get(SIZE_VARIANT);
+                    } else {
+                        // 2nd block - MIDDLE, randomly choose size
+                        newPosition = SekhemCactusPosition.MIDDLE;
+                        sizeVariant = SekhemCactusSizeVariant.random(random);
+                    }
+
                     world.setBlockState(blockPos, this.getDefaultState()
+                            .with(POSITION, newPosition)
                             .with(VARIANT, variant)
                             .with(MODEL_VARIANT, modelVariant)
-                            .with(MAX_HEIGHT, maxHeight));
+                            .with(SIZE_VARIANT, sizeVariant)
+                            .with(MAX_HEIGHT, 4));
                     BlockState blockState = state.with(AGE, 0);
                     world.setBlockState(pos, blockState, 4);
                     blockState.neighborUpdate(world, blockPos, this, pos, false);
@@ -277,7 +321,7 @@ public class SekhemCactusBlock extends BlockWithEntity {
 
     @Override
     protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
-        builder.add(AGE, POSITION, VARIANT, MODEL_VARIANT, MAX_HEIGHT);
+        builder.add(AGE, POSITION, VARIANT, MODEL_VARIANT, SIZE_VARIANT, MAX_HEIGHT);
     }
 
     @Nullable
@@ -288,22 +332,11 @@ public class SekhemCactusBlock extends BlockWithEntity {
 
     @Override
     public BlockRenderType getRenderType(BlockState state) {
-        return BlockRenderType.ENTITYBLOCK_ANIMATED;
+        return BlockRenderType.MODEL;
     }
 
     private BlockState updatePositionState(BlockState state, BlockView world, BlockPos pos) {
-        boolean hasCactusBelow = world.getBlockState(pos.down()).isOf(this);
-        boolean hasCactusAbove = world.getBlockState(pos.up()).isOf(this);
-
-        if (!hasCactusBelow) {
-            return state.with(POSITION, SekhemCactusPosition.BOTTOM);
-        }
-
-        if (!hasCactusAbove) {
-            return state.with(POSITION, SekhemCactusPosition.TOP);
-        }
-
-        // It's a middle piece. Determine if it's MIDDLE or MIDDLE2
+        // Count how many cactus blocks are below this one
         int countBelow = 0;
         BlockPos current = pos.down();
         while (world.getBlockState(current).isOf(this)) {
@@ -311,11 +344,16 @@ public class SekhemCactusBlock extends BlockWithEntity {
             current = current.down();
         }
 
-        if (countBelow == 1) {
-            return state.with(POSITION, SekhemCactusPosition.MIDDLE);
-        } else {
-            return state.with(POSITION, SekhemCactusPosition.MIDDLE2);
-        }
+        // Position is determined purely by how many blocks are below
+        // This ensures MIDDLE2 stays MIDDLE2 even when it's the top of the stack
+        SekhemCactusPosition newPosition = switch (countBelow) {
+            case 0 -> SekhemCactusPosition.BOTTOM;   // No blocks below = 1st block
+            case 1 -> SekhemCactusPosition.MIDDLE;   // 1 block below = 2nd block
+            case 2 -> SekhemCactusPosition.MIDDLE2;  // 2 blocks below = 3rd block
+            default -> SekhemCactusPosition.TOP;     // 3+ blocks below = 4th block
+        };
+
+        return state.with(POSITION, newPosition);
     }
 
     public enum SekhemCactusPosition implements StringIdentifiable {
@@ -366,6 +404,32 @@ public class SekhemCactusBlock extends BlockWithEntity {
         @Override
         public String asString() {
             return this.name;
+        }
+    }
+
+    public enum SekhemCactusSizeVariant implements StringIdentifiable {
+        SINGLE("single"),
+        DOUBLE("double"),
+        TRIPLE("triple"),
+        QUADRUPLE("quadruple");
+
+        private final String name;
+
+        SekhemCactusSizeVariant(String name) {
+            this.name = name;
+        }
+
+        @Override
+        public String asString() {
+            return this.name;
+        }
+
+        /**
+         * Get a random size variant
+         */
+        public static SekhemCactusSizeVariant random(Random random) {
+            SekhemCactusSizeVariant[] values = values();
+            return values[random.nextInt(values.length)];
         }
     }
 }

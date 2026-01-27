@@ -38,6 +38,7 @@ public class CurseZonePackets {
     public static final Identifier SYNC_ANKH_VALUE = new Identifier(AncientCurse.MOD_ID, "sync_ankh_value");
     public static final Identifier PLAY_PLAYER_ANIMATION = new Identifier(AncientCurse.MOD_ID, "play_player_animation");
     public static final Identifier SCREEN_SHAKE = new Identifier(AncientCurse.MOD_ID, "screen_shake");
+    public static final Identifier SUN_FLASH = new Identifier(AncientCurse.MOD_ID, "sun_flash");
 
     public static void registerServerPackets() {
         ServerPlayNetworking.registerGlobalReceiver(UPDATE_ZONE, CurseZonePackets::handleUpdateZone);
@@ -55,6 +56,7 @@ public class CurseZonePackets {
         ClientPlayNetworking.registerGlobalReceiver(SYNC_ANKH_VALUE, CurseZonePackets::handleSyncAnkhValue);
         ClientPlayNetworking.registerGlobalReceiver(PLAY_PLAYER_ANIMATION, CurseZonePackets::handlePlayPlayerAnimation);
         ClientPlayNetworking.registerGlobalReceiver(SCREEN_SHAKE, CurseZonePackets::handleScreenShake);
+        ClientPlayNetworking.registerGlobalReceiver(SUN_FLASH, CurseZonePackets::handleSunFlash);
     }
 
     // Client -> Server: Update zone data
@@ -540,6 +542,53 @@ public class CurseZonePackets {
         // Execute on client thread
         client.execute(() -> {
             com.ancientcurse.client.ScreenShakeManager.shake(intensity, duration);
+        });
+    }
+
+    /**
+     * Server -> Client: Send sun flash effect to nearby players.
+     * Creates a flashbang-style screen overlay that fades from white to golden.
+     *
+     * @param world     The server world
+     * @param origin    The position where the flash originates
+     * @param intensity Base intensity (1.0 = full flash)
+     * @param duration  Duration in ticks (e.g., 60 for 3 seconds)
+     * @param maxRange  Maximum range for the flash effect
+     */
+    public static void sendSunFlash(ServerWorld world, BlockPos origin, float intensity, float duration,
+            double maxRange) {
+        for (ServerPlayerEntity player : world.getPlayers()) {
+            double distance = Math.sqrt(player.squaredDistanceTo(origin.getX(), origin.getY(), origin.getZ()));
+            if (distance <= maxRange) {
+                // Calculate distance-based falloff
+                // Full intensity within 8 blocks, then linear falloff
+                float falloff;
+                if (distance <= 8.0) {
+                    falloff = 1.0f;
+                } else {
+                    falloff = (float) Math.max(0, 1.0 - ((distance - 8.0) / (maxRange - 8.0)));
+                }
+                float adjustedIntensity = intensity * falloff;
+
+                if (adjustedIntensity > 0.05f) {
+                    PacketByteBuf buf = PacketByteBufs.create();
+                    buf.writeFloat(adjustedIntensity);
+                    buf.writeFloat(duration);
+                    ServerPlayNetworking.send(player, SUN_FLASH, buf);
+                }
+            }
+        }
+    }
+
+    // Client packet handler for sun flash
+    private static void handleSunFlash(MinecraftClient client, ClientPlayNetworkHandler handler,
+            PacketByteBuf buf, PacketSender responseSender) {
+        float intensity = buf.readFloat();
+        float duration = buf.readFloat();
+
+        // Execute on client thread
+        client.execute(() -> {
+            com.ancientcurse.client.SunFlashManager.flash(intensity, duration);
         });
     }
 }
