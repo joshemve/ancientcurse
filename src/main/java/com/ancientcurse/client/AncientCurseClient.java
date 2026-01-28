@@ -11,6 +11,7 @@ import com.ancientcurse.client.model.*;
 import com.ancientcurse.client.particle.ZulmakParticle;
 import com.ancientcurse.client.particle.OrbFireParticle;
 import com.ancientcurse.client.particle.OrbFlareParticle;
+import com.ancientcurse.client.particle.SandDustParticle;
 import com.ancientcurse.client.render.*;
 import com.ancientcurse.client.render.entity.*;
 import com.ancientcurse.client.renderer.block.SolarSpireRenderer;
@@ -21,6 +22,9 @@ import com.ancientcurse.entity.renderer.*;
 import com.ancientcurse.entity.renderer.HyenaRenderer;
 import com.ancientcurse.entity.renderer.ZulmakRenderer;
 import com.ancientcurse.network.CurseZonePackets;
+import com.ancientcurse.network.ThirstPackets;
+import com.ancientcurse.network.SandstormPackets;
+import com.ancientcurse.network.BloodWaterPackets;
 import com.ancientcurse.client.animation.ModAnimations;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
@@ -103,6 +107,15 @@ public class AncientCurseClient implements ClientModInitializer {
         // Register the Sun Flash HUD renderer (Ra's flashbang effect)
         SunFlashHudRenderer.register();
 
+        // Register the Thirst HUD renderer (water skin display)
+        ThirstHudRenderer.register();
+
+        // Register the Sandstorm overlay renderer (vignette and screen particles)
+        SandstormOverlayRenderer.register();
+
+        // Register the Blood Water overlay renderer (curse effects)
+        BloodWaterOverlayRenderer.register();
+
         // Register render layers for cursed plants
         CursedPlantRenderLayer.register();
 
@@ -126,11 +139,16 @@ public class AncientCurseClient implements ClientModInitializer {
 
         // Register network packets
         CurseZonePackets.registerClientPackets();
+        ThirstPackets.registerClientPackets();
+        SandstormPackets.registerClientPackets();
+        BloodWaterPackets.registerClientPackets();
 
-        // Register client tick event for screen shake and sun flash
+        // Register client tick event for screen shake, sun flash, sandstorm, and blood water
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             ScreenShakeManager.tick();
             SunFlashManager.tick();
+            SandstormClientHandler.tick();
+            BloodWaterClientHandler.tick();
         });
 
         // Register player animations (PlayerAnimator auto-loads from player_animation
@@ -145,6 +163,8 @@ public class AncientCurseClient implements ClientModInitializer {
             CurseZoneClientCache.clear();
             SunFlashManager.reset();
             ScreenShakeManager.reset();
+            SandstormClientHandler.reset();
+            BloodWaterClientHandler.reset();
         });
 
         // Register world render events for curse zone visualization
@@ -267,6 +287,9 @@ public class AncientCurseClient implements ClientModInitializer {
         // Register Ra sun orb particle factories
         ParticleFactoryRegistry.getInstance().register(ModParticles.ORB_FIRE, OrbFireParticle.Factory::new);
         ParticleFactoryRegistry.getInstance().register(ModParticles.ORB_FLARE, OrbFlareParticle.Factory::new);
+
+        // Register Sand Dust particle factory for sandstorm effects
+        ParticleFactoryRegistry.getInstance().register(ModParticles.SAND_DUST, SandDustParticle.Factory::new);
 
         AncientCurse.LOGGER.info("Particle factories registered");
     }
