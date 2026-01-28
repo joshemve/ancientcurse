@@ -1,0 +1,28 @@
+{
+  "name": "Artifacts",
+  "icon": "ancientcurse:eternal_sigil",
+  "category": "ancientcurse:items",
+  "sortnum": 2,
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "ancientcurse:eternal_sigil",
+      "text": "Divine artifact. Cleanses curses and grants powerful protection."
+    },
+    {
+      "type": "patchouli:spotlight",
+      "item": "ancientcurse:scarab_talisman",
+      "text": "Grants temporary protection and regeneration when activated."
+    },
+    {
+      "type": "patchouli:spotlight",
+      "item": "ancientcurse:eye_of_apophis",
+      "text": "The gaze of the chaos serpent. Used to activate the Solar Spire."
+    },
+    {
+      "type": "patchouli:spotlight",
+      "item": "ancientcurse:canopic_heart_jar",
+      "text": "Sacred vessel containing preserved organs. Valuable artifact."
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "name": "Magical Staffs",
+  "icon": "ancientcurse:staff_of_ra",
+  "category": "ancientcurse:items",
+  "sortnum": 0,
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "ancientcurse:staff_of_ra",
+      "text": "The most powerful weapon!$(br)- Hold right-click to charge$(br)- Releases sun beam$(br)- Sets enemies on fire$(br)- Extra damage to undead$(br)- Creates light when held"
+    },
+    {
+      "type": "patchouli:spotlight",
+      "item": "ancientcurse:serpent_staff",
+      "text": "Fires snake projectiles.$(br)- Right-click: Fire snakes$(br)- Sneak+click: Powerful attack$(br)- Applies Poison II"
+    },
+    {
+      "type": "patchouli:spotlight",
+      "item": "ancientcurse:withered_staff",
+      "text": "Launches wither skulls when charged. Dark magic!"
+    }
+  ]
+}

@@ -100,6 +100,10 @@ public class ModSounds {
     public static final SoundEvent WITHERED_PHARAOH_SUSPENSE = registerSoundEvent("withered_pharaoh_suspense");
     public static final SoundEvent WITHERED_PHARAOH_GRUMBLE = registerSoundEvent("withered_pharaoh_grumble");
 
+    // Sandstorm Sound Events
+    public static final SoundEvent SANDSTORM_DEEP_LOOP = registerSoundEvent("sandstorm_deep_loop");
+    public static final SoundEvent SANDSTORM_DUST_LOOP = registerSoundEvent("sandstorm_dust_loop");
+
     private static SoundEvent registerSoundEvent(String name) {
         Identifier id = new Identifier(AncientCurse.MOD_ID, name);
         return Registry.register(Registries.SOUND_EVENT, id, SoundEvent.of(id));

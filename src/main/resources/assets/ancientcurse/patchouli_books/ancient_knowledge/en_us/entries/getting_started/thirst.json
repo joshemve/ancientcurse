@@ -1,0 +1,17 @@
+{
+  "name": "Thirst System",
+  "icon": "ancientcurse:water_skin",
+  "category": "ancientcurse:getting_started",
+  "sortnum": 0,
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "The desert heat drains your water. A thirst bar appears above hunger.$(br2)When thirst is empty, you take damage!$(br2)Restore thirst by:$(br)- Using a Water Skin$(br)- Eating Lotus Flowers$(br)- Standing in water"
+    },
+    {
+      "type": "patchouli:spotlight",
+      "item": "ancientcurse:water_skin",
+      "text": "Holds 5 drinks. Right-click water to fill. Right-click to drink.$(br2)Bar color shows level:$(br)Blue = Good$(br)Orange = Low$(br)Red = Empty"
+    }
+  ]
+}

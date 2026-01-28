@@ -23,6 +23,9 @@ public class ModParticles {
     // Ra sun orb flare particle - high-speed escaping flares (golden/white)
     public static final DefaultParticleType ORB_FLARE = FabricParticleTypes.simple();
 
+    // Sand dust particle for sandstorm effect
+    public static final DefaultParticleType SAND_DUST = FabricParticleTypes.simple();
+
     /**
      * Registers all mod particles
      */
@@ -35,6 +38,7 @@ public class ModParticles {
                 ZULMAK_SHIELD_PARTICLE);
         Registry.register(Registries.PARTICLE_TYPE, new Identifier(AncientCurse.MOD_ID, "orb_fire"), ORB_FIRE);
         Registry.register(Registries.PARTICLE_TYPE, new Identifier(AncientCurse.MOD_ID, "orb_flare"), ORB_FLARE);
+        Registry.register(Registries.PARTICLE_TYPE, new Identifier(AncientCurse.MOD_ID, "sand_dust"), SAND_DUST);
 
         AncientCurse.LOGGER.info("Particles registered");
     }

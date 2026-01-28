@@ -7,7 +7,9 @@
     "SingleBiomePresetMixin",
     "PlayerEntityMixin",
     "JackelBindsRestrictionMixin",
-    "JackelBindsServerMixin"
+    "JackelBindsServerMixin",
+    "PotionItemMixin",
+    "FoodConsumptionMixin"
   ],
   "client": [
     "client.EntityRenderDispatcherMixin",
@@ -17,7 +19,10 @@
     "client.JackelBindsFirstPersonMixin",
     "client.JackelBindsArmMixin",
     "client.PlayerAnimationMixin",
-    "client.GameRendererScreenShakeMixin"
+    "client.GameRendererScreenShakeMixin",
+    "client.BloodWaterColorMixin",
+    "client.SandstormFogMixin",
+    "client.SandstormSkyMixin"
   ],
   "injectors": {
     "defaultRequire": 1

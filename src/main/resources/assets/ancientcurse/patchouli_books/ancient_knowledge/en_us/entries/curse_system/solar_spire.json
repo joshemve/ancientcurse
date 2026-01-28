@@ -1,0 +1,23 @@
+{
+  "name": "Solar Spire",
+  "icon": "ancientcurse:solar_spire",
+  "category": "ancientcurse:curse_system",
+  "sortnum": 5,
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "ancientcurse:solar_spire",
+      "text": "The $(#D4AF37)Solar Spire$() is a powerful monument capable of cleansing the land of the Khamsin Curse. When placed, it constructs a 3-block tall tower that channels the power of Ra."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Activation",
+      "text": "To activate the spire:$(br2)$(li)Place the Solar Spire block$(li)Use an $(l:ancientcurse:items/artifacts)Eye of Apophis$() on the base$(li)The spire must be near cursed earth$(br2)Once activated, it will purify a large area around it, turning cursed blocks back to their natural state."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Warning",
+      "text": "$(#FF6600)Be warned:$() Defending the spire attracts enemies! The cleansing ritual takes time, and dark forces will attempt to stop you.$(br2)The spire requires a 3-block high vertical space and clear line of sight to the sky for maximum effectiveness."
+    }
+  ]
+}

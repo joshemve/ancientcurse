@@ -1,0 +1,27 @@
+{
+  "name": "Armor",
+  "icon": "ancientcurse:bronze_chestplate",
+  "category": "ancientcurse:tools",
+  "sortnum": 1,
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "Bronze Armor:$(br)- Helmet$(br)- Chestplate$(br)- Leggings$(br)- Boots$(br2)Craft with Bronze Ingots. Stronger than iron armor!"
+    },
+    {
+      "type": "patchouli:spotlight",
+      "item": "ancientcurse:veil_of_anubis",
+      "text": "Sacred helmet from Anubis. Grants protection and marks you as worthy."
+    },
+    {
+      "type": "patchouli:spotlight",
+      "item": "ancientcurse:ceremonial_chestwrap",
+      "text": "Ancient Egyptian ceremonial armor."
+    },
+    {
+      "type": "patchouli:spotlight",
+      "item": "ancientcurse:scarab_mask",
+      "text": "Sacred mask of the divine scarab."
+    }
+  ]
+}

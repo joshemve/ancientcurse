@@ -1,0 +1,23 @@
+{
+  "name": "Removing the Curse",
+  "icon": "ancientcurse:scroll_of_unbinding",
+  "category": "ancientcurse:curse_system",
+  "sortnum": 1,
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "ancientcurse:scroll_of_unbinding",
+      "text": "Reduces curse by 1 stage. Craft with Papyrus Paper and Hieroglyph Fragments."
+    },
+    {
+      "type": "patchouli:spotlight",
+      "item": "ancientcurse:pharaohs_blood",
+      "text": "Fully restores Ankh and provides protection. Very rare and powerful!"
+    },
+    {
+      "type": "patchouli:spotlight",
+      "item": "ancientcurse:purification_staff",
+      "text": "Cleanses cursed earth. Must stand in a salt circle to use. Hold right-click for 3 seconds."
+    }
+  ]
+}

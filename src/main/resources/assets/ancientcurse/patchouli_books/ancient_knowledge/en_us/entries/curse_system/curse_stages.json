@@ -1,0 +1,16 @@
+{
+  "name": "Curse Stages",
+  "icon": "ancientcurse:cursed_earth",
+  "category": "ancientcurse:curse_system",
+  "sortnum": 0,
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "The Khamsin Curse has 5 stages:$(br2)Stage 1: Weakness$(br)Stage 2: Hunger drain$(br)Stage 3: Mining fatigue$(br)Stage 4: Wither effect$(br)Stage 5: Rapid death!$(br2)You get cursed by walking on Cursed Earth or being attacked by cursed enemies."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Cursed Earth spreads and corrupts normal blocks. Cursed plants grow on it.$(br2)Avoid cursed areas or use Salt to protect yourself!"
+    }
+  ]
+}

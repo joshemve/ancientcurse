@@ -310,6 +310,14 @@ public class ModItems {
                                         .recipeRemainder(net.minecraft.item.Items.BUCKET)
                                         .maxCount(1));
 
+        // Water Skin - Refillable water container for thirst management
+        public static final com.ancientcurse.item.WaterSkinItem WATER_SKIN =
+                        new com.ancientcurse.item.WaterSkinItem(new FabricItemSettings());
+
+        // Tome of Ancient Knowledge - Guide book for the mod
+        public static final com.ancientcurse.item.TomeOfAncientKnowledgeItem TOME_OF_ANCIENT_KNOWLEDGE =
+                        new com.ancientcurse.item.TomeOfAncientKnowledgeItem(new FabricItemSettings().maxCount(1));
+
         /**
          * Registers all mod items
          */
@@ -690,5 +698,17 @@ public class ModItems {
                                 Registries.ITEM,
                                 new Identifier(AncientCurse.MOD_ID, "binding_crossbow"),
                                 BINDING_CROSSBOW);
+
+                // Register Water Skin
+                Registry.register(
+                                Registries.ITEM,
+                                new Identifier(AncientCurse.MOD_ID, "water_skin"),
+                                WATER_SKIN);
+
+                // Register Tome of Ancient Knowledge
+                Registry.register(
+                                Registries.ITEM,
+                                new Identifier(AncientCurse.MOD_ID, "tome_of_ancient_knowledge"),
+                                TOME_OF_ANCIENT_KNOWLEDGE);
         }
 }

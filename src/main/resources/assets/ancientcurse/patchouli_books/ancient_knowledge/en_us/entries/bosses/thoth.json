@@ -1,0 +1,18 @@
+{
+  "name": "Thoth",
+  "icon": "ancientcurse:thoth_spawn_egg",
+  "category": "ancientcurse:bosses",
+  "sortnum": 1,
+  "pages": [
+    {
+      "type": "patchouli:entity",
+      "entity": "ancientcurse:thoth",
+      "scale": 0.4,
+      "text": "God of Wisdom and Magic. Wields powerful time magic."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Attacks:$(br)- Time Bend: Lifts and throws you$(br)- Magic Balls: Seeking projectiles$(br)- Scroll Blast: Area damage$(br)- Summons servants$(br2)Bring full bronze armor and healing items!"
+    }
+  ]
+}

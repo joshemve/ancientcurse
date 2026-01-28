@@ -1,0 +1,27 @@
+{
+  "name": "Bronze Equipment",
+  "icon": "ancientcurse:bronze_ingot",
+  "category": "ancientcurse:tools",
+  "sortnum": 0,
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "Bronze is the main crafting metal.$(br2)To make Bronze Ingots:$(br)1. Craft Bronze Blend$(br)2. Smelt in a furnace$(br2)Bronze tools are better than iron!"
+    },
+    {
+      "type": "patchouli:spotlight",
+      "item": "ancientcurse:bronze_sword",
+      "text": "Standard bronze sword."
+    },
+    {
+      "type": "patchouli:spotlight",
+      "item": "ancientcurse:bronze_khopesh",
+      "text": "Curved Egyptian sword. Higher damage and faster than normal sword!"
+    },
+    {
+      "type": "patchouli:spotlight",
+      "item": "ancientcurse:bronze_pickaxe",
+      "text": "Bronze mining tool."
+    }
+  ]
+}

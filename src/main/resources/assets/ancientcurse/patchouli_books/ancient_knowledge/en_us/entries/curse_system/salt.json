@@ -1,0 +1,13 @@
+{
+  "name": "Salt Protection",
+  "icon": "ancientcurse:salt",
+  "category": "ancientcurse:curse_system",
+  "sortnum": 2,
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "ancientcurse:salt",
+      "text": "Place salt in a circle around yourself to create a barrier.$(br2)Salt circles:$(br)- Stop cursed earth spread$(br)- Damage cursed creatures$(br)- Allow Purification Staff use$(br2)The circle must be complete!"
+    }
+  ]
+}
