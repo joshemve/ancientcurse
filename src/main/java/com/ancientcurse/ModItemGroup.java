@@ -45,6 +45,10 @@ public class ModItemGroup {
                         // Tools and Items
                         safeAdd(entries, ModItems.STAFF_OF_RA);
 
+                        // Survival items
+                        safeAdd(entries, ModItems.WATER_SKIN);
+                        safeAdd(entries, ModItems.TOME_OF_ANCIENT_KNOWLEDGE);
+
                         // Food items
                         safeAdd(entries, ModItems.SYCAMORE_FIG);
                         safeAdd(entries, ModItems.GOLDEN_SYCAMORE_FIG);
