@@ -19,6 +19,7 @@ import com.ancientcurse.network.CurseZonePackets;
 import com.ancientcurse.event.PlayerJoinHandler;
 import com.ancientcurse.event.PathCreationHandler;
 import com.ancientcurse.event.AnimationDebugHandler;
+import com.ancientcurse.event.WaterInteractionHandler;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 // import com.ancientcurse.screen.ModScreenHandlers;
 // import com.ancientcurse.worldgen.ModWorldGen;
@@ -205,6 +206,9 @@ public class AncientCurse implements ModInitializer {
 
         // Register animation debug handler for debug stick
         AnimationDebugHandler.register();
+
+        // Register water interaction handler for water skin refilling
+        WaterInteractionHandler.register();
     }
 
     /**
