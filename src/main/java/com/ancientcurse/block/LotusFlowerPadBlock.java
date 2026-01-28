@@ -52,13 +52,13 @@ public class LotusFlowerPadBlock extends Block {
     
     @Override
     public boolean canPlaceAt(BlockState state, WorldView world, BlockPos pos) {
-        // Can be placed if there's water at this position (floating on water)
-        FluidState fluidState = world.getFluidState(pos);
-        if (fluidState.isOf(Fluids.WATER) && fluidState.getLevel() == 8) {
-            return true;
+        // Must NOT have water above (ensures surface placement only, not underwater)
+        FluidState aboveFluid = world.getFluidState(pos.up());
+        if (aboveFluid.isOf(Fluids.WATER)) {
+            return false;
         }
 
-        // Or if there's water directly below (when placed on seagrass, kelp, etc.)
+        // Must have water below to float on
         FluidState belowFluid = world.getFluidState(pos.down());
         return belowFluid.isOf(Fluids.WATER) && belowFluid.getLevel() == 8;
     }
@@ -68,21 +68,21 @@ public class LotusFlowerPadBlock extends Block {
         World world = ctx.getWorld();
         BlockPos pos = ctx.getBlockPos();
         BlockState blockStateAtPos = world.getBlockState(pos);
-        FluidState fluidState = world.getFluidState(pos);
 
-        // Check if we can place here
-        // Can place if: 1) Position has full water OR 2) Replaceable block with water below
-        boolean canPlace = false;
-        if (fluidState.isOf(Fluids.WATER) && fluidState.getLevel() == 8) {
-            canPlace = true;
-        } else if (blockStateAtPos.isReplaceable() && !blockStateAtPos.isAir()) {
-            FluidState belowFluid = world.getFluidState(pos.down());
-            if (belowFluid.isOf(Fluids.WATER) && belowFluid.getLevel() == 8) {
-                canPlace = true;
-            }
+        // Must NOT have water above (surface placement only)
+        FluidState aboveFluid = world.getFluidState(pos.up());
+        if (aboveFluid.isOf(Fluids.WATER)) {
+            return null;
         }
 
-        if (!canPlace) {
+        // Must have water below to float on
+        FluidState belowFluid = world.getFluidState(pos.down());
+        if (!belowFluid.isOf(Fluids.WATER) || belowFluid.getLevel() != 8) {
+            return null;
+        }
+
+        // Position must be air or replaceable
+        if (!blockStateAtPos.isAir() && !blockStateAtPos.isReplaceable()) {
             return null;
         }
 
@@ -92,10 +92,10 @@ public class LotusFlowerPadBlock extends Block {
     }
     
     @Override
-    public BlockState getStateForNeighborUpdate(BlockState state, Direction direction, BlockState neighborState, 
+    public BlockState getStateForNeighborUpdate(BlockState state, Direction direction, BlockState neighborState,
                                                WorldAccess world, BlockPos pos, BlockPos neighborPos) {
         if (!state.canPlaceAt(world, pos)) {
-            return null;
+            return Blocks.AIR.getDefaultState();
         }
         return state;
     }
