@@ -57,7 +57,7 @@ public class CursedEarthBlock extends BaseAncientCurseBlock {
     private static final int MAX_BLOCKS_PER_CHUNK = 256;
     private static final int MAX_BLOCKS_PER_SECTION = 64;
     private static final int SURFACE_SECTION_BONUS = 32;
-    private static final int SPREAD_COOLDOWN = 100; // 5 seconds - faster for sweeping effect
+    private static final int SPREAD_COOLDOWN = 200; // 10 seconds - slower to reduce map pressure
     private static final int DEATH_BURST_COOLDOWN = 6000; // 5 minutes
     private static final int DEATH_BURST_SIZE = 12; // Diameter of death burst
     private static final float HORIZONTAL_SPREAD_CHANCE = 0.85f; // Strong favor for horizontal spread
@@ -65,14 +65,16 @@ public class CursedEarthBlock extends BaseAncientCurseBlock {
     private static final float BRANCH_CHANCE = 0.45f; // Increased chance to create branching patterns
     private static final float MOMENTUM_BONUS = 0.15f; // Reduced momentum for more variation
     private static final int MAX_BRANCH_LENGTH = 5; // Shorter branches for more spider-webbing
-    private static final float MULTI_SPREAD_CHANCE = 0.25f; // Chance to spread to multiple blocks
+    private static final float MULTI_SPREAD_CHANCE = 0.10f; // Chance to spread to multiple blocks (reduced from 0.25)
     private static final float ROTATION_CHANCE = 0.35f; // Chance to rotate direction
     private static final Vector3f CURSED_PARTICLE_COLOR = new Vector3f(0.4f, 0.1f, 0.5f);
 
     // PERFORMANCE LIMITS for tracking maps
-    private static final int MAX_TRACKED_COOLDOWNS = 2000; // Max entries in cooldown maps
-    private static final int MAX_TRACKED_DIRECTIONS = 1000; // Max entries in spread direction maps
-    private static final int CLEANUP_INTERVAL = 1200; // Clean up every 60 seconds instead of 10 minutes
+    private static final int MAX_TRACKED_COOLDOWNS = 500; // Max entries in cooldown maps (reduced from 2000)
+    private static final int MAX_TRACKED_DIRECTIONS = 250; // Max entries in spread direction maps (reduced from 1000)
+    private static final int CLEANUP_INTERVAL = 6000; // Clean up every 5 minutes (increased from 60 seconds)
+    private static final int TRIM_CHECK_INTERVAL = 600; // Check trim every 30 seconds (instead of 100 ticks)
+    private static long lastTrimLogTime = 0; // Rate limit trim logging
     
     // Leaf decay constants
     private static final int LEAF_WITHER_TIME = 400; // 20 seconds to fully wither (faster to reduce tracking)
@@ -164,8 +166,8 @@ public class CursedEarthBlock extends BaseAncientCurseBlock {
             return; // No spreading, no effects, nothing while cleansing is active
         }
 
-        // Attempt to spread the curse to nearby blocks
-        if (CursedEarthCommand.isEnabled() && random.nextFloat() < 0.3f) {
+        // Attempt to spread the curse to nearby blocks (reduced from 30% to 15%)
+        if (CursedEarthCommand.isEnabled() && random.nextFloat() < 0.15f) {
             attemptSpread(world, pos, random);
         } else if (!CursedEarthCommand.isEnabled() && world.getTime() % 100 == 0) {
             // Log once every 5 seconds if spreading is disabled
@@ -211,11 +213,8 @@ public class CursedEarthBlock extends BaseAncientCurseBlock {
         if (currentTime - spreadCooldowns.getOrDefault(pos, 0L) < SPREAD_COOLDOWN) {
             return;
         }
-        
-        // Update cooldown with variation for organic feel
-        spreadCooldowns.put(pos, currentTime - (random.nextInt(30))); 
-        
-        // Check if we've hit the chunk limit
+
+        // Check if we've hit the chunk limit BEFORE updating cooldown
         ChunkPos chunkPos = new ChunkPos(pos);
         int currentCount = chunkCounts.getOrDefault(chunkPos, 0);
         if (currentCount >= MAX_BLOCKS_PER_CHUNK) {
@@ -387,7 +386,12 @@ public class CursedEarthBlock extends BaseAncientCurseBlock {
                 
                 // Queue the spread
                 CursedEarthManager.getInstance().queueSpread(world, pos, candidate.pos, targetState);
-                
+
+                // Update cooldown NOW that we're actually spreading
+                if (spreadsThisTick == 0) {
+                    spreadCooldowns.put(pos, currentTime - (random.nextInt(30)));
+                }
+
                 // Update tracking
                 chunkCounts.put(chunkPos, currentCount + spreadsThisTick + 1);
                 
@@ -1710,33 +1714,35 @@ public class CursedEarthBlock extends BaseAncientCurseBlock {
             }
         }
 
-        // Force trim maps if they get too large (check every 100 ticks for responsiveness)
-        if (currentTime % 100 == 0) {
-            trimTrackingMapsIfNeeded();
+        // Force trim maps if they get too large (check every 30 seconds)
+        if (currentTime % TRIM_CHECK_INTERVAL == 0) {
+            trimTrackingMapsIfNeeded(currentTime);
         }
     }
 
     /**
      * Trim tracking maps if they exceed size limits - prevents memory bloat
+     * Now with rate-limited logging to prevent log spam
      */
-    private static void trimTrackingMapsIfNeeded() {
-        // Trim cooldowns map
+    private static void trimTrackingMapsIfNeeded(long currentTime) {
+        boolean didTrim = false;
+
+        // Trim cooldowns map - be more aggressive with removal
         if (spreadCooldowns.size() > MAX_TRACKED_COOLDOWNS) {
-            // Remove oldest 25% of entries
-            int toRemove = spreadCooldowns.size() / 4;
+            // Remove oldest 50% of entries (more aggressive)
+            int toRemove = spreadCooldowns.size() / 2;
             List<Map.Entry<BlockPos, Long>> sorted = new ArrayList<>(spreadCooldowns.entrySet());
             sorted.sort(Map.Entry.comparingByValue());
             for (int i = 0; i < toRemove && i < sorted.size(); i++) {
                 spreadCooldowns.remove(sorted.get(i).getKey());
             }
-            AncientCurse.LOGGER.info("Trimmed spreadCooldowns map from {} to {} entries",
-                spreadCooldowns.size() + toRemove, spreadCooldowns.size());
+            didTrim = true;
         }
 
-        // Trim direction tracking maps
+        // Trim direction tracking maps - be more aggressive
         if (spreadDirections.size() > MAX_TRACKED_DIRECTIONS) {
-            // Just clear the oldest entries - spread directions are less critical
-            int toRemove = spreadDirections.size() / 4;
+            // Remove 50% of entries
+            int toRemove = spreadDirections.size() / 2;
             int removed = 0;
             Iterator<BlockPos> iter = spreadDirections.keySet().iterator();
             while (iter.hasNext() && removed < toRemove) {
@@ -1746,18 +1752,24 @@ public class CursedEarthBlock extends BaseAncientCurseBlock {
                 spreadOrigins.remove(pos);
                 removed++;
             }
-            AncientCurse.LOGGER.info("Trimmed spread direction maps, removed {} entries", removed);
+            didTrim = true;
         }
 
         // Trim death burst cooldowns
-        if (deathBurstCooldowns.size() > 500) {
+        if (deathBurstCooldowns.size() > 100) {
             deathBurstCooldowns.clear();
-            AncientCurse.LOGGER.debug("Cleared death burst cooldowns map");
         }
 
         // Trim player exposure map
-        if (playerExposureTime.size() > 100) {
+        if (playerExposureTime.size() > 50) {
             playerExposureTime.clear();
+        }
+
+        // Only log trim operations once per minute max
+        if (didTrim && currentTime - lastTrimLogTime > 1200) {
+            lastTrimLogTime = currentTime;
+            AncientCurse.LOGGER.debug("Trimmed cursed earth tracking maps - cooldowns: {}, directions: {}",
+                spreadCooldowns.size(), spreadDirections.size());
         }
     }
     
