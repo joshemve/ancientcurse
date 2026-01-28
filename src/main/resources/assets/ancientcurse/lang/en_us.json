@@ -446,5 +446,11 @@
   "block.ancientcurse.sekhem_cactus": "Sekhem Cactus",
   "entity.ancientcurse.hyena": "Hyena",
   "item.ancientcurse.hyena_spawn_egg": "Hyena Spawn Egg",
-  "item.ancientcurse.hyena_spawn_egg.tooltip": "Summon a wild desert hyena - can be tamed with bones"
+  "item.ancientcurse.hyena_spawn_egg.tooltip": "Summon a wild desert hyena - can be tamed with bones",
+  "item.ancientcurse.water_skin": "Water Skin",
+  "item.ancientcurse.water_skin.tooltip": "A leather pouch to carry water in the desert",
+  "item.ancientcurse.water_skin.tooltip1": "Right-click to drink and restore thirst",
+  "item.ancientcurse.water_skin.tooltip2": "Refill by right-clicking water sources",
+  "item.ancientcurse.tome_of_ancient_knowledge": "Tome of Ancient Knowledge",
+  "item.ancientcurse.tome_of_ancient_knowledge.tooltip": "A guidebook containing wisdom of the ancients"
 }
