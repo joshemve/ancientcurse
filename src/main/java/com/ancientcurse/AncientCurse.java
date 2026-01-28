@@ -4,6 +4,7 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.world.World;
+import net.minecraft.server.world.ServerWorld;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.bernie.geckolib.GeckoLib;
@@ -186,6 +187,11 @@ public class AncientCurse implements ModInitializer {
             com.ancientcurse.system.JackelBindsBreakoutManager.getInstance().tick(currentTime);
             for (var player : server.getPlayerManager().getPlayerList()) {
                 com.ancientcurse.item.armor.JackelBindsItem.applyBindEffects(player);
+            }
+
+            // Tick Blood Water plague in every world
+            for (ServerWorld world : server.getWorlds()) {
+                com.ancientcurse.system.BloodWaterData.getServerState(world).tick(world);
             }
         });
 

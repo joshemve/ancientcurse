@@ -44,7 +44,7 @@ import java.util.List;
 public class WarAxeOfAbydosItem extends AxeItem implements GeoItem {
     private AnimatableInstanceCache cache = new SingletonAnimatableInstanceCache(this);
     private final java.util.function.Supplier<Object> renderProvider = GeoItem.makeRenderer(this);
-    private static final int EXECUTIONER_STRIKE_COOLDOWN = 1; // 1 tick for testing (was 300 = 15 seconds)
+    private static final int EXECUTIONER_STRIKE_COOLDOWN = 40; // 2 seconds - enough for animation to complete
     private static final float SPIN_ATTACK_DAMAGE = 15.0F;
     private static final float UNDEAD_DAMAGE_MULTIPLIER = 1.75F;
     

@@ -53,16 +53,20 @@ import software.bernie.geckolib.util.GeckoLibUtil;
 public class HyenaEntity extends TameableEntity implements GeoEntity {
 
     // Animation timing constants (derived from animation JSON)
-    private static final int ATTACK_DURATION_TICKS = 8;  // 0.375s * 20
-    private static final int ATTACK_DAMAGE_TICK = 4;     // Deal damage at ~0.2s into animation
-    private static final int ATTACK_COOLDOWN_EXTRA = 5;  // Extra ticks after animation for recovery
-    private static final int SIT_TRANSITION_TICKS = 10;  // 0.5s * 20
+    private static final int ATTACK_DURATION_TICKS = 8; // 0.375s * 20
+    private static final int ATTACK_DAMAGE_TICK = 4; // Deal damage at ~0.2s into animation
+    private static final int ATTACK_COOLDOWN_EXTRA = 5; // Extra ticks after animation for recovery
+    private static final int SIT_TRANSITION_TICKS = 10; // 0.5s * 20
 
     // Tracked data for client/server sync
-    private static final TrackedData<Boolean> ATTACKING = DataTracker.registerData(HyenaEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
-    private static final TrackedData<Integer> ATTACK_COOLDOWN = DataTracker.registerData(HyenaEntity.class, TrackedDataHandlerRegistry.INTEGER);
-    private static final TrackedData<Integer> VARIANT = DataTracker.registerData(HyenaEntity.class, TrackedDataHandlerRegistry.INTEGER);
-    private static final TrackedData<Integer> SIT_TRANSITION_TIMER = DataTracker.registerData(HyenaEntity.class, TrackedDataHandlerRegistry.INTEGER);
+    private static final TrackedData<Boolean> ATTACKING = DataTracker.registerData(HyenaEntity.class,
+            TrackedDataHandlerRegistry.BOOLEAN);
+    private static final TrackedData<Integer> ATTACK_COOLDOWN = DataTracker.registerData(HyenaEntity.class,
+            TrackedDataHandlerRegistry.INTEGER);
+    private static final TrackedData<Integer> VARIANT = DataTracker.registerData(HyenaEntity.class,
+            TrackedDataHandlerRegistry.INTEGER);
+    private static final TrackedData<Integer> SIT_TRANSITION_TIMER = DataTracker.registerData(HyenaEntity.class,
+            TrackedDataHandlerRegistry.INTEGER);
 
     // GeckoLib animation cache
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
@@ -113,11 +117,14 @@ public class HyenaEntity extends TameableEntity implements GeoEntity {
 
     @Override
     public EntityData initialize(ServerWorldAccess world, LocalDifficulty difficulty, SpawnReason spawnReason,
-                                 EntityData entityData, NbtCompound entityNbt) {
+            EntityData entityData, NbtCompound entityNbt) {
         entityData = super.initialize(world, difficulty, spawnReason, entityData, entityNbt);
 
-        // Randomly assign a texture variant on spawn
-        this.setVariant(this.random.nextInt(VARIANT_COUNT));
+        // Only assign random variant if NOT spawning from breeding (parents pass it
+        // down)
+        if (spawnReason != SpawnReason.BREEDING) {
+            this.setVariant(this.random.nextInt(VARIANT_COUNT));
+        }
 
         return entityData;
     }
@@ -182,7 +189,8 @@ public class HyenaEntity extends TameableEntity implements GeoEntity {
     /* ---------- COMBAT ---------- */
     @Override
     public boolean tryAttack(net.minecraft.entity.Entity target) {
-        if (this.dataTracker.get(ATTACK_COOLDOWN) > 0) return false;
+        if (this.dataTracker.get(ATTACK_COOLDOWN) > 0)
+            return false;
 
         // Start attack animation
         this.dataTracker.set(ATTACK_COOLDOWN, ATTACK_DURATION_TICKS + ATTACK_COOLDOWN_EXTRA);
@@ -255,10 +263,10 @@ public class HyenaEntity extends TameableEntity implements GeoEntity {
                     this.playSound(SoundEvents.ENTITY_GENERIC_EAT, 1.0f, 1.0f);
                     return ActionResult.SUCCESS;
                 }
-                // Fall through to toggle sitting if at full health
             }
 
-            // Toggle sitting (works with empty hand or any non-consumed item)
+            // Toggle sitting (standard wolf behavior)
+            // Works with empty hand or non-food item
             boolean newSitting = !this.isSitting();
             this.setSitting(newSitting);
             if (newSitting) {
@@ -340,8 +348,7 @@ public class HyenaEntity extends TameableEntity implements GeoEntity {
     private <T extends GeoAnimatable> PlayState animationPredicate(AnimationState<T> state) {
         // Priority 1: Death animation
         if (this.isDead()) {
-            state.getController().setAnimation(ANIM_IDLE);
-            return PlayState.CONTINUE;
+            return PlayState.STOP;
         }
 
         // Priority 2: Attack animation - check both flag AND cooldown for reliability
@@ -353,23 +360,18 @@ public class HyenaEntity extends TameableEntity implements GeoEntity {
         }
 
         // Priority 3: Sitting animations (tamed only)
+        // Always use ANIM_SIT_THEN_IDLE - GeckoLib will play sit once then loop
+        // idle_sitting
         if (this.isTamed() && this.isSitting()) {
-            int sitTimer = this.dataTracker.get(SIT_TRANSITION_TIMER);
-            if (sitTimer > 0) {
-                // During transition: play sit animation then chain to idle_sitting
-                state.getController().setAnimation(ANIM_SIT_THEN_IDLE);
-            } else {
-                // After transition: just loop idle_sitting (prevents restart)
-                state.getController().setAnimation(ANIM_IDLE_SITTING);
-            }
+            state.getController().setAnimation(ANIM_SIT_THEN_IDLE);
             return PlayState.CONTINUE;
         }
 
         // Priority 4: Movement animations
         if (state.isMoving()) {
-            // Use run animation if chasing a target OR moving fast
-            // Checking target is more reliable than velocity for chase detection
-            if (this.getTarget() != null) {
+            double horizontalSpeed = Math
+                    .sqrt(this.getVelocity().x * this.getVelocity().x + this.getVelocity().z * this.getVelocity().z);
+            if (horizontalSpeed > 0.1) {
                 state.getController().setAnimation(ANIM_RUN);
             } else {
                 state.getController().setAnimation(ANIM_WALK);
@@ -392,10 +394,13 @@ public class HyenaEntity extends TameableEntity implements GeoEntity {
     public HyenaEntity createChild(ServerWorld world, PassiveEntity mate) {
         HyenaEntity baby = com.ancientcurse.ModEntities.HYENA.create(world);
         if (baby != null) {
+            baby.setBaby(true); // Ensure they are born as babies
+
             // Inherit variant from one parent randomly
             if (mate instanceof HyenaEntity hyenaMate) {
                 baby.setVariant(this.random.nextBoolean() ? this.getVariant() : hyenaMate.getVariant());
             }
+
             // Inherit owner if parents are tamed
             if (this.isTamed()) {
                 baby.setOwnerUuid(this.getOwnerUuid());

@@ -96,6 +96,12 @@ public class ModSounds {
     // Zulmak - Ambient Loop (spinning blocks vortex)
     public static final SoundEvent ZULMAK_VORTEX_WIND_LOOP = registerSoundEvent("zulmak_vortex_wind_loop");
 
+    // Ra Sound Events
+    public static final SoundEvent RA_FLYING_GROUND_SMACK = registerSoundEvent("ra_flying_ground_smack");
+    public static final SoundEvent RA_HURT = registerSoundEvent("ra_hurt");
+    public static final SoundEvent RA_AMBIENCE = registerSoundEvent("ra_ambience");
+    public static final SoundEvent RA_FLYING_AMBIENCE = registerSoundEvent("ra_flying_ambience");
+
     // Withered Pharaoh Sound Events
     public static final SoundEvent WITHERED_PHARAOH_SUSPENSE = registerSoundEvent("withered_pharaoh_suspense");
     public static final SoundEvent WITHERED_PHARAOH_GRUMBLE = registerSoundEvent("withered_pharaoh_grumble");

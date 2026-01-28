@@ -21,10 +21,13 @@ import java.util.Map;
 import java.util.UUID;
 
 /**
- * Server-side persistent state for the Blood Water plague event (1st Plague of Egypt).
+ * Server-side persistent state for the Blood Water plague event (1st Plague of
+ * Egypt).
  *
- * "The LORD said to Moses, 'Tell Aaron, Take your staff and stretch out your hand
- * over the waters of Egypt... and they will turn to blood. Blood will be everywhere
+ * "The LORD said to Moses, 'Tell Aaron, Take your staff and stretch out your
+ * hand
+ * over the waters of Egypt... and they will turn to blood. Blood will be
+ * everywhere
  * in Egypt, even in vessels of wood and stone.'" - Exodus 7:19-20
  *
  * When active:
@@ -44,16 +47,15 @@ public class BloodWaterData extends PersistentState {
 
     // Custom damage type for blood water
     public static final RegistryKey<DamageType> BLOOD_WATER_DAMAGE = RegistryKey.of(
-        RegistryKeys.DAMAGE_TYPE,
-        new Identifier(AncientCurse.MOD_ID, "blood_water")
-    );
+            RegistryKeys.DAMAGE_TYPE,
+            new Identifier(AncientCurse.MOD_ID, "blood_water"));
 
-    // Track cursed players and their linger timers (not persisted - runtime only)
-    private transient Map<UUID, Integer> cursedPlayers = new HashMap<>();
-    private transient Map<UUID, Integer> playerDamageTimers = new HashMap<>();
-    private transient Map<UUID, Integer> playerLingerTimers = new HashMap<>();
-    private transient Map<UUID, Integer> playerImmunityTimers = new HashMap<>();
-    private transient int tickCounter = 0;
+    // Track cursed players and their linger timers
+    private Map<UUID, Integer> cursedPlayers = new HashMap<>();
+    private Map<UUID, Integer> playerDamageTimers = new HashMap<>();
+    private Map<UUID, Integer> playerLingerTimers = new HashMap<>();
+    private Map<UUID, Integer> playerImmunityTimers = new HashMap<>();
+    private int tickCounter = 0;
 
     public BloodWaterData() {
         this.cursedPlayers = new HashMap<>();
@@ -64,10 +66,9 @@ public class BloodWaterData extends PersistentState {
 
     public static BloodWaterData getServerState(ServerWorld world) {
         return world.getPersistentStateManager().getOrCreate(
-            BloodWaterData::readNbt,
-            BloodWaterData::new,
-            KEY
-        );
+                BloodWaterData::readNbt,
+                BloodWaterData::new,
+                KEY);
     }
 
     public static BloodWaterData readNbt(NbtCompound nbt) {
@@ -75,7 +76,33 @@ public class BloodWaterData extends PersistentState {
         data.active = nbt.getBoolean("active");
         data.duration = nbt.getInt("duration");
         data.intensity = nbt.getFloat("intensity");
+
+        // Read maps
+        if (nbt.contains("cursedPlayers")) {
+            readMapFromNbt(nbt.getCompound("cursedPlayers"), data.cursedPlayers);
+        }
+        if (nbt.contains("playerDamageTimers")) {
+            readMapFromNbt(nbt.getCompound("playerDamageTimers"), data.playerDamageTimers);
+        }
+        if (nbt.contains("playerLingerTimers")) {
+            readMapFromNbt(nbt.getCompound("playerLingerTimers"), data.playerLingerTimers);
+        }
+        if (nbt.contains("playerImmunityTimers")) {
+            readMapFromNbt(nbt.getCompound("playerImmunityTimers"), data.playerImmunityTimers);
+        }
+
         return data;
+    }
+
+    private static void readMapFromNbt(NbtCompound compound, Map<UUID, Integer> map) {
+        for (String key : compound.getKeys()) {
+            try {
+                UUID uuid = UUID.fromString(key);
+                int value = compound.getInt(key);
+                map.put(uuid, value);
+            } catch (IllegalArgumentException ignored) {
+            }
+        }
     }
 
     @Override
@@ -83,7 +110,20 @@ public class BloodWaterData extends PersistentState {
         nbt.putBoolean("active", active);
         nbt.putInt("duration", duration);
         nbt.putFloat("intensity", intensity);
+
+        // Write maps
+        nbt.put("cursedPlayers", writeMapToNbt(cursedPlayers));
+        nbt.put("playerDamageTimers", writeMapToNbt(playerDamageTimers));
+        nbt.put("playerLingerTimers", writeMapToNbt(playerLingerTimers));
+        nbt.put("playerImmunityTimers", writeMapToNbt(playerImmunityTimers));
+
         return nbt;
+    }
+
+    private NbtCompound writeMapToNbt(Map<UUID, Integer> map) {
+        NbtCompound compound = new NbtCompound();
+        map.forEach((uuid, value) -> compound.putInt(uuid.toString(), value));
+        return compound;
     }
 
     /**
@@ -284,8 +324,12 @@ public class BloodWaterData extends PersistentState {
         }
 
         if (damage > 0) {
-            // Use generic magic damage - the blood water damage type would need to be registered
-            player.damage(player.getDamageSources().magic(), damage);
+            // Use custom blood water damage type
+            DamageSource source = new DamageSource(
+                    player.getWorld().getRegistryManager()
+                            .get(RegistryKeys.DAMAGE_TYPE)
+                            .entryOf(BLOOD_WATER_DAMAGE));
+            player.damage(source, damage);
         }
     }
 
@@ -296,37 +340,35 @@ public class BloodWaterData extends PersistentState {
         // Apply nausea
         if (config.isApplyNausea()) {
             player.addStatusEffect(new StatusEffectInstance(
-                StatusEffects.NAUSEA,
-                config.getNauseaDuration(),
-                config.getNauseaAmplifier(),
-                false, // ambient
-                false, // show particles
-                true   // show icon
+                    StatusEffects.NAUSEA,
+                    config.getNauseaDuration(),
+                    config.getNauseaAmplifier(),
+                    false, // ambient
+                    false, // show particles
+                    true // show icon
             ));
         }
 
         // Apply poison
         if (config.isApplyPoison()) {
             player.addStatusEffect(new StatusEffectInstance(
-                StatusEffects.POISON,
-                config.getPoisonDuration(),
-                config.getPoisonAmplifier(),
-                false,
-                true,
-                true
-            ));
+                    StatusEffects.POISON,
+                    config.getPoisonDuration(),
+                    config.getPoisonAmplifier(),
+                    false,
+                    true,
+                    true));
         }
 
         // Apply hunger
         if (config.isApplyHunger()) {
             player.addStatusEffect(new StatusEffectInstance(
-                StatusEffects.HUNGER,
-                config.getHungerDuration(),
-                config.getHungerAmplifier(),
-                false,
-                false,
-                true
-            ));
+                    StatusEffects.HUNGER,
+                    config.getHungerDuration(),
+                    config.getHungerAmplifier(),
+                    false,
+                    false,
+                    true));
         }
     }
 
@@ -358,7 +400,8 @@ public class BloodWaterData extends PersistentState {
 
     /**
      * Start the blood water event
-     * @param world The server world
+     * 
+     * @param world         The server world
      * @param durationTicks Duration in ticks, or -1 for infinite
      */
     public void start(ServerWorld world, int durationTicks) {
@@ -370,7 +413,7 @@ public class BloodWaterData extends PersistentState {
         BloodWaterPackets.sendSyncPacket(world, this);
 
         AncientCurse.LOGGER.info("Blood Water plague started" +
-            (durationTicks > 0 ? " for " + (durationTicks / 20) + " seconds" : " indefinitely"));
+                (durationTicks > 0 ? " for " + (durationTicks / 20) + " seconds" : " indefinitely"));
     }
 
     /**
@@ -418,7 +461,8 @@ public class BloodWaterData extends PersistentState {
     }
 
     /**
-     * Check if the blood water effect is having any visible effect (active or fading)
+     * Check if the blood water effect is having any visible effect (active or
+     * fading)
      */
     public boolean hasEffect() {
         return intensity > 0.01f;

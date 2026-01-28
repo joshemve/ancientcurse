@@ -314,10 +314,6 @@ public class ModItems {
         public static final com.ancientcurse.item.WaterSkinItem WATER_SKIN =
                         new com.ancientcurse.item.WaterSkinItem(new FabricItemSettings());
 
-        // Tome of Ancient Knowledge - Guide book for the mod
-        public static final com.ancientcurse.item.TomeOfAncientKnowledgeItem TOME_OF_ANCIENT_KNOWLEDGE =
-                        new com.ancientcurse.item.TomeOfAncientKnowledgeItem(new FabricItemSettings().maxCount(1));
-
         /**
          * Registers all mod items
          */
@@ -704,11 +700,5 @@ public class ModItems {
                                 Registries.ITEM,
                                 new Identifier(AncientCurse.MOD_ID, "water_skin"),
                                 WATER_SKIN);
-
-                // Register Tome of Ancient Knowledge
-                Registry.register(
-                                Registries.ITEM,
-                                new Identifier(AncientCurse.MOD_ID, "tome_of_ancient_knowledge"),
-                                TOME_OF_ANCIENT_KNOWLEDGE);
         }
 }

@@ -2,12 +2,14 @@ package com.ancientcurse.entity.ai;
 
 import com.ancientcurse.entity.RaEntity;
 import com.ancientcurse.entity.RaEntity.RaPhase;
+import com.ancientcurse.ModSounds;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.goal.Goal;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
@@ -108,6 +110,19 @@ public class RaGroundSmackGoal extends Goal {
         animationTicks = GROUND_SMACK_DURATION;
         hasDealtDamage = false;
 
+        // Play ground smack sound with slight pitch variation (0.9 - 1.1)
+        // Use world.playSound for wider broadcast (null player = all players hear it)
+        // Volume 2.0+ ensures sound carries far and plays fully without distance cutoff
+        float pitchVariation = 0.9f + ra.getRandom().nextFloat() * 0.2f;
+        ra.getWorld().playSound(
+                null, // null = broadcast to all players
+                ra.getX(), ra.getY(), ra.getZ(),
+                ModSounds.RA_FLYING_GROUND_SMACK,
+                SoundCategory.HOSTILE,
+                2.5f, // High volume for boss attack - ensures full audibility
+                pitchVariation
+        );
+
         // Stop all movement - Ra should be stationary during ground smack
         ra.setVelocity(0, 0, 0);
         ra.getNavigation().stop();
@@ -135,6 +150,18 @@ public class RaGroundSmackGoal extends Goal {
         animationTicks = GROUND_SMACK_DURATION;
         hasDealtDamage = false;
         cooldown = 0; // Reset cooldown so it can trigger
+
+        // Play ground smack sound with slight pitch variation (0.9 - 1.1)
+        // Use world.playSound for wider broadcast
+        float pitchVariation = 0.9f + ra.getRandom().nextFloat() * 0.2f;
+        ra.getWorld().playSound(
+                null,
+                ra.getX(), ra.getY(), ra.getZ(),
+                ModSounds.RA_FLYING_GROUND_SMACK,
+                SoundCategory.HOSTILE,
+                2.5f,
+                pitchVariation
+        );
 
         // Look at target if available
         if (ra.getTarget() != null) {

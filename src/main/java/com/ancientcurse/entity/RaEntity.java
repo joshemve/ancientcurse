@@ -1,6 +1,7 @@
 package com.ancientcurse.entity;
 
 import com.ancientcurse.ModItems;
+import com.ancientcurse.ModSounds;
 import com.ancientcurse.entity.ai.RaFlightGoal;
 import com.ancientcurse.entity.ai.RaFlyingStaffAttackGoal;
 import com.ancientcurse.entity.ai.RaGroundSmackGoal;
@@ -192,6 +193,14 @@ public class RaEntity extends HostileEntity implements GeoEntity {
     // Hibernation (stun) state
     private int hibernationTicks = 0;
     private static final int BASE_HIBERNATION_DURATION = 400; // 20 seconds base
+
+    // Ambient sound management
+    // Sound durations approximated from file sizes - adjust if sounds pop
+    private static final int AMBIENT_SOUND_INTERVAL = 300; // ~15 seconds (restart before sound ends)
+    private static final int FLYING_AMBIENT_SOUND_INTERVAL = 140; // ~7 seconds
+    private int ambientSoundTimer = 0;
+    private int flyingAmbientSoundTimer = 0;
+    private boolean wasFlying = false;
 
     /*
      * ========== ANIMATION DURATIONS ==========
@@ -462,7 +471,55 @@ public class RaEntity extends HostileEntity implements GeoEntity {
             if (isFlying()) {
                 tickFlight();
             }
+
+            // Handle ambient sounds (server-side)
+            tickAmbientSounds();
         }
+    }
+
+    /**
+     * Manage looping ambient sounds.
+     * Plays base ambience continuously, layers flying ambience when airborne.
+     */
+    private void tickAmbientSounds() {
+        // Don't play ambient sounds while hibernating or dying
+        if (isHibernating() || getCombatState() == RaCombatState.DYING) {
+            return;
+        }
+
+        // Base ambient sound - always playing, loops seamlessly
+        ambientSoundTimer--;
+        if (ambientSoundTimer <= 0) {
+            // Play with slight pitch variation to avoid monotony
+            float pitch = 0.95f + this.random.nextFloat() * 0.1f;
+            this.playSound(ModSounds.RA_AMBIENCE, 0.6f, pitch);
+            ambientSoundTimer = AMBIENT_SOUND_INTERVAL;
+        }
+
+        // Flying ambient sound - layered on top when flying
+        boolean currentlyFlying = isFlying();
+
+        // Start flying ambience immediately when taking off
+        if (currentlyFlying && !wasFlying) {
+            float pitch = 0.95f + this.random.nextFloat() * 0.1f;
+            this.playSound(ModSounds.RA_FLYING_AMBIENCE, 0.8f, pitch);
+            flyingAmbientSoundTimer = FLYING_AMBIENT_SOUND_INTERVAL;
+        }
+
+        // Continue looping flying ambience while airborne
+        if (currentlyFlying) {
+            flyingAmbientSoundTimer--;
+            if (flyingAmbientSoundTimer <= 0) {
+                float pitch = 0.95f + this.random.nextFloat() * 0.1f;
+                this.playSound(ModSounds.RA_FLYING_AMBIENCE, 0.8f, pitch);
+                flyingAmbientSoundTimer = FLYING_AMBIENT_SOUND_INTERVAL;
+            }
+        } else {
+            // Reset timer when landing so it plays immediately on next takeoff
+            flyingAmbientSoundTimer = 0;
+        }
+
+        wasFlying = currentlyFlying;
     }
 
     /**
@@ -1092,7 +1149,16 @@ public class RaEntity extends HostileEntity implements GeoEntity {
     /* ========== SOUNDS ========== */
     @Override
     protected SoundEvent getHurtSound(DamageSource source) {
-        return SoundEvents.ENTITY_GENERIC_HURT;
+        // Uses ra_hurt sound event which randomly selects from ra_hurt_1, ra_hurt_2, ra_hurt_3
+        // Each with pitch variants 0.9, 1.0, 1.1 defined in sounds.json
+        return ModSounds.RA_HURT;
+    }
+
+    @Override
+    protected void playHurtSound(DamageSource source) {
+        // Add additional slight pitch variation on top of sounds.json variants
+        float pitchVariation = 0.95f + this.random.nextFloat() * 0.1f;
+        this.playSound(this.getHurtSound(source), this.getSoundVolume(), pitchVariation);
     }
 
     @Override

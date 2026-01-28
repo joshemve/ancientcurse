@@ -69,8 +69,9 @@ public class PistiaStratiotesBlock extends Block {
             return true;
         }
 
-        // Check for waterlogged blocks (slabs, stairs, etc. with water)
-        if (belowState.getFluidState().isOf(Fluids.WATER) && belowState.getFluidState().isStill()) {
+        // Check for any waterlogged blocks (seagrass, kelp, slabs, etc.)
+        // Level 8 is a full water block (source-like) in waterlogged contexts
+        if (belowFluid.isOf(Fluids.WATER) && belowFluid.getLevel() == 8) {
             return true;
         }
 

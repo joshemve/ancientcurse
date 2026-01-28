@@ -734,5 +734,87 @@
         "pitch": 1.1
       }
     ]
+  },
+  "ra_flying_ground_smack": {
+    "subtitle": "subtitles.ancientcurse.ra_ground_smack",
+    "sounds": [
+      {
+        "name": "ancientcurse:ra/ra_flying_ground_smack",
+        "volume": 1.5,
+        "pitch": 1.0
+      }
+    ]
+  },
+  "ra_hurt": {
+    "subtitle": "subtitles.ancientcurse.ra_hurt",
+    "sounds": [
+      {
+        "name": "ancientcurse:ra/ra_hurt_1",
+        "volume": 1.0,
+        "pitch": 0.9
+      },
+      {
+        "name": "ancientcurse:ra/ra_hurt_1",
+        "volume": 1.0,
+        "pitch": 1.0
+      },
+      {
+        "name": "ancientcurse:ra/ra_hurt_1",
+        "volume": 1.0,
+        "pitch": 1.1
+      },
+      {
+        "name": "ancientcurse:ra/ra_hurt_2",
+        "volume": 1.0,
+        "pitch": 0.9
+      },
+      {
+        "name": "ancientcurse:ra/ra_hurt_2",
+        "volume": 1.0,
+        "pitch": 1.0
+      },
+      {
+        "name": "ancientcurse:ra/ra_hurt_2",
+        "volume": 1.0,
+        "pitch": 1.1
+      },
+      {
+        "name": "ancientcurse:ra/ra_hurt_3",
+        "volume": 1.0,
+        "pitch": 0.9
+      },
+      {
+        "name": "ancientcurse:ra/ra_hurt_3",
+        "volume": 1.0,
+        "pitch": 1.0
+      },
+      {
+        "name": "ancientcurse:ra/ra_hurt_3",
+        "volume": 1.0,
+        "pitch": 1.1
+      }
+    ]
+  },
+  "ra_ambience": {
+    "subtitle": "subtitles.ancientcurse.ra_ambience",
+    "sounds": [
+      {
+        "name": "ancientcurse:ra/ra_ambience",
+        "volume": 1.0,
+        "pitch": 1.0,
+        "stream": true
+      }
+    ]
+  },
+  "ra_flying_ambience": {
+    "subtitle": "subtitles.ancientcurse.ra_flying_ambience",
+    "sounds": [
+      {
+        "name": "ancientcurse:ra/ra__flying_ambience",
+        "volume": 1.0,
+        "pitch": 1.0,
+        "stream": true
+      }
+    ]
   }
 }

@@ -48,11 +48,15 @@ public class PlayerAnimationHandler {
                     if (animation != null) {
                         AncientCurse.LOGGER.info("[PlayerAnimation] Animation found! Setting animation on layer...");
 
+                        // Stop any currently playing animation first to ensure clean transition
+                        animationLayer.setAnimation(null);
+
                         // Create animation player
                         // The animation JSON now ends at 0° rotation (same as default pose)
                         // This prevents the reverse spin that was caused by -360° → 0° interpolation
                         KeyframeAnimationPlayer animPlayer = new KeyframeAnimationPlayer(animation);
-                        animPlayer.setFirstPersonMode(dev.kosmx.playerAnim.api.firstPerson.FirstPersonMode.DISABLED);
+                        // Use THIRD_PERSON_MODEL so player can see their own animation in F5 view
+                        animPlayer.setFirstPersonMode(dev.kosmx.playerAnim.api.firstPerson.FirstPersonMode.THIRD_PERSON_MODEL);
                         animationLayer.setAnimation(animPlayer);
 
                         AncientCurse.LOGGER.info("[PlayerAnimation] SUCCESS - Animation " + animationId + " is now playing on " + player.getName().getString());

@@ -47,7 +47,6 @@ public class ModItemGroup {
 
                         // Survival items
                         safeAdd(entries, ModItems.WATER_SKIN);
-                        safeAdd(entries, ModItems.TOME_OF_ANCIENT_KNOWLEDGE);
 
                         // Food items
                         safeAdd(entries, ModItems.SYCAMORE_FIG);

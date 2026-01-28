@@ -48,9 +48,9 @@ public class BloodWaterClientHandler {
      * Called when receiving main sync packet from server
      */
     public static void update(boolean serverActive, float serverIntensity, int serverRemainingSeconds,
-                               boolean serverCurseEnabled, boolean serverShowCurseOverlay,
-                               float serverOverlayAlpha, boolean serverShowCurseTimer,
-                               boolean serverShowDamageFlash) {
+            boolean serverCurseEnabled, boolean serverShowCurseOverlay,
+            float serverOverlayAlpha, boolean serverShowCurseTimer,
+            boolean serverShowDamageFlash) {
         boolean stateChanged = (active != serverActive);
         boolean intensityJump = Math.abs(currentIntensity - serverIntensity) > 0.3f;
         active = serverActive;
@@ -68,7 +68,8 @@ public class BloodWaterClientHandler {
         showCurseTimer = serverShowCurseTimer;
         showDamageFlash = serverShowDamageFlash;
 
-        // Trigger chunk reload on state change or big intensity jump (e.g., player just joined)
+        // Trigger chunk reload on state change or big intensity jump (e.g., player just
+        // joined)
         if ((stateChanged || intensityJump) && reloadCooldown <= 0) {
             // Schedule delayed reload to ensure chunks are loaded
             pendingReloadDelay = 20; // 1 second delay
@@ -105,11 +106,10 @@ public class BloodWaterClientHandler {
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.player != null) {
             client.player.playSound(
-                SoundEvents.ENTITY_PLAYER_HURT,
-                SoundCategory.PLAYERS,
-                0.5f,
-                0.8f + client.world.random.nextFloat() * 0.2f
-            );
+                    SoundEvents.ENTITY_PLAYER_HURT,
+                    SoundCategory.PLAYERS,
+                    0.5f,
+                    0.8f + client.world.random.nextFloat() * 0.2f);
         }
     }
 
@@ -120,11 +120,10 @@ public class BloodWaterClientHandler {
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.player != null) {
             client.player.playSound(
-                SoundEvents.AMBIENT_CAVE.value(),
-                SoundCategory.AMBIENT,
-                0.6f,
-                0.5f
-            );
+                    SoundEvents.AMBIENT_CAVE.value(),
+                    SoundCategory.AMBIENT,
+                    0.6f,
+                    0.5f);
         }
     }
 
@@ -245,7 +244,8 @@ public class BloodWaterClientHandler {
     }
 
     public static float getDamageFlashAlpha() {
-        if (damageFlashTimer <= 0 || !showDamageFlash) return 0;
+        if (damageFlashTimer <= 0 || !showDamageFlash)
+            return 0;
         return (damageFlashTimer / 10.0f) * 0.6f;
     }
 
@@ -290,21 +290,26 @@ public class BloodWaterClientHandler {
         int origB = originalColor & 0xFF;
 
         // Blood color in 0-255 range
-        int bloodR = (int)(BLOOD_RED * 255);
-        int bloodG = (int)(BLOOD_GREEN * 255);
-        int bloodB = (int)(BLOOD_BLUE * 255);
+        int bloodR = (int) (BLOOD_RED * 255);
+        int bloodG = (int) (BLOOD_GREEN * 255);
+        int bloodB = (int) (BLOOD_BLUE * 255);
 
         // Lerp between original and blood color based on intensity
-        int newR = (int)(origR * (1 - intensity) + bloodR * intensity);
-        int newG = (int)(origG * (1 - intensity) + bloodG * intensity);
-        int newB = (int)(origB * (1 - intensity) + bloodB * intensity);
+        int newR = (int) (origR * (1 - intensity) + bloodR * intensity);
+        int newG = (int) (origG * (1 - intensity) + bloodG * intensity);
+        int newB = (int) (origB * (1 - intensity) + bloodB * intensity);
 
         // Clamp values
         newR = Math.min(255, Math.max(0, newR));
         newG = Math.min(255, Math.max(0, newG));
         newB = Math.min(255, Math.max(0, newB));
 
-        return (newR << 16) | (newG << 8) | newB;
+        // Preserve original alpha
+        int alpha = (originalColor >> 24) & 0xFF;
+        if (alpha == 0 && intensity > 0)
+            alpha = 0xFF; // Ensure visible if it was somehow 0
+
+        return (alpha << 24) | (newR << 16) | (newG << 8) | newB;
     }
 
     /**
@@ -312,7 +317,7 @@ public class BloodWaterClientHandler {
      */
     public static float[] getBloodFogColor(float origR, float origG, float origB) {
         if (!isBloodWaterActive()) {
-            return new float[]{origR, origG, origB};
+            return new float[] { origR, origG, origB };
         }
 
         float intensity = currentIntensity;
@@ -321,19 +326,20 @@ public class BloodWaterClientHandler {
         float newG = origG * (1 - intensity) + BLOOD_GREEN * intensity;
         float newB = origB * (1 - intensity) + BLOOD_BLUE * intensity;
 
-        return new float[]{newR, newG, newB};
+        return new float[] { newR, newG, newB };
     }
 
     /**
      * Get the curse overlay color (deep red with pulsing effect)
      */
     public static int getCurseOverlayColor() {
-        if (!isCursed() || !showCurseOverlay) return 0;
+        if (!isCursed() || !showCurseOverlay)
+            return 0;
 
         // Pulsing effect based on game time
         MinecraftClient client = MinecraftClient.getInstance();
-        float pulse = 0.5f + 0.5f * (float)Math.sin(
-            (client.world != null ? client.world.getTime() : 0) * 0.1f);
+        float pulse = 0.5f + 0.5f * (float) Math.sin(
+                (client.world != null ? client.world.getTime() : 0) * 0.1f);
 
         float baseAlpha = 0.3f * overlayAlphaMultiplier;
         float alpha = baseAlpha * pulse;
@@ -342,7 +348,7 @@ public class BloodWaterClientHandler {
         float lingerFactor = Math.min(1.0f, curseLingerTicks / 60.0f); // Full intensity for first 3 seconds
         alpha *= lingerFactor;
 
-        int a = (int)(alpha * 255);
+        int a = (int) (alpha * 255);
         int r = 150;
         int g = 20;
         int b = 20;
@@ -354,10 +360,11 @@ public class BloodWaterClientHandler {
      * Get the damage flash overlay color (bright red flash)
      */
     public static int getDamageFlashColor() {
-        if (!isDamageFlashing()) return 0;
+        if (!isDamageFlashing())
+            return 0;
 
         float alpha = getDamageFlashAlpha();
-        int a = (int)(alpha * 255);
+        int a = (int) (alpha * 255);
         int r = 200;
         int g = 30;
         int b = 30;
@@ -369,7 +376,8 @@ public class BloodWaterClientHandler {
      * Format remaining curse time for display
      */
     public static String getFormattedCurseTime() {
-        if (!isCursed()) return "";
+        if (!isCursed())
+            return "";
 
         float seconds = getCurseLingerSeconds();
         if (seconds > 0) {
