@@ -235,5 +235,12 @@ public class AncientCurse implements ModInitializer {
 
         // Register the Cursed Earth command
         CommandRegistrationCallback.EVENT.register(CursedEarthCommand::register);
+
+        // Register plague commands
+        CommandRegistrationCallback.EVENT.register(com.ancientcurse.command.SandstormCommand::register);
+        CommandRegistrationCallback.EVENT.register(com.ancientcurse.command.BloodWaterCommand::register);
+        CommandRegistrationCallback.EVENT.register(com.ancientcurse.command.DarknessCommand::register);
+        CommandRegistrationCallback.EVENT.register(com.ancientcurse.command.FamineCommand::register);
+        CommandRegistrationCallback.EVENT.register(com.ancientcurse.command.PlagueClearCommand::register);
     }
 }
