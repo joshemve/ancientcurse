@@ -211,6 +211,7 @@ public class HyenaEntity extends TameableEntity implements GeoEntity {
         // Make sitting hyenas stand up when damaged
         if (this.isSitting()) {
             this.setSitting(false);
+            this.setInSittingPose(false); // Sync to client!
             this.dataTracker.set(SIT_TRANSITION_TIMER, 0); // Reset transition timer
         }
 
@@ -240,6 +241,7 @@ public class HyenaEntity extends TameableEntity implements GeoEntity {
                 this.navigation.stop();
                 this.setTarget(null);
                 this.setSitting(true);
+                this.setInSittingPose(true); // Sync to client for animation!
                 startSitTransition();
                 this.getWorld().sendEntityStatus(this, (byte) 7); // Hearts particles
                 this.playSound(SoundEvents.ENTITY_WOLF_WHINE, 1.0f, 1.0f);
@@ -265,19 +267,23 @@ public class HyenaEntity extends TameableEntity implements GeoEntity {
                 }
             }
 
-            // Toggle sitting (standard wolf behavior)
-            // Works with empty hand or non-food item
-            boolean newSitting = !this.isSitting();
-            this.setSitting(newSitting);
-            if (newSitting) {
-                startSitTransition();
-            } else {
-                this.dataTracker.set(SIT_TRANSITION_TIMER, 0); // Reset transition timer when standing
+            // Toggle sitting ONLY when sneaking (shift+right-click)
+            // This allows normal right-click with food to be used for breeding
+            // IMPORTANT: Must call BOTH setSitting() (for AI/SitGoal) AND setInSittingPose() (for client sync)
+            if (player.isSneaking()) {
+                boolean newSitting = !this.isSitting();
+                this.setSitting(newSitting);
+                this.setInSittingPose(newSitting); // Sync to client for animation!
+                if (newSitting) {
+                    startSitTransition();
+                } else {
+                    this.dataTracker.set(SIT_TRANSITION_TIMER, 0); // Reset transition timer when standing
+                }
+                this.jumping = false;
+                this.navigation.stop();
+                this.setTarget(null);
+                return ActionResult.SUCCESS;
             }
-            this.jumping = false;
-            this.navigation.stop();
-            this.setTarget(null);
-            return ActionResult.SUCCESS;
         }
 
         return super.interactMob(player, hand);
@@ -362,7 +368,8 @@ public class HyenaEntity extends TameableEntity implements GeoEntity {
         // Priority 3: Sitting animations (tamed only)
         // Always use ANIM_SIT_THEN_IDLE - GeckoLib will play sit once then loop
         // idle_sitting
-        if (this.isTamed() && this.isSitting()) {
+        // IMPORTANT: Use isInSittingPose() NOT isSitting() - isInSittingPose() is synced via DataTracker
+        if (this.isTamed() && this.isInSittingPose()) {
             state.getController().setAnimation(ANIM_SIT_THEN_IDLE);
             return PlayState.CONTINUE;
         }

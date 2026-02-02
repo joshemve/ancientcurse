@@ -159,7 +159,8 @@ public class RaSunBeamAttackGoal extends Goal {
 
         // Charging sounds
         if (this.attackTime < BEAM_START && this.attackTime % 5 == 0) {
-            this.ra.playSound(SoundEvents.BLOCK_RESPAWN_ANCHOR_CHARGE, 0.5f, 0.5f + (this.attackTime / (float) BEAM_START));
+            this.ra.playSound(SoundEvents.BLOCK_RESPAWN_ANCHOR_CHARGE, 0.5f,
+                    0.5f + (this.attackTime / (float) BEAM_START));
         }
 
         // Ambient beam sound
@@ -169,15 +170,7 @@ public class RaSunBeamAttackGoal extends Goal {
     }
 
     private Vec3d getBeamStartPosition() {
-        // Start from Ra's staff position (approximated as chest height + forward offset)
-        Vec3d pos = this.ra.getPos();
-        float yaw = (float) Math.toRadians(-this.ra.getYaw());
-        double forwardOffset = 1.5;
-        return new Vec3d(
-                pos.x + Math.sin(yaw) * forwardOffset,
-                pos.y + this.ra.getHeight() * 0.7,
-                pos.z + Math.cos(yaw) * forwardOffset
-        );
+        return this.ra.getStaffSunPosition();
     }
 
     private void fireBeam(LivingEntity target) {
@@ -198,8 +191,7 @@ public class RaSunBeamAttackGoal extends Goal {
             direction = new Vec3d(
                     Math.sin(yaw) * Math.cos(pitch),
                     Math.sin(pitch),
-                    Math.cos(yaw) * Math.cos(pitch)
-            ).normalize();
+                    Math.cos(yaw) * Math.cos(pitch)).normalize();
         }
 
         // Create visual beam particles
@@ -230,8 +222,7 @@ public class RaSunBeamAttackGoal extends Goal {
             world.spawnParticles(
                     new DustParticleEffect(CORE_COLOR, 1.2f * intensity),
                     pos.x, pos.y, pos.z,
-                    1, 0.05, 0.05, 0.05, 0
-            );
+                    1, 0.05, 0.05, 0.05, 0);
 
             // Inner glow - warm yellow (spiral pattern)
             double innerAngle = (distance * 2.0 + this.attackTime * 0.3) % (Math.PI * 2);
@@ -241,8 +232,7 @@ public class RaSunBeamAttackGoal extends Goal {
                     pos.x + Math.cos(innerAngle) * innerOffset,
                     pos.y + Math.sin(innerAngle) * innerOffset * 0.5,
                     pos.z + Math.sin(innerAngle) * innerOffset,
-                    1, 0.02, 0.02, 0.02, 0
-            );
+                    1, 0.02, 0.02, 0.02, 0);
 
             // Outer halo - golden particles
             if (distance % 0.8 < 0.4) {
@@ -253,8 +243,7 @@ public class RaSunBeamAttackGoal extends Goal {
                         pos.x + Math.cos(outerAngle) * outerOffset,
                         pos.y,
                         pos.z + Math.sin(outerAngle) * outerOffset,
-                        1, 0.03, 0.03, 0.03, 0
-                );
+                        1, 0.03, 0.03, 0.03, 0);
             }
 
             // Flame particles along beam
@@ -264,8 +253,7 @@ public class RaSunBeamAttackGoal extends Goal {
                         pos.x + (world.getRandom().nextDouble() - 0.5) * beamWidth,
                         pos.y + (world.getRandom().nextDouble() - 0.5) * beamWidth,
                         pos.z + (world.getRandom().nextDouble() - 0.5) * beamWidth,
-                        1, 0, 0, 0, 0.02
-                );
+                        1, 0, 0, 0, 0.02);
             }
 
             // Sparkles
@@ -273,8 +261,7 @@ public class RaSunBeamAttackGoal extends Goal {
                 world.spawnParticles(
                         ParticleTypes.END_ROD,
                         pos.x, pos.y, pos.z,
-                        1, beamWidth * 0.5, beamWidth * 0.5, beamWidth * 0.5, 0.01
-                );
+                        1, beamWidth * 0.5, beamWidth * 0.5, beamWidth * 0.5, 0.01);
             }
         }
 
@@ -282,13 +269,11 @@ public class RaSunBeamAttackGoal extends Goal {
         world.spawnParticles(
                 ParticleTypes.FLAME,
                 start.x, start.y, start.z,
-                3, 0.2, 0.2, 0.2, 0.02
-        );
+                3, 0.2, 0.2, 0.2, 0.02);
         world.spawnParticles(
                 new DustParticleEffect(INNER_COLOR, 2.0f),
                 start.x, start.y, start.z,
-                2, 0.1, 0.1, 0.1, 0
-        );
+                2, 0.1, 0.1, 0.1, 0);
     }
 
     private void damageEntitiesInBeam(ServerWorld world, Vec3d start, Vec3d direction) {
@@ -308,8 +293,7 @@ public class RaSunBeamAttackGoal extends Goal {
         List<LivingEntity> entities = world.getEntitiesByClass(
                 LivingEntity.class,
                 beamBox,
-                entity -> entity != this.ra && entity.isAlive() && !entity.isSpectator()
-        );
+                entity -> entity != this.ra && entity.isAlive() && !entity.isSpectator());
 
         for (LivingEntity entity : entities) {
             // Check if entity is actually in the beam path
@@ -348,8 +332,7 @@ public class RaSunBeamAttackGoal extends Goal {
                     world.spawnParticles(
                             ParticleTypes.LAVA,
                             entityPos.x, entityPos.y, entityPos.z,
-                            2, 0.3, 0.3, 0.3, 0
-                    );
+                            2, 0.3, 0.3, 0.3, 0);
                 }
             }
         }
@@ -363,8 +346,7 @@ public class RaSunBeamAttackGoal extends Goal {
                 start, endPos,
                 RaycastContext.ShapeType.COLLIDER,
                 RaycastContext.FluidHandling.NONE,
-                this.ra
-        ));
+                this.ra));
 
         if (hitResult.getType() == HitResult.Type.BLOCK) {
             BlockPos hitPos = hitResult.getBlockPos();
@@ -397,13 +379,11 @@ public class RaSunBeamAttackGoal extends Goal {
             world.spawnParticles(
                     ParticleTypes.FLAME,
                     hitResult.getPos().x, hitResult.getPos().y, hitResult.getPos().z,
-                    10, 0.3, 0.3, 0.3, 0.05
-            );
+                    10, 0.3, 0.3, 0.3, 0.05);
             world.spawnParticles(
                     ParticleTypes.LAVA,
                     hitResult.getPos().x, hitResult.getPos().y, hitResult.getPos().z,
-                    3, 0.2, 0.2, 0.2, 0
-            );
+                    3, 0.2, 0.2, 0.2, 0);
         }
     }
 

@@ -52,25 +52,28 @@ public class BloodWaterClientHandler {
             float serverOverlayAlpha, boolean serverShowCurseTimer,
             boolean serverShowDamageFlash) {
         boolean stateChanged = (active != serverActive);
-        boolean intensityJump = Math.abs(currentIntensity - serverIntensity) > 0.3f;
+        // Consider it a significant intensity change if diff > 0.2 (more sensitive threshold)
+        // This handles both sudden jumps up AND down consistently
+        boolean intensityJump = Math.abs(currentIntensity - serverIntensity) > 0.2f;
         active = serverActive;
-        targetIntensity = serverIntensity;
+        targetIntensity = Math.max(0.0f, Math.min(1.0f, serverIntensity)); // Clamp to valid range
+
         // Also immediately set current intensity if it's a fresh join (big jump)
         if (intensityJump) {
-            currentIntensity = serverIntensity;
+            currentIntensity = targetIntensity;
         }
         remainingSeconds = serverRemainingSeconds;
 
-        // Update config values
+        // Update config values with validation
         curseEnabled = serverCurseEnabled;
         showCurseOverlay = serverShowCurseOverlay;
-        overlayAlphaMultiplier = serverOverlayAlpha;
+        overlayAlphaMultiplier = Math.max(0.0f, Math.min(2.0f, serverOverlayAlpha)); // Clamp alpha multiplier
         showCurseTimer = serverShowCurseTimer;
         showDamageFlash = serverShowDamageFlash;
 
-        // Trigger chunk reload on state change or big intensity jump (e.g., player just
-        // joined)
-        if ((stateChanged || intensityJump) && reloadCooldown <= 0) {
+        // Trigger chunk reload on state change or big intensity jump (e.g., player just joined)
+        // Don't queue multiple reloads if one is already pending
+        if ((stateChanged || intensityJump) && reloadCooldown <= 0 && pendingReloadDelay <= 0) {
             // Schedule delayed reload to ensure chunks are loaded
             pendingReloadDelay = 20; // 1 second delay
             reloadCooldown = 40;
@@ -104,7 +107,7 @@ public class BloodWaterClientHandler {
 
         // Play hurt sound
         MinecraftClient client = MinecraftClient.getInstance();
-        if (client.player != null) {
+        if (client.player != null && client.world != null) {
             client.player.playSound(
                     SoundEvents.ENTITY_PLAYER_HURT,
                     SoundCategory.PLAYERS,

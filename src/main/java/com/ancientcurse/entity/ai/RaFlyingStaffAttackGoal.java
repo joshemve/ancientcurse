@@ -28,23 +28,24 @@ import java.util.EnumSet;
  *
  * Animation timing - MUST match ra.animation.json "ra.flying_staff_attack"!
  * Source: src/main/resources/assets/ancientcurse/animations/ra.animation.json
- * Animation length: 3.0 seconds = 60 ticks
+ * Animation length: 3.0 seconds = 60 ticks per loop
+ * Total duration: 2 loops = 6.0 seconds = 120 ticks
  */
 public class RaFlyingStaffAttackGoal extends Goal {
     private final RaEntity ra;
     private int attackTime = 0;
     private int cooldown = 0;
-    private int loopCount = 1;     // Random 1-3 loops per attack
-    private int totalTicks = 60;   // Total duration based on loop count
+    private int loopCount = 1; // Random 1-3 loops per attack
+    private int totalTicks = 60; // Total duration based on loop count
 
     private static final int SINGLE_LOOP_TICKS = 60; // 3.0s per animation loop
 
     // Beam phases within each loop (matching animation timing)
     // Visual beam handled by FlyingStaffBeamLayer (client-side) from tick 20-45
     private static final int CHARGE_START = 0;
-    private static final int BEAM_START = 20;    // Start firing beam (matches client layer)
-    private static final int BEAM_END = 45;      // Stop firing beam (matches client layer)
-    private static final int DAMAGE_TICK = 22;   // Deal damage early in beam phase
+    private static final int BEAM_START = 20; // Start firing beam (matches client layer)
+    private static final int BEAM_END = 45; // Stop firing beam (matches client layer)
+    private static final int DAMAGE_TICK = 22; // Deal damage early in beam phase
 
     // Cooldown between uses (in ticks)
     private static final int COOLDOWN_TICKS = 160; // 8 seconds
@@ -53,7 +54,7 @@ public class RaFlyingStaffAttackGoal extends Goal {
     private static final double BEAM_RANGE = 32.0D;
 
     // Sun beam colors - EXACT same as StaffOfRaItem
-    private static final Vector3f CORE_COLOR = new Vector3f(1.0F, 1.0F, 0.9F);   // Bright white-yellow
+    private static final Vector3f CORE_COLOR = new Vector3f(1.0F, 1.0F, 0.9F); // Bright white-yellow
     private static final Vector3f INNER_COLOR = new Vector3f(1.0F, 0.95F, 0.7F); // Warm yellow
     private static final Vector3f OUTER_COLOR = new Vector3f(1.0F, 0.85F, 0.4F); // Golden orange
 
@@ -98,9 +99,9 @@ public class RaFlyingStaffAttackGoal extends Goal {
     public void start() {
         this.attackTime = 0;
 
-        // Randomly select 1-3 loops for this attack
-        this.loopCount = 1 + this.ra.getRandom().nextInt(3); // 1, 2, or 3
-        this.totalTicks = SINGLE_LOOP_TICKS * this.loopCount;
+        // Always loop twice to match particle duration
+        this.loopCount = 2;
+        this.totalTicks = SINGLE_LOOP_TICKS * this.loopCount; // 120 ticks = 6 seconds
 
         // Sync loop count to client for beam rendering
         this.ra.setFlyingStaffLoopCount(this.loopCount);
@@ -111,7 +112,7 @@ public class RaFlyingStaffAttackGoal extends Goal {
         // Initial power-up sound
         if (!this.ra.getWorld().isClient) {
             this.ra.getWorld().playSound(null, this.ra.getX(), this.ra.getY(), this.ra.getZ(),
-                SoundEvents.BLOCK_BEACON_POWER_SELECT, SoundCategory.HOSTILE, 1.5F, 1.5F);
+                    SoundEvents.BLOCK_BEACON_POWER_SELECT, SoundCategory.HOSTILE, 1.5F, 1.5F);
         }
     }
 
@@ -122,7 +123,8 @@ public class RaFlyingStaffAttackGoal extends Goal {
             this.ra.setCombatState(RaEntity.RaCombatState.FLYING);
         }
         // Explicitly reset action ticks to stop beam particles immediately
-        // This ensures the client-side beam layer stops rendering even with DataTracker sync delay
+        // This ensures the client-side beam layer stops rendering even with DataTracker
+        // sync delay
         this.ra.setActionTicks(0);
         // Clear beam direction to prevent stale direction being used
         this.ra.setSunBeamDirection(Vec3d.ZERO);
@@ -131,7 +133,7 @@ public class RaFlyingStaffAttackGoal extends Goal {
         // Deactivation sound
         if (!this.ra.getWorld().isClient) {
             this.ra.getWorld().playSound(null, this.ra.getX(), this.ra.getY(), this.ra.getZ(),
-                SoundEvents.BLOCK_BEACON_DEACTIVATE, SoundCategory.HOSTILE, 0.8F, 1.0F);
+                    SoundEvents.BLOCK_BEACON_DEACTIVATE, SoundCategory.HOSTILE, 0.8F, 1.0F);
         }
     }
 
@@ -149,7 +151,8 @@ public class RaFlyingStaffAttackGoal extends Goal {
         this.attackTime++;
 
         LivingEntity target = this.ra.getTarget();
-        if (target == null) return;
+        if (target == null)
+            return;
 
         // Track target throughout
         this.ra.getLookControl().lookAt(target, 30.0F, 30.0F);
@@ -160,7 +163,8 @@ public class RaFlyingStaffAttackGoal extends Goal {
         Vec3d direction = targetPos.subtract(startPos).normalize();
         this.ra.setSunBeamDirection(direction);
 
-        if (this.ra.getWorld().isClient) return;
+        if (this.ra.getWorld().isClient)
+            return;
         ServerWorld world = (ServerWorld) this.ra.getWorld();
 
         // Calculate position within the current loop (0-59 for each loop)
@@ -172,13 +176,13 @@ public class RaFlyingStaffAttackGoal extends Goal {
 
         // Charging phase - building energy particles around Ra (only first loop)
         if (this.attackTime >= CHARGE_START && this.attackTime < BEAM_START) {
-            float chargeProgress = (float)(this.attackTime - CHARGE_START) / (BEAM_START - CHARGE_START);
+            float chargeProgress = (float) (this.attackTime - CHARGE_START) / (BEAM_START - CHARGE_START);
             spawnChargingParticles(world, startPos, chargeProgress);
 
             // Charging sounds
             if (this.attackTime % 5 == 0) {
                 world.playSound(null, this.ra.getX(), this.ra.getY(), this.ra.getZ(),
-                    SoundEvents.BLOCK_RESPAWN_ANCHOR_CHARGE, SoundCategory.HOSTILE, 0.5F, 0.5F + chargeProgress);
+                        SoundEvents.BLOCK_RESPAWN_ANCHOR_CHARGE, SoundCategory.HOSTILE, 0.5F, 0.5F + chargeProgress);
             }
         }
 
@@ -189,7 +193,7 @@ public class RaFlyingStaffAttackGoal extends Goal {
             // Continuous beam sound
             if (this.attackTime % 10 == 0) {
                 world.playSound(null, this.ra.getX(), this.ra.getY(), this.ra.getZ(),
-                    SoundEvents.BLOCK_BEACON_AMBIENT, SoundCategory.HOSTILE, 0.6F, 1.2F);
+                        SoundEvents.BLOCK_BEACON_AMBIENT, SoundCategory.HOSTILE, 0.6F, 1.2F);
             }
         }
 
@@ -198,7 +202,8 @@ public class RaFlyingStaffAttackGoal extends Goal {
             fireStaffBeam(target, startPos, direction);
         }
 
-        // Continuous damage while beam is active (every 10 ticks after initial hit within each loop)
+        // Continuous damage while beam is active (every 10 ticks after initial hit
+        // within each loop)
         if (localTick > DAMAGE_TICK && localTick <= BEAM_END && this.attackTime % 10 == 0) {
             // Check if target is still in beam path
             double distToTarget = startPos.distanceTo(target.getPos().add(0, target.getHeight() * 0.5, 0));
@@ -212,15 +217,7 @@ public class RaFlyingStaffAttackGoal extends Goal {
      * Get the position of Ra's staff tip (where the beam originates)
      */
     private Vec3d getStaffTipPosition() {
-        // Staff is held in right hand, beam comes from above Ra's position
-        double yOffset = this.ra.getHeight() * 0.85;
-
-        // Offset slightly forward based on Ra's facing direction
-        float yaw = this.ra.getYaw();
-        double xOffset = -Math.sin(Math.toRadians(yaw)) * 0.5;
-        double zOffset = Math.cos(Math.toRadians(yaw)) * 0.5;
-
-        return this.ra.getPos().add(xOffset, yOffset, zOffset);
+        return this.ra.getStaffSunPosition();
     }
 
     /**
@@ -228,7 +225,7 @@ public class RaFlyingStaffAttackGoal extends Goal {
      */
     private void spawnChargingParticles(ServerWorld world, Vec3d staffPos, float progress) {
         // Orbiting energy particles that converge as charge builds
-        int particleCount = (int)(3 + 5 * progress);
+        int particleCount = (int) (3 + 5 * progress);
         double radius = 1.5 - (progress * 1.0); // Shrinks as it charges
 
         for (int i = 0; i < particleCount; i++) {
@@ -238,27 +235,27 @@ public class RaFlyingStaffAttackGoal extends Goal {
             double offsetY = Math.sin(angle * 2 + this.ra.age * 0.1) * 0.3;
 
             world.spawnParticles(
-                new DustParticleEffect(INNER_COLOR, 1.0F + progress),
-                staffPos.x + offsetX, staffPos.y + offsetY, staffPos.z + offsetZ,
-                1, 0, 0, 0, 0
-            );
+                    new DustParticleEffect(INNER_COLOR, 1.0F + progress),
+                    staffPos.x + offsetX, staffPos.y + offsetY, staffPos.z + offsetZ,
+                    1, 0, 0, 0, 0);
         }
 
         // Central glow intensifies
         if (progress > 0.5F) {
             world.spawnParticles(
-                new DustParticleEffect(CORE_COLOR, 1.5F * progress),
-                staffPos.x, staffPos.y, staffPos.z,
-                2, 0.1, 0.1, 0.1, 0
-            );
+                    new DustParticleEffect(CORE_COLOR, 1.5F * progress),
+                    staffPos.x, staffPos.y, staffPos.z,
+                    2, 0.1, 0.1, 0.1, 0);
         }
     }
 
-    // NOTE: Sun beam visual particles are now rendered client-side by FlyingStaffBeamLayer
+    // NOTE: Sun beam visual particles are now rendered client-side by
+    // FlyingStaffBeamLayer
     // This allows the beam to originate from the actual sun_orb bone position
 
     private void fireStaffBeam(LivingEntity target, Vec3d startPos, Vec3d direction) {
-        if (this.ra.getWorld().isClient) return;
+        if (this.ra.getWorld().isClient)
+            return;
         ServerWorld world = (ServerWorld) this.ra.getWorld();
 
         // Deal damage to target - scales with phase like original
@@ -312,10 +309,9 @@ public class RaFlyingStaffAttackGoal extends Goal {
 
         // Central flash
         world.spawnParticles(
-            ParticleTypes.INSTANT_EFFECT,
-            pos.x, pos.y, pos.z,
-            5, 0.1, 0.1, 0.1, 0
-        );
+                ParticleTypes.INSTANT_EFFECT,
+                pos.x, pos.y, pos.z,
+                5, 0.1, 0.1, 0.1, 0);
 
         // Radial burst
         for (int i = 0; i < particleCount; i++) {
@@ -323,26 +319,24 @@ public class RaFlyingStaffAttackGoal extends Goal {
             double speed = 0.4D;
 
             world.spawnParticles(
-                new DustParticleEffect(OUTER_COLOR, 1.5F),
-                pos.x, pos.y, pos.z,
-                0,
-                Math.cos(angle) * speed,
-                0.1,
-                Math.sin(angle) * speed,
-                1.0
-            );
+                    new DustParticleEffect(OUTER_COLOR, 1.5F),
+                    pos.x, pos.y, pos.z,
+                    0,
+                    Math.cos(angle) * speed,
+                    0.1,
+                    Math.sin(angle) * speed,
+                    1.0);
         }
 
         // Upward burst
         world.spawnParticles(
-            ParticleTypes.END_ROD,
-            pos.x, pos.y, pos.z,
-            8, 0.2, 0.3, 0.2, 0.05
-        );
+                ParticleTypes.END_ROD,
+                pos.x, pos.y, pos.z,
+                8, 0.2, 0.3, 0.2, 0.05);
 
         // Impact sound
         world.playSound(null, pos.x, pos.y, pos.z,
-            SoundEvents.ENTITY_FIREWORK_ROCKET_LARGE_BLAST, SoundCategory.HOSTILE, 1.0F, 1.2F);
+                SoundEvents.ENTITY_FIREWORK_ROCKET_LARGE_BLAST, SoundCategory.HOSTILE, 1.0F, 1.2F);
     }
 
     public void forceStart() {

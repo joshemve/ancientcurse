@@ -147,8 +147,12 @@ public class ThirstDataManager {
     public static void addExhaustion(PlayerEntity player, float amount) {
         if (player == null || player.isCreative() || player.isSpectator()) return;
 
+        // Prevent negative exhaustion (which could be exploited)
+        if (amount < 0) return;
+
+        // Prevent overflow by capping at a reasonable max
         float currentExhaustion = getThirstExhaustion(player);
-        float newExhaustion = currentExhaustion + amount;
+        float newExhaustion = Math.min(currentExhaustion + amount, EXHAUSTION_THRESHOLD * 100);
 
         // When exhaustion exceeds threshold, reduce saturation or thirst
         while (newExhaustion >= EXHAUSTION_THRESHOLD) {

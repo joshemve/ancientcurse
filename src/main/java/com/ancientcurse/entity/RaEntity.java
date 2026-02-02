@@ -223,7 +223,7 @@ public class RaEntity extends HostileEntity implements GeoEntity {
     private boolean meleeHasDealtDamage = false; // Track if current melee attack dealt damage
     private static final int GROUND_SMACK_DURATION = 60; // ra.flying_ground_smack: 3.0s
     private static final int SHARD_ATTACK_DURATION = 120; // Loops ra.shard_attack twice (2 * 3.0s)
-    private static final int FLYING_STAFF_ATTACK_DURATION = 60; // ra.flying_staff_attack: 3.0s
+    private static final int FLYING_STAFF_ATTACK_DURATION = 120; // ra.flying_staff_attack: 3.0s x 2 loops
     public static final int SUN_BEAM_SLICE_DURATION = 40; // Projectile duration (merged into ground smack)
 
     // Debug animation cycling
@@ -350,8 +350,24 @@ public class RaEntity extends HostileEntity implements GeoEntity {
 
     /**
      * Trigger a combat action with a specified duration.
+     *
+     * CRITICAL: This resets lastAttackState to null to ensure the animation
+     * controller
+     * will recognize this as a NEW attack and trigger the animation, even if the
+     * same
+     * attack type is triggered back-to-back without the controller observing an
+     * intermediate non-attack state. This fixes a race condition where rapid
+     * attacks
+     * of the same type (e.g., melee → melee) could fail to play animations.
      */
     public void triggerAction(RaCombatState state, int duration) {
+        // Reset animation tracking so the client-side controller recognizes this as a
+        // new attack
+        // This fixes edge case where attacks chain faster than the render thread can
+        // observe
+        // the intermediate IDLE/WALKING state
+        this.lastAttackState = null;
+
         setCombatState(state);
         setActionTicks(duration);
     }
@@ -367,6 +383,42 @@ public class RaEntity extends HostileEntity implements GeoEntity {
 
     public int getActionAnimationTicks() {
         return this.dataTracker.get(ACTION_TICKS);
+    }
+
+    /**
+     * Get the approximate world position of Ra's staff sun bone.
+     * This is used for server-side particle spawning and should match the
+     * client-side
+     * visual position as closely as possible without having access to the model.
+     *
+     * Note: This accounts for root bone movement in the "ra.flying_staff_attack"
+     * animation.
+     */
+    public Vec3d getStaffSunPosition() {
+        Vec3d pos = this.getPos();
+        float yaw = (float) Math.toRadians(-this.getYaw());
+
+        // Base approximation constants (in blocks)
+        double forwardOffset = 1.2; // Forward from entity origin
+        double sideOffset = -0.9; // Right side (approx arm width)
+        double heightOffset = this.getHeight() * 0.82;
+
+        // Adjust for specific animation shifts seen in Blockbench/ra.animation.json
+        // ra.flying_staff_attack has significant root movement: x=0, y=15.14, z=-13
+        if (getCombatState() == RaCombatState.FLYING_STAFF_ATTACK) {
+            // Apply root bone movement (converted from 1/16th blocks)
+            double animYShift = 15.14 / 16.0; // ~0.946 blocks up
+            double animZShift = -13.0 / 16.0; // ~-0.812 blocks backward
+
+            heightOffset += animYShift;
+            forwardOffset += animZShift; // Effectively moves origin back while arm/staff move forward
+        }
+
+        // Apply rotation to horizontal offsets
+        double dx = Math.sin(yaw) * forwardOffset + Math.cos(yaw) * sideOffset;
+        double dz = Math.cos(yaw) * forwardOffset - Math.sin(yaw) * sideOffset;
+
+        return new Vec3d(pos.x + dx, pos.y + heightOffset, pos.z + dz);
     }
 
     public boolean isFlying() {
@@ -575,6 +627,16 @@ public class RaEntity extends HostileEntity implements GeoEntity {
 
         // Return to appropriate idle state
         if (currentState == RaCombatState.DYING) {
+            // CRITICAL: Remove invulnerability before killing, otherwise kill() damage is
+            // blocked!
+            this.setInvulnerable(false);
+
+            // Clear boss bar for all tracking players
+            if (this.bossBar != null) {
+                this.bossBar.clearPlayers();
+            }
+
+            // Actually kill the entity
             this.kill();
             return;
         }
@@ -614,6 +676,10 @@ public class RaEntity extends HostileEntity implements GeoEntity {
     }
 
     public void triggerMeleeAttack() {
+        // Reset animation tracking - fixes race condition with back-to-back melee
+        // attacks
+        this.lastAttackState = null;
+
         setCombatState(RaCombatState.MELEE);
         setActionTicks(MELEE_DURATION);
         meleeHasDealtDamage = false; // Reset damage flag for new attack
@@ -668,6 +734,9 @@ public class RaEntity extends HostileEntity implements GeoEntity {
     }
 
     public void triggerGroundSmack() {
+        // Reset animation tracking - fixes race condition with rapid attacks
+        this.lastAttackState = null;
+
         if (isFlying()) {
             setFlying(false);
         }
@@ -679,6 +748,9 @@ public class RaEntity extends HostileEntity implements GeoEntity {
     public void triggerShardAttack() {
         if (isPerformingAction())
             return;
+        // Reset animation tracking - fixes race condition with rapid attacks
+        this.lastAttackState = null;
+
         setCombatState(RaCombatState.SHARD_ATTACK);
         setActionTicks(SHARD_ATTACK_DURATION);
     }
@@ -686,6 +758,9 @@ public class RaEntity extends HostileEntity implements GeoEntity {
     public void triggerFlyingStaffAttack() {
         if (!isFlying() || isPerformingAction())
             return;
+        // Reset animation tracking - fixes race condition with rapid attacks
+        this.lastAttackState = null;
+
         setCombatState(RaCombatState.FLYING_STAFF_ATTACK);
         setActionTicks(FLYING_STAFF_ATTACK_DURATION);
     }
@@ -1149,7 +1224,8 @@ public class RaEntity extends HostileEntity implements GeoEntity {
     /* ========== SOUNDS ========== */
     @Override
     protected SoundEvent getHurtSound(DamageSource source) {
-        // Uses ra_hurt sound event which randomly selects from ra_hurt_1, ra_hurt_2, ra_hurt_3
+        // Uses ra_hurt sound event which randomly selects from ra_hurt_1, ra_hurt_2,
+        // ra_hurt_3
         // Each with pitch variants 0.9, 1.0, 1.1 defined in sounds.json
         return ModSounds.RA_HURT;
     }
@@ -1251,28 +1327,35 @@ public class RaEntity extends HostileEntity implements GeoEntity {
         return PlayState.CONTINUE;
     }
 
-    // Track when we last started an attack animation to allow re-triggering same
-    // attack type
+    // Track animation state to detect new attacks (client-side)
+    // Uses ACTION_TICKS from DataTracker to detect when a new attack starts
     private int lastAttackStartTick = -1;
     private RaCombatState lastAttackState = null;
+    private int lastSeenActionTicks = 0; // Tracks ACTION_TICKS to detect new attacks
 
     /**
      * Attack controller - handles all attack animations.
      * Plays once per attack, then stops.
      *
-     * SIMPLIFIED LOGIC: Start animation when combat state differs from lastAttackState.
-     * This handles all cases:
-     * - First attack: null != MELEE → start
-     * - Same attack continuing: MELEE == MELEE → don't restart
-     * - Attack ends (go to IDLE/WALKING): reset lastAttackState to null
-     * - New attack: null != MELEE → start
+     * BUG FIX: Uses ACTION_TICKS (synced via DataTracker) to detect new attacks.
+     * Previously, if the same attack type was triggered twice in rapid succession
+     * (e.g., MELEE → brief WALKING → MELEE), the animation might not play the
+     * second
+     * time because the controller didn't observe the intermediate non-attack state.
+     *
+     * New detection logic:
+     * - Different attack type: trigger animation
+     * - Same attack type BUT ACTION_TICKS jumped UP: new attack, trigger animation
+     * (ACTION_TICKS counts DOWN during an attack, so a jump UP means fresh start)
      */
     private PlayState attackController(AnimationState<RaEntity> state) {
         RaCombatState combatState = getCombatState();
+        int currentActionTicks = getActionAnimationTicks();
 
         // Stop attack animation when dead or dying - let death controller handle it
         if (this.isDead() || combatState == RaCombatState.DYING) {
             lastAttackState = null;
+            lastSeenActionTicks = 0;
             logAnimationChange("attack", "(STOPPED - dead/dying)");
             return PlayState.STOP;
         }
@@ -1286,28 +1369,41 @@ public class RaEntity extends HostileEntity implements GeoEntity {
         };
 
         if (animation != null) {
-            // Simple check: start animation if we haven't started it for THIS attack yet
-            // lastAttackState tracks what attack we've already triggered animation for
-            if (lastAttackState != combatState) {
+            // Detect new attack using two conditions:
+            // 1. Different attack type than last time
+            // 2. Same attack type, but ACTION_TICKS jumped UP significantly (new action
+            // started)
+            // ACTION_TICKS counts DOWN, so if it's higher than before, a new action began
+            boolean isDifferentAttackType = lastAttackState != combatState;
+            boolean actionTicksJumpedUp = currentActionTicks > lastSeenActionTicks + 10;
+            boolean isNewAttack = isDifferentAttackType || actionTicksJumpedUp;
+
+            if (isNewAttack) {
                 lastAttackState = combatState;
                 lastAttackStartTick = this.age;
 
                 RawAnimation rawAnimation = RawAnimation.begin().thenPlay(animation);
 
-                // If it's the Shard Attack, loop it exactly twice to match the 120-tick duration
+                // If it's the Shard Attack, loop it exactly twice to match the 120-tick
+                // duration
                 if (combatState == RaCombatState.SHARD_ATTACK) {
                     rawAnimation.thenPlay(animation);
                 }
 
                 state.getController().setAnimation(rawAnimation);
                 logAnimationChange("attack",
-                        animation + (combatState == RaCombatState.SHARD_ATTACK ? " (looped 2x)" : ""));
+                        animation + (combatState == RaCombatState.SHARD_ATTACK ? " (looped 2x)" : "")
+                                + (actionTicksJumpedUp && !isDifferentAttackType ? " (re-triggered same type)" : ""));
             }
+
+            // Track current action ticks for next comparison
+            lastSeenActionTicks = currentActionTicks;
             return PlayState.CONTINUE;
         }
 
         // Not in attack state - reset tracking so next attack will trigger animation
         lastAttackState = null;
+        lastSeenActionTicks = 0;
         logAnimationChange("attack", "(STOPPED - no attack)");
         return PlayState.STOP;
     }

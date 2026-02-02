@@ -191,14 +191,44 @@ public class SaltDustBlock extends Block {
 
         // Only trigger if a complete loop is formed
         boolean shouldBeActivated = isLoopFormed(world, connectedSalt);
-        boolean currentlyActivated = state.get(ACTIVATED);
 
-        if (shouldBeActivated && !currentlyActivated) {
-            // Activate the network!
+        // Check if ANY block in the network is already activated (not just the triggering block)
+        boolean networkAlreadyActivated = isNetworkActivated(world, connectedSalt);
+
+        if (shouldBeActivated && !networkAlreadyActivated) {
+            // Activate the network with effects (first time activation)
             activateNetwork(world, connectedSalt);
-        } else if (!shouldBeActivated && currentlyActivated) {
-            // Deactivate the network
+        } else if (shouldBeActivated && networkAlreadyActivated) {
+            // Network already active - just silently update any new blocks without effects
+            silentlyActivateNewBlocks(world, connectedSalt);
+        } else if (!shouldBeActivated && networkAlreadyActivated) {
+            // Deactivate the network (loop broken)
             deactivateNetwork(world, connectedSalt);
+        }
+    }
+
+    /**
+     * Checks if any block in the network is already activated
+     */
+    private boolean isNetworkActivated(World world, Set<BlockPos> network) {
+        for (BlockPos pos : network) {
+            BlockState state = world.getBlockState(pos);
+            if (state.isOf(this) && state.get(ACTIVATED)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Silently activates new blocks added to an already-active network (no effects)
+     */
+    private void silentlyActivateNewBlocks(ServerWorld world, Set<BlockPos> saltPositions) {
+        for (BlockPos pos : saltPositions) {
+            BlockState state = world.getBlockState(pos);
+            if (state.isOf(this) && !state.get(ACTIVATED)) {
+                world.setBlockState(pos, state.with(ACTIVATED, true), Block.NOTIFY_ALL);
+            }
         }
     }
 

@@ -74,33 +74,44 @@ public class BloodWaterData extends PersistentState {
     public static BloodWaterData readNbt(NbtCompound nbt) {
         BloodWaterData data = new BloodWaterData();
         data.active = nbt.getBoolean("active");
-        data.duration = nbt.getInt("duration");
-        data.intensity = nbt.getFloat("intensity");
 
-        // Read maps
+        // Validate duration: -1 is valid (infinite), otherwise must be >= 0
+        int rawDuration = nbt.getInt("duration");
+        data.duration = rawDuration < -1 ? 0 : rawDuration;
+
+        // Validate intensity: must be in [0.0, 1.0] range
+        float rawIntensity = nbt.getFloat("intensity");
+        data.intensity = Math.max(0.0f, Math.min(MAX_INTENSITY, rawIntensity));
+
+        // Read maps with validation (skip negative values)
         if (nbt.contains("cursedPlayers")) {
-            readMapFromNbt(nbt.getCompound("cursedPlayers"), data.cursedPlayers);
+            readMapFromNbt(nbt.getCompound("cursedPlayers"), data.cursedPlayers, false);
         }
         if (nbt.contains("playerDamageTimers")) {
-            readMapFromNbt(nbt.getCompound("playerDamageTimers"), data.playerDamageTimers);
+            readMapFromNbt(nbt.getCompound("playerDamageTimers"), data.playerDamageTimers, true);
         }
         if (nbt.contains("playerLingerTimers")) {
-            readMapFromNbt(nbt.getCompound("playerLingerTimers"), data.playerLingerTimers);
+            readMapFromNbt(nbt.getCompound("playerLingerTimers"), data.playerLingerTimers, true);
         }
         if (nbt.contains("playerImmunityTimers")) {
-            readMapFromNbt(nbt.getCompound("playerImmunityTimers"), data.playerImmunityTimers);
+            readMapFromNbt(nbt.getCompound("playerImmunityTimers"), data.playerImmunityTimers, true);
         }
 
         return data;
     }
 
-    private static void readMapFromNbt(NbtCompound compound, Map<UUID, Integer> map) {
+    private static void readMapFromNbt(NbtCompound compound, Map<UUID, Integer> map, boolean requirePositive) {
         for (String key : compound.getKeys()) {
             try {
                 UUID uuid = UUID.fromString(key);
                 int value = compound.getInt(key);
-                map.put(uuid, value);
+                // Skip invalid entries
+                if (requirePositive && value < 0) {
+                    continue;
+                }
+                map.put(uuid, Math.max(0, value)); // Ensure non-negative
             } catch (IllegalArgumentException ignored) {
+                // Invalid UUID format, skip entry
             }
         }
     }
@@ -173,6 +184,12 @@ public class BloodWaterData extends PersistentState {
             return entry.getValue() <= 0;
         });
 
+        // Periodic cleanup of stale player data (every 5 minutes = 6000 ticks)
+        // This prevents memory leaks from players who have left the server
+        if (tickCounter % 6000 == 0) {
+            cleanupStalePlayerData(world);
+        }
+
         if (dirty) {
             this.markDirty();
         }
@@ -180,6 +197,29 @@ public class BloodWaterData extends PersistentState {
         // Sync to clients every second (20 ticks) for smooth interpolation
         if (tickCounter % 20 == 0) {
             BloodWaterPackets.sendSyncPacket(world, this);
+        }
+    }
+
+    /**
+     * Clean up player data for players who are no longer online.
+     * This prevents memory leaks on long-running servers.
+     */
+    private void cleanupStalePlayerData(ServerWorld world) {
+        // Get set of currently online player UUIDs
+        java.util.Set<UUID> onlinePlayers = new java.util.HashSet<>();
+        for (ServerPlayerEntity player : world.getServer().getPlayerManager().getPlayerList()) {
+            onlinePlayers.add(player.getUuid());
+        }
+
+        // Remove entries for offline players
+        int removedCount = 0;
+        removedCount += cursedPlayers.keySet().removeIf(uuid -> !onlinePlayers.contains(uuid)) ? 1 : 0;
+        removedCount += playerDamageTimers.keySet().removeIf(uuid -> !onlinePlayers.contains(uuid)) ? 1 : 0;
+        removedCount += playerLingerTimers.keySet().removeIf(uuid -> !onlinePlayers.contains(uuid)) ? 1 : 0;
+        removedCount += playerImmunityTimers.keySet().removeIf(uuid -> !onlinePlayers.contains(uuid)) ? 1 : 0;
+
+        if (removedCount > 0) {
+            this.markDirty();
         }
     }
 

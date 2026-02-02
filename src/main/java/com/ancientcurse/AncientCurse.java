@@ -176,7 +176,7 @@ public class AncientCurse implements ModInitializer {
         // Register status effects
         ModStatusEffects.registerStatusEffects();
 
-        // Register server tick event for tornado management and locust swarms
+        // Register server tick event for tornado management, thirst, and other systems
         ServerTickEvents.END_SERVER_TICK.register(server -> {
             com.ancientcurse.effect.TornadoManager.tick(server);
             LocusSwarmCommand.tickSwarm();
@@ -187,6 +187,9 @@ public class AncientCurse implements ModInitializer {
             com.ancientcurse.system.JackelBindsBreakoutManager.getInstance().tick(currentTime);
             for (var player : server.getPlayerManager().getPlayerList()) {
                 com.ancientcurse.item.armor.JackelBindsItem.applyBindEffects(player);
+
+                // Tick thirst system for each player
+                com.ancientcurse.player.ThirstDataManager.tickThirst(player);
             }
 
             // Tick Blood Water plague in every world

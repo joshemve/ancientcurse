@@ -47,9 +47,13 @@ public class ThirstPackets {
      * @param saturation The current thirst saturation
      */
     public static void sendThirstToClient(ServerPlayerEntity player, int thirst, float saturation) {
+        // Validate values before sending to ensure data integrity
+        int validatedThirst = Math.max(0, Math.min(ThirstDataManager.MAX_THIRST, thirst));
+        float validatedSaturation = Math.max(0.0f, Math.min(20.0f, saturation));
+
         PacketByteBuf buf = PacketByteBufs.create();
-        buf.writeInt(thirst);
-        buf.writeFloat(saturation);
+        buf.writeInt(validatedThirst);
+        buf.writeFloat(validatedSaturation);
         ServerPlayNetworking.send(player, SYNC_THIRST, buf);
     }
 
@@ -61,10 +65,14 @@ public class ThirstPackets {
         int thirst = buf.readInt();
         float saturation = buf.readFloat();
 
+        // Validate received values to prevent malicious packets from corrupting client state
+        final int validatedThirst = Math.max(0, Math.min(ThirstDataManager.MAX_THIRST, thirst));
+        final float validatedSaturation = Math.max(0.0f, Math.min(20.0f, saturation));
+
         // Execute on client thread
         client.execute(() -> {
             if (client.player != null) {
-                ThirstDataManager.setClientThirstValue(thirst, saturation);
+                ThirstDataManager.setClientThirstValue(validatedThirst, validatedSaturation);
             }
         });
     }
@@ -95,9 +103,13 @@ public class ThirstPackets {
         boolean enabled = buf.readBoolean();
         float desertMultiplier = buf.readFloat();
 
+        // Validate config values to prevent exploits
+        final float validatedDrainMultiplier = Math.max(0.0f, Math.min(10.0f, drainMultiplier));
+        final float validatedDesertMultiplier = Math.max(0.0f, Math.min(10.0f, desertMultiplier));
+
         // Execute on client thread
         client.execute(() -> {
-            ModConfig.get().updateFromServer(drainMultiplier, enabled, desertMultiplier);
+            ModConfig.get().updateFromServer(validatedDrainMultiplier, enabled, validatedDesertMultiplier);
         });
     }
 }

@@ -47,13 +47,19 @@ public class WaterSkinItem extends Item {
 
         // Check if we have water and player needs it
         if (uses > 0) {
-            int currentThirst = ThirstDataManager.getClientThirstValue();
+            // Check thirst level - use appropriate method for client/server
+            int currentThirst;
             if (world.isClient) {
-                // Client-side check for feedback
-                if (currentThirst >= ThirstDataManager.MAX_THIRST) {
-                    // Already full thirst, don't drink
-                    return TypedActionResult.pass(stack);
-                }
+                // Client-side: use cached value for immediate feedback
+                currentThirst = ThirstDataManager.getClientThirstValue();
+            } else {
+                // Server-side: use actual player data (authoritative)
+                currentThirst = ThirstDataManager.getThirstValue(user);
+            }
+
+            // Don't drink if already at max thirst
+            if (currentThirst >= ThirstDataManager.MAX_THIRST) {
+                return TypedActionResult.pass(stack);
             }
 
             // Start drinking animation
