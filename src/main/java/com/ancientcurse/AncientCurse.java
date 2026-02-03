@@ -192,9 +192,10 @@ public class AncientCurse implements ModInitializer {
                 com.ancientcurse.player.ThirstDataManager.tickThirst(player);
             }
 
-            // Tick Blood Water plague in every world
+            // Tick Blood Water and Mirage plagues in every world
             for (ServerWorld world : server.getWorlds()) {
                 com.ancientcurse.system.BloodWaterData.getServerState(world).tick(world);
+                com.ancientcurse.system.MirageData.getServerState(world).tick(world);
             }
         });
 
@@ -251,5 +252,6 @@ public class AncientCurse implements ModInitializer {
         CommandRegistrationCallback.EVENT.register(com.ancientcurse.command.DarknessCommand::register);
         CommandRegistrationCallback.EVENT.register(com.ancientcurse.command.FamineCommand::register);
         CommandRegistrationCallback.EVENT.register(com.ancientcurse.command.PlagueClearCommand::register);
+        CommandRegistrationCallback.EVENT.register(com.ancientcurse.command.MirageCommand::register);
     }
 }

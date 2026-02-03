@@ -22,7 +22,9 @@
     "client.GameRendererScreenShakeMixin",
     "client.BloodWaterColorMixin",
     "client.SandstormFogMixin",
-    "client.SandstormSkyMixin"
+    "client.SandstormSkyMixin",
+    "client.MirageShaderMixin",
+    "client.PostEffectProcessorAccessor"
   ],
   "injectors": {
     "defaultRequire": 1

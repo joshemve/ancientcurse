@@ -25,6 +25,7 @@ import com.ancientcurse.network.CurseZonePackets;
 import com.ancientcurse.network.ThirstPackets;
 import com.ancientcurse.network.SandstormPackets;
 import com.ancientcurse.network.BloodWaterPackets;
+import com.ancientcurse.network.MiragePackets;
 import com.ancientcurse.client.animation.ModAnimations;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
@@ -142,6 +143,7 @@ public class AncientCurseClient implements ClientModInitializer {
         ThirstPackets.registerClientPackets();
         SandstormPackets.registerClientPackets();
         BloodWaterPackets.registerClientPackets();
+        MiragePackets.registerClientPackets();
 
         // Register client tick event for screen shake, sun flash, sandstorm, and blood water
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
@@ -149,6 +151,7 @@ public class AncientCurseClient implements ClientModInitializer {
             SunFlashManager.tick();
             SandstormClientHandler.tick();
             BloodWaterClientHandler.tick();
+            MirageClientHandler.tick();
         });
 
         // Register player animations (PlayerAnimator auto-loads from player_animation
@@ -165,6 +168,7 @@ public class AncientCurseClient implements ClientModInitializer {
             ScreenShakeManager.reset();
             SandstormClientHandler.reset();
             BloodWaterClientHandler.reset();
+            MirageClientHandler.reset();
         });
 
         // Register world render events for curse zone visualization
